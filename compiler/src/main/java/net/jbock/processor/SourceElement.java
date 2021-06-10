@@ -2,6 +2,8 @@ package net.jbock.processor;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import net.jbock.Command;
+import net.jbock.common.Descriptions;
 import net.jbock.common.EnumName;
 import net.jbock.common.SafeElements;
 import net.jbock.common.ValidationFailure;
@@ -18,7 +20,6 @@ import static net.jbock.common.Constants.ACCESS_MODIFIERS;
 public class SourceElement {
 
   private final TypeElement sourceElement;
-  private final ParserFlavour parserFlavour;
   private final List<Modifier> accessModifiers;
   private final String programName;
   private final ClassName generatedClass;
@@ -26,31 +27,29 @@ public class SourceElement {
 
   private SourceElement(
       TypeElement sourceElement,
-      ParserFlavour parserFlavour,
       List<Modifier> accessModifiers,
       String programName,
       ClassName generatedClass,
       ClassName optionEnumType) {
     this.sourceElement = sourceElement;
-    this.parserFlavour = parserFlavour;
     this.accessModifiers = accessModifiers;
     this.programName = programName;
     this.generatedClass = generatedClass;
     this.optionEnumType = optionEnumType;
   }
 
-  static SourceElement create(TypeElement typeElement, ParserFlavour parserFlavour) {
+  static SourceElement create(TypeElement typeElement) {
     List<Modifier> accessModifiers = typeElement.getModifiers().stream()
         .filter(ACCESS_MODIFIERS::contains)
         .collect(Collectors.toUnmodifiableList());
-    String programName = parserFlavour.programName(typeElement)
+    String programName = programName(typeElement)
         .orElseGet(() -> EnumName.create(typeElement.getSimpleName().toString()).snake('-'));
     String generatedClassName = String.join("_", ClassName.get(typeElement).simpleNames()) + "Parser";
     ClassName generatedClass = ClassName.get(typeElement)
         .topLevelClassName()
         .peerClass(generatedClassName);
     ClassName optionEnumType = generatedClass.nestedClass("Opt");
-    return new SourceElement(typeElement, parserFlavour, accessModifiers,
+    return new SourceElement(typeElement, accessModifiers,
         programName, generatedClass, optionEnumType);
   }
 
@@ -67,31 +66,19 @@ public class SourceElement {
   }
 
   public boolean isSuperCommand() {
-    return parserFlavour.isSuperCommand(sourceElement);
+    return get().superCommand();
   }
 
   public boolean helpEnabled() {
-    return parserFlavour.helpEnabled(sourceElement);
+    return get().helpEnabled();
   }
 
-  public boolean isAnsi() {
-    return parserFlavour.isAnsi(sourceElement);
-  }
-
-  public boolean expandAtSign() {
-    return parserFlavour.expandAtSign(sourceElement);
-  }
-
-  public String programName() {
-    return programName;
+  public boolean atFileExpansion() {
+    return get().atFileExpansion();
   }
 
   public List<Modifier> accessModifiers() {
     return accessModifiers;
-  }
-
-  public Optional<String> descriptionKey() {
-    return parserFlavour.descriptionKey(sourceElement);
   }
 
   public ClassName generatedClass() {
@@ -106,7 +93,29 @@ public class SourceElement {
     return sourceElement.getKind() == ElementKind.INTERFACE;
   }
 
+  private static Optional<String> programName(TypeElement sourceElement) {
+    Command command = sourceElement.getAnnotation(Command.class);
+    return Descriptions.optionalString(command.name());
+  }
+
+  public String programName() {
+    return programName;
+  }
+
+  public Optional<String> descriptionKey() {
+    return Descriptions.optionalString(get().descriptionKey());
+  }
+
   public List<String> description(SafeElements elements) {
-    return parserFlavour.description(sourceElement, elements);
+    String[] description = get().description();
+    return Descriptions.getDescription(sourceElement, elements, description);
+  }
+
+  public boolean isAnsi() {
+    return get().ansi();
+  }
+
+  private Command get() {
+    return sourceElement.getAnnotation(Command.class);
   }
 }

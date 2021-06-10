@@ -55,7 +55,7 @@ public class CreateModelMethod extends Cached<MethodSpec> {
     code.add(CodeBlock.of(".withAnsi($L)", sourceElement.isAnsi()));
     code.add(CodeBlock.of(".withHelpEnabled($L)", sourceElement.helpEnabled()));
     code.add(CodeBlock.of(".withSuperCommand($L)", sourceElement.isSuperCommand()));
-    code.add(CodeBlock.of(".withAtFileExpansion($L)", sourceElement.expandAtSign()));
+    code.add(CodeBlock.of(".withAtFileExpansion($L)", sourceElement.atFileExpansion()));
     for (Mapped<NamedOption> c : namedOptions.options()) {
       code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
     }

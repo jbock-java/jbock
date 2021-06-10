@@ -71,9 +71,8 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   @Override
   public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
     elementsByAnnotation.forEach((annotationName, element) -> {
-      ParserFlavour parserFlavour = ParserFlavour.forAnnotationName(annotationName);
       ElementFilter.typesIn(List.of(element)).stream()
-          .map(typeElement -> validateSourceElement(typeElement, parserFlavour))
+          .map(typeElement -> validateSourceElement(typeElement))
           .forEach(either -> either.accept(this::printFailures, this::processSourceElement));
     });
     return Set.of();
@@ -95,15 +94,14 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private Either<List<ValidationFailure>, SourceElement> validateSourceElement(
-      TypeElement element,
-      ParserFlavour parserFlavour) {
+      TypeElement element) {
     Optional<List<ValidationFailure>> failureList = util.commonTypeChecks(element)
         .or(() -> util.assertNoDuplicateAnnotations(element,
             Annotations.typeLevelAnnotations()))
         .map(s -> new ValidationFailure(s, element))
         .map(List::of);
     return Either.unbalancedLeft(failureList)
-        .orElseRight(() -> SourceElement.create(element, parserFlavour));
+        .orElseRight(() -> SourceElement.create(element));
   }
 
   private void printFailures(List<ValidationFailure> failures) {

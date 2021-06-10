@@ -73,7 +73,7 @@ public class ParseMethod extends Cached<MethodSpec> {
           .unindent();
     }
 
-    if (sourceElement.expandAtSign()) {
+    if (sourceElement.atFileExpansion()) {
       code.addStatement(CodeBlock.builder()
           .add("$T $N = $N.length == 1\n", BOOLEAN, atFile, args)
           .indent().indent().indent().indent()
