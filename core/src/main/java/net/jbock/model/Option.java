@@ -53,6 +53,7 @@ public final class Option extends Item {
      * Public method that may be invoked from the generated code.
      *
      * @param paramLabel a non-empty string
+     * @return the builder instance
      */
     public Builder withParamLabel(String paramLabel) {
       this.paramLabel = paramLabel;
@@ -64,6 +65,7 @@ public final class Option extends Item {
      * Public method that may be invoked from the generated code.
      *
      * @param descriptionKey a string, possibly empty
+     * @return the builder instance
      */
     public Builder withDescriptionKey(String descriptionKey) {
       this.descriptionKey = descriptionKey;

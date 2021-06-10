@@ -139,6 +139,8 @@ public abstract class Either<L, R> {
    *
    * @param leftMapper the function to apply if this is a Left
    * @param rightMapper the function to apply if this is a Right
+   * @param <U> result type
+   * @return the result of applying either {@code leftMapper} or {@code rightMapper}
    */
   public abstract <U> U fold(
       Function<? super L, ? extends U> leftMapper,

@@ -16,6 +16,7 @@ public final class ExConvert extends ExNotSuccess {
   /**
    * Public constructor that may be invoked from the generated code.
    *
+   * @param failure the failure
    * @param itemType the item type
    * @param itemIndex the item index
    */

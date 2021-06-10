@@ -87,13 +87,16 @@ public @interface SuperCommand {
    * containing lines of {@code UTF-8} encoded tokens.
    * Trailing empty lines are ignored.</p>
    * <p>The following escape sequences are recognized:</p>
+   * <p>
    * <table>
+   *   <caption>Escape sequences</caption>
    *   <thead><tr><td><b>Code</b></td><td><b>Meaning</b></td></tr></thead>
    *   <tr><td>{@code \\}</td><td>backslash</td></tr>
    *   <tr><td>{@code \n}</td><td>newline</td></tr>
    *   <tr><td>{@code \r}</td><td>carriage return</td></tr>
    *   <tr><td>{@code \t}</td><td>horizontal tab</td></tr>
    * </table>
+   * </p>
    * <p>An unpaired backslash at the end of a line prevents
    * the newline from being read.</p>
    *

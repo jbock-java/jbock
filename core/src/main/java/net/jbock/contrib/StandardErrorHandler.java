@@ -61,10 +61,11 @@ public final class StandardErrorHandler {
      * or usage documentation.
      * The default value is {@code System.err}.
      *
+     * @param out the output stream
      * @return the builder instance
      */
-    public Builder withOutputStream(PrintStream err) {
-      this.out = err;
+    public Builder withOutputStream(PrintStream out) {
+      this.out = out;
       return this;
     }
 
@@ -75,6 +76,7 @@ public final class StandardErrorHandler {
      * for improved readability of the usage documentation,
      * if a library like JLine is available.
      *
+     * @param width terminal width in characters
      * @return the builder instance
      */
     public Builder withTerminalWidth(int width) {
@@ -88,6 +90,7 @@ public final class StandardErrorHandler {
      * This map is used to pass the internationalization
      * value of a {@code descriptionKey}.
      *
+     * @param map a map of strings
      * @return the builder instance
      */
     public Builder withMessages(Map<String, String> map) {
@@ -101,6 +104,7 @@ public final class StandardErrorHandler {
      * with an exit code of {@code 1} if an error occurred,
      * or {@code 0} if the {@code --help} option was passed.
      *
+     * @param exitHook the exit logic
      * @return the builder instance
      */
     public Builder withExitHook(Supplier<RuntimeException> exitHook) {
@@ -136,10 +140,7 @@ public final class StandardErrorHandler {
   /**
    * <p>Public method that may be invoked from the generated code.</p>
    *
-   * <p></p>
-   * <h2><tt>CAUTION:</tt></h2>
-   * <p><b><tt>Invoking this method may shut down the JVM.</tt></b></p>
-   * <p></p>
+   * <h2><b>CAUTION: Invoking this method may shut down the JVM.</b></h2>
    *
    * <p>This method also does standard error handling like printing of
    *    error messages, or printing standard usage documentation for

@@ -4,16 +4,19 @@ import net.jbock.Option;
 import net.jbock.Parameter;
 
 /**
- * Item type as determined by its method's annotation.
+ * <p>Item type as determined by its method's annotation.
  * An &quot;Item&quot; is either a <em>named option</em>
- * or a <em>positional parameter</em>.
+ * or a <em>positional parameter</em>.</p>
  *
+ * <p>
  * <table>
+ *   <caption>Item types</caption>
  *   <thead><tr><td><b>Annotation</b></td><td><b>Item type</b></td></tr></thead>
  *   <tr><td>{@code @Parameter}</td><td>{@link ItemType#PARAMETER PARAMETER}</td></tr>
  *   <tr><td>{@code @Parameters}</td><td>{@link ItemType#PARAMETER PARAMETER}</td></tr>
  *   <tr><td>{@code @Option}</td><td>{@link ItemType#OPTION OPTION}</td></tr>
  * </table>
+ * </p>
  */
 public enum ItemType {
 
