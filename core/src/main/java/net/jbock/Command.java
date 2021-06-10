@@ -101,4 +101,32 @@ public @interface Command {
    * @return {@code false} to disable the {@code @file} expansion
    */
   boolean atFileExpansion() default true;
+
+  /**
+   * <p>If {@code true}, the generated parser will stop parsing after the
+   * last positional parameter was read,
+   * and return the remaining tokens as an array of strings.
+   * The double-dash is not recognized as a special token.</p>
+   *
+   * <p>The following additional rules apply, then:</p>
+   *
+   * <ul>
+   *   <li>There must be at least one {@link Parameter @Parameter}.</li>
+   *   <li>{@link Parameters @Parameters} cannot be used.</li>
+   * </ul>
+   *
+   * @return {@code true} to make this a SuperCommand
+   */
+  boolean superCommand() default false;
+
+  /**
+   * Enables clustering of unix short options.
+   * In order for this to do have any effect, there must
+   * be at least one mode flag with a unix-style option
+   * name, and one other  option with a unix name,
+   * possibly also a mode flag.
+   *
+   * @return {@code true} to enable clustering
+   */
+  boolean unixClustering() default false;
 }
