@@ -9,7 +9,7 @@ import javax.lang.model.element.Modifier;
 import static javax.lang.model.element.Modifier.FINAL;
 
 /**
- * Generates the *_Parser class.
+ * Generates the *Parser class.
  */
 @ContextScope
 public final class GeneratedClass {
