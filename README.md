@@ -36,7 +36,7 @@ abstract class DeleteCommand {
 ````
 
 See here for the code this generates:
-[DeleteCommand_Parser.java](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommand_Parser.java)
+[DeleteCommandParser.java](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommandParser.java)
 
 The generated code is typically used directly in the `main` method:
 
