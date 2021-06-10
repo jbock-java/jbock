@@ -140,7 +140,7 @@ public final class StandardErrorHandler {
   /**
    * <p>Public method that may be invoked from the generated code.</p>
    *
-   * <h2><b>CAUTION: Invoking this method may shut down the JVM.</b></h2>
+   * <p><b>CAUTION: Invoking this method may shut down the JVM.</b></p>
    *
    * <p>This method also does standard error handling like printing of
    *    error messages, or printing standard usage documentation for
