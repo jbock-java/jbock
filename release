@@ -6,7 +6,7 @@ die () {
     exit 1
 }
 
-usage="Usage: release <(core|annotations)> <version>"
+usage="Usage: release [core|compiler] <version>"
 
 if [[ `git status --porcelain` ]]; then
   die "dirty workspace"
@@ -17,9 +17,9 @@ VERSION="$2"
 TAG_PREFIX=""
 
 if [[ "$MODULE" == "core" ]]; then
-  TAG_PREFIX="v"
-elif [[ "$MODULE" == "annotations" ]]; then
-  TAG_PREFIX="a"
+  TAG_PREFIX="core"
+elif [[ "$MODULE" == "compiler" ]]; then
+  TAG_PREFIX="compiler"
 else
   die "$usage"
 fi
@@ -28,17 +28,13 @@ if [[ -z "$VERSION" ]]; then
   die "$usage"
 fi
 
-if [[ "${VERSION:0:1}" == $TAG_PREFIX ]]; then
-  die "version cannot begin with $TAG_PREFIX"
-fi
-
 git pull origin $(git rev-parse --abbrev-ref HEAD)
-./gradlew clean core:test examples:test
+./gradlew clean compiler:test examples:test
 ./gradlew -Pversion=${VERSION} ${MODULE}:publish
 
 read -e -p "Upload successful. Also tag? [y/N]"
 if [[ "$REPLY" == [Yy]* ]]; then
-  git tag "${TAG_PREFIX}${VERSION}"
+  git tag "${TAG_PREFIX}:${VERSION}"
   git push origin --tags
 fi
 
