@@ -79,7 +79,8 @@ public @interface Command {
    * containing lines of {@code UTF-8} encoded tokens.
    * Trailing empty lines are ignored.
    * <p>The following escape sequences are recognized:</p>
-   * <p>
+   *
+   * <br/>
    * <table>
    *   <caption>Escape sequences</caption>
    *   <thead><tr><td><b>Code</b></td><td><b>Meaning</b></td></tr></thead>
@@ -88,7 +89,7 @@ public @interface Command {
    *   <tr><td>{@code \r}</td><td>carriage return</td></tr>
    *   <tr><td>{@code \t}</td><td>horizontal tab</td></tr>
    * </table>
-   * </p>
+   *
    * <p>An unpaired backslash at the end of a line prevents
    * the newline from being read.</p>
    * <p>Note: Even if set to {@code true},
