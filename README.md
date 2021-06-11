@@ -50,9 +50,6 @@ public static void main(String[] args) {
 
 In addition to `parseOrExit`, there is also a highly configurable `parse` method with no side effects.
 
-Here's a screenshot of jbock in action:
-
-<img src="images/screenshot.png" alt="screenshot">
 
 ### Sample projects
 
