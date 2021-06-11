@@ -7,8 +7,6 @@ It is an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
 that generates custom parsing code at compile time.
 
-Please see the [wiki](https://github.com/h908714124/jbock/wiki) for synopsis details.
-
 ### Basic example
 
 A command line interface is defined as an `abstract` class 
@@ -38,18 +36,18 @@ abstract class DeleteCommand {
 See here for the code this generates:
 [DeleteCommandParser.java](https://github.com/jbock-java/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommandParser.java)
 
-The generated code is usually used directly in the `main` method:
+The generated parser is usually used in the `main` method:
 
 ````java
 public static void main(String[] args) {
-    DeleteCommand command = new DeleteCommand_Parser().parseOrExit(args);
+    DeleteCommand command = new DeleteCommandParser().parseOrExit(args);
     // ...
 }
 
 ````
 
 In addition to `parseOrExit`, there is also a highly configurable `parse` method with no side effects.
-
+Please see the [wiki](https://github.com/h908714124/jbock/wiki) for details.
 
 ### Sample projects
 
