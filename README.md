@@ -12,7 +12,7 @@ Please see the [wiki](https://github.com/h908714124/jbock/wiki) for synopsis det
 ### Basic example
 
 A command line interface is defined as an `abstract` class 
-which has either a `@Command` or `@SuperCommand` annotation.
+which has a `@Command` annotation.
 In this class, each `abstract` method defines a *named option* or a *positional parameter*.
 
 ````java
@@ -48,6 +48,7 @@ public static void main(String[] args) {
 
 ````
 
+In addition to `parseOrExit`, there is also a `parse` method with no side effects.
 jbock will warn about missing parameters:
 
 <img src="images/screenshot.png" alt="screenshot">
@@ -56,3 +57,4 @@ jbock will warn about missing parameters:
 
 * [jbock-maven-example](https://github.com/jbock-java/jbock-maven-example)
 * [jbock-gradle-example](https://github.com/jbock-java/jbock-gradle-example)
+
