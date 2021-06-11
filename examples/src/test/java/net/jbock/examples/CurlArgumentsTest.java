@@ -16,7 +16,7 @@ class CurlArgumentsTest {
   private final CurlArgumentsParser parser = new CurlArgumentsParser();
 
   private final ParserTestFixture<CurlArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void testEmpty() {

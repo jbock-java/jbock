@@ -17,7 +17,7 @@ class CpArgumentsTest {
   private final CpArgumentsParser parser = new CpArgumentsParser();
 
   private final ParserTestFixture<CpArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void errorMissingSource() {

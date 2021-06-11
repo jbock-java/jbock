@@ -10,7 +10,7 @@ class PsArgumentsTest {
   private final PsArgumentsParser parser = new PsArgumentsParser();
 
   private final ParserTestFixture<PsArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void testPrint() {

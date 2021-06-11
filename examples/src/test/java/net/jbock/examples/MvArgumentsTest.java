@@ -11,7 +11,7 @@ class MvArgumentsTest {
   private final MvArgumentsParser parser = new MvArgumentsParser();
 
   private final ParserTestFixture<MvArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void notEnoughArguments() {

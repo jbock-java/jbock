@@ -22,7 +22,7 @@ class RestArgumentsTest {
   private final RestArgumentsParser parser = new RestArgumentsParser();
 
   private final ParserTestFixture<RestArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   private final Map<String, String> messages = new HashMap<>();
 

@@ -9,8 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ExtremelySimpleArgumentsTest {
 
+  private final ExtremelySimpleArgumentsParser parser = new ExtremelySimpleArgumentsParser();
+
   private final ParserTestFixture<ExtremelySimpleArguments> f =
-      ParserTestFixture.create(new ExtremelySimpleArgumentsParser());
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void simpleTest() {

@@ -11,8 +11,10 @@ import static java.util.Collections.emptyList;
 
 class AllIntegersArgumentsTest {
 
+  private final AllIntegersArgumentsParser parser = new AllIntegersArgumentsParser();
+
   private final ParserTestFixture<AllIntegersArguments> f =
-      ParserTestFixture.create(new AllIntegersArgumentsParser());
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void listOfInteger() {

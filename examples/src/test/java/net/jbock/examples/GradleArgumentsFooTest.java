@@ -12,7 +12,7 @@ class GradleArgumentsFooTest {
   private final GradleArguments_FooParser parser = new GradleArguments_FooParser();
 
   private final ParserTestFixture<GradleArguments.Foo> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void testParserForNestedClass() {

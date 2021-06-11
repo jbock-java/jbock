@@ -12,9 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class VariousArgumentsTest {
 
+  private final VariousArgumentsParser parser = new VariousArgumentsParser();
+
   @Test
   void bigDecimal() {
-    VariousArguments args = new VariousArgumentsParser().parse(new String[]{
+    VariousArguments args = parser.parse(new String[]{
         "--bigDecimal", "3.14159265358979323846264338327950288419716939937510",
         "--bigInteger", "60221407600000000000000",
         "--path", "/home",

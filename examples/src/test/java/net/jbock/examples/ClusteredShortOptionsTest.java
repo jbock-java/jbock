@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
-import net.jbock.util.NotSuccess;
 import net.jbock.util.ErrToken;
+import net.jbock.util.NotSuccess;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

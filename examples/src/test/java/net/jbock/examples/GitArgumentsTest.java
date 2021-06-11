@@ -15,7 +15,7 @@ class GitArgumentsTest {
   private final GitArgumentsParser parser = new GitArgumentsParser();
 
   private final ParserTestFixture<GitArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @RepeatedTest(10)
   void testEscape() {

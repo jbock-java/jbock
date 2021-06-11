@@ -15,7 +15,7 @@ class PositionalArgumentsTest {
   private final PositionalArgumentsParser parser = new PositionalArgumentsParser();
 
   private final ParserTestFixture<PositionalArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void errorMissingParameters() {

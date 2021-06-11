@@ -15,7 +15,7 @@ class AllCharactersArgumentsTest {
   private final AllCharactersArgumentsParser parser = new AllCharactersArgumentsParser();
 
   private final ParserTestFixture<AllCharactersArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void tests() {

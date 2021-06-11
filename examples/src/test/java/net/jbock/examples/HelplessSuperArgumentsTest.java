@@ -1,9 +1,9 @@
 package net.jbock.examples;
 
 import net.jbock.either.Either;
+import net.jbock.util.ErrToken;
 import net.jbock.util.NotSuccess;
 import net.jbock.util.SuperResult;
-import net.jbock.util.ErrToken;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

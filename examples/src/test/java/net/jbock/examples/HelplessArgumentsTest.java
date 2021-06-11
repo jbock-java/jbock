@@ -13,7 +13,7 @@ class HelplessArgumentsTest {
   private final HelplessArgumentsParser parser = new HelplessArgumentsParser();
 
   private final ParserTestFixture<HelplessArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void success0() {

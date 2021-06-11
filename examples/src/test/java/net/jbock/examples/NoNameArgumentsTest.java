@@ -15,7 +15,7 @@ class NoNameArgumentsTest {
   private final NoNameArgumentsParser parser = new NoNameArgumentsParser();
 
   private final ParserTestFixture<NoNameArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void testDifferentOrder() {

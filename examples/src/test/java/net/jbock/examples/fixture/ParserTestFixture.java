@@ -8,11 +8,10 @@ import org.junit.jupiter.api.Assertions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public final class ParserTestFixture<E> {
 
-  private static final String ANSI_RESET = "\u001B[0m";
   private static final String ANSI_RED = "\u001B[31m";
+  private static final String ANSI_RESET = "\u001B[m";
   private static final int MAX_LINE_WIDTH = 82;
 
   private static void printErr(String text) {
@@ -35,35 +34,14 @@ public final class ParserTestFixture<E> {
     System.out.print(ANSI_RED + String.format(format, args) + ANSI_RESET);
   }
 
-  public interface Parser<E> {
-    Optional<E> parse(String[] args);
-  }
+  private final Function<String[], Either<NotSuccess, E>> parser;
 
-  private final Parser<E> parser;
-
-  private ParserTestFixture(Parser<E> parser) {
+  private ParserTestFixture(Function<String[], Either<NotSuccess, E>> parser) {
     this.parser = parser;
   }
 
-  public static <E> ParserTestFixture<E> create(Object builder) {
-    List<Parser<E>> parser = new ArrayList<>(1);
-    parser.add(new Parser<E>() {
-
-      @Override
-      @SuppressWarnings("unchecked")
-      public Optional<E> parse(String[] args) {
-        try {
-          Method parseMethod = builder.getClass().getDeclaredMethod("parse", args.getClass());
-          parseMethod.setAccessible(true);
-          Either<NotSuccess, E> parseResult = (Either<NotSuccess, E>)
-              parseMethod.invoke(builder, new Object[]{args});
-          return parseResult.getRight();
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-          return Optional.empty();
-        }
-      }
-    });
-    return new ParserTestFixture<>(parser.get(0));
+  public static <E> ParserTestFixture<E> create(Function<String[], Either<NotSuccess, E>> parser) {
+    return new ParserTestFixture<>(parser);
   }
 
   public JsonAssert<E> assertThat(String... args) {
@@ -71,8 +49,9 @@ public final class ParserTestFixture<E> {
   }
 
   public E parse(String... args) {
-    Optional<E> result = parser.parse(args);
-    return result.get();
+    Either<NotSuccess, E> result = parser.apply(args);
+    return result.orElseThrow(l -> new RuntimeException("expecting success but found "
+        + l.getClass()));
   }
 
   public static void assertEquals(String[] actual, String... expected) {
@@ -142,15 +121,15 @@ public final class ParserTestFixture<E> {
 
     Parsed getParsed() {
       TestOutputStream stderr = new TestOutputStream();
-      Optional<E> result = parser.parse(args);
+      Optional<E> result = parser.apply(args).getRight();
       return new Parsed(stderr.toString(), result);
     }
 
     private final String[] args;
 
-    private final Parser<E> parser;
+    private final Function<String[], Either<NotSuccess, E>> parser;
 
-    private JsonAssert(String[] args, Parser<E> parser) {
+    private JsonAssert(String[] args, Function<String[], Either<NotSuccess, E>> parser) {
       this.args = args;
       this.parser = parser;
     }
@@ -161,6 +140,11 @@ public final class ParserTestFixture<E> {
       assertTrue(predicate.test(parsed.get()));
     }
 
+    /**
+     * Assert that the parsing result matches the expected output.
+     *
+     * @param expected key-value pairs
+     */
     public void succeeds(Object... expected) {
       Parsed parsed = getParsed();
       try {

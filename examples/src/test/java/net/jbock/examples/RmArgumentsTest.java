@@ -12,7 +12,7 @@ class RmArgumentsTest {
   private final RmArgumentsParser parser = new RmArgumentsParser();
 
   private final ParserTestFixture<RmArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void testRest() {

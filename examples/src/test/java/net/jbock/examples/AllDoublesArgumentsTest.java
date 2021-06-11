@@ -10,8 +10,10 @@ import static java.util.Collections.emptyList;
 
 class AllDoublesArgumentsTest {
 
+  private final AllDoublesArgumentsParser parser = new AllDoublesArgumentsParser();
+
   private final ParserTestFixture<AllDoublesArguments> f =
-      ParserTestFixture.create(new AllDoublesArgumentsParser());
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void listOfInteger() {

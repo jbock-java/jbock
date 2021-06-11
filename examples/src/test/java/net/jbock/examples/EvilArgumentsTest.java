@@ -12,7 +12,7 @@ class EvilArgumentsTest {
   private final EvilArgumentsParser parser = new EvilArgumentsParser();
 
   private final ParserTestFixture<EvilArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void basicTest() {

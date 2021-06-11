@@ -16,7 +16,7 @@ class GradleArgumentsTest {
   private final GradleArgumentsParser parser = new GradleArgumentsParser();
 
   private final ParserTestFixture<GradleArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void errorShortLongConflict() {

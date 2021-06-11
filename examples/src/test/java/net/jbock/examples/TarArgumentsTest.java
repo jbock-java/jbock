@@ -11,7 +11,7 @@ class TarArgumentsTest {
   private final TarArgumentsParser parser = new TarArgumentsParser();
 
   private final ParserTestFixture<TarArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void testExtract() {

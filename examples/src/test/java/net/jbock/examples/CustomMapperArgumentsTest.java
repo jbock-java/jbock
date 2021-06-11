@@ -22,7 +22,7 @@ class CustomMapperArgumentsTest {
   private final CustomMapperArgumentsParser parser = new CustomMapperArgumentsParser();
 
   private final ParserTestFixture<CustomMapperArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void success() {

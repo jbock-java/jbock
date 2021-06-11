@@ -13,7 +13,7 @@ class SimpleArgumentsTest {
   private final SimpleArgumentsParser parser = new SimpleArgumentsParser();
 
   private final ParserTestFixture<SimpleArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void invalidOptions() {

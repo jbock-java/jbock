@@ -16,7 +16,7 @@ class RequiredArgumentsTest {
   private final RequiredArgumentsParser parser = new RequiredArgumentsParser();
 
   private final ParserTestFixture<RequiredArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void success() {

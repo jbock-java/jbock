@@ -13,7 +13,7 @@ class AdditionArgumentsTest {
   private final AdditionArgumentsParser parser = new AdditionArgumentsParser();
 
   private final ParserTestFixture<AdditionArguments> f =
-      ParserTestFixture.create(parser);
+      ParserTestFixture.create(parser::parse);
 
   @Test
   void optionalAbsent() {
