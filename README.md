@@ -36,9 +36,9 @@ abstract class DeleteCommand {
 ````
 
 See here for the code this generates:
-[DeleteCommandParser.java](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommandParser.java)
+[DeleteCommandParser.java](https://github.com/jbock-java/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommandParser.java)
 
-The generated code is typically used directly in the `main` method:
+The generated code is usually used directly in the `main` method:
 
 ````java
 public static void main(String[] args) {
@@ -48,12 +48,11 @@ public static void main(String[] args) {
 
 ````
 
-This will be enough to warn your users of missing parameters,
-in a nicely colored error message:
+jbock will warn about missing parameters:
 
 <img src="images/screenshot.png" alt="screenshot">
 
 ### Sample projects
 
-* [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
-* [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
+* [jbock-maven-example](https://github.com/jbock-java/jbock-maven-example)
+* [jbock-gradle-example](https://github.com/jbock-java/jbock-gradle-example)
