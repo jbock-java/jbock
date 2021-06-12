@@ -12,20 +12,22 @@ that generates custom parsing code at compile time.
 A command line interface is defined as an `abstract` class 
 which has a `@Command` annotation.
 In this class, each `abstract` method defines a *named option* or a *positional parameter*.
+As an annotation processor, jbock has access to the method's return type *before erasure*.
+It uses this full type information to determine *multiplicity*.
 
 ````java
 @Command(name = "rm", description = "Coffee time!")
 abstract class DeleteCommand {
 
   /* Path, not Optional<Path>:
-   * This positional parameter is required.
+   * This positional parameter is required (multiplicity = 1).
    */
   @Parameter(index = 0,
              description = "A positional parameter.")
   abstract Path path();
 
   /* OptionalInt, not int or Integer:
-   * This named option is optional.
+   * This named option is optional (multiplicity = 0..1).
    */
   @Option(names = {"-v", "--verbosity"},
           description = "A named option.")
@@ -36,7 +38,7 @@ abstract class DeleteCommand {
 See here for the code this generates:
 [DeleteCommandParser.java](https://github.com/jbock-java/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommandParser.java)
 
-The generated parser is usually used in the `main` method:
+The generated parser is usually used in a `main` method:
 
 ````java
 public static void main(String[] args) {
