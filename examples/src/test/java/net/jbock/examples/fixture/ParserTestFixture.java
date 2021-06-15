@@ -48,6 +48,14 @@ public final class ParserTestFixture<E> {
     return new JsonAssert<>(args, parser);
   }
 
+  public void assertPrintsHelp(String... expected) {
+    String[] input = {"--help"};
+    Either<NotSuccess, E> result = parser.apply(input);
+    Assertions.assertTrue(result.getLeft().isPresent());
+    String[] actual = getUsageDocumentation(result.getLeft().get());
+    assertEquals(expected,actual);
+  }
+
   public E parse(String... args) {
     Either<NotSuccess, E> result = parser.apply(args);
     return result.orElseThrow(l -> new RuntimeException("expecting success but found "

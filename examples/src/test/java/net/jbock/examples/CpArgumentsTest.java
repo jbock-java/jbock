@@ -1,15 +1,10 @@
 package net.jbock.examples;
 
-import net.jbock.either.Either;
 import net.jbock.examples.CpArguments.Control;
 import net.jbock.examples.fixture.ParserTestFixture;
-import net.jbock.util.NotSuccess;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CpArgumentsTest {
 
@@ -91,21 +86,23 @@ class CpArgumentsTest {
 
   @Test
   void testEnum() {
-    assertEquals(Optional.of(Control.NUMBERED), f.parse("a", "b", "--backup=NUMBERED").backup());
-    f.assertThat("-r", "a", "b", "--backup", "SIMPLE")
-        .succeeds(
-            "source", "a",
-            "dest", "b",
-            "recursive", true,
-            "backup", Optional.of(Control.SIMPLE),
-            "suffix", Optional.empty());
+    f.assertThat("a", "b", "--backup=NUMBERED").succeeds(
+        "source", "a",
+        "dest", "b",
+        "recursive", false,
+        "backup", Optional.of(Control.NUMBERED),
+        "suffix", Optional.empty());
+    f.assertThat("-r", "a", "b", "--backup", "SIMPLE").succeeds(
+        "source", "a",
+        "dest", "b",
+        "recursive", true,
+        "backup", Optional.of(Control.SIMPLE),
+        "suffix", Optional.empty());
   }
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    ParserTestFixture.assertEquals(actual,
+    f.assertPrintsHelp(
         "\u001B[1mUSAGE\u001B[m",
         "  cp-arguments [OPTIONS] SOURCE DEST",
         "",
