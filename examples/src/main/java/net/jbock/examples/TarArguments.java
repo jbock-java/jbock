@@ -4,7 +4,7 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Option;
 
-@Command(unixClustering = true)
+@Command
 abstract class TarArguments {
 
   @Option(names = {"--x", "-x"})

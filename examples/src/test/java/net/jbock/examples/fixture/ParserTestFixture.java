@@ -163,6 +163,24 @@ public final class ParserTestFixture<E> {
         fail(e);
       }
     }
+
+    public void failsContaining(String m) {
+      fails(message -> message.contains(m));
+    }
+
+    public void fails(String m) {
+      fails(m::equals);
+    }
+
+    public void fails(Predicate<String> messageTest) {
+      Optional<HasMessage> hasMessage = parser.apply(args).getLeft()
+          .map(notSuccess -> (HasMessage) notSuccess);
+      Assertions.assertTrue(hasMessage.isPresent());
+      boolean success = messageTest.test(hasMessage.get().message());
+      if (!success) {
+        Assertions.fail("Assertion failed, message: " + hasMessage.get().message());
+      }
+    }
   }
 
   public HasMessage castToError(NotSuccess notSuccess) {

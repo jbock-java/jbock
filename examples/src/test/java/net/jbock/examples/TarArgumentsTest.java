@@ -34,9 +34,6 @@ class TarArgumentsTest {
     assertTrue(parser.parse("-xf").getLeft().map(f::castToError)
         .orElseThrow().message()
         .contains("Missing argument after token: -f"));
-    assertTrue(parser.parse("--x=f").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid token: --x=f"));
   }
 
   @Test

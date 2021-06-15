@@ -14,7 +14,7 @@ import java.util.Optional;
  * curl is powered by libcurl for all transfer-related features.
  * See libcurl(3) for details.
  */
-@Command(name = "curl", unixClustering = true)
+@Command(name = "curl")
 abstract class CurlArguments {
 
   /**

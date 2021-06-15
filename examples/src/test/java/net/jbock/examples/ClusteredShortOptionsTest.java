@@ -1,12 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.examples.fixture.ParserTestFixture;
-import net.jbock.util.ErrToken;
-import net.jbock.util.NotSuccess;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 class ClusteredShortOptionsTest {
 
@@ -73,12 +68,5 @@ class ClusteredShortOptionsTest {
         "bbb", true,
         "ccc", true,
         "file", "InputFile.txt");
-  }
-
-  @Test
-  void testNotClustering() {
-    Optional<NotSuccess> left = parser.parse("-abcf=InputFile.txt").getLeft();
-    Assertions.assertTrue(left.isPresent());
-    Assertions.assertTrue(left.get() instanceof ErrToken);
   }
 }
