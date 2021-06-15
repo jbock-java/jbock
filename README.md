@@ -1,5 +1,6 @@
-[![jbock-compiler](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock-compiler/badge.svg?color=grey&style=plastic&subject=jbock-compiler)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock-compiler)
-[![jbock](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock/badge.svg?style=plastic&subject=jbock)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock) [![Join the chat at https://gitter.im/jbock-java/jbock-support](https://badges.gitter.im/jbock-java/jbock-support.svg)](https://gitter.im/jbock-java/jbock-support?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![jbock-compiler](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock-compiler/badge.svg?color=grey&subject=jbock-compiler)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock-compiler)
+[![jbock](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock/badge.svg?subject=jbock)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock)
+[![Join the chat at https://gitter.im/jbock-java/jbock-support](https://badges.gitter.im/jbock-java/jbock-support.svg)](https://gitter.im/jbock-java/jbock-support?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 jbock is a command line parser, similar to [JCommander](https://jcommander.org/)
 and [picocli](https://github.com/remkop/picocli).
