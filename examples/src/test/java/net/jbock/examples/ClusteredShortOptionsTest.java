@@ -1,5 +1,6 @@
 package net.jbock.examples;
 
+import net.jbock.examples.fixture.ParserTestFixture;
 import net.jbock.util.ErrToken;
 import net.jbock.util.NotSuccess;
 import org.junit.jupiter.api.Assertions;
@@ -7,34 +8,71 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class ClusteredShortOptionsTest {
 
   private final ClusteredShortOptionsParser parser = new ClusteredShortOptionsParser();
 
+  private final ParserTestFixture<ClusteredShortOptions> f = ParserTestFixture.create(parser::parse);
+
   @Test
   void testAttached() {
-    assertAllSet(parse("-abcfInputFile.txt"));
+    f.assertThat("-abcfInputFile.txt").succeeds(
+        "aaa", true,
+        "bbb", true,
+        "ccc", true,
+        "file", "InputFile.txt");
+  }
+
+
+  @Test
+  void testSurprise() {
+    f.assertThat("-abcf=InputFile.txt").succeeds(
+        "aaa", true,
+        "bbb", true,
+        "ccc", true,
+        "file", "=InputFile.txt"); // !
   }
 
   @Test
   void testAa() {
-    assertAllSet(parse("--aa", "-bcfInputFile.txt"));
+    f.assertThat("--aa", "-bcfInputFile.txt").succeeds(
+        "aaa", true,
+        "bbb", true,
+        "ccc", true,
+        "file", "InputFile.txt");
   }
 
   @Test
   void testDetached() {
-    assertAllSet(parse("-abcf", "InputFile.txt"));
+    f.assertThat("-abcf", "InputFile.txt").succeeds(
+        "aaa", true,
+        "bbb", true,
+        "ccc", true,
+        "file", "InputFile.txt");
   }
 
   @Test
   void testClustering() {
-    assertAllSet(parse("-abc", "-fInputFile.txt"));
-    assertAllSet(parse("-ab", "-cfInputFile.txt"));
-    assertAllSet(parse("-a", "-b", "-c", "-fInputFile.txt"));
-    assertAllSet(parse("-a", "-b", "-c", "-f", "InputFile.txt"));
+    f.assertThat("-abc", "-fInputFile.txt").succeeds(
+        "aaa", true,
+        "bbb", true,
+        "ccc", true,
+        "file", "InputFile.txt");
+    f.assertThat("-ab", "-cfInputFile.txt").succeeds(
+        "aaa", true,
+        "bbb", true,
+        "ccc", true,
+        "file", "InputFile.txt");
+    f.assertThat("-a", "-b", "-c", "-fInputFile.txt").succeeds(
+        "aaa", true,
+        "bbb", true,
+        "ccc", true,
+        "file", "InputFile.txt");
+    f.assertThat("-a", "-b", "-c", "-f", "InputFile.txt").succeeds(
+        "aaa", true,
+        "bbb", true,
+        "ccc", true,
+        "file", "InputFile.txt");
   }
 
   @Test
@@ -42,17 +80,5 @@ class ClusteredShortOptionsTest {
     Optional<NotSuccess> left = parser.parse("-abcf=InputFile.txt").getLeft();
     Assertions.assertTrue(left.isPresent());
     Assertions.assertTrue(left.get() instanceof ErrToken);
-  }
-
-  private void assertAllSet(ClusteredShortOptions options) {
-    assertTrue(options.aaa());
-    assertTrue(options.bbb());
-    assertTrue(options.ccc());
-    assertEquals("InputFile.txt", options.file());
-  }
-
-  private ClusteredShortOptions parse(String... args) {
-    return parser.parse(args)
-        .orElseThrow(notSuccess -> Assertions.<RuntimeException>fail("success expected but was " + notSuccess));
   }
 }

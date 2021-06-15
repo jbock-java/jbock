@@ -8,8 +8,8 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.Constants;
-import net.jbock.util.ExToken;
 import net.jbock.util.ErrTokenType;
+import net.jbock.util.ExToken;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -104,7 +104,7 @@ public final class OptionParser {
     code.addStatement("if ($N == null) $N = new $T<>()", values, values, ArrayList.class);
     code.addStatement("values.add($N($N, $N))", readOptionArgumentMethod.get(), token, it);
     if (namedOptions.unixClusteringSupported()) {
-      code.addStatement("return false");
+      code.addStatement("return null");
     }
     return MethodSpec.methodBuilder("read")
         .addException(ExToken.class)
@@ -123,7 +123,7 @@ public final class OptionParser {
         .unindent();
     code.addStatement("$N = $N($N, $N)", value, readOptionArgumentMethod.get(), token, it);
     if (namedOptions.unixClusteringSupported()) {
-      code.addStatement("return false");
+      code.addStatement("return null");
     }
     return MethodSpec.methodBuilder("read")
         .addException(ExToken.class)
@@ -147,15 +147,14 @@ public final class OptionParser {
 
   private CodeBlock readMethodFlagCodeClustering(FieldSpec seen, ParameterSpec token) {
     CodeBlock.Builder code = CodeBlock.builder();
-    code.add("if ($N.contains($S))\n", token, "=").indent()
-        .addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
-            ErrTokenType.INVALID_UNIX_GROUP, token)
-        .unindent();
     code.add("if ($N)\n", seen).indent()
         .addStatement(throwRepetitionErrorStatement(token))
         .unindent();
     code.addStatement("$N = $L", seen, true);
-    code.addStatement("return $1N.charAt(1) != '-' && $1N.length() > 2", token);
+    code.add("if ($1N.startsWith($2S) || $1N.length() <= 2)\n", token, "--").indent()
+        .addStatement("return null")
+        .unindent();
+    code.addStatement("return '-' + $N.substring(2)", token);
     return code.build();
   }
 
@@ -210,6 +209,6 @@ public final class OptionParser {
   }
 
   private TypeName readMethodReturnType() {
-    return namedOptions.unixClusteringSupported() ? BOOLEAN : VOID;
+    return namedOptions.unixClusteringSupported() ? STRING : VOID;
   }
 }

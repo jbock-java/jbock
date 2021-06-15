@@ -60,6 +60,12 @@ class CurlArgumentsTest {
         "verbose", false,
         "include", false,
         "url", emptyList());
+    f.assertThat("-X=PUT").succeeds(
+        "method", Optional.of("=PUT"), // !
+        "headers", emptyList(),
+        "verbose", false,
+        "include", false,
+        "url", emptyList());
   }
 
   @Test

@@ -120,13 +120,13 @@ public @interface Command {
   boolean superCommand() default false;
 
   /**
-   * Enables clustering of unix short options.
+   * Disables clustering of unix short options.
    * In order for this to do have any effect, there must
-   * be at least one mode flag with a unix-style option
-   * name, and one other  option with a unix name,
-   * possibly also a mode flag.
+   * be at least one nullary unix-style option,
+   * and one other option with a unix name,
+   * possibly also nullary.
    *
-   * @return {@code true} to enable clustering
+   * @return {@code false} to disable clustering
    */
-  boolean unixClustering() default false;
+  boolean unixClustering() default true;
 }
