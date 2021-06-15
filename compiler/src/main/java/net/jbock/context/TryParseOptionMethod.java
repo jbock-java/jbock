@@ -58,7 +58,7 @@ public class TryParseOptionMethod extends Cached<MethodSpec> {
         .unindent();
     code.addStatement("$T $N = $N", clusterToken.type, clusterToken, token);
     code.beginControlFlow("while ($N.get($N).read($N, $N))", commonFields.optionParsers(), option, clusterToken, it);
-    code.addStatement("$1N = '-' + $1N.substring(2, $1N.length())", clusterToken);
+    code.addStatement("$1N = '-' + $1N.substring(2)", clusterToken);
     code.addStatement("$N = $N.get($N($N))", option, commonFields.optionNames(), readOptionNameMethod.get(),
         clusterToken);
     code.add("if ($N == null)\n", option).indent()
