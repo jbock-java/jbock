@@ -8,7 +8,6 @@ import java.util.Optional;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CurlArgumentsTest {
@@ -233,9 +232,7 @@ class CurlArgumentsTest {
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "curl is a tool to transfer data from or to a server using one of the supported",
         "protocols. curl offers a busload of useful tricks. curl is powered by libcurl for",
         "all transfer-related features. See libcurl(3) for details.",
