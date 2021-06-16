@@ -35,9 +35,9 @@ public final class Parameter extends Item {
   public static class Builder {
 
     private String paramLabel;
-    private String descriptionKey;
+    private String descriptionKey = "";
     private final List<String> description = new ArrayList<>();
-    private Multiplicity skew;
+    private Multiplicity multiplicity;
 
     /**
      * Set the param label.
@@ -83,7 +83,7 @@ public final class Parameter extends Item {
      * @return the builder instance
      */
     public Builder withMultiplicity(Multiplicity multiplicity) {
-      this.skew = multiplicity;
+      this.multiplicity = multiplicity;
       return this;
     }
 
@@ -94,7 +94,7 @@ public final class Parameter extends Item {
      * @return parameter model
      */
     public Parameter build() {
-      return new Parameter(paramLabel, descriptionKey, description, skew);
+      return new Parameter(paramLabel, descriptionKey, description, multiplicity);
     }
   }
 

@@ -58,13 +58,13 @@ public final class CommandModel {
    */
   public static final class Builder {
 
-    private String descriptionKey;
+    private String descriptionKey = "";
     private final List<String> descriptionLines = new ArrayList<>();
     private String programName;
-    private boolean ansi;
-    private boolean helpEnabled;
+    private boolean ansi = true;
+    private boolean helpEnabled = true;
     private boolean superCommand;
-    private boolean atFileExpansion;
+    private boolean atFileExpansion = true;
     private final List<Option> options = new ArrayList<>();
     private final List<Parameter> parameters = new ArrayList<>();
 

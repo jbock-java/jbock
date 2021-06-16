@@ -42,10 +42,10 @@ public final class Option extends Item {
   public static final class Builder {
 
     private String paramLabel;
-    private String descriptionKey;
+    private String descriptionKey = "";
     private final List<String> description = new ArrayList<>();
     private List<String> names;
-    private Multiplicity multiplicity;
+    private Multiplicity multiplicity = Multiplicity.OPTIONAL;
     private Arity arity = Arity.UNARY;
 
     /**

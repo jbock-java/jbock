@@ -47,15 +47,23 @@ public class CreateModelMethod extends Cached<MethodSpec> {
   MethodSpec define() {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("return $T.builder()", CommandModel.class));
-    code.add(CodeBlock.of(".withDescriptionKey($S)", sourceElement.descriptionKey().orElse("")));
+    sourceElement.descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
     for (String descriptionLine : sourceElement.description(elements)) {
       code.add(CodeBlock.of(".addDescriptionLine($S)", descriptionLine));
     }
     code.add(CodeBlock.of(".withProgramName($S)", sourceElement.programName()));
-    code.add(CodeBlock.of(".withAnsi($L)", sourceElement.isAnsi()));
-    code.add(CodeBlock.of(".withHelpEnabled($L)", sourceElement.helpEnabled()));
-    code.add(CodeBlock.of(".withSuperCommand($L)", sourceElement.isSuperCommand()));
-    code.add(CodeBlock.of(".withAtFileExpansion($L)", sourceElement.atFileExpansion()));
+    if (!sourceElement.isAnsi()) {
+      code.add(CodeBlock.of(".withAnsi($L)", false));
+    }
+    if (!sourceElement.helpEnabled()) {
+      code.add(CodeBlock.of(".withHelpEnabled($L)", false));
+    }
+    if (sourceElement.isSuperCommand()) {
+      code.add(CodeBlock.of(".withSuperCommand($L)", true));
+    }
+    if (!sourceElement.atFileExpansion()) {
+      code.add(CodeBlock.of(".withAtFileExpansion($L)", false));
+    }
     for (Mapped<NamedOption> c : namedOptions.options()) {
       code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
     }
@@ -78,11 +86,11 @@ public class CreateModelMethod extends Cached<MethodSpec> {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("$T.builder()", Option.class));
     code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
-    code.add(CodeBlock.of(".withDescriptionKey($S)", c.item().descriptionKey().orElse("")));
+    c.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
     code.add(CodeBlock.of(".withNames($T.of($L))", List.class, util.joinByComma(names)));
     if (c.isFlag()) {
       code.add(CodeBlock.of(".withModeFlag()"));
-    } else {
+    } else if (c.multiplicity() != Multiplicity.OPTIONAL) {
       code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
     }
     for (String line : c.item().description(elements)) {
@@ -96,7 +104,7 @@ public class CreateModelMethod extends Cached<MethodSpec> {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("$T.builder()", Parameter.class));
     code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
-    code.add(CodeBlock.of(".withDescriptionKey($S)", c.item().descriptionKey().orElse("")));
+    c.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
     code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
     for (String line : c.item().description(elements)) {
       code.add(CodeBlock.of(".addDescriptionLine($S)", line));
