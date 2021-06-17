@@ -5,10 +5,9 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.Constants;
-import net.jbock.util.ErrTokenType;
+import net.jbock.common.Util;
 import net.jbock.util.ExToken;
 
 import javax.inject.Inject;
@@ -16,13 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.squareup.javapoet.TypeName.BOOLEAN;
-import static com.squareup.javapoet.TypeName.VOID;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ITERATOR;
 
@@ -35,24 +31,27 @@ public final class OptionParser {
   private final GeneratedTypes generatedTypes;
   private final NamedOptions namedOptions;
   private final ReadOptionArgumentMethod readOptionArgumentMethod;
+  private final CommonFields commonFields;
+  private final Util util;
+  private final FlagParser flagParser;
 
   @Inject
   OptionParser(
       GeneratedTypes generatedTypes,
       NamedOptions namedOptions,
-      ReadOptionArgumentMethod readOptionArgumentMethod) {
+      ReadOptionArgumentMethod readOptionArgumentMethod,
+      CommonFields commonFields,
+      Util util,
+      FlagParser flagParser) {
     this.generatedTypes = generatedTypes;
     this.namedOptions = namedOptions;
     this.readOptionArgumentMethod = readOptionArgumentMethod;
+    this.commonFields = commonFields;
+    this.util = util;
+    this.flagParser = flagParser;
   }
 
   List<TypeSpec> define() {
-    FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
-        .build();
-    FieldSpec value = FieldSpec.builder(STRING, "value")
-        .build();
-    FieldSpec seen = FieldSpec.builder(BOOLEAN, "seen")
-        .build();
     List<TypeSpec> result = new ArrayList<>();
     result.add(TypeSpec.classBuilder(generatedTypes.optionParserType())
         .addMethod(readMethodAbstract())
@@ -60,27 +59,22 @@ public final class OptionParser {
         .addModifiers(PRIVATE, STATIC, ABSTRACT)
         .build());
     if (namedOptions.anyFlags()) {
-      result.add(TypeSpec.classBuilder(generatedTypes.flagParserType())
-          .superclass(generatedTypes.optionParserType())
-          .addField(seen)
-          .addMethod(readMethodFlag(seen))
-          .addMethod(streamMethodFlag(seen))
-          .addModifiers(PRIVATE, STATIC).build());
+      result.add(flagParser.define());
     }
     if (namedOptions.anyRepeatable()) {
       result.add(TypeSpec.classBuilder(generatedTypes.repeatableOptionParserType())
           .superclass(generatedTypes.optionParserType())
-          .addField(values)
-          .addMethod(readMethodRepeatable(values))
-          .addMethod(streamMethodRepeatable(values))
+          .addField(commonFields.values())
+          .addMethod(readMethodRepeatable(commonFields.values()))
+          .addMethod(streamMethodRepeatable(commonFields.values()))
           .addModifiers(PRIVATE, STATIC).build());
     }
     if (namedOptions.anyRegular()) {
       result.add(TypeSpec.classBuilder(generatedTypes.regularOptionParserType())
           .superclass(generatedTypes.optionParserType())
-          .addField(value)
-          .addMethod(readMethodRegular(value))
-          .addMethod(streamMethodRegular(value))
+          .addField(commonFields.value())
+          .addMethod(readMethodRegular(commonFields.value()))
+          .addMethod(streamMethodRegular(commonFields.value()))
           .addModifiers(PRIVATE, STATIC).build());
     }
     return result;
@@ -93,7 +87,7 @@ public final class OptionParser {
         .addException(ExToken.class)
         .addParameters(asList(token, it))
         .addModifiers(ABSTRACT)
-        .returns(readMethodReturnType())
+        .returns(namedOptions.readMethodReturnType())
         .build();
   }
 
@@ -110,7 +104,7 @@ public final class OptionParser {
         .addException(ExToken.class)
         .addParameters(asList(token, it))
         .addCode(code.build())
-        .returns(readMethodReturnType())
+        .returns(namedOptions.readMethodReturnType())
         .build();
   }
 
@@ -119,7 +113,7 @@ public final class OptionParser {
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     CodeBlock.Builder code = CodeBlock.builder();
     code.add("if ($N != null)\n", value).indent()
-        .addStatement(throwRepetitionErrorStatement(token))
+        .addStatement(util.throwRepetitionErrorStatement(token))
         .unindent();
     code.addStatement("$N = $N($N, $N)", value, readOptionArgumentMethod.get(), token, it);
     if (namedOptions.unixClusteringSupported()) {
@@ -128,48 +122,10 @@ public final class OptionParser {
     return MethodSpec.methodBuilder("read")
         .addException(ExToken.class)
         .addCode(code.build())
-        .returns(readMethodReturnType())
+        .returns(namedOptions.readMethodReturnType())
         .addParameters(asList(token, it)).build();
   }
 
-
-  private MethodSpec readMethodFlag(FieldSpec seen) {
-    ParameterSpec token = ParameterSpec.builder(Constants.STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
-    return MethodSpec.methodBuilder("read")
-        .addException(ExToken.class)
-        .addCode(namedOptions.unixClusteringSupported() ?
-            readMethodFlagCodeClustering(seen, token) :
-            readMethodFlagCodeSimple(seen, token))
-        .returns(readMethodReturnType())
-        .addParameters(asList(token, it)).build();
-  }
-
-  private CodeBlock readMethodFlagCodeClustering(FieldSpec seen, ParameterSpec token) {
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.add("if ($N)\n", seen).indent()
-        .addStatement(throwRepetitionErrorStatement(token))
-        .unindent();
-    code.addStatement("$N = $L", seen, true);
-    code.add("if ($1N.startsWith($2S) || $1N.length() <= 2)\n", token, "--").indent()
-        .addStatement("return null")
-        .unindent();
-    code.addStatement("return '-' + $N.substring(2)", token);
-    return code.build();
-  }
-
-  private CodeBlock readMethodFlagCodeSimple(FieldSpec seen, ParameterSpec token) {
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.add("if ($N.charAt(1) != '-' && $N.length() > 2 || $N.contains($S))\n", token, token, token, "=").indent()
-        .addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
-            ErrTokenType.INVALID_UNIX_GROUP, token)
-        .unindent();
-    code.add("if ($N)\n", seen).indent()
-        .addStatement(throwRepetitionErrorStatement(token))
-        .unindent();
-    code.addStatement("$N = $L", seen, true);
-    return code.build();
-  }
 
   MethodSpec streamMethodAbstract() {
     ParameterizedTypeName streamOfString = ParameterizedTypeName.get(Stream.class, String.class);
@@ -193,22 +149,5 @@ public final class OptionParser {
         .returns(streamOfString)
         .addStatement("return $N == null ? $T.empty() : $N.stream()", values, Stream.class, values)
         .build();
-  }
-
-  MethodSpec streamMethodFlag(FieldSpec seen) {
-    ParameterizedTypeName streamOfString = ParameterizedTypeName.get(Stream.class, String.class);
-    return MethodSpec.methodBuilder("stream")
-        .returns(streamOfString)
-        .addStatement("return $N ? $T.of($S) : $T.empty()", seen, Stream.class, "", Stream.class)
-        .build();
-  }
-
-  private CodeBlock throwRepetitionErrorStatement(ParameterSpec token) {
-    return CodeBlock.of("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
-        ErrTokenType.OPTION_REPETITION, token);
-  }
-
-  private TypeName readMethodReturnType() {
-    return namedOptions.unixClusteringSupported() ? STRING : VOID;
   }
 }

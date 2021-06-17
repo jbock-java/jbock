@@ -8,9 +8,6 @@ import java.util.Optional;
 
 public class Descriptions {
 
-  private Descriptions() {
-  }
-
   public static Optional<String> optionalString(String s) {
     if (s.isEmpty()) {
       return Optional.empty();

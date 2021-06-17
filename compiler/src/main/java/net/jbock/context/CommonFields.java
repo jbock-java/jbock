@@ -7,8 +7,6 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
-import net.jbock.util.ItemType;
-import net.jbock.util.ConverterFailure;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -16,15 +14,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.mapOf;
 
-public class CommonFields {
+class CommonFields {
 
   private final FieldSpec optionNames;
   private final FieldSpec params;
   private final FieldSpec optionParsers;
+
+  private final FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
+      .build();
+  private final FieldSpec value = FieldSpec.builder(STRING, "value")
+      .build();
+  private final FieldSpec seen = FieldSpec.builder(BOOLEAN, "seen")
+      .build();
+
 
   private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest")
       .initializer("new $T<>()", ArrayList.class)
@@ -32,13 +39,6 @@ public class CommonFields {
 
   private final FieldSpec suspiciousPattern = FieldSpec.builder(Pattern.class, "suspicious")
       .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
-      .build();
-
-  private final FieldSpec convExFailure = FieldSpec.builder(ConverterFailure.class, "failure")
-      .build();
-  private final FieldSpec convExItemType = FieldSpec.builder(ItemType.class, "itemType")
-      .build();
-  private final FieldSpec convExItemName = FieldSpec.builder(STRING, "itemName")
       .build();
 
   private CommonFields(
@@ -50,7 +50,7 @@ public class CommonFields {
     this.optionParsers = optionParsers;
   }
 
-  public static CommonFields create(
+  static CommonFields create(
       GeneratedTypes generatedTypes,
       SourceElement sourceElement,
       PositionalParameters positionalParameters,
@@ -81,35 +81,35 @@ public class CommonFields {
     return new CommonFields(optionsByName, paramParsers, optionParsers);
   }
 
-  public FieldSpec suspiciousPattern() {
+  FieldSpec suspiciousPattern() {
     return suspiciousPattern;
   }
 
-  public FieldSpec optionNames() {
+  FieldSpec optionNames() {
     return optionNames;
   }
 
-  public FieldSpec rest() {
+  FieldSpec rest() {
     return rest;
   }
 
-  public FieldSpec params() {
+  FieldSpec params() {
     return params;
   }
 
-  public FieldSpec convExFailure() {
-    return convExFailure;
-  }
-
-  public FieldSpec convExItemType() {
-    return convExItemType;
-  }
-
-  public FieldSpec convExItemName() {
-    return convExItemName;
-  }
-
-  public FieldSpec optionParsers() {
+  FieldSpec optionParsers() {
     return optionParsers;
+  }
+
+  FieldSpec values() {
+    return values;
+  }
+
+  FieldSpec value() {
+    return value;
+  }
+
+  FieldSpec seen() {
+    return seen;
   }
 }

@@ -1,6 +1,9 @@
 package net.jbock.common;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
+import net.jbock.util.ErrTokenType;
+import net.jbock.util.ExToken;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -176,5 +179,10 @@ public class Util {
       result.unindent();
     }
     return result.build();
+  }
+
+  public CodeBlock throwRepetitionErrorStatement(ParameterSpec token) {
+    return CodeBlock.of("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
+        ErrTokenType.OPTION_REPETITION, token);
   }
 }

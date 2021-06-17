@@ -21,15 +21,11 @@ public final class Constants {
 
   public static final ClassName STRING = ClassName.get(String.class);
 
-  public static final TypeName LIST_OF_STRING = listOf(STRING);
+  public static final TypeName LIST_OF_STRING = ParameterizedTypeName.get(ClassName.get(List.class), STRING);
 
   public static final TypeName STRING_ARRAY = ArrayTypeName.of(STRING);
 
   public static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
-
-  public static TypeName listOf(TypeName typeName) {
-    return ParameterizedTypeName.get(ClassName.get(List.class), typeName);
-  }
 
   public static TypeName mapOf(TypeName keyType, TypeName valueType) {
     return ParameterizedTypeName.get(ClassName.get(Map.class), keyType, valueType);

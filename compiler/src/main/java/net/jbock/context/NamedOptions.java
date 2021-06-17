@@ -1,5 +1,6 @@
 package net.jbock.context;
 
+import com.squareup.javapoet.TypeName;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 
@@ -7,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.squareup.javapoet.TypeName.VOID;
+import static net.jbock.common.Constants.STRING;
 
 public class NamedOptions {
 
@@ -86,4 +90,9 @@ public class NamedOptions {
   public List<Mapped<NamedOption>> optional() {
     return optionalOptions;
   }
+
+  public TypeName readMethodReturnType() {
+    return unixClusteringSupported ? STRING : VOID;
+  }
+
 }
