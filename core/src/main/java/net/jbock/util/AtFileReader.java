@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -20,18 +21,22 @@ import static net.jbock.either.Either.right;
 public final class AtFileReader {
 
   /**
-   * Read the contents of the {@code @file} into a string array.
+   * Read the contents of the {@code @file} into a list of Strings.
    * This method may be invoked from the generated code,
    * unless {@link Command#atFileExpansion()} is {@code false}.
    *
-   * @param fileName a file name
+   * @param args command line input, must contain at least one token,
+   *             and the first token must be two characters at least
    * @return the options in the file, or an error report
    */
-  public Either<FileReadingError, List<String>> readAtFile(String fileName) {
+  public Either<FileReadingError, List<String>> readAtFile(String[] args) {
+    String fileName = args[0].substring(1);
     try {
       Path path = Paths.get(fileName);
       List<String> lines = Files.readAllLines(path);
-      return right(readAtLines(lines));
+      List<String> expanded = new ArrayList<>(readAtLines(lines));
+      expanded.addAll(Arrays.asList(args).subList(1, args.length));
+      return right(expanded);
     } catch (Exception e) {
       return left(new FileReadingError(e, fileName));
     }

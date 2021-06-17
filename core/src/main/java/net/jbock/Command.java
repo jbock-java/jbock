@@ -73,8 +73,8 @@ public @interface Command {
 
   /**
    * <p>Enables or disables the so-called {@code @file} (read: &quot;at-file&quot;) expansion.
-   * If the first token in the input array starts with an {@code @} character,
-   * <em>and</em> this is also the only token in the input array,
+   * If the first token in the input array starts with an {@code @} character
+   * and is at least 2 characters long,
    * then this token is interpreted as the name of an options-file,
    * containing lines of {@code UTF-8} encoded tokens.
    * Trailing empty lines are ignored.

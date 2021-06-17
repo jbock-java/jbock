@@ -75,7 +75,7 @@ public class ParseMethod extends Cached<MethodSpec> {
 
     if (sourceElement.atFileExpansion()) {
       code.addStatement(CodeBlock.builder()
-          .add("$T $N = $N.length == 1\n", BOOLEAN, atFile, args)
+          .add("$T $N = $N.length >= 1\n", BOOLEAN, atFile, args)
           .indent().indent().indent().indent()
           .add("&& $N[0].length() >= 2\n", args)
           .add("&& $N[0].startsWith($S)", args, "@")
@@ -83,7 +83,7 @@ public class ParseMethod extends Cached<MethodSpec> {
       code.addStatement(CodeBlock.builder()
           .add("$T $N = $N ?\n", either.type, either, atFile)
           .indent()
-          .add("new $T().readAtFile($N[0].substring(1)) :\n", AtFileReader.class, args)
+          .add("new $T().readAtFile($N) :\n", AtFileReader.class, args)
           .add("$T.right($T.asList($N))", Either.class, Arrays.class, args)
           .unindent().build());
       code.addStatement("return $L", CodeBlock.builder()
