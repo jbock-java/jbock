@@ -22,7 +22,6 @@ public class FlagParser {
 
   private final GeneratedTypes generatedTypes;
   private final NamedOptions namedOptions;
-  private final ReadOptionArgumentMethod readOptionArgumentMethod;
   private final CommonFields commonFields;
   private final Util util;
 
@@ -30,12 +29,10 @@ public class FlagParser {
   FlagParser(
       GeneratedTypes generatedTypes,
       NamedOptions namedOptions,
-      ReadOptionArgumentMethod readOptionArgumentMethod,
       CommonFields commonFields,
       Util util) {
     this.generatedTypes = generatedTypes;
     this.namedOptions = namedOptions;
-    this.readOptionArgumentMethod = readOptionArgumentMethod;
     this.commonFields = commonFields;
     this.util = util;
   }

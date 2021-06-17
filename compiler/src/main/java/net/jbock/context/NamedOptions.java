@@ -18,7 +18,7 @@ public class NamedOptions {
   private final List<Mapped<NamedOption>> requiredOptions;
   private final List<Mapped<NamedOption>> optionalOptions;
   private final boolean anyRepeatable;
-  private final boolean anyRegular;
+  private final boolean anyRegular; // any (optional|required) ?
   private final boolean anyFlags;
   private final boolean unixClusteringSupported;
 
@@ -94,5 +94,4 @@ public class NamedOptions {
   public TypeName readMethodReturnType() {
     return unixClusteringSupported ? STRING : VOID;
   }
-
 }
