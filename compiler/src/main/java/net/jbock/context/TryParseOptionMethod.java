@@ -48,23 +48,20 @@ public class TryParseOptionMethod extends CachedMethod {
   }
 
   private CodeBlock tryParseOptionCodeClustering(ParameterSpec token, ParameterSpec it) {
-    ParameterSpec r = ParameterSpec.builder(STRING, "r").build();
-    ParameterSpec option = ParameterSpec.builder(sourceElement.optionEnumType(), "option").build();
+    ParameterSpec option = ParameterSpec.builder(sourceElement.optionEnumType(), "opt").build();
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = $N.get($N($N))", sourceElement.optionEnumType(),
         option, commonFields.optionNames(), readOptionNameMethod.get(), token);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("return false")
         .unindent();
-    code.addStatement("$T $N = $N", r.type, r, token);
-    code.beginControlFlow("while (($1N = $2N.get($3N).read($1N, $4N)) != null)",
-        r, commonFields.optionParsers(), option, it);
-    code.add("if (($N = $N.get($N($N))) == null)\n", option, commonFields.optionNames(), readOptionNameMethod.get(),
-        r).indent()
-        .addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
-            ErrTokenType.INVALID_UNIX_GROUP, token)
-        .unindent();
-    code.endControlFlow();
+    code.add("while (($1N = $2N.get($3N).read($1N, $4N)) != null)\n",
+        token, commonFields.optionParsers(), option, it).indent();
+    code.add("if (($N = $N.get($N($N))) == null)\n", option, commonFields.optionNames(),
+        readOptionNameMethod.get(), token).indent();
+    code.addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
+        ErrTokenType.INVALID_UNIX_GROUP, token);
+    code.unindent().unindent();
     code.addStatement("return true");
     return code.build();
   }
