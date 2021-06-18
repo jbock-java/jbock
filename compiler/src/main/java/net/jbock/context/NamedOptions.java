@@ -39,7 +39,7 @@ public class NamedOptions {
     this.unixClusteringSupported = unixClusteringSupported;
   }
 
-  public static NamedOptions create(List<Mapped<NamedOption>> options, boolean unixClustering) {
+  static NamedOptions create(List<Mapped<NamedOption>> options, boolean unixClustering) {
     boolean anyRepeatable = options.stream().anyMatch(Mapped::isRepeatable);
     boolean anyRegular = options.stream().anyMatch(option -> option.isOptional() || option.isRequired());
     boolean anyFlags = options.stream().anyMatch(Mapped::isFlag);
@@ -55,43 +55,43 @@ public class NamedOptions {
         anyRepeatable, anyRegular, anyFlags, unixClusteringSupported);
   }
 
-  public boolean anyRepeatable() {
+  boolean anyRepeatable() {
     return anyRepeatable;
   }
 
-  public boolean anyRegular() {
+  boolean anyRegular() {
     return anyRegular;
   }
 
-  public boolean anyFlags() {
+  boolean anyFlags() {
     return anyFlags;
   }
 
-  public List<Mapped<NamedOption>> options() {
+  List<Mapped<NamedOption>> options() {
     return options;
   }
 
-  public boolean isEmpty() {
+  boolean isEmpty() {
     return options.isEmpty();
   }
 
-  public Stream<Mapped<NamedOption>> stream() {
+  Stream<Mapped<NamedOption>> stream() {
     return options.stream();
   }
 
-  public boolean unixClusteringSupported() {
+  boolean unixClusteringSupported() {
     return unixClusteringSupported;
   }
 
-  public List<Mapped<NamedOption>> required() {
+  List<Mapped<NamedOption>> required() {
     return requiredOptions;
   }
 
-  public List<Mapped<NamedOption>> optional() {
+  List<Mapped<NamedOption>> optional() {
     return optionalOptions;
   }
 
-  public TypeName readMethodReturnType() {
+  TypeName readMethodReturnType() {
     return unixClusteringSupported ? STRING : VOID;
   }
 }

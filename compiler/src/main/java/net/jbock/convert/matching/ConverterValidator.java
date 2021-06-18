@@ -86,7 +86,7 @@ public class ConverterValidator extends MatchValidator {
       }
     }
     TypeMirror typeForErrorMessage = matches.stream()
-        .max(Comparator.comparing(Match::skew))
+        .max(Comparator.comparing(Match::multiplicity))
         .map(Match::baseType)
         .orElse(sourceMethod.returnType());
     return left(noMatchError(typeForErrorMessage));

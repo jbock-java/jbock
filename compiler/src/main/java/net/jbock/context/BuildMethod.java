@@ -22,7 +22,7 @@ import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
 @ContextScope
-public class BuildMethod extends Cached<MethodSpec> {
+public class BuildMethod extends CachedMethod {
 
   private final GeneratedTypes generatedTypes;
   private final SourceElement sourceElement;
@@ -151,7 +151,7 @@ public class BuildMethod extends Cached<MethodSpec> {
             CodeBlock.of(".collect($T.toValidList())", Either.class),
             orElseThrowConverterError(ItemType.OPTION, i));
       default:
-        throw new IllegalArgumentException("unexpected skew: " + c.multiplicity());
+        throw new IllegalArgumentException("unexpected multiplicity: " + c.multiplicity());
     }
   }
 
@@ -168,7 +168,7 @@ public class BuildMethod extends Cached<MethodSpec> {
             orElseThrowConverterError(ItemType.PARAMETER, i),
             CodeBlock.of(".stream().findAny()"));
       default:
-        throw new IllegalArgumentException("unexpected skew: " + c.multiplicity());
+        throw new IllegalArgumentException("unexpected multiplicity: " + c.multiplicity());
     }
   }
 

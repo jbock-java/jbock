@@ -30,7 +30,7 @@ public class SourceFileGenerator {
     this.operationMode = operationMode;
   }
 
-  public void write(SourceElement sourceElement, TypeSpec typeSpec) {
+  void write(SourceElement sourceElement, TypeSpec typeSpec) {
     Preconditions.checkArgument(typeSpec.originatingElements.size() == 1);
     String packageName = sourceElement.generatedClass().packageName();
     JavaFile javaFile = JavaFile.builder(packageName, typeSpec)

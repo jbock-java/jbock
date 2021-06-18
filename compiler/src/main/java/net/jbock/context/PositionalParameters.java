@@ -6,22 +6,18 @@ import net.jbock.parameter.PositionalParameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class PositionalParameters {
 
-  private final List<Mapped<PositionalParameter>> regular;
+  private final List<Mapped<PositionalParameter>> regular; // (optional|required)
   private final Optional<Mapped<PositionalParameter>> repeatable;
-  private final int maxWidth;
 
   private PositionalParameters(
       List<Mapped<PositionalParameter>> regular,
-      Optional<Mapped<PositionalParameter>> repeatable,
-      int maxWidth) {
+      Optional<Mapped<PositionalParameter>> repeatable) {
     this.regular = regular;
     this.repeatable = repeatable;
-    this.maxWidth = maxWidth;
   }
 
   public static PositionalParameters create(List<Mapped<PositionalParameter>> all) {
@@ -31,10 +27,7 @@ public class PositionalParameters {
     Optional<Mapped<PositionalParameter>> repeatable = all.stream()
         .filter(Mapped::isRepeatable)
         .findFirst();
-    int maxWidth = all.stream()
-        .map(Mapped::paramLabel)
-        .mapToInt(String::length).max().orElse(0);
-    return new PositionalParameters(regular, repeatable, maxWidth);
+    return new PositionalParameters(regular, repeatable);
   }
 
   public List<Mapped<PositionalParameter>> regular() {
@@ -65,13 +58,5 @@ public class PositionalParameters {
 
   public boolean isEmpty() {
     return regular.isEmpty() && !anyRepeatable();
-  }
-
-  public void forEachRegular(Consumer<Mapped<PositionalParameter>> consumer) {
-    regular.forEach(consumer);
-  }
-
-  public int maxWidth() {
-    return maxWidth;
   }
 }

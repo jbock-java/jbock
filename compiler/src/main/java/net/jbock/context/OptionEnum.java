@@ -12,7 +12,7 @@ import java.util.List;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
 /**
- * Defines the *Parser.Option enum.
+ * Defines the inner class *Parser.Option.
  *
  * @see GeneratedClass
  */

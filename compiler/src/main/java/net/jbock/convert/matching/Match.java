@@ -16,40 +16,40 @@ public class Match {
    */
   private final TypeMirror baseType;
   private final Optional<CodeBlock> extractExpr;
-  private final Multiplicity skew;
+  private final Multiplicity multiplicity;
 
   private Match(
       TypeMirror baseType,
-      Multiplicity skew,
+      Multiplicity multiplicity,
       Optional<CodeBlock> extractExpr) {
     this.baseType = baseType;
-    this.skew = skew;
+    this.multiplicity = multiplicity;
     this.extractExpr = extractExpr;
   }
 
   public static Match create(
       TypeMirror baseType,
-      Multiplicity skew,
+      Multiplicity multiplicity,
       CodeBlock extractExpr) {
-    return new Match(baseType, skew, Optional.of(extractExpr));
+    return new Match(baseType, multiplicity, Optional.of(extractExpr));
   }
 
   public static Match create(
       TypeMirror baseType,
-      Multiplicity skew) {
-    return new Match(baseType, skew, Optional.empty());
+      Multiplicity multiplicity) {
+    return new Match(baseType, multiplicity, Optional.empty());
   }
 
   public <P extends AbstractItem> Mapped<P> toConvertedParameter(
       CodeBlock mapExpr, P parameter) {
-    return Mapped.create(mapExpr, extractExpr, skew, parameter);
+    return Mapped.create(mapExpr, extractExpr, multiplicity, parameter);
   }
 
   public TypeMirror baseType() {
     return baseType;
   }
 
-  public Multiplicity skew() {
-    return skew;
+  public Multiplicity multiplicity() {
+    return multiplicity;
   }
 }

@@ -23,7 +23,7 @@ import static net.jbock.common.Constants.STRING_ARRAY;
 import static net.jbock.common.Constants.STRING_ITERATOR;
 
 @ContextScope
-public class ParseMethod extends Cached<MethodSpec> {
+public class ParseMethod extends CachedMethod {
 
   private final GeneratedTypes generatedTypes;
   private final AllItems allItems;

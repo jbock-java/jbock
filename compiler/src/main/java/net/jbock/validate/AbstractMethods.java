@@ -4,7 +4,7 @@ import net.jbock.parameter.SourceMethod;
 
 import java.util.List;
 
-public class AbstractMethods {
+class AbstractMethods {
 
   private final List<SourceMethod> positionalParameters;
   private final List<SourceMethod> namedOptions;
@@ -14,11 +14,11 @@ public class AbstractMethods {
     this.namedOptions = namedOptions;
   }
 
-  public List<SourceMethod> positionalParameters() {
+  List<SourceMethod> positionalParameters() {
     return positionalParameters;
   }
 
-  public List<SourceMethod> namedOptions() {
+  List<SourceMethod> namedOptions() {
     return namedOptions;
   }
 }

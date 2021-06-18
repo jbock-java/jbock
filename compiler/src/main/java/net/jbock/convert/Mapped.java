@@ -18,7 +18,7 @@ public final class Mapped<P extends AbstractItem> {
 
   private final CodeBlock mapExpr;
   private final Optional<CodeBlock> extractExpr;
-  private final Multiplicity skew;
+  private final Multiplicity multiplicity;
   private final P item;
   private final ParameterSpec asParameterSpec;
   private final FieldSpec asFieldSpec;
@@ -27,7 +27,7 @@ public final class Mapped<P extends AbstractItem> {
   private Mapped(
       CodeBlock mapExpr,
       Optional<CodeBlock> extractExpr,
-      Multiplicity skew,
+      Multiplicity multiplicity,
       ParameterSpec asParameterSpec,
       FieldSpec asFieldSpec,
       P item,
@@ -35,7 +35,7 @@ public final class Mapped<P extends AbstractItem> {
     this.asParameterSpec = asParameterSpec;
     this.mapExpr = mapExpr;
     this.extractExpr = extractExpr;
-    this.skew = skew;
+    this.multiplicity = multiplicity;
     this.asFieldSpec = asFieldSpec;
     this.item = item;
     this.modeFlag = modeFlag;
@@ -44,13 +44,13 @@ public final class Mapped<P extends AbstractItem> {
   public static <P extends AbstractItem> Mapped<P> create(
       CodeBlock mapExpr,
       Optional<CodeBlock> extractExpr,
-      Multiplicity skew,
+      Multiplicity multiplicity,
       P parameter) {
     TypeName fieldType = parameter.returnType();
     String fieldName = '_' + parameter.enumName().enumConstant().toLowerCase(Locale.US);
     FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
     ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
-    return new Mapped<>(mapExpr, extractExpr, skew, asParameterSpec,
+    return new Mapped<>(mapExpr, extractExpr, multiplicity, asParameterSpec,
         asFieldSpec, parameter, false);
   }
 
@@ -74,7 +74,7 @@ public final class Mapped<P extends AbstractItem> {
   }
 
   public Multiplicity multiplicity() {
-    return skew;
+    return multiplicity;
   }
 
   public EnumName enumName() {
@@ -82,15 +82,15 @@ public final class Mapped<P extends AbstractItem> {
   }
 
   public boolean isRequired() {
-    return skew == Multiplicity.REQUIRED;
+    return multiplicity == Multiplicity.REQUIRED;
   }
 
   public boolean isRepeatable() {
-    return skew == Multiplicity.REPEATABLE;
+    return multiplicity == Multiplicity.REPEATABLE;
   }
 
   public boolean isOptional() {
-    return skew == Multiplicity.OPTIONAL;
+    return multiplicity == Multiplicity.OPTIONAL;
   }
 
   public boolean isFlag() {

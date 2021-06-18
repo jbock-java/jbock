@@ -3,8 +3,8 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.util.ExToken;
 import net.jbock.util.ErrTokenType;
+import net.jbock.util.ExToken;
 
 import javax.inject.Inject;
 
@@ -17,7 +17,7 @@ import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ITERATOR;
 
 @ContextScope
-public class ReadOptionArgumentMethod extends Cached<MethodSpec> {
+public class ReadOptionArgumentMethod extends CachedMethod {
 
   @Inject
   ReadOptionArgumentMethod() {

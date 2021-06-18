@@ -70,11 +70,10 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   @Override
   public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
-    elementsByAnnotation.forEach((annotationName, element) -> {
-      ElementFilter.typesIn(List.of(element)).stream()
-          .map(typeElement -> validateSourceElement(typeElement))
-          .forEach(either -> either.accept(this::printFailures, this::processSourceElement));
-    });
+    elementsByAnnotation.forEach((annotationName, element) ->
+        ElementFilter.typesIn(List.of(element)).stream()
+            .map(this::validateSourceElement)
+            .forEach(either -> either.accept(this::printFailures, this::processSourceElement)));
     return Set.of();
   }
 

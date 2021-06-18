@@ -12,7 +12,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.common.Constants.STRING;
 
 @ContextScope
-public class ReadOptionNameMethod extends Cached<MethodSpec> {
+public class ReadOptionNameMethod extends CachedMethod {
 
   @Inject
   ReadOptionNameMethod() {

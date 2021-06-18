@@ -17,7 +17,7 @@ import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
 
 @ContextScope
-public class UsageMethod extends Cached<MethodSpec> {
+public class UsageMethod extends CachedMethod {
 
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
@@ -57,9 +57,9 @@ public class UsageMethod extends Cached<MethodSpec> {
     }
 
     for (Mapped<PositionalParameter> param : positionalParameters.regular()) {
-      Multiplicity skew = param.multiplicity();
+      Multiplicity multiplicity = param.multiplicity();
       String paramLabel = param.paramLabel();
-      switch (skew) {
+      switch (multiplicity) {
         case OPTIONAL:
           spec.addStatement("$N.add($S)", result, "[" + paramLabel + "]");
           break;
@@ -67,7 +67,7 @@ public class UsageMethod extends Cached<MethodSpec> {
           spec.addStatement("$N.add($S)", result, paramLabel);
           break;
         default:
-          throw new AssertionError("unexpected skew: " + skew);
+          throw new AssertionError("unexpected multiplicity: " + multiplicity);
       }
     }
 

@@ -64,7 +64,7 @@ public class RepeatableOptionParser {
         .build();
   }
 
-   private MethodSpec streamMethodRepeatable(FieldSpec values) {
+  private MethodSpec streamMethodRepeatable(FieldSpec values) {
     ParameterizedTypeName streamOfString = ParameterizedTypeName.get(Stream.class, String.class);
     return MethodSpec.methodBuilder("stream")
         .returns(streamOfString)

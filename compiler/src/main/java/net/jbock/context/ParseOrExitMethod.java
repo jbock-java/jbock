@@ -29,7 +29,7 @@ public class ParseOrExitMethod {
     this.parseMethod = parseMethod;
   }
 
-  MethodSpec get() {
+  MethodSpec define() {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
     ParameterSpec notSuccess = builder(generatedTypes.parseResultType(), "notSuccess").build();

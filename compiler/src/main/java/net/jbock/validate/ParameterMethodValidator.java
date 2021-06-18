@@ -2,7 +2,6 @@ package net.jbock.validate;
 
 import net.jbock.common.Annotations;
 import net.jbock.common.Util;
-import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Element;

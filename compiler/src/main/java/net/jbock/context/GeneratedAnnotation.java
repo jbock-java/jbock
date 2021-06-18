@@ -8,7 +8,7 @@ import javax.annotation.processing.Generated;
 import javax.inject.Inject;
 
 @ContextScope
-public class GeneratedAnnotation extends Cached<AnnotationSpec> {
+public class GeneratedAnnotation {
 
   private static final String PROJECT_URL = "https://github.com/jbock-java";
 
@@ -16,7 +16,6 @@ public class GeneratedAnnotation extends Cached<AnnotationSpec> {
   GeneratedAnnotation() {
   }
 
-  @Override
   AnnotationSpec define() {
     return AnnotationSpec.builder(Generated.class)
         .addMember("value", CodeBlock.of("$S", JbockProcessor.class.getCanonicalName()))

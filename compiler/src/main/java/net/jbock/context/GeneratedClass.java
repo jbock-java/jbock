@@ -58,7 +58,7 @@ public final class GeneratedClass {
   public TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass())
         .addMethod(parseMethod.get())
-        .addMethod(parseOrExitMethod.get());
+        .addMethod(parseOrExitMethod.define());
     if (!namedOptions.isEmpty()) {
       spec.addMethod(readOptionNameMethod.get());
       if (namedOptions.anyRepeatable() || namedOptions.anyRegular()) {
@@ -66,7 +66,7 @@ public final class GeneratedClass {
       }
     }
 
-    spec.addType(statefulParser.get());
+    spec.addType(statefulParser.define());
     if (!namedOptions.isEmpty()) {
       spec.addType(optionEnum.define());
       spec.addTypes(optionParser.define());
@@ -78,6 +78,6 @@ public final class GeneratedClass {
     return spec.addModifiers(FINAL)
         .addOriginatingElement(sourceElement.element())
         .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]))
-        .addAnnotation(generatedAnnotation.get()).build();
+        .addAnnotation(generatedAnnotation.define()).build();
   }
 }

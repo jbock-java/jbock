@@ -8,7 +8,7 @@ import net.jbock.parameter.PositionalParameter;
 
 import java.util.List;
 
-public final class AllItems {
+final class AllItems {
 
   private final List<Mapped<? extends AbstractItem>> items;
   private final boolean anyRequired;
@@ -33,7 +33,7 @@ public final class AllItems {
     return items;
   }
 
-  public boolean anyRequired() {
+  boolean anyRequired() {
     return anyRequired;
   }
 }

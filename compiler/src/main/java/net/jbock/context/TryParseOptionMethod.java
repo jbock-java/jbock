@@ -13,7 +13,7 @@ import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ITERATOR;
 
-public class TryParseOptionMethod extends Cached<MethodSpec> {
+public class TryParseOptionMethod extends CachedMethod {
 
   private final SourceElement sourceElement;
   private final NamedOptions namedOptions;

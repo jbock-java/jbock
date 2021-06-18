@@ -68,7 +68,7 @@ public class RegularOptionParser {
         .addParameters(asList(token, it)).build();
   }
 
-   private MethodSpec streamMethodRegular(FieldSpec value) {
+  private MethodSpec streamMethodRegular(FieldSpec value) {
     ParameterizedTypeName streamOfString = ParameterizedTypeName.get(Stream.class, String.class);
     return MethodSpec.methodBuilder("stream")
         .returns(streamOfString)

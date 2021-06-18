@@ -17,7 +17,7 @@ import static javax.lang.model.element.Modifier.STATIC;
  * Defines the inner class StatefulParser
  */
 @ContextScope
-public class StatefulParser extends Cached<TypeSpec> {
+public class StatefulParser {
 
   private final StatefulParseMethod statefulParseMethod;
   private final GeneratedTypes generatedTypes;
@@ -48,7 +48,6 @@ public class StatefulParser extends Cached<TypeSpec> {
     this.tryParseOptionMethod = tryParseOptionMethod;
   }
 
-  @Override
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.statefulParserType())
         .addModifiers(PRIVATE, STATIC)

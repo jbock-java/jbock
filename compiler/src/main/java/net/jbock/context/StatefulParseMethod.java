@@ -4,8 +4,8 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.processor.SourceElement;
-import net.jbock.util.ExToken;
 import net.jbock.util.ErrTokenType;
+import net.jbock.util.ExToken;
 
 import javax.inject.Inject;
 
@@ -168,7 +168,7 @@ public class StatefulParseMethod {
     return code;
   }
 
-  CodeBlock errorUnrecognizedOption() {
+  private CodeBlock errorUnrecognizedOption() {
     return CodeBlock.builder().add("if ($N.matcher($N).matches())\n",
         commonFields.suspiciousPattern(), token).indent()
         .addStatement(throwInvalidOptionStatement(ErrTokenType.INVALID_OPTION))

@@ -21,7 +21,7 @@ import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
 @ContextScope
-public class CreateModelMethod extends Cached<MethodSpec> {
+public class CreateModelMethod extends CachedMethod {
 
   private final Util util;
   private final SourceElement sourceElement;
