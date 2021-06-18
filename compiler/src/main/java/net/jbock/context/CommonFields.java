@@ -37,7 +37,7 @@ class CommonFields {
       .initializer("new $T<>()", ArrayList.class)
       .build();
 
-  private final FieldSpec suspiciousPattern = FieldSpec.builder(Pattern.class, "suspicious")
+  private final FieldSpec suspiciousPattern = FieldSpec.builder(Pattern.class, "sus")
       .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
       .build();
 

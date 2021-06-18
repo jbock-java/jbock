@@ -11,6 +11,7 @@ import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ExConvert;
 import net.jbock.util.ExMissingItem;
+import net.jbock.util.ExNotSuccess;
 import net.jbock.util.ItemType;
 
 import javax.inject.Inject;
@@ -80,8 +81,7 @@ public class BuildMethod extends CachedMethod {
         },
         () -> spec.addStatement("return new $T($L)", generatedTypes.implType(), constructorArguments));
     return spec.returns(generatedTypes.parseSuccessType())
-        .addException(ExMissingItem.class)
-        .addException(ExConvert.class)
+        .addException(ExNotSuccess.class)
         .build();
   }
 
@@ -174,9 +174,6 @@ public class BuildMethod extends CachedMethod {
 
   private CodeBlock orElseThrowConverterError(ItemType itemType, int i) {
     return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5L))",
-        left, ExConvert.class,
-        ItemType.class,
-        itemType,
-        i);
+        left, ExConvert.class, ItemType.class, itemType, i);
   }
 }

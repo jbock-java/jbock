@@ -94,8 +94,7 @@ public class ParseMethod extends CachedMethod {
           .add("})").unindent()
           .build());
     } else {
-      code.addStatement("$T $N = $T.asList($N)", it.type, it,
-          Either.class, Arrays.class, args);
+      code.addStatement("$T $N = $T.asList($N).iterator()", it.type, it, Arrays.class, args);
       code.add(coreBlock(it));
     }
 

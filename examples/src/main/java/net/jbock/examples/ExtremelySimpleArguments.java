@@ -5,7 +5,7 @@ import net.jbock.Parameters;
 
 import java.util.List;
 
-@Command(helpEnabled = false)
+@Command(helpEnabled = false, atFileExpansion = false)
 abstract class ExtremelySimpleArguments {
 
   @Parameters

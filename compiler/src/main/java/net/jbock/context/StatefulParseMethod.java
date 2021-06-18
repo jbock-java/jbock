@@ -103,9 +103,11 @@ public class StatefulParseMethod {
     if (!options.isEmpty()) {
       code.add(optionBlock());
     }
-    code.beginControlFlow("if (!$N)", endOfOptionParsing)
-        .add(errorUnrecognizedOption())
-        .endControlFlow();
+
+    code.add("if (!$N && $N.matcher($N).matches())\n",
+        endOfOptionParsing, commonFields.suspiciousPattern(), token).indent()
+        .addStatement(throwInvalidOptionStatement(ErrTokenType.INVALID_OPTION))
+        .unindent();
 
     if (positionalParameters.isEmpty()) {
       code.addStatement(throwInvalidOptionStatement(ErrTokenType.EXCESS_PARAM));

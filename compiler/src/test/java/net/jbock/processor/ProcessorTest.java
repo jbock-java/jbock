@@ -459,7 +459,7 @@ class ProcessorTest {
   @Test
   void simpleInt() {
     JavaFileObject javaFile = fromSource(
-        "@Command(description = \"y\", descriptionKey = \"y\")",
+        "@Command(description = \"y\", descriptionKey = \"y\", atFileExpansion = false)",
         "abstract class Arguments {",
         "",
         "  @Option(names = \"--x\", description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
