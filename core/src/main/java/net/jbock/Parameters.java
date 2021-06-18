@@ -23,12 +23,13 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public @interface Parameters {
 
   /**
-   * Declare a custom converter that will be applied to each
+   * <p>Class of a custom converter that will be used to convert to each
    * individual token that's captured by this parameter.
-   * This is either a
-   * {@link java.util.function.Function Function}
-   * accepting strings,
-   * or a {@link java.util.function.Supplier Supplier} of such a function.
+   * This is either a class that extends
+   * {@link net.jbock.util.StringConverter StringConverter}
+   * or a {@link java.util.function.Supplier Supplier} of a string converter.</p>
+   * <p>Note: The same converter instance will be used to convert
+   * all relevant tokens in the input array.</p>
    *
    * @return converter class or {@code Void.class}
    */

@@ -16,7 +16,28 @@ import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
 /**
- * Read command line options from a configuration file.
+ * <p>Read command line options from a configuration file.
+ * The following escape sequences are recognized:</p>
+ *
+ * <br/>
+ * <table>
+ *   <caption>Escape sequences</caption>
+ *   <thead><tr><td><b>Code</b></td><td><b>Meaning</b></td></tr></thead>
+ *   <tr><td>{@code \\}</td><td>backslash</td></tr>
+ *   <tr><td>{@code \n}</td><td>newline</td></tr>
+ *   <tr><td>{@code \r}</td><td>carriage return</td></tr>
+ *   <tr><td>{@code \t}</td><td>horizontal tab</td></tr>
+ * </table>
+ *
+ * <p>An unpaired backslash at the end of a line prevents
+ * the newline from being read.</p>
+ * <p>Note: Even if set to {@code true},
+ * and the user wants to pass exactly one positional parameter
+ * that starts with an {@code @} character,
+ * they can still prevent the {@code @file} expansion,
+ * by passing {@code --} as the first token.</p>
+ * <p>Note: additional arguments after the {@code @file}
+ * are allowed and will be appended to the result.</p>
  */
 public final class AtFileReader {
 
