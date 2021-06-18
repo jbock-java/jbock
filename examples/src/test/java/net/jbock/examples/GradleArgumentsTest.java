@@ -8,7 +8,6 @@ import java.util.Optional;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GradleArgumentsTest {
@@ -20,65 +19,39 @@ class GradleArgumentsTest {
 
   @Test
   void errorShortLongConflict() {
-    assertTrue(parser.parse("-m", "hello", "--message=goodbye").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Option '--message=goodbye' is a repetition"));
+    f.assertThat("-m", "hello", "--message=goodbye")
+        .fails("Option '--message=goodbye' is a repetition");
   }
 
   @Test
   void errorMissingValue() {
-    // there's nothing after -m
-    assertTrue(parser.parse("-m").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Missing argument after token: -m"));
+    f.assertThat("-m").fails("Missing argument after token: -m");
   }
 
   @Test
   void errorLongShortConflict() {
-    assertTrue(parser.parse("--message=hello", "-m", "goodbye").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Option '-m' is a repetition"));
+    f.assertThat("--message=hello", "-m", "goodbye")
+        .fails("Option '-m' is a repetition");
   }
 
   @Test
   void errorLongLongConflict() {
-    assertTrue(parser.parse("--message=hello", "--message=goodbye").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Option '--message=goodbye' is a repetition"));
+    f.assertThat("--message=hello", "--message=goodbye")
+        .fails("Option '--message=goodbye' is a repetition");
   }
 
   @Test
   void errorInvalidOption() {
-    assertTrue(parser.parse("-c1").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid token: -c1"));
-    assertTrue(parser.parse("-c-v").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid token: -c-v"));
-    assertTrue(parser.parse("-c-").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid token: -c-"));
-    assertTrue(parser.parse("-c=v").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid token: -c=v"));
-    assertTrue(parser.parse("-c=").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid token: -c="));
-    assertTrue(parser.parse("-cX=1").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid token: -cX=1"));
-    assertTrue(parser.parse("-cvv").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Option '-v' is a repetition"));
-    assertTrue(parser.parse("-cvx").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid token: -cvx"));
-    assertTrue(parser.parse("-cvm").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Missing argument after token: -m"));
-    assertTrue(parser.parse("--column-count").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid option: --column-count"));
+    f.assertThat("-c1").fails("Invalid token: -c1");
+    f.assertThat("-c-v").fails("Invalid token: -c-v");
+    f.assertThat("-c-").fails("Invalid token: -c-");
+    f.assertThat("-c=v").fails("Invalid token: -c=v");
+    f.assertThat("-c=").fails("Invalid token: -c=");
+    f.assertThat("-cX=1").fails("Invalid token: -cX=1");
+    f.assertThat("-cvv").fails("Option '-v' is a repetition");
+    f.assertThat("-cvx").fails("Invalid token: -cvx");
+    f.assertThat("-cvm").fails("Missing argument after token: -m");
+    f.assertThat("--column-count").fails("Invalid option: --column-count");
   }
 
   @Test
@@ -239,9 +212,7 @@ class GradleArgumentsTest {
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "\u001B[1mUSAGE\u001B[m",
         "  gradle-arguments [OPTIONS] [SOME_TOKEN] moreTokens...",
         "",
