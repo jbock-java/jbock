@@ -3,6 +3,7 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
@@ -10,6 +11,7 @@ import javax.inject.Inject;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
+import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -28,12 +30,14 @@ public class ReadOptionArgumentMethod extends CachedMethod {
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     CodeBlock.Builder code = CodeBlock.builder();
+    ParameterSpec unix = builder(BOOLEAN, "unix").build();
+    code.addStatement("$T $N = !$N.startsWith($S)", BOOLEAN, unix, token, "--");
 
-    code.add("if ($N.charAt(1) == '-' && $N.indexOf('=') >= 0)\n", token, token).indent()
-        .addStatement("return $N.substring($N.indexOf('=') + 1)", token, token).unindent();
-
-    code.add("if ($N.charAt(1) != '-' && $N.length() >= 3)\n", token, token).indent()
+    code.add("if ($N && $N.length() >= 3)\n", unix, token).indent()
         .addStatement("return $N.substring(2)", token).unindent();
+
+    code.add("if (!$N && $N.indexOf('=') >= 0)\n", unix, token).indent()
+        .addStatement("return $N.substring($N.indexOf('=') + 1)", token, token).unindent();
 
     code.add("if (!$N.hasNext())\n", it).indent()
         .addStatement("throw new $T($T.$L, $N)", ExToken.class,

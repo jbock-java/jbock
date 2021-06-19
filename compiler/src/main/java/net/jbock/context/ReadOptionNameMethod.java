@@ -27,7 +27,7 @@ public class ReadOptionNameMethod extends CachedMethod {
     code.add("if ($N.length() <= 1 || $N.charAt(0) != '-')\n", token, token).indent()
         .addStatement("return null").unindent();
 
-    code.add("if ($N.charAt(1) != '-')\n", token).indent()
+    code.add("if (!$N.startsWith($S))\n", token, "--").indent()
         .addStatement("return $N.substring(0, 2)", token).unindent();
 
     code.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
