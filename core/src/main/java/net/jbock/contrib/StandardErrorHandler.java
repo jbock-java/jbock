@@ -18,14 +18,17 @@ public final class StandardErrorHandler {
 
   private final PrintStream out;
   private final int terminalWidth;
+  private final boolean ansi;
   private final Map<String, String> messages;
 
   private StandardErrorHandler(
       PrintStream out,
       int terminalWidth,
+      boolean ansi,
       Map<String, String> messages) {
     this.out = out;
     this.terminalWidth = terminalWidth;
+    this.ansi = ansi;
     this.messages = messages;
   }
 
@@ -36,6 +39,7 @@ public final class StandardErrorHandler {
 
     private PrintStream out = System.err;
     private int terminalWidth = 80;
+    private boolean ansi = true;
     private Map<String, String> messages = Collections.emptyMap();
 
     private Builder() {
@@ -84,12 +88,24 @@ public final class StandardErrorHandler {
     }
 
     /**
+     * Set the value of the ansi attribute.
+     *
+     * @param ansi if ansi codes should be used
+     *         when printing the usage documentation
+     * @return the builder instance
+     */
+    public Builder withAnsi(boolean ansi) {
+      this.ansi = ansi;
+      return this;
+    }
+
+    /**
      * Create the error handler.
      *
      * @return an error handler
      */
     public StandardErrorHandler build() {
-      return new StandardErrorHandler(out, terminalWidth, messages);
+      return new StandardErrorHandler(out, terminalWidth, ansi, messages);
     }
   }
 
@@ -114,24 +130,25 @@ public final class StandardErrorHandler {
    */
   public int handle(NotSuccess notSuccess) {
     CommandModel model = notSuccess.commandModel();
-    AnsiStyle ansi = AnsiStyle.create(model);
+    AnsiStyle ansiStyle = AnsiStyle.create(ansi);
     if (notSuccess instanceof HelpRequested) {
       UsageDocumentation.builder(model)
           .withOutputStream(out)
+          .withAnsi(ansi)
           .withMessages(messages)
           .withTerminalWidth(terminalWidth)
           .build().printUsageDocumentation();
       out.flush();
       return 0;
     }
-    out.println(ansi.red("ERROR:") + ' ' + ((HasMessage) notSuccess).message());
+    out.println(ansiStyle.red("ERROR:") + ' ' + ((HasMessage) notSuccess).message());
     if (model.helpEnabled()) {
       List<String> synopsis = Synopsis.create(model)
           .createSynopsis("Usage:");
       out.println(String.join(" ", synopsis));
       String helpCommand = model.programName() + " --help";
       out.println("Type " +
-          ansi.bold(helpCommand).orElseGet(() -> "'" + helpCommand + "'") +
+          ansiStyle.bold(helpCommand).orElseGet(() -> "'" + helpCommand + "'") +
           " for more information.");
     } else {
       UsageDocumentation.builder(model)

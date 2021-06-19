@@ -15,7 +15,6 @@ public final class CommandModel {
   private final String descriptionKey;
   private final List<String> descriptionLines;
   private final String programName;
-  private final boolean ansi;
   private final boolean helpEnabled;
   private final boolean superCommand;
   private final boolean atFileExpansion;
@@ -27,7 +26,6 @@ public final class CommandModel {
       String descriptionKey,
       List<String> descriptionLines,
       String programName,
-      boolean ansi,
       boolean helpEnabled,
       boolean superCommand,
       boolean atFileExpansion,
@@ -37,7 +35,6 @@ public final class CommandModel {
     this.descriptionKey = descriptionKey;
     this.descriptionLines = descriptionLines;
     this.programName = programName;
-    this.ansi = ansi;
     this.helpEnabled = helpEnabled;
     this.superCommand = superCommand;
     this.atFileExpansion = atFileExpansion;
@@ -64,7 +61,6 @@ public final class CommandModel {
     private String descriptionKey = "";
     private final List<String> descriptionLines = new ArrayList<>();
     private String programName;
-    private boolean ansi = true;
     private boolean helpEnabled = true;
     private boolean superCommand;
     private boolean atFileExpansion = true;
@@ -108,18 +104,6 @@ public final class CommandModel {
      */
     public Builder withProgramName(String programName) {
       this.programName = programName;
-      return this;
-    }
-
-    /**
-     * Set ansi flag.
-     * Public method that may be invoked from the generated code.
-     *
-     * @param ansi whether to use ansi codes
-     * @return the builder instance
-     */
-    public Builder withAnsi(boolean ansi) {
-      this.ansi = ansi;
       return this;
     }
 
@@ -203,7 +187,7 @@ public final class CommandModel {
      */
     public CommandModel build() {
       return new CommandModel(descriptionKey, descriptionLines,
-          programName, ansi, helpEnabled, superCommand,
+          programName, helpEnabled, superCommand,
           atFileExpansion, unixClustering, options, parameters);
     }
   }
@@ -236,16 +220,6 @@ public final class CommandModel {
    */
   public String programName() {
     return programName;
-  }
-
-  /**
-   * Get the value of the {@link Command#ansi()} attribute.
-   *
-   * @return {@code true} if the parser can use ansi colors
-   *         when printing the usage documentation
-   */
-  public boolean ansi() {
-    return ansi;
   }
 
   /**
@@ -307,7 +281,7 @@ public final class CommandModel {
    * @return {@code true} if unix clustering is enabled
    */
   public boolean unixClustering() {
-    return atFileExpansion;
+    return unixClustering;
   }
 
   /**

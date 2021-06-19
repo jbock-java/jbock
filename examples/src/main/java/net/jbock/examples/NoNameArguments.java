@@ -7,7 +7,7 @@ import net.jbock.Option;
 import java.util.List;
 import java.util.Optional;
 
-@Command(ansi = false)
+@Command
 abstract class NoNameArguments {
 
   @Option(names = "--message")

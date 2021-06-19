@@ -6,7 +6,7 @@ import net.jbock.Parameter;
 import java.io.IOException;
 import java.util.Optional;
 
-@Command(ansi = false)
+@Command
 abstract class AdditionArguments {
 
   AdditionArguments() throws IndexOutOfBoundsException {

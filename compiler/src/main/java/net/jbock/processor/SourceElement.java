@@ -111,10 +111,6 @@ public class SourceElement {
     return Descriptions.getDescription(sourceElement, elements, description);
   }
 
-  public boolean isAnsi() {
-    return get().ansi();
-  }
-
   public boolean unixClustering() {
     return get().unixClustering();
   }

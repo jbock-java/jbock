@@ -20,10 +20,10 @@ class GradleArgumentsFooTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "USAGE",
+        "\u001B[1mUSAGE\u001B[m",
         "  foo [OPTIONS]",
         "",
-        "OPTIONS",
+        "\u001B[1mOPTIONS\u001B[m",
         "  --bar BAR ",
         "");
   }

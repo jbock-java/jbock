@@ -1,7 +1,5 @@
 package net.jbock.contrib;
 
-import net.jbock.model.CommandModel;
-
 import java.util.Optional;
 
 final class AnsiStyle {
@@ -16,8 +14,8 @@ final class AnsiStyle {
     this.ansi = ansi;
   }
 
-  static AnsiStyle create(CommandModel context) {
-    return new AnsiStyle(context.ansi());
+  static AnsiStyle create(boolean ansi) {
+    return new AnsiStyle(ansi);
   }
 
   private Optional<String> paint(String text, Style style) {

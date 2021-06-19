@@ -65,6 +65,7 @@ final class UsageDocumentation {
 
     private PrintStream out = System.err;
     private int terminalWidth = 80;
+    private boolean ansi = true;
     private Map<String, String> messages = Collections.emptyMap();
 
     private Builder(CommandModel model) {
@@ -81,6 +82,11 @@ final class UsageDocumentation {
       return this;
     }
 
+    Builder withAnsi(boolean ansi) {
+      this.ansi = ansi;
+      return this;
+    }
+
     Builder withOutputStream(PrintStream out) {
       this.out = out;
       return this;
@@ -94,7 +100,7 @@ final class UsageDocumentation {
           model.options(),
           model.parameters(),
           Synopsis.create(model),
-          AnsiStyle.create(model),
+          AnsiStyle.create(ansi),
           maxWidth(model.options()),
           maxWidth(model.parameters()));
     }

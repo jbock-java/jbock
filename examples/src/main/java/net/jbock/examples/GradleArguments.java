@@ -52,7 +52,7 @@ abstract class GradleArguments {
   @Parameters(paramLabel = "moreTokens")
   abstract List<String> otherTokens();
 
-  @Command(ansi = false)
+  @Command
   static abstract class Foo {
 
     @Option(names = "--bar")

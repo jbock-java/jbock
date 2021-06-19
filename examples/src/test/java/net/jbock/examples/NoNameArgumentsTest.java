@@ -79,10 +79,10 @@ class NoNameArgumentsTest {
     String[] actual = parser.parse("--help")
         .getLeft().map(f::getUsageDocumentation).orElseThrow();
     assertEquals(actual,
-        "USAGE",
+        "\u001B[1mUSAGE\u001B[m",
         "  no-name-arguments [OPTIONS] -n NUMBER",
         "",
-        "OPTIONS",
+        "\u001B[1mOPTIONS\u001B[m",
         "  --message MESSAGE         ",
         "  --file FILE               ",
         "  -v, --verbosity VERBOSITY ",

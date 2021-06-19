@@ -52,10 +52,10 @@ class AdditionArgumentsTest {
     String[] actual = parser.parse("--help")
         .getLeft().map(f::getUsageDocumentation).orElseThrow();
     assertEquals(actual,
-        "USAGE",
+        "\u001B[1mUSAGE\u001B[m",
         "  addition-arguments A B [C]",
         "",
-        "PARAMETERS",
+        "\u001B[1mPARAMETERS\u001B[m",
         "  A  First argument",
         "  B  Second argument",
         "  C  Optional third argument",

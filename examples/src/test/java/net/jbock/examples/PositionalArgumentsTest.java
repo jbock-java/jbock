@@ -102,10 +102,10 @@ class PositionalArgumentsTest {
     String[] actual = parser.parse("--help")
         .getLeft().map(f::getUsageDocumentation).orElseThrow();
     assertEquals(actual,
-        "USAGE",
+        "\u001B[1mUSAGE\u001B[m",
         "  positional-arguments SOURCE DEST ANOTHER_INT [OPT_STRING] OTHER_TOKENS...",
         "",
-        "PARAMETERS",
+        "\u001B[1mPARAMETERS\u001B[m",
         "  SOURCE       ",
         "  DEST          Desc of dest.",
         "  ANOTHER_INT  ",

@@ -60,13 +60,6 @@ public @interface Command {
   String descriptionKey() default "";
 
   /**
-   * Enables or disables ANSI colors in the usage documentation.
-   *
-   * @return {@code false} to disable ANSI colors
-   */
-  boolean ansi() default true;
-
-  /**
    * <p>Enables or disables the so-called {@code @file}
    * (read: &quot;at-file&quot;) expansion, a mechanism
    * that allows putting some or all command line options in

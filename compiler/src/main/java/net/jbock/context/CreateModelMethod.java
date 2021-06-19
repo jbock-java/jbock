@@ -47,14 +47,12 @@ public class CreateModelMethod extends CachedMethod {
   MethodSpec define() {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("return $T.builder()", CommandModel.class));
-    sourceElement.descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
+    sourceElement.descriptionKey().ifPresent(key ->
+        code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
     for (String descriptionLine : sourceElement.description(elements)) {
       code.add(CodeBlock.of(".addDescriptionLine($S)", descriptionLine));
     }
     code.add(CodeBlock.of(".withProgramName($S)", sourceElement.programName()));
-    if (!sourceElement.isAnsi()) {
-      code.add(CodeBlock.of(".withAnsi($L)", false));
-    }
     if (!sourceElement.helpEnabled()) {
       code.add(CodeBlock.of(".withHelpEnabled($L)", false));
     }
@@ -108,7 +106,9 @@ public class CreateModelMethod extends CachedMethod {
     code.add(CodeBlock.of("$T.builder()", Parameter.class));
     code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
     c.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
-    code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
+    if (c.multiplicity() != Multiplicity.REQUIRED) {
+      code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
+    }
     for (String line : c.item().description(elements)) {
       code.add(CodeBlock.of(".addDescriptionLine($S)", line));
     }

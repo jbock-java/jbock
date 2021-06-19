@@ -16,8 +16,11 @@ import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
 /**
- * <p>Read command line options from a configuration file.
- * The following escape sequences are recognized:</p>
+ * <p>Allow reading some or all command line options from
+ * a configuration file, if the user requests it by prefixing
+ * the first command line token with a {@code "@"} character.</p>
+ *
+ * <p>The following escape sequences are recognized:</p>
  *
  * <br/>
  * <table>
@@ -54,7 +57,7 @@ public final class AtFileReader {
     if (args.length == 0
         || args[0].length() < 2
         || !args[0].startsWith("@")) {
-      return Either.right(Arrays.asList(args));
+      return right(Arrays.asList(args));
     }
     String fileName = args[0].substring(1);
     try {
