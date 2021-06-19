@@ -50,7 +50,12 @@ public final class AtFileReader {
    *             and the first token must be two characters at least
    * @return the options in the file, or an error report
    */
-  public Either<FileReadingError, List<String>> readAtFile(String[] args) {
+  public Either<FileReadingError, List<String>> read(String[] args) {
+    if (args.length == 0
+        || args[0].length() < 2
+        || !args[0].startsWith("@")) {
+      return Either.right(Arrays.asList(args));
+    }
     String fileName = args[0].substring(1);
     try {
       Path path = Paths.get(fileName);

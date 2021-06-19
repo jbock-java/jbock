@@ -1,10 +1,8 @@
 package net.jbock.context;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.either.Either;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.AtFileReader;
@@ -17,8 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static com.squareup.javapoet.TypeName.BOOLEAN;
-import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
 import static net.jbock.common.Constants.STRING_ITERATOR;
 
@@ -51,43 +47,27 @@ public class ParseMethod extends CachedMethod {
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     ParameterSpec err = builder(FileReadingError.class, "err").build();
-    ParameterSpec either = builder(ParameterizedTypeName.get(
-        ClassName.get(Either.class),
-        ClassName.get(FileReadingError.class),
-        LIST_OF_STRING),
-        "either").build();
-    ParameterSpec atFile = builder(BOOLEAN, "atFile").build();
 
     CodeBlock.Builder code = CodeBlock.builder();
 
     if (sourceElement.helpEnabled()) {
       if (allItems.anyRequired()) {
-        code.add("if ($N.length == 0)\n", args).indent()
+        code.add("if ($1N.length == 0 || $2S.equals($1N[0]))\n", args, "--help").indent()
+            .addStatement("return $T.left(new $T($N()))", Either.class, HelpRequested.class,
+                createModelMethod.get())
+            .unindent();
+      } else {
+        code.add("if ($1N.length > 0 && $2S.equals($1N[0]))\n", args, "--help").indent()
             .addStatement("return $T.left(new $T($N()))", Either.class, HelpRequested.class,
                 createModelMethod.get())
             .unindent();
       }
-      code.add("if ($1N.length == 1 && $2S.equals($1N[0]))\n", args, "--help").indent()
-          .addStatement("return $T.left(new $T($N()))", Either.class, HelpRequested.class,
-              createModelMethod.get())
-          .unindent();
     }
 
     if (sourceElement.atFileExpansion()) {
-      code.addStatement(CodeBlock.builder()
-          .add("$T $N = $N.length >= 1\n", BOOLEAN, atFile, args)
-          .indent().indent().indent().indent()
-          .add("&& $N[0].length() >= 2\n", args)
-          .add("&& $N[0].startsWith($S)", args, "@")
-          .unindent().unindent().unindent().unindent().build());
-      code.addStatement(CodeBlock.builder()
-          .add("$T $N = $N ?\n", either.type, either, atFile)
-          .indent()
-          .add("new $T().readAtFile($N) :\n", AtFileReader.class, args)
-          .add("$T.right($T.asList($N))", Either.class, Arrays.class, args)
-          .unindent().build());
       code.addStatement("return $L", CodeBlock.builder()
-          .add("$1N.mapLeft($2N -> $2N.addModel($3N()))\n", either, err, createModelMethod.get()).indent()
+          .add("new $T().read($N)\n", AtFileReader.class, args).indent()
+          .add(".mapLeft($1N -> $1N.addModel($2N()))\n", err, createModelMethod.get())
           .add(".map($T::iterator)\n", List.class)
           .add(".flatMap($N -> {\n", it)
           .indent().add(coreBlock(it)).unindent()
