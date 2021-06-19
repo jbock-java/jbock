@@ -32,12 +32,15 @@ public final class Parameter extends Item {
   /**
    * Builder for a {@link Parameter}.
    */
-  public static class Builder {
+  public static final class Builder {
 
     private String paramLabel;
     private String descriptionKey = "";
     private final List<String> description = new ArrayList<>();
     private Multiplicity multiplicity;
+
+    private Builder() {
+    }
 
     /**
      * Set the param label.

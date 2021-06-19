@@ -64,6 +64,9 @@ public class CreateModelMethod extends CachedMethod {
     if (!sourceElement.atFileExpansion()) {
       code.add(CodeBlock.of(".withAtFileExpansion($L)", false));
     }
+    if (namedOptions.unixClusteringSupported()) {
+      code.add(CodeBlock.of(".withUnixClustering($L)", true));
+    }
     for (Mapped<NamedOption> c : namedOptions.options()) {
       code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
     }

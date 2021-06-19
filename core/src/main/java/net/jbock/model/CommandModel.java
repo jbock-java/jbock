@@ -19,6 +19,7 @@ public final class CommandModel {
   private final boolean helpEnabled;
   private final boolean superCommand;
   private final boolean atFileExpansion;
+  private final boolean unixClustering;
   private final List<Option> options;
   private final List<Parameter> parameters;
 
@@ -30,6 +31,7 @@ public final class CommandModel {
       boolean helpEnabled,
       boolean superCommand,
       boolean atFileExpansion,
+      boolean unixClustering,
       List<Option> options,
       List<Parameter> parameters) {
     this.descriptionKey = descriptionKey;
@@ -39,6 +41,7 @@ public final class CommandModel {
     this.helpEnabled = helpEnabled;
     this.superCommand = superCommand;
     this.atFileExpansion = atFileExpansion;
+    this.unixClustering = unixClustering;
     this.options = options;
     this.parameters = parameters;
   }
@@ -65,8 +68,12 @@ public final class CommandModel {
     private boolean helpEnabled = true;
     private boolean superCommand;
     private boolean atFileExpansion = true;
+    private boolean unixClustering;
     private final List<Option> options = new ArrayList<>();
     private final List<Parameter> parameters = new ArrayList<>();
+
+    private Builder() {
+    }
 
     /**
      * Set the description key.
@@ -153,6 +160,18 @@ public final class CommandModel {
     }
 
     /**
+     * Set the unix clustering property.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param unixClustering whether unix clustering is enabled
+     * @return the builder instance
+     */
+    public Builder withUnixClustering(boolean unixClustering) {
+      this.unixClustering = unixClustering;
+      return this;
+    }
+
+    /**
      * Add an option.
      * Public method that may be invoked from the generated code.
      *
@@ -183,8 +202,9 @@ public final class CommandModel {
      * @return command model
      */
     public CommandModel build() {
-      return new CommandModel(descriptionKey, descriptionLines, programName, ansi, helpEnabled, superCommand, atFileExpansion,
-          options, parameters);
+      return new CommandModel(descriptionKey, descriptionLines,
+          programName, ansi, helpEnabled, superCommand,
+          atFileExpansion, unixClustering, options, parameters);
     }
   }
 
@@ -275,6 +295,18 @@ public final class CommandModel {
    * @return {@code true} if {@code @file} expansion is enabled
    */
   public boolean atFileExpansion() {
+    return atFileExpansion;
+  }
+
+  /**
+   * Get the value of the {@link Command#unixClustering()}}
+   * attribute. Note, this may also return {@code false}
+   * if unix clustering is impossible because
+   * there are no unix-style mode flags.
+   *
+   * @return {@code true} if unix clustering is enabled
+   */
+  public boolean unixClustering() {
     return atFileExpansion;
   }
 

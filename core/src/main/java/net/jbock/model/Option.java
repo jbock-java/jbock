@@ -48,6 +48,9 @@ public final class Option extends Item {
     private Multiplicity multiplicity = Multiplicity.OPTIONAL;
     private Arity arity = Arity.UNARY;
 
+    private Builder() {
+    }
+
     /**
      * Set the param label.
      * Public method that may be invoked from the generated code.

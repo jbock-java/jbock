@@ -53,7 +53,7 @@ public final class ParserTestFixture<E> {
     Either<NotSuccess, E> result = parser.apply(input);
     Assertions.assertTrue(result.getLeft().isPresent());
     String[] actual = getUsageDocumentation(result.getLeft().get());
-    assertEquals(expected,actual);
+    assertEquals(expected, actual);
   }
 
   public E parse(String... args) {
@@ -203,13 +203,12 @@ public final class ParserTestFixture<E> {
       NotSuccess notSuccess,
       Map<String, String> messages) {
     TestOutputStream testOutputStream = new TestOutputStream();
-    StandardErrorHandler.builder(notSuccess)
+    StandardErrorHandler.builder()
         .withOutputStream(testOutputStream.out)
         .withTerminalWidth(MAX_LINE_WIDTH)
         .withMessages(messages)
-        .withExitHook(RuntimeException::new) // no shutdown
         .build()
-        .handle();
+        .handle(notSuccess);
     return testOutputStream.split();
   }
 }

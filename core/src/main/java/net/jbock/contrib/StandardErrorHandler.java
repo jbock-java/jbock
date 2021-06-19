@@ -9,7 +9,6 @@ import java.io.PrintStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * This class is responsible for standard error handling,
@@ -17,24 +16,17 @@ import java.util.function.Supplier;
  */
 public final class StandardErrorHandler {
 
-  private final NotSuccess notSuccess;
-
   private final PrintStream out;
   private final int terminalWidth;
   private final Map<String, String> messages;
-  private final Supplier<RuntimeException> exitHook;
 
   private StandardErrorHandler(
-      NotSuccess notSuccess,
       PrintStream out,
       int terminalWidth,
-      Map<String, String> messages,
-      Supplier<RuntimeException> exitHook) {
-    this.notSuccess = notSuccess;
+      Map<String, String> messages) {
     this.out = out;
     this.terminalWidth = terminalWidth;
     this.messages = messages;
-    this.exitHook = exitHook;
   }
 
   /**
@@ -42,18 +34,11 @@ public final class StandardErrorHandler {
    */
   public static final class Builder {
 
-    private final NotSuccess notSuccess;
-
     private PrintStream out = System.err;
     private int terminalWidth = 80;
     private Map<String, String> messages = Collections.emptyMap();
-    private Supplier<RuntimeException> exitHook;
 
-    private Builder(
-        NotSuccess notSuccess,
-        Supplier<RuntimeException> exitHook) {
-      this.notSuccess = notSuccess;
-      this.exitHook = exitHook;
+    private Builder() {
     }
 
     /**
@@ -99,26 +84,12 @@ public final class StandardErrorHandler {
     }
 
     /**
-     * Change or elide the JVM shutdown command.
-     * The default behaviour is to invoke {@link System#exit(int)}
-     * with an exit code of {@code 1} if an error occurred,
-     * or {@code 0} if the {@code --help} option was passed.
-     *
-     * @param exitHook the exit logic
-     * @return the builder instance
-     */
-    public Builder withExitHook(Supplier<RuntimeException> exitHook) {
-      this.exitHook = exitHook;
-      return this;
-    }
-
-    /**
      * Create the error handler.
      *
      * @return an error handler
      */
     public StandardErrorHandler build() {
-      return new StandardErrorHandler(notSuccess, out, terminalWidth, messages, exitHook);
+      return new StandardErrorHandler(out, terminalWidth, messages);
     }
   }
 
@@ -126,29 +97,22 @@ public final class StandardErrorHandler {
    * Create an empty builder instance.
    * Public method that may be invoked from the generated code.
    *
-   * @param notSuccess failure object
    * @return empty builder
    */
-  public static Builder builder(NotSuccess notSuccess) {
-    Supplier<RuntimeException> exitHook = () -> {
-      System.exit(notSuccess instanceof HelpRequested ? 0 : 1);
-      return new RuntimeException();
-    };
-    return new Builder(notSuccess, exitHook);
+  public static Builder builder() {
+    return new Builder();
   }
 
   /**
    * <p>Public method that may be invoked from the generated code.</p>
    *
-   * <p><b>CAUTION: Invoking this method may shut down the JVM.</b></p>
-   *
-   * <p>This method also does standard error handling like printing of
+   * <p>This method does standard error handling like printing of
    *    error messages, or printing standard usage documentation for
    *    the provided {@link CommandModel}.</p>
    *
-   * @return a runtime exception
+   * @return system return code
    */
-  public RuntimeException handle() {
+  public int handle(NotSuccess notSuccess) {
     CommandModel model = notSuccess.commandModel();
     AnsiStyle ansi = AnsiStyle.create(model);
     if (notSuccess instanceof HelpRequested) {
@@ -158,7 +122,7 @@ public final class StandardErrorHandler {
           .withTerminalWidth(terminalWidth)
           .build().printUsageDocumentation();
       out.flush();
-      return exitHook.get();
+      return 0;
     }
     out.println(ansi.red("ERROR:") + ' ' + ((HasMessage) notSuccess).message());
     if (model.helpEnabled()) {
@@ -174,6 +138,6 @@ public final class StandardErrorHandler {
           .build().printUsageDocumentation();
     }
     out.flush();
-    return exitHook.get();
+    return 1;
   }
 }

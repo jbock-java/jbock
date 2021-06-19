@@ -39,8 +39,11 @@ public class ParseOrExitMethod {
         .returns(generatedTypes.parseSuccessType())
         .addCode(CodeBlock.builder()
             .add("return $N($N)", parseMethod.get(), args)
-            .add(".orElseThrow($N ->\n", notSuccess).indent()
-            .add("$T.builder($N).build().handle());\n", StandardErrorHandler.class, notSuccess).unindent()
+            .add(".orElseThrow($N -> {\n", notSuccess).indent()
+            .addStatement("$T.exit($T.builder().build().handle($N))", System.class,
+                StandardErrorHandler.class, notSuccess)
+            .addStatement("return new $T()", RuntimeException.class).unindent()
+            .addStatement("})")
             .build())
         .build();
   }
