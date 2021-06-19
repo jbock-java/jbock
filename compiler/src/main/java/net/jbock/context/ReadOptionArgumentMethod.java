@@ -36,7 +36,7 @@ public class ReadOptionArgumentMethod extends CachedMethod {
     code.add("if ($N && $N.length() >= 3)\n", unix, token).indent()
         .addStatement("return $N.substring(2)", token).unindent();
 
-    code.add("if (!$N && $N.indexOf('=') >= 0)\n", unix, token).indent()
+    code.add("if (!$N && $N.contains($S))\n", unix, token, "=").indent()
         .addStatement("return $1N.substring($1N.indexOf('=') + 1)", token).unindent();
 
     code.add("if (!$N.hasNext())\n", it).indent()

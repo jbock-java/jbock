@@ -145,16 +145,16 @@ public class StatefulParseMethod {
   private CodeBlock optionBlock() {
     if (sourceElement.isSuperCommand()) {
       return CodeBlock.builder()
-          .beginControlFlow("if ($N($N, $N))", tryParseOptionMethod.get(), token, it)
+          .add("if ($N($N, $N))\n", tryParseOptionMethod.get(), token, it).indent()
           .addStatement("continue")
-          .endControlFlow()
+          .unindent()
           .build();
     } else {
       return CodeBlock.builder()
-          .beginControlFlow("if (!$N && $N($N, $N))", endOfOptionParsing,
-              tryParseOptionMethod.get(), token, it)
+          .add("if (!$N && $N($N, $N))\n", endOfOptionParsing,
+              tryParseOptionMethod.get(), token, it).indent()
           .addStatement("continue")
-          .endControlFlow()
+          .unindent()
           .build();
     }
   }

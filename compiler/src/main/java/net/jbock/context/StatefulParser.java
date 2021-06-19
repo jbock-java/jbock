@@ -27,6 +27,7 @@ public class StatefulParser {
   private final CommonFields commonFields;
   private final BuildMethod buildMethod;
   private final TryParseOptionMethod tryParseOptionMethod;
+  private final ReadOptionNameMethod readOptionNameMethod;
 
   @Inject
   StatefulParser(
@@ -37,7 +38,8 @@ public class StatefulParser {
       PositionalParameters positionalParameters,
       CommonFields commonFields,
       BuildMethod buildMethod,
-      TryParseOptionMethod tryParseOptionMethod) {
+      TryParseOptionMethod tryParseOptionMethod,
+      ReadOptionNameMethod readOptionNameMethod) {
     this.generatedTypes = generatedTypes;
     this.statefulParseMethod = statefulParseMethod;
     this.sourceElement = sourceElement;
@@ -46,6 +48,7 @@ public class StatefulParser {
     this.commonFields = commonFields;
     this.buildMethod = buildMethod;
     this.tryParseOptionMethod = tryParseOptionMethod;
+    this.readOptionNameMethod = readOptionNameMethod;
   }
 
   TypeSpec define() {
@@ -54,8 +57,9 @@ public class StatefulParser {
         .addMethod(statefulParseMethod.define());
     spec.addField(commonFields.suspiciousPattern());
     if (!namedOptions.isEmpty()) {
-      spec.addMethod(tryParseOptionMethod.get())
-          .addMethod(privateConstructor());
+      spec.addMethod(readOptionNameMethod.get());
+      spec.addMethod(tryParseOptionMethod.get());
+      spec.addMethod(privateConstructor());
       spec.addField(commonFields.optionNames());
       spec.addField(commonFields.optionParsers());
     }

@@ -6,8 +6,6 @@ import com.squareup.javapoet.ParameterSpec;
 
 import javax.inject.Inject;
 
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.common.Constants.STRING;
 
 @ContextScope
@@ -28,7 +26,7 @@ public class ReadOptionNameMethod extends CachedMethod {
     code.add("if (!$N.startsWith($S))\n", token, "--").indent()
         .addStatement("return $N.substring(0, 2)", token).unindent();
 
-    code.add("if ($N.indexOf('=') < 0)\n", token).indent()
+    code.add("if (!$N.contains($S))\n", token, "=").indent()
         .addStatement("return $N", token).unindent();
 
     code.addStatement("return $1N.substring(0, $1N.indexOf('='))", token);
@@ -36,7 +34,6 @@ public class ReadOptionNameMethod extends CachedMethod {
     return MethodSpec.methodBuilder("readOptionName")
         .addParameter(token)
         .addCode(code.build())
-        .addModifiers(STATIC, PRIVATE)
         .returns(STRING).build();
   }
 }

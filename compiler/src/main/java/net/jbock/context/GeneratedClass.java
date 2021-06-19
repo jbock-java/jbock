@@ -6,8 +6,6 @@ import net.jbock.processor.SourceElement;
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 
-import static javax.lang.model.element.Modifier.FINAL;
-
 /**
  * Generates the *Parser class.
  */
@@ -24,7 +22,6 @@ public final class GeneratedClass {
   private final ParseOrExitMethod parseOrExitMethod;
   private final ReadOptionArgumentMethod readOptionArgumentMethod;
   private final GeneratedAnnotation generatedAnnotation;
-  private final ReadOptionNameMethod readOptionNameMethod;
   private final CreateModelMethod createModelMethod;
 
   @Inject
@@ -39,7 +36,6 @@ public final class GeneratedClass {
       ParseOrExitMethod parseOrExitMethod,
       ReadOptionArgumentMethod readOptionArgumentMethod,
       GeneratedAnnotation generatedAnnotation,
-      ReadOptionNameMethod readOptionNameMethod,
       CreateModelMethod createModelMethod) {
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
@@ -51,7 +47,6 @@ public final class GeneratedClass {
     this.parseOrExitMethod = parseOrExitMethod;
     this.readOptionArgumentMethod = readOptionArgumentMethod;
     this.generatedAnnotation = generatedAnnotation;
-    this.readOptionNameMethod = readOptionNameMethod;
     this.createModelMethod = createModelMethod;
   }
 
@@ -60,7 +55,6 @@ public final class GeneratedClass {
         .addMethod(parseMethod.get())
         .addMethod(parseOrExitMethod.define());
     if (!namedOptions.isEmpty()) {
-      spec.addMethod(readOptionNameMethod.get());
       if (namedOptions.anyRepeatable() || namedOptions.anyRegular()) {
         spec.addMethod(readOptionArgumentMethod.get());
       }
@@ -75,8 +69,7 @@ public final class GeneratedClass {
 
     spec.addMethod(createModelMethod.get());
 
-    return spec.addModifiers(FINAL)
-        .addOriginatingElement(sourceElement.element())
+    return spec.addOriginatingElement(sourceElement.element())
         .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]))
         .addAnnotation(generatedAnnotation.define()).build();
   }
