@@ -37,7 +37,7 @@ public class ReadOptionArgumentMethod extends CachedMethod {
         .addStatement("return $N.substring(2)", token).unindent();
 
     code.add("if (!$N && $N.indexOf('=') >= 0)\n", unix, token).indent()
-        .addStatement("return $N.substring($N.indexOf('=') + 1)", token, token).unindent();
+        .addStatement("return $1N.substring($1N.indexOf('=') + 1)", token).unindent();
 
     code.add("if (!$N.hasNext())\n", it).indent()
         .addStatement("throw new $T($T.$L, $N)", ExToken.class,
