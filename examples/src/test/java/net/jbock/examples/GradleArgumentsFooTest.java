@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
-
 class GradleArgumentsFooTest {
 
   private final GradleArguments_FooParser parser = new GradleArguments_FooParser();
@@ -21,9 +19,7 @@ class GradleArgumentsFooTest {
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "USAGE",
         "  foo [OPTIONS]",
         "",

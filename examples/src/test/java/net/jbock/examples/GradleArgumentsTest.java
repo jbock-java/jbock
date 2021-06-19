@@ -52,6 +52,7 @@ class GradleArgumentsTest {
     f.assertThat("-cvx").fails("Invalid token: -cvx");
     f.assertThat("-cvm").fails("Missing argument after token: -m");
     f.assertThat("--column-count").fails("Invalid option: --column-count");
+    f.assertThat("--cmos").fails("Invalid option: --cmos");
   }
 
   @Test
@@ -140,14 +141,6 @@ class GradleArgumentsTest {
         "cmos", false,
         "verbose", false,
         "otherTokens", emptyList());
-  }
-
-  @Test
-  void testLongSuppressed() {
-    // Long option --cmos is suppressed
-    assertTrue(parser.parse("--cmos").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid option: --cmos"));
   }
 
   @Test
