@@ -69,27 +69,28 @@ public class AutoConverterFinder extends MatchValidator {
   private Either<String, CodeBlock> enumConverter(TypeMirror baseType) {
     return Either.unbalancedRight(asEnumType(baseType))
         .orElseLeft(() -> noMatchError(baseType))
+        .map(TypeElement::asType)
         .map(enumType -> {
           ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
           return CodeBlock.builder()
               .add("$T.create(", StringConverter.class)
               .add("$N -> {\n", s)
-              .indent().add(enumConvertBlock(baseType)).unindent()
+              .indent().add(enumConvertBlock(enumType)).unindent()
               .add("})").build();
         });
   }
 
-  private CodeBlock enumConvertBlock(TypeMirror baseType) {
+  private CodeBlock enumConvertBlock(TypeMirror enumType) {
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e").build();
     ParameterSpec values = ParameterSpec.builder(STRING, "values").build();
     ParameterSpec message = ParameterSpec.builder(STRING, "message").build();
     return CodeBlock.builder().add("try {\n").indent()
-        .add("return $T.valueOf($N);\n", baseType, s)
+        .add("return $T.valueOf($N);\n", enumType, s)
         .unindent()
         .add("} catch ($T $N) {\n", IllegalArgumentException.class, e).indent()
-        .add("$T $N = $T.stream($T.values())\n", STRING, values, Arrays.class, baseType).indent()
-        .add(".map($T::name)\n", baseType)
+        .add("$T $N = $T.stream($T.values())\n", STRING, values, Arrays.class, enumType).indent()
+        .add(".map($T::name)\n", enumType)
         .add(".collect($T.joining($S, $S, $S));\n", Collectors.class, ", ", "[", "]")
         .unindent()
         .add("$T $N = $N.getMessage() + $S + $N;\n", STRING, message, e, " ", values)
