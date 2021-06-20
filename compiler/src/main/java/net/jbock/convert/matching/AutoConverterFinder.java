@@ -15,6 +15,7 @@ import net.jbock.validate.ParameterStyle;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
@@ -66,15 +67,16 @@ public class AutoConverterFinder extends MatchValidator {
   }
 
   private Either<String, CodeBlock> enumConverter(TypeMirror baseType) {
-    if (!isEnumType(baseType)) {
-      return left(noMatchError(baseType));
-    }
-    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-    return Either.right(CodeBlock.builder()
-        .add("$T.create(", StringConverter.class)
-        .add("$N -> {\n", s)
-        .indent().add(enumConvertBlock(baseType)).unindent()
-        .add("})").build());
+    return Either.unbalancedRight(asEnumType(baseType))
+        .orElseLeft(() -> noMatchError(baseType))
+        .map(enumType -> {
+          ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+          return CodeBlock.builder()
+              .add("$T.create(", StringConverter.class)
+              .add("$N -> {\n", s)
+              .indent().add(enumConvertBlock(baseType)).unindent()
+              .add("})").build();
+        });
   }
 
   private CodeBlock enumConvertBlock(TypeMirror baseType) {
@@ -96,12 +98,11 @@ public class AutoConverterFinder extends MatchValidator {
         .add("}\n").build();
   }
 
-  private boolean isEnumType(TypeMirror type) {
+  private Optional<TypeElement> asEnumType(TypeMirror type) {
     return TypeTool.AS_DECLARED.visit(type)
         .map(DeclaredType::asElement)
         .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
-        .map(element -> element.getKind() == ElementKind.ENUM)
-        .orElse(false);
+        .filter(element -> element.getKind() == ElementKind.ENUM);
   }
 
   private String noMatchError(TypeMirror type) {

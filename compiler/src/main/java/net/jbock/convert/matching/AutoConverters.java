@@ -53,10 +53,7 @@ public class AutoConverters {
   }
 
   private static Entry<String, Supplier<CodeBlock>> create(Class<?> autoType, CodeBlock mapExpr) {
-    return create(autoType, () -> CodeBlock.builder()
-        .add("$T.create(", StringConverter.class)
-        .add(mapExpr)
-        .add(")").build());
+    return create(autoType, () -> CodeBlock.of("$T.create($L)", StringConverter.class, mapExpr));
   }
 
   private static Entry<String, Supplier<CodeBlock>> create(Class<?> autoType, Supplier<CodeBlock> mapExpr) {
