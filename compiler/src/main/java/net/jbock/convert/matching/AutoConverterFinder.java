@@ -70,13 +70,19 @@ public class AutoConverterFinder extends MatchValidator {
       return left(noMatchError(baseType));
     }
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+    return Either.right(CodeBlock.builder()
+        .add("$T.create(", StringConverter.class)
+        .add("$N -> {\n", s)
+        .indent().add(enumConvertBlock(baseType)).unindent()
+        .add("})").build());
+  }
+
+  private CodeBlock enumConvertBlock(TypeMirror baseType) {
+    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e").build();
     ParameterSpec values = ParameterSpec.builder(STRING, "values").build();
     ParameterSpec message = ParameterSpec.builder(STRING, "message").build();
-    return Either.right(CodeBlock.builder()
-        .add(".map($T.create(", StringConverter.class)
-        .add("$N -> {\n", s).indent()
-        .add("try {\n").indent()
+    return CodeBlock.builder().add("try {\n").indent()
         .add("return $T.valueOf($N);\n", baseType, s)
         .unindent()
         .add("} catch ($T $N) {\n", IllegalArgumentException.class, e).indent()
@@ -86,8 +92,7 @@ public class AutoConverterFinder extends MatchValidator {
         .unindent()
         .add("$T $N = $N.getMessage() + $S + $N;\n", STRING, message, e, " ", values)
         .add("throw new $T($N);\n", IllegalArgumentException.class, message)
-        .unindent().add("}\n")
-        .unindent().add("}))").build());
+        .unindent().add("}\n").build();
   }
 
   private boolean isEnumType(TypeMirror type) {

@@ -78,10 +78,7 @@ public class ConverterValidator extends MatchValidator {
       if (match.isPresent()) {
         Match m = match.get();
         return Either.unbalancedLeft(validateMatch(m))
-            .orElseRight(() -> CodeBlock.builder()
-                .add(".map(")
-                .add(getMapExpr(functionType, converter))
-                .add(")").build())
+            .orElseRight(() -> getMapExpr(functionType, converter))
             .map(mapExpr -> m.toConvertedParameter(mapExpr, parameter));
       }
     }

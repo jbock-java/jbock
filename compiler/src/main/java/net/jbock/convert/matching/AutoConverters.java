@@ -75,9 +75,9 @@ public class AutoConverters {
     for (Entry<String, CodeBlock> converter : converters) {
       if (tool.isSameType(baseType, converter.getKey())) {
         return right(CodeBlock.builder()
-            .add(".map($T.create(", StringConverter.class)
+            .add("$T.create(", StringConverter.class)
             .add(converter.getValue())
-            .add("))").build());
+            .add(")").build());
       }
     }
     return left(baseType);

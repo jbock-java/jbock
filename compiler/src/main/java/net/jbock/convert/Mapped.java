@@ -55,7 +55,7 @@ public final class Mapped<P extends AbstractItem> {
   }
 
   public static Mapped<NamedOption> createFlag(NamedOption namedOption) {
-    CodeBlock mapExpr = CodeBlock.of(".map($T.create($T.identity()))", StringConverter.class, Function.class);
+    CodeBlock mapExpr = CodeBlock.of("$T.create($T.identity())", StringConverter.class, Function.class);
     TypeName fieldType = TypeName.BOOLEAN;
     String fieldName = '_' + namedOption.enumName().enumConstant().toLowerCase(Locale.US);
     FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
@@ -63,7 +63,6 @@ public final class Mapped<P extends AbstractItem> {
     return new Mapped<>(mapExpr, Optional.empty(), Multiplicity.OPTIONAL, asParameterSpec,
         asFieldSpec, namedOption, true);
   }
-
 
   public CodeBlock mapExpr() {
     return mapExpr;
