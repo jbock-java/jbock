@@ -83,11 +83,18 @@ public class AutoConverters {
     return left(baseType);
   }
 
-  private static CodeBlock autoConverterFile() {
+  private CodeBlock autoConverterFile() {
+    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+    return CodeBlock.builder()
+        .add("$N -> {\n", s)
+        .indent().add(autoConverterFileBlock()).unindent()
+        .add("}").build();
+  }
+
+  private CodeBlock autoConverterFileBlock() {
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     ParameterSpec f = ParameterSpec.builder(File.class, "f").build();
     return CodeBlock.builder()
-        .add("$N -> {\n", s).indent()
         .add("$T $N = new $T($N);\n", File.class, f, File.class, s)
         .beginControlFlow("if (!$N.exists())", f)
         .add("throw new $T($S + $N);\n", IllegalStateException.class,
@@ -97,19 +104,25 @@ public class AutoConverters {
         .add("throw new $T($S + $N);\n", IllegalStateException.class,
             "Not a file: ", s)
         .endControlFlow()
-        .add("return $N;\n", f)
-        .unindent().add("}").build();
+        .add("return $N;\n", f).build();
   }
 
-  private static CodeBlock autoConverterChar() {
+  private CodeBlock autoConverterChar() {
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     return CodeBlock.builder()
-        .add("$N -> {\n", s).indent()
+        .add("$N -> {\n", s)
+        .indent().add(autoConverterCharBlock()).unindent()
+        .add("}").build();
+  }
+
+  private CodeBlock autoConverterCharBlock() {
+    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+    return CodeBlock.builder()
         .beginControlFlow("if ($N.length() != 1)", s)
         .add("throw new $T($S + $N + $S);\n", RuntimeException.class,
             "Not a single character: <", s, ">")
         .endControlFlow()
         .add("return $N.charAt(0);\n", s)
-        .unindent().add("}").build();
+        .build();
   }
 }
