@@ -22,6 +22,7 @@ public final class GeneratedClass {
   private final ParseOrExitMethod parseOrExitMethod;
   private final GeneratedAnnotation generatedAnnotation;
   private final CreateModelMethod createModelMethod;
+  private final ConverterFileExists converterFileExists;
 
   @Inject
   GeneratedClass(
@@ -34,7 +35,8 @@ public final class GeneratedClass {
       NamedOptions namedOptions,
       ParseOrExitMethod parseOrExitMethod,
       GeneratedAnnotation generatedAnnotation,
-      CreateModelMethod createModelMethod) {
+      CreateModelMethod createModelMethod,
+      ConverterFileExists converterFileExists) {
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
     this.impl = impl;
@@ -45,6 +47,7 @@ public final class GeneratedClass {
     this.parseOrExitMethod = parseOrExitMethod;
     this.generatedAnnotation = generatedAnnotation;
     this.createModelMethod = createModelMethod;
+    this.converterFileExists = converterFileExists;
   }
 
   public TypeSpec define() {
@@ -58,6 +61,7 @@ public final class GeneratedClass {
       spec.addTypes(optionParser.define());
     }
     spec.addType(impl.define());
+    spec.addType(converterFileExists.define());
 
     spec.addMethod(createModelMethod.get());
 

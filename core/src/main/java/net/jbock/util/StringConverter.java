@@ -33,7 +33,7 @@ public abstract class StringConverter<T> implements Function<String, Either<Conv
    * @return an instance of {@code T}
    * @throws Exception converter failure
    */
-  public abstract T convert(String token) throws Exception;
+  protected abstract T convert(String token) throws Exception;
 
   /**
    * Creates a {@link StringConverter} from a function.

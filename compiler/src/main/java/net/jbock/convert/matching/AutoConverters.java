@@ -5,6 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.either.Either;
+import net.jbock.processor.SourceElement;
 import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
@@ -20,6 +21,7 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static net.jbock.common.Constants.STRING;
@@ -36,23 +38,34 @@ public class AutoConverters {
   private static final String PARSE = "parse";
 
   private final TypeTool tool;
+  private final SourceElement sourceElement;
 
   @Inject
-  AutoConverters(TypeTool tool) {
+  AutoConverters(
+      TypeTool tool,
+      SourceElement sourceElement) {
     this.tool = tool;
+    this.sourceElement = sourceElement;
   }
 
-  private static Entry<String, CodeBlock> create(Class<?> autoType, String createFromString) {
+  private static Entry<String, Supplier<CodeBlock>> create(Class<?> autoType, String createFromString) {
     return create(autoType, CodeBlock.of("$T::" + createFromString, autoType));
   }
 
-  private static Entry<String, CodeBlock> create(Class<?> autoType, CodeBlock mapExpr) {
+  private static Entry<String, Supplier<CodeBlock>> create(Class<?> autoType, CodeBlock mapExpr) {
+    return create(autoType, () -> CodeBlock.builder()
+        .add("$T.create(", StringConverter.class)
+        .add(mapExpr)
+        .add(")").build());
+  }
+
+  private static Entry<String, Supplier<CodeBlock>> create(Class<?> autoType, Supplier<CodeBlock> mapExpr) {
     return new SimpleImmutableEntry<>(autoType.getCanonicalName(), mapExpr);
   }
 
-  private final List<Entry<String, CodeBlock>> converters = autoConverters();
+  private final List<Entry<String, Supplier<CodeBlock>>> converters = autoConverters();
 
-  private List<Entry<String, CodeBlock>> autoConverters() {
+  private List<Entry<String, Supplier<CodeBlock>>> autoConverters() {
     return List.of(
         create(String.class, CodeBlock.of("$T.identity()", Function.class)),
         create(Integer.class, VALUE_OF),
@@ -72,39 +85,16 @@ public class AutoConverters {
   }
 
   Either<TypeMirror, CodeBlock> findAutoConverter(TypeMirror baseType) {
-    for (Entry<String, CodeBlock> converter : converters) {
+    for (Entry<String, Supplier<CodeBlock>> converter : converters) {
       if (tool.isSameType(baseType, converter.getKey())) {
-        return right(CodeBlock.builder()
-            .add("$T.create(", StringConverter.class)
-            .add(converter.getValue())
-            .add(")").build());
+        return right(converter.getValue().get());
       }
     }
     return left(baseType);
   }
 
-  private CodeBlock autoConverterFile() {
-    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-    return CodeBlock.builder()
-        .add("$N -> {\n", s)
-        .indent().add(autoConverterFileBlock()).unindent()
-        .add("}").build();
-  }
-
-  private CodeBlock autoConverterFileBlock() {
-    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-    ParameterSpec f = ParameterSpec.builder(File.class, "f").build();
-    return CodeBlock.builder()
-        .add("$T $N = new $T($N);\n", File.class, f, File.class, s)
-        .beginControlFlow("if (!$N.exists())", f)
-        .add("throw new $T($S + $N);\n", IllegalStateException.class,
-            "File does not exist: ", s)
-        .endControlFlow()
-        .beginControlFlow("if (!$N.isFile())", f)
-        .add("throw new $T($S + $N);\n", IllegalStateException.class,
-            "Not a file: ", s)
-        .endControlFlow()
-        .add("return $N;\n", f).build();
+  private Supplier<CodeBlock> autoConverterFile() {
+    return () -> CodeBlock.of("new $T()", sourceElement.converterFileExistsType());
   }
 
   private CodeBlock autoConverterChar() {
