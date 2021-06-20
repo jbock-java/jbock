@@ -10,7 +10,6 @@ import net.jbock.convert.matcher.Matcher;
 import net.jbock.either.Either;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
-import net.jbock.util.StringConverter;
 import net.jbock.validate.ParameterStyle;
 
 import javax.inject.Inject;
@@ -71,33 +70,30 @@ public class AutoConverterFinder extends MatchValidator {
         .orElseLeft(() -> noMatchError(baseType))
         .map(TypeElement::asType)
         .map(enumType -> {
-          ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-          CodeBlock code = CodeBlock.builder()
-              .add("$T.create(", StringConverter.class)
-              .add("$N -> {\n", s)
-              .indent().add(enumConvertBlock(enumType)).unindent()
-              .add("})").build();
-          return new MapExpr(code, enumType, false);
+          CodeBlock code = enumConvertBlock(enumType);
+          return new MapExpr(code, enumType, true);
         });
   }
 
   private CodeBlock enumConvertBlock(TypeMirror enumType) {
-    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e").build();
     ParameterSpec values = ParameterSpec.builder(STRING, "values").build();
     ParameterSpec message = ParameterSpec.builder(STRING, "message").build();
-    return CodeBlock.builder().add("try {\n").indent()
-        .add("return $T.valueOf($N);\n", enumType, s)
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.add("try {\n").indent()
+        .addStatement("return $T.valueOf($N)", enumType, token)
         .unindent()
         .add("} catch ($T $N) {\n", IllegalArgumentException.class, e).indent()
         .add("$T $N = $T.stream($T.values())\n", STRING, values, Arrays.class, enumType).indent()
         .add(".map($T::name)\n", enumType)
         .add(".collect($T.joining($S, $S, $S));\n", Collectors.class, ", ", "[", "]")
         .unindent()
-        .add("$T $N = $N.getMessage() + $S + $N;\n", STRING, message, e, " ", values)
-        .add("throw new $T($N);\n", IllegalArgumentException.class, message)
+        .addStatement("$T $N = $N.getMessage() + $S + $N", STRING, message, e, " ", values)
+        .addStatement("throw new $T($N)", IllegalArgumentException.class, message)
         .unindent()
-        .add("}\n").build();
+        .add("}\n");
+    return code.build();
   }
 
   private Optional<TypeElement> asEnumType(TypeMirror type) {
