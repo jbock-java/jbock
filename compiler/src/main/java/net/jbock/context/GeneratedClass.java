@@ -20,7 +20,6 @@ public final class GeneratedClass {
   private final SourceElement sourceElement;
   private final NamedOptions namedOptions;
   private final ParseOrExitMethod parseOrExitMethod;
-  private final ReadOptionArgumentMethod readOptionArgumentMethod;
   private final GeneratedAnnotation generatedAnnotation;
   private final CreateModelMethod createModelMethod;
 
@@ -34,7 +33,6 @@ public final class GeneratedClass {
       StatefulParser statefulParser,
       NamedOptions namedOptions,
       ParseOrExitMethod parseOrExitMethod,
-      ReadOptionArgumentMethod readOptionArgumentMethod,
       GeneratedAnnotation generatedAnnotation,
       CreateModelMethod createModelMethod) {
     this.parseMethod = parseMethod;
@@ -45,7 +43,6 @@ public final class GeneratedClass {
     this.statefulParser = statefulParser;
     this.namedOptions = namedOptions;
     this.parseOrExitMethod = parseOrExitMethod;
-    this.readOptionArgumentMethod = readOptionArgumentMethod;
     this.generatedAnnotation = generatedAnnotation;
     this.createModelMethod = createModelMethod;
   }
@@ -54,11 +51,6 @@ public final class GeneratedClass {
     TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass())
         .addMethod(parseMethod.get())
         .addMethod(parseOrExitMethod.define());
-    if (!namedOptions.isEmpty()) {
-      if (namedOptions.anyRepeatable() || namedOptions.anyRegular()) {
-        spec.addMethod(readOptionArgumentMethod.get());
-      }
-    }
 
     spec.addType(statefulParser.define());
     if (!namedOptions.isEmpty()) {

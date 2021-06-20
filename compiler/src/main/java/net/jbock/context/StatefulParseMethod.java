@@ -75,7 +75,7 @@ public class StatefulParseMethod {
     if (!options.isEmpty()) {
       code.add(optionBlock());
     }
-    code.add(errorUnrecognizedOption());
+    code.add(checkSuspicious());
 
     code.addStatement("$N[$N++] = $N", commonFields.params(),
         position, token);
@@ -170,7 +170,7 @@ public class StatefulParseMethod {
     return code;
   }
 
-  private CodeBlock errorUnrecognizedOption() {
+  private CodeBlock checkSuspicious() {
     return CodeBlock.builder().add("if ($N.matcher($N).matches())\n",
         commonFields.suspiciousPattern(), token).indent()
         .addStatement(throwInvalidOptionStatement(ErrTokenType.INVALID_OPTION))

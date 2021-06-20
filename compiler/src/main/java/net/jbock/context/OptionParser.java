@@ -29,6 +29,7 @@ public final class OptionParser {
   private final FlagParser flagParser;
   private final RepeatableOptionParser repeatableOptionParser;
   private final RegularOptionParser regularOptionParser;
+  private final ReadOptionArgumentMethod readOptionArgumentMethod;
 
   @Inject
   OptionParser(
@@ -36,12 +37,14 @@ public final class OptionParser {
       NamedOptions namedOptions,
       FlagParser flagParser,
       RepeatableOptionParser repeatableOptionParser,
-      RegularOptionParser regularOptionParser) {
+      RegularOptionParser regularOptionParser,
+      ReadOptionArgumentMethod readOptionArgumentMethod) {
     this.generatedTypes = generatedTypes;
     this.namedOptions = namedOptions;
     this.flagParser = flagParser;
     this.repeatableOptionParser = repeatableOptionParser;
     this.regularOptionParser = regularOptionParser;
+    this.readOptionArgumentMethod = readOptionArgumentMethod;
   }
 
   List<TypeSpec> define() {
@@ -49,11 +52,7 @@ public final class OptionParser {
       return List.of();
     }
     List<TypeSpec> result = new ArrayList<>();
-    result.add(TypeSpec.classBuilder(generatedTypes.optionParserType())
-        .addMethod(readMethodAbstract())
-        .addMethod(streamMethodAbstract())
-        .addModifiers(PRIVATE, STATIC, ABSTRACT)
-        .build());
+    result.add(defineAbstractOptionParser());
     if (namedOptions.anyFlags()) {
       result.add(flagParser.define());
     }
@@ -64,6 +63,17 @@ public final class OptionParser {
       result.add(regularOptionParser.define());
     }
     return result;
+  }
+
+  private TypeSpec defineAbstractOptionParser() {
+    TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.optionParserType());
+    spec.addMethod(readMethodAbstract());
+    spec.addMethod(streamMethodAbstract());
+    if (namedOptions.anyRepeatable() || namedOptions.anyRegular()) {
+      spec.addMethod(readOptionArgumentMethod.get());
+    }
+    spec.addModifiers(PRIVATE, STATIC, ABSTRACT);
+    return spec.build();
   }
 
   private MethodSpec readMethodAbstract() {

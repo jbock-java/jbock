@@ -11,6 +11,7 @@ import net.jbock.common.Util;
 import net.jbock.util.ExToken;
 
 import javax.inject.Inject;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -72,7 +73,7 @@ public class RegularOptionParser {
     ParameterizedTypeName streamOfString = ParameterizedTypeName.get(Stream.class, String.class);
     return MethodSpec.methodBuilder("stream")
         .returns(streamOfString)
-        .addStatement("return $N == null ? $T.empty() : $T.of($N)", value, Stream.class, Stream.class, value)
+        .addStatement("return $T.ofNullable($N).stream()", Optional.class, value)
         .build();
   }
 }

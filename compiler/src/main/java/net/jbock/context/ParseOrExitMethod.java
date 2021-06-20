@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
+import static com.squareup.javapoet.TypeName.INT;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
 @ContextScope
@@ -33,6 +34,7 @@ public class ParseOrExitMethod {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
     ParameterSpec notSuccess = builder(generatedTypes.parseResultType(), "notSuccess").build();
+    ParameterSpec code = builder(INT, "code").build();
 
     return methodBuilder("parseOrExit").addParameter(args)
         .addModifiers(sourceElement.accessModifiers())
@@ -40,8 +42,9 @@ public class ParseOrExitMethod {
         .addCode(CodeBlock.builder()
             .add("return $N($N)", parseMethod.get(), args)
             .add(".orElseThrow($N -> {\n", notSuccess).indent()
-            .addStatement("$T.exit($T.builder().build().handle($N))", System.class,
+            .addStatement("$T $N = $T.builder().build().handle($N)", INT, code,
                 StandardErrorHandler.class, notSuccess)
+            .addStatement("$T.exit($N)", System.class, code)
             .addStatement("return new $T()", RuntimeException.class).unindent()
             .addStatement("})")
             .build())

@@ -3,7 +3,6 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
@@ -13,8 +12,6 @@ import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static java.util.Arrays.asList;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ITERATOR;
 
@@ -50,7 +47,6 @@ public class ReadOptionArgumentMethod extends CachedMethod {
         .addCode(code.build())
         .addParameters(asList(token, it))
         .returns(STRING)
-        .addModifiers(PRIVATE, STATIC)
         .build();
   }
 }
