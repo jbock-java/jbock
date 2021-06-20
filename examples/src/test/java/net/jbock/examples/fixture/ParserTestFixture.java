@@ -172,10 +172,6 @@ public final class ParserTestFixture<E> {
       }
     }
 
-    public void failsContaining(String m) {
-      fails(message -> message.contains(m));
-    }
-
     public void fails(String m) {
       fails(m::equals);
     }

@@ -65,7 +65,7 @@ class CpArgumentsTest {
 
   @Test
   void testNotClustering() {
-    f.assertThat("-rs1", "a", "b").fails("Invalid token: -rs1");
+    f.assertThat("-rs1", "a", "b").fails("Invalid option: -rs1");
   }
 
   @Test

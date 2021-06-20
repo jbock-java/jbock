@@ -5,9 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class SimpleArgumentsTest {
 
   private final SimpleArgumentsParser parser = new SimpleArgumentsParser();
@@ -17,12 +14,9 @@ class SimpleArgumentsTest {
 
   @Test
   void invalidOptions() {
-    assertTrue(parser.parse("xf", "1").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Excess param: xf"));
-    assertTrue(parser.parse("-xf", "1").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid token: -xf"));
+    f.assertThat("xf", "1").fails("Excess param: xf");
+    f.assertThat("-xf", "1").fails("Invalid option: -xf");
+    f.assertThat("---").fails("Invalid option: ---");
   }
 
   @Test
@@ -32,16 +26,12 @@ class SimpleArgumentsTest {
 
   @Test
   void errorHelpNotFirstArgument() {
-    assertTrue(parser.parse("--file", "1", "--help").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid option: --help"));
+    f.assertThat("--file", "1", "--help").fails("Invalid option: --help");
   }
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "",
         "\u001B[1mUSAGE\u001B[m",

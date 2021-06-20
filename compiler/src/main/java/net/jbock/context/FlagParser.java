@@ -64,7 +64,7 @@ public class FlagParser {
         .addStatement(util.throwRepetitionErrorStatement(token))
         .unindent();
     code.addStatement("$N = $L", commonFields.seen(), true);
-    code.add("if ($1N.startsWith($2S) || $1N.length() <= 2)\n", token, "--").indent()
+    code.add("if ($1N.startsWith($2S) || $1N.length() == 2)\n", token, "--").indent()
         .addStatement("return null")
         .unindent();
     code.addStatement("return '-' + $N.substring(2)", token);
@@ -73,9 +73,9 @@ public class FlagParser {
 
   private CodeBlock readMethodFlagCodeSimple(ParameterSpec token) {
     CodeBlock.Builder code = CodeBlock.builder();
-    code.add("if ($N.charAt(1) != '-' && $N.length() > 2 || $N.contains($S))\n", token, token, token, "=").indent()
+    code.add("if (!$1N.startsWith($2S) && $1N.length() > 2)\n", token, "--").indent()
         .addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
-            ErrTokenType.INVALID_UNIX_GROUP, token)
+            ErrTokenType.INVALID_OPTION, token)
         .unindent();
     code.add("if ($N)\n", commonFields.seen()).indent()
         .addStatement(util.throwRepetitionErrorStatement(token))
