@@ -79,6 +79,7 @@ public class ConverterValidator extends MatchValidator {
         Match m = match.get();
         return Either.unbalancedLeft(validateMatch(m))
             .orElseRight(() -> getMapExpr(functionType, converter))
+            .map(code -> new MapExpr(code, m.baseType(), false))
             .map(mapExpr -> m.toConvertedParameter(mapExpr, parameter));
       }
     }
@@ -88,7 +89,6 @@ public class ConverterValidator extends MatchValidator {
         .orElse(sourceMethod.returnType());
     return left(noMatchError(typeForErrorMessage));
   }
-
 
   private Optional<String> checkConverterAnnotationPresent(TypeElement converter) {
     Converter converterAnnotation = converter.getAnnotation(Converter.class);

@@ -1,6 +1,8 @@
 package net.jbock.context;
 
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.convert.Mapped;
+import net.jbock.parameter.AbstractItem;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -19,10 +21,11 @@ public final class GeneratedClass {
   private final StatefulParser statefulParser;
   private final SourceElement sourceElement;
   private final NamedOptions namedOptions;
+  private final AllItems allItems;
   private final ParseOrExitMethod parseOrExitMethod;
   private final GeneratedAnnotation generatedAnnotation;
   private final CreateModelMethod createModelMethod;
-  private final ConverterFileExists converterFileExists;
+  private final MultilineConverter multilineConverter;
 
   @Inject
   GeneratedClass(
@@ -33,10 +36,11 @@ public final class GeneratedClass {
       OptionEnum optionEnum,
       StatefulParser statefulParser,
       NamedOptions namedOptions,
+      AllItems allItems,
       ParseOrExitMethod parseOrExitMethod,
       GeneratedAnnotation generatedAnnotation,
       CreateModelMethod createModelMethod,
-      ConverterFileExists converterFileExists) {
+      MultilineConverter multilineConverter) {
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
     this.impl = impl;
@@ -44,10 +48,11 @@ public final class GeneratedClass {
     this.optionEnum = optionEnum;
     this.statefulParser = statefulParser;
     this.namedOptions = namedOptions;
+    this.allItems = allItems;
     this.parseOrExitMethod = parseOrExitMethod;
     this.generatedAnnotation = generatedAnnotation;
     this.createModelMethod = createModelMethod;
-    this.converterFileExists = converterFileExists;
+    this.multilineConverter = multilineConverter;
   }
 
   public TypeSpec define() {
@@ -61,7 +66,12 @@ public final class GeneratedClass {
       spec.addTypes(optionParser.define());
     }
     spec.addType(impl.define());
-    spec.addType(converterFileExists.define());
+
+    for (Mapped<? extends AbstractItem> item : allItems.items()) {
+      if (item.mapExpr().multiline()) {
+        spec.addType(multilineConverter.define(item));
+      }
+    }
 
     spec.addMethod(createModelMethod.get());
 

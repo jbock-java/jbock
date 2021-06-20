@@ -66,17 +66,18 @@ public class AutoConverterFinder extends MatchValidator {
         .map(mapExpr -> match.toConvertedParameter(mapExpr, parameter));
   }
 
-  private Either<String, CodeBlock> enumConverter(TypeMirror baseType) {
+  private Either<String, MapExpr> enumConverter(TypeMirror baseType) {
     return Either.unbalancedRight(asEnumType(baseType))
         .orElseLeft(() -> noMatchError(baseType))
         .map(TypeElement::asType)
         .map(enumType -> {
           ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-          return CodeBlock.builder()
+          CodeBlock code = CodeBlock.builder()
               .add("$T.create(", StringConverter.class)
               .add("$N -> {\n", s)
               .indent().add(enumConvertBlock(enumType)).unindent()
               .add("})").build();
+          return new MapExpr(code, enumType, false);
         });
   }
 

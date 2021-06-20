@@ -41,7 +41,7 @@ public class Match {
   }
 
   public <P extends AbstractItem> Mapped<P> toConvertedParameter(
-      CodeBlock mapExpr, P parameter) {
+      MapExpr mapExpr, P parameter) {
     return Mapped.create(mapExpr, extractExpr, multiplicity, parameter);
   }
 

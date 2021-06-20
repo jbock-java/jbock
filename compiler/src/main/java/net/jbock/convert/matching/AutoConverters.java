@@ -2,10 +2,10 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.either.Either;
-import net.jbock.processor.SourceElement;
 import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
@@ -21,7 +21,6 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static net.jbock.common.Constants.STRING;
@@ -38,36 +37,47 @@ public class AutoConverters {
   private static final String PARSE = "parse";
 
   private final TypeTool tool;
-  private final SourceElement sourceElement;
+  private final SafeElements elements;
+  private final List<Entry<String, MapExpr>> converters;
 
   @Inject
-  AutoConverters(
-      TypeTool tool,
-      SourceElement sourceElement) {
+  AutoConverters(TypeTool tool, SafeElements elements) {
     this.tool = tool;
-    this.sourceElement = sourceElement;
+    this.elements = elements;
+    this.converters = autoConverters();
   }
 
-  private static Entry<String, Supplier<CodeBlock>> create(Class<?> autoType, String createFromString) {
-    return create(autoType, CodeBlock.of("$T::" + createFromString, autoType));
+  Either<TypeMirror, MapExpr> findAutoConverter(TypeMirror baseType) {
+    for (Entry<String, MapExpr> converter : converters) {
+      if (tool.isSameType(baseType, converter.getKey())) {
+        return right(converter.getValue());
+      }
+    }
+    return left(baseType);
   }
 
-  private static Entry<String, Supplier<CodeBlock>> create(Class<?> autoType, CodeBlock mapExpr) {
-    return create(autoType, () -> CodeBlock.of("$T.create($L)", StringConverter.class, mapExpr));
+  private Entry<String, MapExpr> create(Class<?> autoType, String methodName) {
+    return create(autoType, CodeBlock.of("$T::" + methodName, autoType));
   }
 
-  private static Entry<String, Supplier<CodeBlock>> create(Class<?> autoType, Supplier<CodeBlock> mapExpr) {
-    return new SimpleImmutableEntry<>(autoType.getCanonicalName(), mapExpr);
+  private Entry<String, MapExpr> create(Class<?> autoType, CodeBlock mapExpr) {
+    return create(autoType, CodeBlock.of("$T.create($L)", StringConverter.class, mapExpr), false);
   }
 
-  private final List<Entry<String, Supplier<CodeBlock>>> converters = autoConverters();
+  private Entry<String, MapExpr> create(Class<?> autoType, CodeBlock code, boolean multiline) {
+    String canonicalName = autoType.getCanonicalName();
+    TypeMirror type = elements.getTypeElement(canonicalName)
+        .orElseThrow(() -> new RuntimeException("no typeElement: " + canonicalName))
+        .asType();
+    return new SimpleImmutableEntry<>(canonicalName, new MapExpr(code, type, multiline));
+  }
 
-  private List<Entry<String, Supplier<CodeBlock>>> autoConverters() {
+  private List<Entry<String, MapExpr>> autoConverters() {
     return List.of(
         create(String.class, CodeBlock.of("$T.identity()", Function.class)),
         create(Integer.class, VALUE_OF),
         create(Path.class, CodeBlock.of("$T::get", Paths.class)),
-        create(File.class, autoConverterFile()),
+        create(File.class, autoConverterFile(), true),
         create(URI.class, CREATE),
         create(Pattern.class, COMPILE),
         create(LocalDate.class, PARSE),
@@ -76,40 +86,35 @@ public class AutoConverters {
         create(Byte.class, VALUE_OF),
         create(Float.class, VALUE_OF),
         create(Double.class, VALUE_OF),
-        create(Character.class, autoConverterChar()),
+        create(Character.class, autoConverterCharBlock(), true),
         create(BigInteger.class, NEW),
         create(BigDecimal.class, NEW));
   }
 
-  Either<TypeMirror, CodeBlock> findAutoConverter(TypeMirror baseType) {
-    for (Entry<String, Supplier<CodeBlock>> converter : converters) {
-      if (tool.isSameType(baseType, converter.getKey())) {
-        return right(converter.getValue().get());
-      }
-    }
-    return left(baseType);
-  }
-
-  private Supplier<CodeBlock> autoConverterFile() {
-    return () -> CodeBlock.of("new $T()", sourceElement.converterFileExistsType());
-  }
-
-  private CodeBlock autoConverterChar() {
-    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-    return CodeBlock.builder()
-        .add("$N -> {\n", s)
-        .indent().add(autoConverterCharBlock()).unindent()
-        .add("}").build();
-  }
-
   private CodeBlock autoConverterCharBlock() {
-    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     return CodeBlock.builder()
-        .beginControlFlow("if ($N.length() != 1)", s)
-        .add("throw new $T($S + $N + $S);\n", RuntimeException.class,
-            "Not a single character: <", s, ">")
-        .endControlFlow()
-        .add("return $N.charAt(0);\n", s)
+        .add("if ($N.length() != 1)\n", token)
+        .addStatement("throw new $T($S + $N + $S);\n", RuntimeException.class,
+            "Not a single character: <", token, ">")
+        .addStatement("return $N.charAt(0)", token)
         .build();
+  }
+
+  private CodeBlock autoConverterFile() {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec file = ParameterSpec.builder(File.class, "file").build();
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("$T $N = new $T($N)", File.class, file, File.class, token);
+    code.add("if (!$N.exists())\n", file).indent()
+        .addStatement("throw new $T($S + $N)", IllegalStateException.class,
+            "File does not exist: ", token)
+        .unindent();
+    code.add("if (!$N.isFile())\n", file).indent()
+        .addStatement("throw new $T($S + $N)", IllegalStateException.class,
+            "Not a file: ", token)
+        .unindent();
+    code.addStatement("return $N", file);
+    return code.build();
   }
 }

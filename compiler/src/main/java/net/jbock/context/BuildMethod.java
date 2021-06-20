@@ -104,7 +104,8 @@ public class BuildMethod extends CachedMethod {
     code.add(CodeBlock.of("$N.get($T.$N).stream()", commonFields.optionParsers(),
         sourceElement.optionEnumType(), c.enumConstant()));
     if (!c.isFlag()) {
-      code.add(CodeBlock.of(".map($L)", c.mapExpr()));
+      code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
+          .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
     }
     code.addAll(tailExpressionOption(c, i));
     c.extractExpr().ifPresent(code::add);
@@ -115,7 +116,8 @@ public class BuildMethod extends CachedMethod {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("$T.ofNullable($N[$L])", Optional.class, commonFields.params(),
         c.item().position()));
-    code.add(CodeBlock.of(".map($L)", c.mapExpr()));
+    code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
+        .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
     code.addAll(tailExpressionParameter(c, i));
     c.extractExpr().ifPresent(code::add);
     return util.joinByNewline(code);
@@ -124,7 +126,8 @@ public class BuildMethod extends CachedMethod {
   private CodeBlock convertExpressionRepeatableParameter(Mapped<PositionalParameter> c) {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("$N.stream()", commonFields.rest()));
-    code.add(CodeBlock.of(".map($L)", c.mapExpr()));
+    code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
+        .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
     code.add(CodeBlock.of(".collect($T.toValidList())", Either.class));
     code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.regular().size()));
     return util.joinByNewline(code);

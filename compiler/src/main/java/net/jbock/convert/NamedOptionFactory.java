@@ -8,6 +8,7 @@ import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
+import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -34,6 +35,7 @@ public class NamedOptionFactory {
   private final SourceElement sourceElement;
   private final EnumName enumName;
   private final List<Mapped<NamedOption>> alreadyCreated;
+  private final Types types;
 
   @Inject
   NamedOptionFactory(
@@ -42,13 +44,15 @@ public class NamedOptionFactory {
       SourceMethod sourceMethod,
       SourceElement sourceElement,
       EnumName enumName,
-      List<Mapped<NamedOption>> alreadyCreated) {
+      List<Mapped<NamedOption>> alreadyCreated,
+      Types types) {
     this.converterFinder = converterFinder;
     this.converterClass = converterClass;
     this.sourceMethod = sourceMethod;
     this.sourceElement = sourceElement;
     this.enumName = enumName;
     this.alreadyCreated = alreadyCreated;
+    this.types = types;
   }
 
   public Either<ValidationFailure, Mapped<NamedOption>> createNamedOption() {
@@ -56,7 +60,7 @@ public class NamedOptionFactory {
         .map(this::createNamedOption)
         .flatMap(namedOption -> {
           if (!converterClass.isPresent() && sourceMethod.returnType().getKind() == BOOLEAN) {
-            return right(createFlag(namedOption));
+            return right(createFlag(namedOption, types.getPrimitiveType(BOOLEAN)));
           }
           return converterFinder.findConverter(namedOption);
         })

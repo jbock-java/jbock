@@ -89,10 +89,6 @@ public class SourceElement {
     return optionEnumType;
   }
 
-  public ClassName converterFileExistsType() {
-    return generatedClass.nestedClass("ConverterFileExists");
-  }
-
   public boolean isInterface() {
     return sourceElement.getKind() == ElementKind.INTERFACE;
   }
