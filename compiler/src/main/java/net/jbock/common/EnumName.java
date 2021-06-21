@@ -6,8 +6,8 @@ import java.util.regex.Pattern;
 public class EnumName {
 
   private static final Pattern ENDS_WITH_NUMBER = Pattern.compile(".*\\d");
-  private final String original;
   private final String enumConstant; // all-caps, unique
+  private final String original; // case-independently unique
 
   private EnumName(String original, String enumConstant) {
     this.original = original;
@@ -15,6 +15,9 @@ public class EnumName {
   }
 
   public static EnumName create(String input) {
+    if ("_".equals(input)) {
+      return new EnumName("__", "__"); // prevent potential problems
+    }
     return new EnumName(input, input.toUpperCase(Locale.US));
   }
 
