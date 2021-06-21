@@ -33,16 +33,10 @@ class CpArgumentsTest {
   }
 
   @Test
-  void minimal() {
-    f.assertThat("a", "b").succeeds(
+  void singleDashParameter() {
+    f.assertThat("a", "-").succeeds(
         "source", "a",
-        "dest", "b",
-        "recursive", false,
-        "backup", Optional.empty(),
-        "suffix", Optional.empty());
-    f.assertThat("b", "a").succeeds(
-        "source", "b",
-        "dest", "a",
+        "dest", "-",
         "recursive", false,
         "backup", Optional.empty(),
         "suffix", Optional.empty());

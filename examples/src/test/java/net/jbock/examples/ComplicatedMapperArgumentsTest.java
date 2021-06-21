@@ -14,9 +14,9 @@ class ComplicatedMapperArgumentsTest {
       ParserTestFixture.create(parser::parse);
 
   @Test
-  void number() {
+  void lazyNumber() {
     ComplicatedMapperArguments parsed = f.parse(
-        "--number", "12",
+        "-N", "12",
         "--numbers", "3",
         "--numbers", "oops");
     assertEquals(1, parsed.number().intValue());

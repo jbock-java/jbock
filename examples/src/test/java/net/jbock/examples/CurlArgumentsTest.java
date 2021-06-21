@@ -8,7 +8,6 @@ import java.util.Optional;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CurlArgumentsTest {
 
@@ -183,51 +182,44 @@ class CurlArgumentsTest {
 
   @Test
   void errorClusteringDuplicateFlag() {
-    assertTrue(parser.parse("-v", "-vH'Content-Type: application/xml'")
-        .getLeft().map(f::castToError).orElseThrow().message()
-        .contains("Option '-vH'Content-Type: application/xml'' is a repetition"));
+    f.assertThat("-v", "-vH'Content-Type: application/xml'")
+        .fails("Option '-vH'Content-Type: application/xml'' is a repetition");
   }
 
   @Test
   void errorMissingRepeatable() {
-    assertTrue(parser.parse("-H")
-        .getLeft().map(f::castToError).orElseThrow().message()
-        .contains("Missing argument after token: -H"));
+    f.assertThat("-H")
+        .fails("Missing argument after option name: -H");
   }
 
   @Test
   void errorMissingNonRepeatable() {
-    assertTrue(parser.parse("--request")
-        .getLeft().map(f::castToError).orElseThrow().message()
-        .contains("Missing argument after token: --request"));
+    f.assertThat("--request")
+        .fails("Missing argument after option name: --request");
   }
 
   @Test
   void errorDuplicateNonRepeatableLong() {
-    assertTrue(parser.parse("--request", "GET", "--request", "POST")
-        .getLeft().map(f::castToError).orElseThrow().message()
-        .contains("Option '--request' is a repetition"));
+    f.assertThat("--request", "GET", "--request", "POST")
+        .fails("Option '--request' is a repetition");
   }
 
   @Test
   void errorDuplicateNonRepeatableShort() {
-    assertTrue(parser.parse("-X1", "-X2")
-        .getLeft().map(f::castToError).orElseThrow().message()
-        .contains("Option '-X2' is a repetition"));
+    f.assertThat("-X1", "-X2")
+        .fails("Option '-X2' is a repetition");
   }
 
   @Test
   void errorDuplicateNonRepeatableLongDetachedShortAttached() {
-    assertTrue(parser.parse("--request", "1", "-X2")
-        .getLeft().map(f::castToError).orElseThrow().message()
-        .contains("Option '-X2' is a repetition"));
+    f.assertThat("--request", "1", "-X2")
+        .fails("Option '-X2' is a repetition");
   }
 
   @Test
   void errorDuplicateNonRepeatableLongAttachedShortDetached() {
-    assertTrue(parser.parse("--request=1", "-X", "2")
-        .getLeft().map(f::castToError).orElseThrow().message()
-        .contains("Option '-X' is a repetition"));
+    f.assertThat("--request=1", "-X", "2")
+        .fails("Option '-X' is a repetition");
   }
 
   @Test

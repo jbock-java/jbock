@@ -10,20 +10,20 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Command
-abstract class ComplicatedMapperArguments {
+interface ComplicatedMapperArguments {
 
   @Option(
-      names = "--number",
+      names = {"-N", "--number"},
       converter = MyConverter.class)
-  abstract Integer number();
+  Integer number();
 
   @Option(
       names = "--numbers",
       converter = LazyNumberConverter.class)
-  abstract List<LazyNumber> numbers();
+  List<LazyNumber> numbers();
 
   @Converter
-  static class LazyNumberConverter implements Supplier<StringConverter<LazyNumber>> {
+  class LazyNumberConverter implements Supplier<StringConverter<LazyNumber>> {
     @Override
     public StringConverter<LazyNumber> get() {
       return StringConverter.create(s -> () -> Integer.valueOf(s));
@@ -34,14 +34,14 @@ abstract class ComplicatedMapperArguments {
   }
 
   @Converter
-  static class MyConverter implements Supplier<StringConverter<Integer>> {
+  class MyConverter implements Supplier<StringConverter<Integer>> {
     @Override
     public StringConverter<Integer> get() {
       return StringConverter.create(new Zapper());
     }
   }
 
-  static class Zapper implements Foo<String> {
+  class Zapper implements Foo<String> {
     public Integer apply(String s) {
       return 1;
     }

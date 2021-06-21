@@ -3,9 +3,6 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class TarArgumentsTest {
 
   private final TarArgumentsParser parser = new TarArgumentsParser();
@@ -30,17 +27,14 @@ class TarArgumentsTest {
   }
 
   @Test
-  void flagWithArgument() {
-    assertTrue(parser.parse("-xf").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Missing argument after token: -f"));
+  void unfinishedUnixGroup() {
+    f.assertThat("-xf")
+        .fails("Missing argument after option name: -f");
   }
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "\u001B[1mUSAGE\u001B[m",
         "  tar-arguments [OPTIONS] -f FILE",
         "",

@@ -44,7 +44,7 @@ public final class ErrToken extends NotSuccess implements HasMessage {
   public String message() {
     switch (errorType) {
       case MISSING_ARGUMENT:
-        return "Missing argument after token: " + token;
+        return "Missing argument after option name: " + token;
       case INVALID_OPTION:
         return "Invalid option: " + token;
       case EXCESS_PARAM:
