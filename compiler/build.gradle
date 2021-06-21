@@ -13,10 +13,6 @@ java {
     }
 }
 
-repositories {
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1004' }
-}
-
 compileJava {
     options.encoding = 'UTF-8'
     sourceCompatibility = '11'
