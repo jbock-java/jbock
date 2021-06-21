@@ -59,8 +59,11 @@ public class ConvertModule {
         .map(EnumName::enumConstant)
         .collect(Collectors.toSet());
     EnumName result = originalName;
-    while (alreadyCreated.contains(result.enumConstant())) {
-      result = originalName.makeLonger();
+    for (int i = 0; i < 100 && alreadyCreated.contains(result.enumConstant()); i++) {
+      result = result.makeLonger();
+    }
+    if (alreadyCreated.contains(result.enumConstant())) {
+      throw new AssertionError();
     }
     return result;
   }

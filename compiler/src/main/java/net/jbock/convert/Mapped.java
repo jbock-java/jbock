@@ -12,7 +12,6 @@ import net.jbock.parameter.NamedOption;
 import net.jbock.util.StringConverter;
 
 import javax.lang.model.type.PrimitiveType;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -49,7 +48,7 @@ public final class Mapped<P extends AbstractItem> {
       Multiplicity multiplicity,
       P parameter) {
     TypeName fieldType = parameter.returnType();
-    String fieldName = '_' + parameter.enumName().enumConstant().toLowerCase(Locale.US);
+    String fieldName = parameter.enumName().original();
     FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
     ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
     return new Mapped<>(mapExpr, extractExpr, multiplicity, asParameterSpec,
@@ -59,7 +58,7 @@ public final class Mapped<P extends AbstractItem> {
   public static Mapped<NamedOption> createFlag(NamedOption namedOption, PrimitiveType booleanType) {
     CodeBlock code = CodeBlock.of("$T.create($T.identity())", StringConverter.class, Function.class);
     TypeName fieldType = TypeName.BOOLEAN;
-    String fieldName = '_' + namedOption.enumName().enumConstant().toLowerCase(Locale.US);
+    String fieldName = namedOption.enumName().original();
     FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
     ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
     MapExpr mapExpr = new MapExpr(code, booleanType, false);
@@ -112,10 +111,6 @@ public final class Mapped<P extends AbstractItem> {
 
   public String paramLabel() {
     return item.paramLabel();
-  }
-
-  public String enumConstant() {
-    return enumName().enumConstant();
   }
 
   public FieldSpec asField() {

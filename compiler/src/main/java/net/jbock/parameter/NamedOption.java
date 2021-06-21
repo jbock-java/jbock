@@ -1,6 +1,7 @@
 package net.jbock.parameter;
 
 import net.jbock.common.EnumName;
+import net.jbock.common.SnakeName;
 
 import java.util.List;
 import java.util.Locale;
@@ -28,7 +29,7 @@ public final class NamedOption extends AbstractItem {
         .map(name -> name.substring(2))
         .map(s -> s.toUpperCase(Locale.US))
         .findFirst())
-        .orElse(enumName().snake('_').toUpperCase(Locale.US));
+        .orElse(SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
   }
 
   public boolean hasUnixName() {

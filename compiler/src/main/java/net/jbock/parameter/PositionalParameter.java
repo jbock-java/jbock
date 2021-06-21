@@ -1,6 +1,7 @@
 package net.jbock.parameter;
 
 import net.jbock.common.EnumName;
+import net.jbock.common.SnakeName;
 
 import java.util.Locale;
 
@@ -21,7 +22,7 @@ public final class PositionalParameter extends AbstractItem {
   @Override
   public final String paramLabel() {
     return sourceMethod().paramLabel()
-        .orElse(enumName().snake('_').toUpperCase(Locale.US));
+        .orElse(SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
   }
 
   public int position() {

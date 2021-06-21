@@ -12,7 +12,6 @@ import net.jbock.util.NotSuccess;
 import net.jbock.util.SuperResult;
 
 import javax.inject.Inject;
-import java.util.Locale;
 import java.util.Optional;
 
 @ContextScope
@@ -66,7 +65,7 @@ public class GeneratedTypes {
   }
 
   ClassName multilineConverterType(Mapped<? extends AbstractItem> item) {
-    String name = item.enumConstant().toLowerCase(Locale.US);
+    String name = item.enumName().original();
     String capitalized = Character.toUpperCase(name.charAt(0)) + name.substring(1);
     return generatedClass.nestedClass(capitalized + "Converter");
   }

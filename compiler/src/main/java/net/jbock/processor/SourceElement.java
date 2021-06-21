@@ -4,8 +4,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Command;
 import net.jbock.common.Descriptions;
-import net.jbock.common.EnumName;
 import net.jbock.common.SafeElements;
+import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.ElementKind;
@@ -43,7 +43,7 @@ public class SourceElement {
         .filter(ACCESS_MODIFIERS::contains)
         .collect(Collectors.toUnmodifiableList());
     String programName = programName(typeElement)
-        .orElseGet(() -> EnumName.create(typeElement.getSimpleName().toString()).snake('-'));
+        .orElseGet(() -> SnakeName.create(typeElement.getSimpleName().toString()).snake('-'));
     String generatedClassName = String.join("_", ClassName.get(typeElement).simpleNames()) + "Parser";
     ClassName generatedClass = ClassName.get(typeElement)
         .topLevelClassName()
