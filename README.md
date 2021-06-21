@@ -12,7 +12,7 @@ that generates custom parsing code at compile time. jbock requires Java 11.
 
 A command line interface is defined by creating an abstract class, or alternatively a Java interface,
 which has a `@Command` annotation.
-In this class, each abstract method defines a *named option* or a *positional parameter*.
+In this class or interface, each abstract method represents either a *named option* or a *positional parameter*.
 As an annotation processor, jbock has access to the method's return type *before erasure*.
 It uses this full type information to determine *multiplicity*.
 
