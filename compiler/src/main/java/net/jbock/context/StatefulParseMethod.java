@@ -24,7 +24,7 @@ public class StatefulParseMethod {
   private final ParameterSpec token = builder(STRING, "token").build();
   private final ParameterSpec position = builder(INT, "position").build();
   private final ParameterSpec endOfOptionParsing = builder(BOOLEAN, "endOfOptionParsing").build();
-  private final NamedOptions options;
+  private final NamedOptions namedOptions;
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
   private final SourceElement sourceElement;
@@ -33,13 +33,13 @@ public class StatefulParseMethod {
   @Inject
   StatefulParseMethod(
       GeneratedTypes generatedTypes,
-      NamedOptions options,
+      NamedOptions namedOptions,
       PositionalParameters positionalParameters,
       CommonFields commonFields,
       SourceElement sourceElement,
       TryParseOptionMethod tryParseOptionMethod) {
     this.generatedTypes = generatedTypes;
-    this.options = options;
+    this.namedOptions = namedOptions;
     this.positionalParameters = positionalParameters;
     this.commonFields = commonFields;
     this.sourceElement = sourceElement;
@@ -72,7 +72,7 @@ public class StatefulParseMethod {
         .addStatement("continue")
         .endControlFlow();
 
-    if (!options.isEmpty()) {
+    if (!namedOptions.isEmpty()) {
       code.add(optionBlock());
     }
     code.add(checkSuspicious());
@@ -100,7 +100,7 @@ public class StatefulParseMethod {
         .addStatement("continue")
         .endControlFlow();
 
-    if (!options.isEmpty()) {
+    if (!namedOptions.isEmpty()) {
       code.add(optionBlock());
     }
 
