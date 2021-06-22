@@ -1,6 +1,6 @@
 [![jbock-compiler](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock-compiler/badge.svg?color=grey&subject=jbock-compiler)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock-compiler)
 [![jbock](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock/badge.svg?subject=jbock)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock)
-[![Join the chat at https://gitter.im/jbock-java/jbock-support](https://badges.gitter.im/jbock-java/jbock-support.svg)](https://gitter.im/jbock-java/jbock-support?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Matrix][matrix-badge]][matrix-link]
 
 jbock is a command line parser, similar to [JCommander](https://jcommander.org/)
 and [picocli](https://github.com/remkop/picocli).
@@ -57,3 +57,5 @@ Please see the [wiki](https://github.com/h908714124/jbock/wiki) for details.
 * [jbock-maven-example](https://github.com/jbock-java/jbock-maven-example)
 * [jbock-gradle-example](https://github.com/jbock-java/jbock-gradle-example)
 
+[matrix-badge]: http://strk.kbt.io/tmp/matrix_badge.svg
+[matrix-link]: https://matrix.to/#/!ECsDheDcxxNFZWEJbl:matrix.org?via=matrix.org
