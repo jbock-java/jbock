@@ -57,8 +57,10 @@ public final class GeneratedClass {
 
   public TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass())
-        .addMethod(parseMethod.get())
-        .addMethod(parseOrExitMethod.define());
+        .addMethod(parseMethod.get());
+    if (sourceElement.generateParseOrExitMethod()) {
+      spec.addMethod(parseOrExitMethod.define());
+    }
 
     spec.addType(statefulParser.define());
     if (!namedOptions.isEmpty()) {

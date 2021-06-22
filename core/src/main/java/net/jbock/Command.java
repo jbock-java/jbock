@@ -96,4 +96,12 @@ public @interface Command {
    * @return {@code false} to disable unix clustering
    */
   boolean unixClustering() default true;
+
+  /**
+   * If {@code false}, the generated parser will not contain
+   * the {@code parseOrExit} method.
+   *
+   * @return {@code false} to skip generating {@code parseOrExit}
+   */
+  boolean generateParseOrExitMethod() default true;
 }

@@ -115,6 +115,10 @@ public class SourceElement {
     return get().unixClustering();
   }
 
+  public boolean generateParseOrExitMethod() {
+    return get().generateParseOrExitMethod();
+  }
+
   private Command get() {
     return sourceElement.getAnnotation(Command.class);
   }
