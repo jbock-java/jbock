@@ -30,7 +30,7 @@ public class ParamsFactory {
     this.util = util;
   }
 
-  public Either<List<ValidationFailure>, Items> create(
+  Either<List<ValidationFailure>, Items> create(
       List<Mapped<PositionalParameter>> positionalParams,
       List<Mapped<NamedOption>> namedOptions) {
     List<ValidationFailure> failures = checkDuplicateDescriptionKeys(namedOptions, positionalParams);

@@ -87,7 +87,7 @@ public class AutoConverterFinder extends MatchValidator {
         .add("} catch ($T $N) {\n", IllegalArgumentException.class, e).indent()
         .add("$T $N = $T.stream($T.values())\n", STRING, values, Arrays.class, enumType).indent()
         .add(".map($T::name)\n", enumType)
-        .add(".collect($T.joining($S, $S, $S));\n", Collectors.class, ", ", "[", "]")
+        .addStatement(".collect($T.joining($S, $S, $S))", Collectors.class, ", ", "[", "]")
         .unindent()
         .addStatement("$T $N = $N.getMessage() + $S + $N", STRING, message, e, " ", values)
         .addStatement("throw new $T($N)", IllegalArgumentException.class, message)

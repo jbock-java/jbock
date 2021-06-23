@@ -94,9 +94,9 @@ public class AutoConverters {
   private CodeBlock autoConverterCharBlock() {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     return CodeBlock.builder()
-        .add("if ($N.length() != 1)\n", token)
-        .addStatement("throw new $T($S + $N + $S);\n", RuntimeException.class,
-            "Not a single character: <", token, ">")
+        .add("if ($N.length() != 1)\n", token).indent()
+        .addStatement("throw new $T($S + $N + $S)", RuntimeException.class,
+            "Not a single character: <", token, ">").unindent()
         .addStatement("return $N.charAt(0)", token)
         .build();
   }
