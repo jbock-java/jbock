@@ -21,6 +21,7 @@ import static net.jbock.either.Either.right;
 @ValidateScope
 public class MethodsFactory {
 
+  // sort order that puts @Parameters last (they don't have an index)
   private static final Comparator<SourceMethod> POSITION_COMPARATOR =
       Comparator.comparingInt(m -> m.index().orElse(Integer.MAX_VALUE));
 
