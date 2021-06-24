@@ -1,10 +1,7 @@
 package net.jbock.examples;
 
-import net.jbock.either.Either;
-import net.jbock.util.HelpRequested;
-import net.jbock.util.NotSuccess;
+import net.jbock.examples.fixture.ParserTestFixture;
 import net.jbock.util.SuperResult;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -15,9 +12,12 @@ class SuperArgumentsTest {
 
   private final SuperArgumentsParser parser = new SuperArgumentsParser();
 
+  private final ParserTestFixture<SuperResult<SuperArguments>> f =
+      ParserTestFixture.create(parser::parse);
+
   @Test
   void testRest() {
-    SuperResult<SuperArguments> success = parseOrFail("-q", "foo", "-a", "1");
+    SuperResult<SuperArguments> success = f.parse("-q", "foo", "-a", "1");
     SuperArguments result = success.result();
     assertEquals("foo", result.command());
     assertTrue(result.quiet());
@@ -25,22 +25,31 @@ class SuperArgumentsTest {
   }
 
   @Test
+  void testDoubleEscape() {
+    String[] args = {"-q", "--", "--", "a"};
+    SuperResult<SuperArguments> result = f.parse(args);
+    assertArrayEquals(new String[]{"--", "a"}, result.rest());
+  }
+
+  @Test
   void testEscapeSequenceNotRecognized() {
-    SuperResult<SuperArguments> success = parseOrFail("-q", "--");
-    SuperArguments result = success.result();
-    assertEquals("--", result.command());
-    assertTrue(result.quiet());
+    String[] args = {"-q", "--"};
+    SuperResult<SuperArguments> result = f.parse(args);
+    assertEquals("--", result.result().command());
+    assertEquals(0, result.rest().length);
   }
 
   @Test
   void testHelp() {
-    Either<NotSuccess, SuperResult<SuperArguments>> result = parser.parse("--help");
-    assertTrue(result.getLeft().isPresent());
-    assertTrue(result.getLeft().get() instanceof HelpRequested);
-  }
-
-  private SuperResult<SuperArguments> parseOrFail(String... args) {
-    return parser.parse(args)
-        .orElseThrow(notSuccess -> Assertions.<RuntimeException>fail("success expected but was " + notSuccess));
+    f.assertPrintsHelp(
+        "\u001B[1mUSAGE\u001B[m",
+        "  super-arguments [OPTIONS] COMMAND",
+        "",
+        "\u001B[1mPARAMETERS\u001B[m",
+        "  COMMAND ",
+        "",
+        "\u001B[1mOPTIONS\u001B[m",
+        "  -q, --quiet ",
+        "");
   }
 }

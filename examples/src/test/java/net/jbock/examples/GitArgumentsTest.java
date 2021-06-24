@@ -5,10 +5,11 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GitArgumentsTest {
 
@@ -30,6 +31,13 @@ class GitArgumentsTest {
 
     // check that escape sequence works
     assertArrayEquals(randomStrings, remainingArgs, Arrays.toString(args));
+  }
+
+  @Test
+  void testDoubleEscape() {
+    String[] args = {"add", "--", "--", "a"};
+    GitArguments result = f.parse(args);
+    assertEquals(List.of("--", "a"), result.remainingArgs());
   }
 
   private String[] randomArgs() {
@@ -58,9 +66,7 @@ class GitArgumentsTest {
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "Git is software for tracking changes in any set of files.",
         "",
         "\u001B[1mUSAGE\u001B[m",
