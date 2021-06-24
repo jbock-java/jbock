@@ -13,10 +13,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static net.jbock.either.Either.left;
-import static net.jbock.either.Either.right;
 
 @ValidateScope
 public class MethodsFactory {
@@ -44,25 +42,28 @@ public class MethodsFactory {
    */
   Either<List<ValidationFailure>, AbstractMethods> findAbstractMethods() {
     return abstractMethodsFinder.findAbstractMethods()
-        .flatMap(this::validateParameterMethods)
-        .flatMap(this::inheritanceCollision)
+        .filter(this::validateParameterMethods)
+        .filter(this::detectInheritanceCollision)
         .map(this::createSourceMethods)
-        .flatMap(this::validateDuplicateParametersAnnotation)
-        .flatMap(this::atLeastOneParameterSuperCommand);
+        .filter(this::validateDuplicateParametersAnnotation)
+        .map(this::createAbstractMethods)
+        .filter(this::validateAtLeastOneParameterInSuperCommand);
   }
 
-  private Either<List<ValidationFailure>, List<ExecutableElement>> inheritanceCollision(
+  private Optional<List<ValidationFailure>> detectInheritanceCollision(
       List<ExecutableElement> methods) {
-    Map<Name, List<ExecutableElement>> map = methods.stream().collect(Collectors.groupingBy(ExecutableElement::getSimpleName));
+    Map<Name, List<ExecutableElement>> map = methods.stream()
+        .collect(Collectors.groupingBy(ExecutableElement::getSimpleName));
     for (ExecutableElement method : methods) {
       if (map.get(method.getSimpleName()).size() >= 2) {
-        return left(List.of(new ValidationFailure("inheritance collision", method)));
+        ValidationFailure f = new ValidationFailure("inheritance collision", method);
+        return Optional.of(List.of(f));
       }
     }
-    return right(methods);
+    return Optional.empty();
   }
 
-  private Either<List<ValidationFailure>, AbstractMethods> atLeastOneParameterSuperCommand(
+  private AbstractMethods createAbstractMethods(
       List<SourceMethod> methods) {
     List<SourceMethod> params = methods.stream()
         .filter(m -> m.style().isPositional())
@@ -71,27 +72,33 @@ public class MethodsFactory {
     List<SourceMethod> options = methods.stream()
         .filter(m -> !m.style().isPositional())
         .collect(Collectors.toUnmodifiableList());
-    if (sourceElement.isSuperCommand() && params.isEmpty()) {
-      String message = "at least one positional parameter must be defined" +
-          " when the superCommand attribute is set";
-      return left(List.of(sourceElement.fail(message)));
-    }
-    return right(new AbstractMethods(params, options));
+    return new AbstractMethods(params, options);
   }
 
-  private Either<List<ValidationFailure>, List<SourceMethod>> validateDuplicateParametersAnnotation(
+  private Optional<List<ValidationFailure>> validateAtLeastOneParameterInSuperCommand(
+      AbstractMethods abstractMethods) {
+    if (!sourceElement.isSuperCommand() ||
+        !abstractMethods.positionalParameters().isEmpty()) {
+      return Optional.empty();
+    }
+    String message = "at least one positional parameter must be defined" +
+        " when the superCommand attribute is set";
+    return Optional.of(List.of(sourceElement.fail(message)));
+  }
+
+  private Optional<List<ValidationFailure>> validateDuplicateParametersAnnotation(
       List<SourceMethod> sourceMethods) {
     List<SourceMethod> parametersMethods = sourceMethods.stream()
         .filter(m -> m.style() == ParameterStyle.PARAMETERS)
         .collect(Collectors.toUnmodifiableList());
     if (parametersMethods.size() >= 2) {
       String message = "duplicate @" + Parameters.class.getSimpleName() + " annotation";
-      return left(List.of(sourceMethods.get(1).fail(message)));
+      return Optional.of(List.of(sourceMethods.get(1).fail(message)));
     }
-    return right(sourceMethods);
+    return Optional.empty();
   }
 
-  private Either<List<ValidationFailure>, List<ExecutableElement>> validateParameterMethods(
+  private Optional<List<ValidationFailure>> validateParameterMethods(
       List<ExecutableElement> sourceMethods) {
     List<ValidationFailure> failures = new ArrayList<>();
     for (ExecutableElement sourceMethod : sourceMethods) {
@@ -100,9 +107,9 @@ public class MethodsFactory {
           .ifPresent(failures::add);
     }
     if (!failures.isEmpty()) {
-      return left(failures);
+      return Optional.of(failures);
     }
-    return right(sourceMethods);
+    return Optional.empty();
   }
 
   private List<SourceMethod> createSourceMethods(List<ExecutableElement> methods) {

@@ -96,6 +96,18 @@ public abstract class Either<L, R> {
   }
 
   /**
+   * If this is a Right, and the result of applying {@code test}
+   * contains a value, return a Left containing that value.
+   * Otherwise return an equivalent instance.
+   *
+   * @param test the filter function
+   * @return filter result
+   */
+  public final Either<L, R> filter(Function<? super R, Optional<? extends L>> test) {
+    return flatMap(r -> unbalancedLeft(test.apply(r)).orElseRight(() -> r));
+  }
+
+  /**
    * Apply the supplied function to the LHS value if this is a Left,
    * otherwise return an equivalent Right instance with an updated LHS type.
    *
