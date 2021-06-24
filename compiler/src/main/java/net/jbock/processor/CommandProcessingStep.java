@@ -95,7 +95,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private Either<List<ValidationFailure>, SourceElement> validateSourceElement(
       TypeElement element) {
     Optional<List<ValidationFailure>> failureList = util.commonTypeChecks(element)
-        .or(() -> util.assertNoDuplicateAnnotations(element,
+        .or(() -> util.checkNoDuplicateAnnotations(element,
             Annotations.typeLevelAnnotations()))
         .map(s -> new ValidationFailure(s, element))
         .map(List::of);

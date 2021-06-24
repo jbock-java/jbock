@@ -1,17 +1,19 @@
 package net.jbock.validate;
 
-import net.jbock.common.Annotations;
 import net.jbock.common.Util;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
+import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.element.NestingKind.MEMBER;
+import static net.jbock.common.Annotations.methodLevelAnnotations;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
@@ -26,23 +28,21 @@ public class ParameterMethodValidator {
   }
 
   Optional<String> validateParameterMethod(ExecutableElement sourceMethod) {
-    Optional<String> noAnnotationsError = util.assertAtLeastOneAnnotation(sourceMethod,
-        Annotations.methodLevelAnnotations());
-    if (noAnnotationsError.isPresent()) {
-      return noAnnotationsError;
-    }
-    Optional<String> duplicateAnnotationsError = util.assertNoDuplicateAnnotations(sourceMethod,
-        Annotations.methodLevelAnnotations());
-    if (duplicateAnnotationsError.isPresent()) {
-      return duplicateAnnotationsError;
-    }
-    if (isUnreachable(sourceMethod.getReturnType())) {
-      return Optional.of("unreachable type: " + util.typeToString(sourceMethod.getReturnType()));
+    List<Class<? extends Annotation>> annotations = methodLevelAnnotations();
+    return util.checkAtLeastOneAnnotation(sourceMethod, annotations)
+        .or(() -> util.checkNoDuplicateAnnotations(sourceMethod, annotations))
+        .or(() -> checkAccessibleType(sourceMethod));
+  }
+
+  private Optional<String> checkAccessibleType(ExecutableElement sourceMethod) {
+    if (isInaccessible(sourceMethod.getReturnType())) {
+      return Optional.of("inaccessible type: " +
+          util.typeToString(sourceMethod.getReturnType()));
     }
     return Optional.empty();
   }
 
-  private boolean isUnreachable(TypeMirror mirror) {
+  private boolean isInaccessible(TypeMirror mirror) {
     return AS_DECLARED.visit(mirror)
         .map(declared -> {
           Element el = declared.asElement();
@@ -54,7 +54,7 @@ public class ParameterMethodValidator {
                   && !t.getModifiers().contains(STATIC))
               .orElse(false);
           return badNesting || declared.getTypeArguments().stream()
-              .anyMatch(this::isUnreachable);
+              .anyMatch(this::isInaccessible);
         })
         .orElse(false);
   }

@@ -620,7 +620,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("unreachable type: Foo");
+        .withErrorContaining("inaccessible type: Foo");
   }
 
   @Test
@@ -639,7 +639,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("unreachable type: List<Foo>");
+        .withErrorContaining("inaccessible type: List<Foo>");
   }
 
 

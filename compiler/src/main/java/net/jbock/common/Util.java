@@ -125,7 +125,7 @@ public class Util {
         })).orElseGet(type::toString);
   }
 
-  public Optional<String> assertAtLeastOneAnnotation(
+  public Optional<String> checkAtLeastOneAnnotation(
       Element element,
       List<Class<? extends Annotation>> annotations) {
     for (Class<? extends Annotation> annotation : annotations) {
@@ -138,7 +138,7 @@ public class Util {
         .collect(Collectors.joining(", ")));
   }
 
-  public Optional<String> assertNoDuplicateAnnotations(
+  public Optional<String> checkNoDuplicateAnnotations(
       Element element,
       List<Class<? extends Annotation>> annotations) {
     List<Class<? extends Annotation>> present = annotations.stream()
