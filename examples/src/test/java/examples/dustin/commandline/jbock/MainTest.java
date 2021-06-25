@@ -14,8 +14,8 @@ class MainTest {
 
   @Test
   void testMain() {
-    f.assertThat("-v", "-f", "file.txt").succeeds(
-        "file", Optional.of("file.txt"),
-        "verbose", true);
+    f.assertThat("-v", "-f", "file.txt")
+        .has(Main.Arguments::file, Optional.of("file.txt"))
+        .has(Main.Arguments::verbose, true);
   }
 }

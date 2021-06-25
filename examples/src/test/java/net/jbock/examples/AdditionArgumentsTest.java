@@ -14,18 +14,18 @@ class AdditionArgumentsTest {
 
   @Test
   void optionalAbsent() {
-    f.assertThat("1", "2").succeeds(
-        "a", 1,
-        "b", 2,
-        "c", Optional.empty());
+    f.assertThat("1", "2")
+        .has(AdditionArguments::a, 1)
+        .has(AdditionArguments::b, 2)
+        .has(AdditionArguments::c, Optional.empty());
   }
 
   @Test
   void optionalPresent() {
-    f.assertThat("1", "2", "3").succeeds(
-        "a", 1,
-        "b", 2,
-        "c", Optional.of(3));
+    f.assertThat("1", "2", "3")
+        .has(AdditionArguments::a, 1)
+        .has(AdditionArguments::b, 2)
+        .has(AdditionArguments::c, Optional.of(3));
   }
 
   @Test
@@ -35,10 +35,14 @@ class AdditionArgumentsTest {
 
   @Test
   void dashesIgnored() {
-    f.assertThat("--", "1", "-2", "3").satisfies(e -> e.sum() == 2);
-    f.assertThat("--", "-1", "-2", "-3").satisfies(e -> e.sum() == -6);
-    f.assertThat("--", "-1", "-2", "3").satisfies(e -> e.sum() == 0);
-    f.assertThat("--", "-1", "-2").satisfies(e -> e.sum() == -3);
+    f.assertThat("--", "1", "-2", "3")
+        .has(AdditionArguments::sum, 2);
+    f.assertThat("--", "-1", "-2", "-3")
+        .has(AdditionArguments::sum, -6);
+    f.assertThat("--", "-1", "-2", "3")
+        .has(AdditionArguments::sum, 0);
+    f.assertThat("--", "-1", "-2")
+        .has(AdditionArguments::sum, -3);
   }
 
   @Test

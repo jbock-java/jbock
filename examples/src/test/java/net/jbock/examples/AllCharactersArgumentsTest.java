@@ -20,11 +20,11 @@ class AllCharactersArgumentsTest {
         "--bigChar", "A",
         "--charOpt", "X",
         "--charList", "b",
-        "--charList", "c").succeeds(
-        "smallChar", 'a',
-        "bigChar", 'A',
-        "charOpt", Optional.of('X'),
-        "charList", List.of('b', 'c'));
+        "--charList", "c")
+        .has(AllCharactersArguments::smallChar, 'a')
+        .has(AllCharactersArguments::bigChar, 'A')
+        .has(AllCharactersArguments::charOpt, Optional.of('X'))
+        .has(AllCharactersArguments::charList, List.of('b', 'c'));
   }
 
   @Test

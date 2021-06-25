@@ -116,28 +116,13 @@ public final class ParserTestFixture<E> {
 
   public static final class JsonAssert<E> {
 
-    class Parsed {
-      final String stderr;
-      final Optional<E> result;
+    private Either<NotSuccess, E> instance;
 
-      Parsed(String stderr, Optional<E> result) {
-        this.stderr = stderr;
-        this.result = result;
+    Either<NotSuccess, E> getParsed() {
+      if (instance == null) {
+        instance = parser.apply(args);
       }
-
-      boolean isPresent() {
-        return result.isPresent();
-      }
-
-      E get() {
-        return result.get();
-      }
-    }
-
-    Parsed getParsed() {
-      TestOutputStream stderr = new TestOutputStream();
-      Optional<E> result = parser.apply(args).getRight();
-      return new Parsed(stderr.toString(), result);
+      return instance;
     }
 
     private final String[] args;
@@ -149,10 +134,12 @@ public final class ParserTestFixture<E> {
       this.parser = parser;
     }
 
-    public void satisfies(Predicate<E> predicate) {
-      Parsed parsed = getParsed();
-      assertTrue(parsed.isPresent(), "Parsing was not successful");
-      assertTrue(predicate.test(parsed.get()));
+    public <V> JsonAssert<E> has(Function<E, V> getter, V expectation) {
+      Either<NotSuccess, E> parsed = getParsed();
+      assertTrue(parsed.getRight().isPresent(), "Parsing was not successful");
+      V result = getter.apply(getParsed().getRight().get());
+      Assertions.assertEquals(expectation, result);
+      return this;
     }
 
     /**
@@ -161,16 +148,15 @@ public final class ParserTestFixture<E> {
      * @param expected key-value pairs
      */
     public void succeeds(Object... expected) {
-      Parsed parsed = getParsed();
+      Either<NotSuccess, E> parsed = getParsed();
       try {
-        assertTrue(parsed.isPresent(), "Parsing was not successful: " + parsed.stderr);
-        assertTrue(parsed.stderr.isEmpty());
+        assertTrue(parsed.getRight().isPresent(), "Parsing was not successful");
         for (int i = 0; i < expected.length; i += 2) {
           String key = (String) expected[i];
           Object expectedValue = expected[i + 1];
-          Method method = parsed.get().getClass().getDeclaredMethod(key);
+          Method method = parsed.getRight().get().getClass().getDeclaredMethod(key);
           method.setAccessible(true);
-          Object result = method.invoke(parsed.get());
+          Object result = method.invoke(parsed.getRight().get());
           Assertions.assertEquals(expectedValue, result,
               String.format("At `%s`: expecting %s but found %s", key, expectedValue, result));
         }
