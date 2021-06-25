@@ -3,9 +3,8 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
-
-import static java.util.Arrays.asList;
 
 class AllCharactersArgumentsTest {
 
@@ -25,7 +24,7 @@ class AllCharactersArgumentsTest {
         "smallChar", 'a',
         "bigChar", 'A',
         "charOpt", Optional.of('X'),
-        "charList", asList('b', 'c'));
+        "charList", List.of('b', 'c'));
   }
 
   @Test

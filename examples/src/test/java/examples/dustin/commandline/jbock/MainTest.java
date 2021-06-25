@@ -1,22 +1,21 @@
 package examples.dustin.commandline.jbock;
 
-import org.junit.jupiter.api.Assertions;
+import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MainTest {
 
   private final Main_ArgumentsParser parser = new Main_ArgumentsParser();
 
+  private final ParserTestFixture<Main.Arguments> f =
+      ParserTestFixture.create(parser::parse);
+
   @Test
   void testMain() {
-    Main.Arguments args = parser.parse("-v", "-f", "file.txt")
-        .orElseThrow(l -> Assertions.<RuntimeException>fail("expecting success but found: " + l));
-    assertEquals(Optional.of("file.txt"), args.file());
-    assertTrue(args.verbose());
+    f.assertThat("-v", "-f", "file.txt").succeeds(
+        "file", Optional.of("file.txt"),
+        "verbose", true);
   }
 }

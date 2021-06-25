@@ -3,10 +3,8 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 
 class NoNameArgumentsTest {
 
@@ -19,7 +17,7 @@ class NoNameArgumentsTest {
   void testDifferentOrder() {
     Object[] expected = {
         "message", Optional.of("m"),
-        "file", asList("f", "o", "o"),
+        "file", List.of("f", "o", "o"),
         "verbosity", Optional.empty(),
         "number", 1,
         "cmos", true};
@@ -35,7 +33,7 @@ class NoNameArgumentsTest {
   void testFlag() {
     f.assertThat("--cmos", "-n1").succeeds(
         "message", Optional.empty(),
-        "file", emptyList(),
+        "file", List.of(),
         "verbosity", Optional.empty(),
         "number", 1,
         "cmos", true);
@@ -45,13 +43,13 @@ class NoNameArgumentsTest {
   void testOptionalInt() {
     f.assertThat("-v", "1", "-n1").succeeds(
         "message", Optional.empty(),
-        "file", emptyList(),
+        "file", List.of(),
         "verbosity", Optional.of(1),
         "number", 1,
         "cmos", false);
     f.assertThat("-n1").succeeds(
         "message", Optional.empty(),
-        "file", emptyList(),
+        "file", List.of(),
         "verbosity", Optional.empty(),
         "number", 1,
         "cmos", false);

@@ -3,9 +3,9 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 class PositionalArgumentsTest {
@@ -28,7 +28,7 @@ class PositionalArgumentsTest {
         "dest", "b",
         "anotherInt", 1,
         "optString", Optional.empty(),
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
   }
 
   @Test
@@ -38,7 +38,7 @@ class PositionalArgumentsTest {
         "dest", "",
         "anotherInt", 0,
         "optString", Optional.empty(),
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
   }
 
   @Test

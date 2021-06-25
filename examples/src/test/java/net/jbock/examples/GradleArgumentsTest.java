@@ -3,10 +3,9 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 class GradleArgumentsTest {
@@ -58,59 +57,59 @@ class GradleArgumentsTest {
   void testDetachedLong() {
     f.assertThat("--message", "hello").succeeds(
         "message", Optional.of("hello"),
-        "file", emptyList(),
+        "file", List.of(),
         "dir", Optional.empty(),
         "cmos", false,
         "verbose", false,
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
   }
 
   @Test
   void testInterestingTokens() {
     f.assertThat("--message=hello", "b-a-b-a", "--", "->", "<=>", "", " ").succeeds(
         "message", Optional.of("hello"),
-        "file", emptyList(),
+        "file", List.of(),
         "dir", Optional.empty(),
         "cmos", false,
         "verbose", false,
         "mainToken", Optional.of("b-a-b-a"),
-        "otherTokens", asList("->", "<=>", "", " "));
+        "otherTokens", List.of("->", "<=>", "", " "));
   }
 
   @Test
   void testPassEmptyString() {
     f.assertThat("-m", "").succeeds(
         "message", Optional.of(""),
-        "file", emptyList(),
+        "file", List.of(),
         "dir", Optional.empty(),
         "cmos", false,
         "verbose", false,
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
     f.assertThat("--message=").succeeds(
         "message", Optional.of(""),
-        "file", emptyList(),
+        "file", List.of(),
         "dir", Optional.empty(),
         "cmos", false,
         "verbose", false,
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
     f.assertThat("--message", "").succeeds(
         "message", Optional.of(""),
-        "file", emptyList(),
+        "file", List.of(),
         "dir", Optional.empty(),
         "cmos", false,
         "verbose", false,
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
   }
 
   @Test
   void testAllForms() {
     Object[] expectation = {
         "message", Optional.of("hello"),
-        "file", emptyList(),
+        "file", List.of(),
         "dir", Optional.empty(),
         "cmos", false,
         "verbose", false,
-        "otherTokens", emptyList()};
+        "otherTokens", List.of()};
     f.assertThat("-mhello").succeeds(expectation);
     f.assertThat("-m", "hello").succeeds(expectation);
     f.assertThat("--message=hello").succeeds(expectation);
@@ -125,28 +124,28 @@ class GradleArgumentsTest {
         "dir", Optional.empty(),
         "cmos", false,
         "verbose", false,
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
     f.assertThat("-fbar.txt", "--message=hello").succeeds(
         "message", Optional.of("hello"),
         "file", singletonList("bar.txt"),
         "dir", Optional.empty(),
         "cmos", false,
         "verbose", false,
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
     f.assertThat("--message=hello", "-fbar.txt").succeeds(
         "message", Optional.of("hello"),
         "file", singletonList("bar.txt"),
         "dir", Optional.empty(),
         "cmos", false,
         "verbose", false,
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
   }
 
   @Test
   void testFlag() {
     f.assertThat("-c", "hello", "hello").succeeds(
         "message", Optional.empty(),
-        "file", emptyList(),
+        "file", List.of(),
         "dir", Optional.empty(),
         "cmos", true,
         "verbose", false,
@@ -158,7 +157,7 @@ class GradleArgumentsTest {
   void testPositionalOnly() {
     f.assertThat("hello", "goodbye").succeeds(
         "message", Optional.empty(),
-        "file", emptyList(),
+        "file", List.of(),
         "dir", Optional.empty(),
         "cmos", false,
         "verbose", false,
@@ -170,36 +169,36 @@ class GradleArgumentsTest {
   void twoFlags() {
     f.assertThat("-c", "-v").succeeds(
         "message", Optional.empty(),
-        "file", emptyList(),
+        "file", List.of(),
         "dir", Optional.empty(),
         "cmos", true,
         "verbose", true,
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
   }
 
   @Test
   void testClustering() {
     f.assertThat("-cv").succeeds(
         "message", Optional.empty(),
-        "file", emptyList(),
+        "file", List.of(),
         "dir", Optional.empty(),
         "cmos", true,
         "verbose", true,
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
     f.assertThat("-cvm", "hello").succeeds(
         "message", Optional.of("hello"),
-        "file", emptyList(),
+        "file", List.of(),
         "dir", Optional.empty(),
         "cmos", true,
         "verbose", true,
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
     f.assertThat("-cvmhello").succeeds(
         "message", Optional.of("hello"),
-        "file", emptyList(),
+        "file", List.of(),
         "dir", Optional.empty(),
         "cmos", true,
         "verbose", true,
-        "otherTokens", emptyList());
+        "otherTokens", List.of());
   }
 
   @Test

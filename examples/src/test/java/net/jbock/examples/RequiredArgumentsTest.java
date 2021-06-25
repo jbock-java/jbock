@@ -7,7 +7,7 @@ import net.jbock.util.NotSuccess;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static java.util.Collections.emptyList;
+import java.util.List;
 
 class RequiredArgumentsTest {
 
@@ -18,13 +18,14 @@ class RequiredArgumentsTest {
 
   @Test
   void success() {
-    f.assertThat("--dir", "A").succeeds("dir", "A", "otherTokens", emptyList());
+    f.assertThat("--dir", "A").succeeds(
+        "dir", "A",
+        "otherTokens", List.of());
   }
 
   @Test
   void errorDirMissing() {
-    String[] emptyInput = new String[0];
-    Either<NotSuccess, RequiredArguments> result = new RequiredArgumentsParser().parse(emptyInput);
+    Either<NotSuccess, RequiredArguments> result = new RequiredArgumentsParser().parse(/* empty */);
     Assertions.assertTrue(result.getLeft().isPresent());
     Assertions.assertTrue(result.getLeft().get() instanceof HelpRequested);
   }

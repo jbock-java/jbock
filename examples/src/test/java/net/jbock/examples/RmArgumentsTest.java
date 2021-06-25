@@ -3,7 +3,7 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
-import static java.util.Arrays.asList;
+import java.util.List;
 
 class RmArgumentsTest {
 
@@ -17,7 +17,7 @@ class RmArgumentsTest {
     f.assertThat("-f", "a", "--", "-r", "--", "-f").succeeds(
         "recursive", false,
         "force", true,
-        "otherTokens", asList("a", "-r", "--", "-f"));
+        "otherTokens", List.of("a", "-r", "--", "-f"));
   }
 
   @Test
