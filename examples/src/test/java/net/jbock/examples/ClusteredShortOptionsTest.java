@@ -18,7 +18,6 @@ class ClusteredShortOptionsTest {
         "file", "InputFile.txt");
   }
 
-
   @Test
   void testSurprise() {
     f.assertThat("-abcf=InputFile.txt").succeeds(

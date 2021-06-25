@@ -1,21 +1,18 @@
 package net.jbock.examples;
 
-import net.jbock.either.Either;
-import net.jbock.util.ErrToken;
-import net.jbock.util.NotSuccess;
+import net.jbock.examples.fixture.ParserTestFixture;
 import net.jbock.util.SuperResult;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HelplessSuperArgumentsTest {
 
   private final HelplessSuperArgumentsParser parser = new HelplessSuperArgumentsParser();
 
+  private final ParserTestFixture<SuperResult<HelplessSuperArguments>> f =
+      ParserTestFixture.create(parser::parse);
+
   @Test
   void testHelpDisabled() {
-    Either<NotSuccess, SuperResult<HelplessSuperArguments>> result = parser.parse("--help");
-    assertTrue(result.getLeft().isPresent());
-    assertTrue(result.getLeft().get() instanceof ErrToken);
+    f.assertThat("--help").fails("Invalid option: --help");
   }
 }

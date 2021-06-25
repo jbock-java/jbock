@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyList;
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RequiredArgumentsTest {
 
@@ -33,32 +31,20 @@ class RequiredArgumentsTest {
 
   @Test
   void errorRepeatedArgument() {
-    assertTrue(parser.parse("--dir", "A", "--dir", "B").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Option '--dir' is a repetition"));
-    assertTrue(parser.parse("--dir=A", "--dir", "B").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Option '--dir' is a repetition"));
-    assertTrue(parser.parse("--dir=A", "--dir=B").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Option '--dir=B' is a repetition"));
-    assertTrue(parser.parse("--dir", "A", "--dir=B").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Option '--dir=B' is a repetition"));
+    f.assertThat("--dir", "A", "--dir", "B").fails("Option '--dir' is a repetition");
+    f.assertThat("--dir=A", "--dir", "B").fails("Option '--dir' is a repetition");
+    f.assertThat("--dir=A", "--dir=B").fails("Option '--dir=B' is a repetition");
+    f.assertThat("--dir", "A", "--dir=B").fails("Option '--dir=B' is a repetition");
   }
 
   @Test
   void errorDetachedAttached() {
-    assertTrue(parser.parse("--dir", "A", "--dir=B").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Option '--dir=B' is a repetition"));
+    f.assertThat("--dir", "A", "--dir=B").fails("Option '--dir=B' is a repetition");
   }
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "\u001B[1mUSAGE\u001B[m",
         "  required-arguments --dir DIR OTHER_TOKENS...",
         "",

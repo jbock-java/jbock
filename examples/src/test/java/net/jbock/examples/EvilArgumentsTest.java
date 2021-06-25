@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
-
 class EvilArgumentsTest {
 
   private final EvilArgumentsParser parser = new EvilArgumentsParser();
@@ -28,9 +26,7 @@ class EvilArgumentsTest {
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "\u001B[1mUSAGE\u001B[m",
         "  evil-arguments [OPTIONS] --fancy FANCY --fAncy FANCY --f_ancy F_ANCY",
         "        --f__ancy F__ANCY --blub BLUB --Blub BLUB",

@@ -1,14 +1,11 @@
 package net.jbock.examples;
 
-import net.jbock.either.Either;
 import net.jbock.examples.fixture.ParserTestFixture;
-import net.jbock.util.NotSuccess;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AllCharactersArgumentsTest {
 
@@ -33,13 +30,12 @@ class AllCharactersArgumentsTest {
 
   @Test
   void fail() {
-    Either<NotSuccess, AllCharactersArguments> result = parser.parse(
+    f.assertThat(
         "--smallChar", "abc",
         "--bigChar", "A",
         "--charOpt", "X",
         "--charList", "b",
-        "--charList", "c");
-    assertTrue(result.getLeft().map(f::castToError).orElseThrow().message().contains(
-        "while converting option SMALLCHAR (--smallChar): Not a single character: <abc>"));
+        "--charList", "c").fails(
+        "while converting option SMALLCHAR (--smallChar): Not a single character: <abc>");
   }
 }

@@ -4,8 +4,6 @@ import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.asList;
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RmArgumentsTest {
 
@@ -24,16 +22,12 @@ class RmArgumentsTest {
 
   @Test
   void testInvalidToken() {
-    assertTrue(parser.parse("--foo-bar").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid option: --foo-bar"));
+    f.assertThat("--foo-bar").fails("Invalid option: --foo-bar");
   }
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "\u001B[1mUSAGE\u001B[m",
         "  rm-arguments [OPTIONS] OTHER_TOKENS...",
         "",

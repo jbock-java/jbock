@@ -7,8 +7,6 @@ import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NoNameArgumentsTest {
 
@@ -61,24 +59,17 @@ class NoNameArgumentsTest {
 
   @Test
   void errorMissingInt() {
-    String message = parser.parse("--cmos").getLeft().map(f::castToError)
-        .orElseThrow().message();
-    assertTrue(message
-        .contains("Missing required option NUMBER (-n, --number)"));
+    f.assertThat("--cmos").fails("Missing required option NUMBER (-n, --number)");
   }
 
   @Test
   void errorUnknownToken() {
-    assertTrue(parser.parse("blabla").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Excess param: blabla"));
+    f.assertThat("blabla").fails("Excess param: blabla");
   }
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "\u001B[1mUSAGE\u001B[m",
         "  no-name-arguments [OPTIONS] -n NUMBER",
         "",

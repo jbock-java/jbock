@@ -12,7 +12,6 @@ import java.util.Vector;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static net.jbock.examples.fixture.ParserTestFixture.assertArraysEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -26,19 +25,6 @@ class RestArgumentsTest {
 
   private final Map<String, String> messages = new HashMap<>();
 
-  private final String[] expected = {
-      "A very good program.",
-      "",
-      "\u001B[1mUSAGE\u001B[m",
-      "  rest-arguments [OPTIONS] REST...",
-      "",
-      "\u001B[1mPARAMETERS\u001B[m",
-      "  REST  Hello yes",
-      "",
-      "\u001B[1mOPTIONS\u001B[m",
-      "  --file FILE  This is dog",
-      ""};
-
   @BeforeEach
   void setup() {
     messages.put("the.file", "This\nis\ndog\n");
@@ -47,11 +33,35 @@ class RestArgumentsTest {
   }
 
   @Test
+  void testNoBundle() {
+    f.assertPrintsHelp(
+        "ouch",
+        "",
+        "\u001B[1mUSAGE\u001B[m",
+        "  rest-arguments [OPTIONS] REST...",
+        "",
+        "\u001B[1mPARAMETERS\u001B[m",
+        "  REST ",
+        "",
+        "\u001B[1mOPTIONS\u001B[m",
+        "  --file FILE  This is the file.",
+        "");
+  }
+
+  @Test
   void testBundleKey() {
-    String[] actual = parser.parse("--help").getLeft()
-        .map(notSuccess -> f.getUsageDocumentation(notSuccess, messages))
-        .orElseThrow();
-    assertArraysEquals(actual, expected);
+    f.assertPrintsHelp(messages,
+        "A very good program.",
+        "",
+        "\u001B[1mUSAGE\u001B[m",
+        "  rest-arguments [OPTIONS] REST...",
+        "",
+        "\u001B[1mPARAMETERS\u001B[m",
+        "  REST  Hello yes",
+        "",
+        "\u001B[1mOPTIONS\u001B[m",
+        "  --file FILE  This is dog",
+        "");
   }
 
   @Test
@@ -59,10 +69,18 @@ class RestArgumentsTest {
     ResourceBundle bundle = mock(ResourceBundle.class);
     when(bundle.getKeys()).thenReturn(new Vector<>(messages.keySet()).elements());
     messages.forEach((k, v) -> when(bundle.getString(eq(k))).thenReturn(v));
-    String[] actual = parser.parse("--help").getLeft()
-        .map(notSuccess -> f.getUsageDocumentation(notSuccess, toMap(bundle)))
-        .orElseThrow();
-    assertArraysEquals(actual, expected);
+    f.assertPrintsHelp(toMap(bundle),
+        "A very good program.",
+        "",
+        "\u001B[1mUSAGE\u001B[m",
+        "  rest-arguments [OPTIONS] REST...",
+        "",
+        "\u001B[1mPARAMETERS\u001B[m",
+        "  REST  Hello yes",
+        "",
+        "\u001B[1mOPTIONS\u001B[m",
+        "  --file FILE  This is dog",
+        "");
   }
 
   private Map<String, String> toMap(ResourceBundle bundle) {

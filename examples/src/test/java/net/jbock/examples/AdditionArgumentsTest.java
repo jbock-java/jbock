@@ -5,9 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class AdditionArgumentsTest {
 
   private final AdditionArgumentsParser parser = new AdditionArgumentsParser();
@@ -33,10 +30,7 @@ class AdditionArgumentsTest {
 
   @Test
   void wrongNumber() {
-    String message = parser.parse("--", "-a", "2").getLeft().map(f::castToError)
-        .orElseThrow().message();
-    assertTrue(message
-        .contains("while converting parameter A: For input string: \"-a\""));
+    f.assertThat("--", "-a", "2").fails("while converting parameter A: For input string: \"-a\"");
   }
 
   @Test
@@ -49,9 +43,7 @@ class AdditionArgumentsTest {
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "\u001B[1mUSAGE\u001B[m",
         "  addition-arguments A B [C]",
         "",

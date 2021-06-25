@@ -1,28 +1,26 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
-import net.jbock.Converter;
 import net.jbock.Option;
 import net.jbock.util.StringConverter;
 
 import java.util.OptionalInt;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
+/*
+ * Option '-a' is not optional, because the output type of the converter
+ * matches the option type exactly.
+ */
 @Command
 abstract class OptionalIntArguments {
 
-  private static final Function<String, Integer> PARSE_INT = Integer::parseInt;
-
-  @Option(names = {"--a", "-a"}, converter = Mapper.class)
+  @Option(names = {"--a", "-a"}, converter = MyConverter.class)
   abstract OptionalInt a();
 
-  @Converter
-  static class Mapper implements Supplier<StringConverter<OptionalInt>> {
+  static class MyConverter extends StringConverter<OptionalInt> {
 
     @Override
-    public StringConverter<OptionalInt> get() {
-      return StringConverter.create(PARSE_INT.andThen(OptionalInt::of));
+    protected OptionalInt convert(String token) {
+      return OptionalInt.of(Integer.parseInt(token));
     }
   }
 }

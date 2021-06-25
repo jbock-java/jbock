@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -46,10 +46,10 @@ class CustomMapperArgumentsTest {
     assertEquals(Optional.of(1500000000000L), parsed.optDate().map(Date::getTime));
     assertEquals(1500000000000L, parsed.dateList().get(0).getTime());
     assertEquals(Optional.of(16), parsed.verbosity().map(BigInteger::intValue));
-    assertEquals(Arrays.asList(true, false, true), parsed.booleanList());
+    assertEquals(List.of(true, false, true), parsed.booleanList());
     assertEquals(51, parsed.aRequiredInt());
-    assertEquals(Arrays.asList(1, 2, 3, 4), parsed.integerList().orElseThrow(AssertionFailedError::new));
-    assertEquals(Arrays.asList(OptionalInt.of(1), OptionalInt.empty(), OptionalInt.of(3), OptionalInt.of(4)),
+    assertEquals(List.of(1, 2, 3, 4), parsed.integerList().orElseThrow(AssertionFailedError::new));
+    assertEquals(List.of(OptionalInt.of(1), OptionalInt.empty(), OptionalInt.of(3), OptionalInt.of(4)),
         parsed.optionalInts());
     assertEquals(singleton(MyEnum.FOO), parsed.enumSet().orElseThrow(AssertionFailedError::new));
     assertEquals(Optional.of(singletonList("foo")), parsed.listWrapper());
@@ -59,8 +59,7 @@ class CustomMapperArgumentsTest {
 
   @Test
   void invalidOptions() {
-    assertTrue(parser.parse("--date", "FooBar").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("while converting option DATE (--date): For input string: \"FooBar\""));
+    f.assertThat("--date", "FooBar")
+        .fails("while converting option DATE (--date): For input string: \"FooBar\"");
   }
 }

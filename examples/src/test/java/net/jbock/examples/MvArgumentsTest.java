@@ -3,9 +3,6 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class MvArgumentsTest {
 
   private final MvArgumentsParser parser = new MvArgumentsParser();
@@ -15,30 +12,22 @@ class MvArgumentsTest {
 
   @Test
   void notEnoughArguments() {
-    assertTrue(parser.parse("a").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Missing required parameter DEST"));
+    f.assertThat("a").fails("Missing required parameter DEST");
   }
 
   @Test
   void invalidOption() {
-    assertTrue(parser.parse("-aa", "b").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Invalid option: -aa"));
+    f.assertThat("-aa", "b").fails("Invalid option: -aa");
   }
 
   @Test
   void excessParam() {
-    assertTrue(parser.parse("a", "b", "c").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Excess param: c"));
+    f.assertThat("a", "b", "c").fails("Excess param: c");
   }
 
   @Test
   void invalidOptionEscapeSequenceThird() {
-    assertTrue(parser.parse("a", "b", "--", "c").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Excess param: c"));
+    f.assertThat("a", "b", "--", "c").fails("Excess param: c");
   }
 
   @Test
@@ -57,9 +46,7 @@ class MvArgumentsTest {
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "\u001B[1mUSAGE\u001B[m",
         "  mv-arguments SOURCE DEST",
         "",

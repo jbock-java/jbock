@@ -48,6 +48,14 @@ public final class ParserTestFixture<E> {
     return new JsonAssert<>(args, parser);
   }
 
+  public void assertPrintsHelp(Map<String, String> messages, String... expected) {
+    String[] input = {"--help"};
+    Either<NotSuccess, E> result = parser.apply(input);
+    Assertions.assertTrue(result.getLeft().isPresent());
+    String[] actual = getUsageDocumentation(result.getLeft().get(), messages);
+    assertEquals(expected, actual);
+  }
+
   public void assertPrintsHelp(String... expected) {
     String[] input = {"--help"};
     Either<NotSuccess, E> result = parser.apply(input);
@@ -57,16 +65,15 @@ public final class ParserTestFixture<E> {
   }
 
   public E parse(String... args) {
-    Either<NotSuccess, E> result = parser.apply(args);
-    return result.orElseThrow(l -> new RuntimeException("expecting success but found "
-        + l.getClass()));
+    return parser.apply(args)
+        .orElseThrow(l -> new RuntimeException("expecting success but found " + l.getClass()));
   }
 
-  public static void assertEquals(String[] actual, String... expected) {
+  static void assertEquals(String[] actual, String... expected) {
     assertArraysEquals(expected, actual);
   }
 
-  public static void assertArraysEquals(String[] expected, String[] actual) {
+  static void assertArraysEquals(String[] expected, String[] actual) {
     if (expected.length != actual.length) {
       failDifferentLength(expected, actual);
     }
@@ -176,7 +183,7 @@ public final class ParserTestFixture<E> {
       fails(m::equals);
     }
 
-    public void fails(Predicate<String> messageTest) {
+    private void fails(Predicate<String> messageTest) {
       Optional<HasMessage> hasMessage = parser.apply(args).getLeft()
           .map(notSuccess -> (HasMessage) notSuccess);
       Assertions.assertTrue(hasMessage.isPresent());
@@ -187,15 +194,11 @@ public final class ParserTestFixture<E> {
     }
   }
 
-  public HasMessage castToError(NotSuccess notSuccess) {
-    return (HasMessage) notSuccess;
-  }
-
-  public String[] getUsageDocumentation(NotSuccess notSuccess) {
+  private String[] getUsageDocumentation(NotSuccess notSuccess) {
     return getUsageDocumentation(notSuccess, Map.of());
   }
 
-  public String[] getUsageDocumentation(
+  private String[] getUsageDocumentation(
       NotSuccess notSuccess,
       Map<String, String> messages) {
     TestOutputStream testOutputStream = new TestOutputStream();

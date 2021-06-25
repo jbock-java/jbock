@@ -1,31 +1,30 @@
 package net.jbock.examples;
 
 import net.jbock.either.Either;
+import net.jbock.examples.fixture.ParserTestFixture;
 import net.jbock.util.HelpRequested;
 import net.jbock.util.NotSuccess;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ListIntegerArgumentsTest {
 
   private final ListIntegerArgumentsParser parser = new ListIntegerArgumentsParser();
 
+  private final ParserTestFixture<ListIntegerArguments> f =
+      ParserTestFixture.create(parser::parse);
+
   @Test
   void testPresent() {
-    ListIntegerArguments args = parser.parse("-a", "1")
-        .orElseThrow(l -> Assertions.<RuntimeException>fail("expecting success but found: " + l));
-    assertEquals(Collections.singletonList(1), args.a());
+    f.assertThat("-a", "1").succeeds("a", List.of(1));
   }
 
   @Test
   void testAbsent() {
-    String[] emptyInput = {};
-    Either<NotSuccess, ListIntegerArguments> result = parser.parse(emptyInput);
+    Either<NotSuccess, ListIntegerArguments> result = parser.parse(/* empty */);
     assertTrue(result.getLeft().isPresent());
     assertTrue(result.getLeft().get() instanceof HelpRequested);
   }

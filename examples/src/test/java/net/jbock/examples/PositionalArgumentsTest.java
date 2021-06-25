@@ -7,8 +7,6 @@ import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PositionalArgumentsTest {
 
@@ -19,12 +17,8 @@ class PositionalArgumentsTest {
 
   @Test
   void errorMissingParameters() {
-    assertTrue(parser.parse("a").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Missing required parameter DEST"));
-    assertTrue(parser.parse("a", "b").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Missing required parameter ANOTHER_INT"));
+    f.assertThat("a").fails("Missing required parameter DEST");
+    f.assertThat("a", "b").fails("Missing required parameter ANOTHER_INT");
   }
 
   @Test
@@ -99,9 +93,7 @@ class PositionalArgumentsTest {
 
   @Test
   void testPrint() {
-    String[] actual = parser.parse("--help")
-        .getLeft().map(f::getUsageDocumentation).orElseThrow();
-    assertEquals(actual,
+    f.assertPrintsHelp(
         "\u001B[1mUSAGE\u001B[m",
         "  positional-arguments SOURCE DEST ANOTHER_INT [OPT_STRING] OTHER_TOKENS...",
         "",
