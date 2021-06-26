@@ -12,7 +12,9 @@ class AllFlagsArgumentsTest {
 
   @Test
   void tests() {
-    f.assertThat().succeeds("smallFlag", false);
-    f.assertThat("--smallFlag").succeeds("smallFlag", true);
+    f.assertThat().has(AllFlagsArguments::smallFlag, false);
+    f.assertThat("--smallFlag").has(AllFlagsArguments::smallFlag, true);
+    f.assertThat("-f").has(AllFlagsArguments::smallFlag, true);
+    f.assertThat("-s").has(AllFlagsArguments::smallFlag, true);
   }
 }
