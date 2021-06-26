@@ -34,12 +34,12 @@ class CpArgumentsTest {
 
   @Test
   void singleDashParameter() {
-    f.assertThat("a", "-").succeeds(
-        "source", "a",
-        "dest", "-",
-        "recursive", false,
-        "backup", Optional.empty(),
-        "suffix", Optional.empty());
+    f.assertThat("a", "-")
+        .has(CpArguments::source, "a")
+        .has(CpArguments::dest, "-")
+        .has(CpArguments::recursive, false)
+        .has(CpArguments::backup, Optional.empty())
+        .has(CpArguments::suffix, Optional.empty());
   }
 
   @Test
@@ -64,34 +64,40 @@ class CpArgumentsTest {
 
   @Test
   void flagInVariousPositions() {
-    Object[] expected = new Object[]{
-        "source", "a",
-        "dest", "b",
-        "recursive", true,
-        "backup", Optional.empty(),
-        "suffix", Optional.empty()};
     f.assertThat("-r", "a", "b")
-        .succeeds(expected);
+        .has(CpArguments::source, "a")
+        .has(CpArguments::dest, "b")
+        .has(CpArguments::recursive, true)
+        .has(CpArguments::backup, Optional.empty())
+        .has(CpArguments::suffix, Optional.empty());
     f.assertThat("a", "-r", "b")
-        .succeeds(expected);
+        .has(CpArguments::source, "a")
+        .has(CpArguments::dest, "b")
+        .has(CpArguments::recursive, true)
+        .has(CpArguments::backup, Optional.empty())
+        .has(CpArguments::suffix, Optional.empty());
     f.assertThat("a", "b", "-r")
-        .succeeds(expected);
+        .has(CpArguments::source, "a")
+        .has(CpArguments::dest, "b")
+        .has(CpArguments::recursive, true)
+        .has(CpArguments::backup, Optional.empty())
+        .has(CpArguments::suffix, Optional.empty());
   }
 
   @Test
   void testEnum() {
-    f.assertThat("a", "b", "--backup=NUMBERED").succeeds(
-        "source", "a",
-        "dest", "b",
-        "recursive", false,
-        "backup", Optional.of(Control.NUMBERED),
-        "suffix", Optional.empty());
-    f.assertThat("-r", "a", "b", "--backup", "SIMPLE").succeeds(
-        "source", "a",
-        "dest", "b",
-        "recursive", true,
-        "backup", Optional.of(Control.SIMPLE),
-        "suffix", Optional.empty());
+    f.assertThat("a", "b", "--backup=NUMBERED")
+        .has(CpArguments::source, "a")
+        .has(CpArguments::dest, "b")
+        .has(CpArguments::recursive, false)
+        .has(CpArguments::backup, Optional.of(Control.NUMBERED))
+        .has(CpArguments::suffix, Optional.empty());
+    f.assertThat("-r", "a", "b", "--backup", "SIMPLE")
+        .has(CpArguments::source, "a")
+        .has(CpArguments::dest, "b")
+        .has(CpArguments::recursive, true)
+        .has(CpArguments::backup, Optional.of(Control.SIMPLE))
+        .has(CpArguments::suffix, Optional.empty());
   }
 
   @Test
