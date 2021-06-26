@@ -44,8 +44,8 @@ public final class ParserTestFixture<E> {
     return new ParserTestFixture<>(parser);
   }
 
-  public JsonAssert<E> assertThat(String... args) {
-    return new JsonAssert<>(args, parser);
+  public AssertionBuilder<E> assertThat(String... args) {
+    return new AssertionBuilder<>(args, parser);
   }
 
   public void assertPrintsHelp(Map<String, String> messages, String... expected) {
@@ -114,7 +114,7 @@ public final class ParserTestFixture<E> {
     fail(String.format("Expected length: %d, actual length: %d", expected.length, actual.length));
   }
 
-  public static final class JsonAssert<E> {
+  public static class AssertionBuilder<E> {
 
     private Either<NotSuccess, E> instance;
 
@@ -129,12 +129,12 @@ public final class ParserTestFixture<E> {
 
     private final Function<String[], Either<NotSuccess, E>> parser;
 
-    private JsonAssert(String[] args, Function<String[], Either<NotSuccess, E>> parser) {
+    private AssertionBuilder(String[] args, Function<String[], Either<NotSuccess, E>> parser) {
       this.args = args;
       this.parser = parser;
     }
 
-    public <V> JsonAssert<E> has(Function<E, V> getter, V expectation) {
+    public <V> AssertionBuilder<E> has(Function<E, V> getter, V expectation) {
       Either<NotSuccess, E> parsed = getParsed();
       assertTrue(parsed.getRight().isPresent(), "Parsing was not successful");
       V result = getter.apply(getParsed().getRight().get());
