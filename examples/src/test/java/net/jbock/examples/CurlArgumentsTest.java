@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Collections.singletonList;
-
 class CurlArgumentsTest {
 
   private final CurlArgumentsParser parser = new CurlArgumentsParser();
@@ -17,150 +15,158 @@ class CurlArgumentsTest {
 
   @Test
   void testEmpty() {
-    f.assertThat().succeeds(
-        "method", Optional.empty(),
-        "headers", List.of(),
-        "verbose", false,
-        "include", false,
-        "url", List.of());
+    f.assertThat(/* empty */) // not an error, no required param
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of())
+        .has(CurlArguments::verbose, false)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
   }
 
   @Test
   void testOptional() {
-    f.assertThat("--request=").succeeds(
-        "method", Optional.of(""),
-        "headers", List.of(),
-        "verbose", false,
-        "include", false,
-        "url", List.of());
-    f.assertThat("--request= ").succeeds(
-        "method", Optional.of(" "),
-        "headers", List.of(),
-        "verbose", false,
-        "include", false,
-        "url", List.of());
-    f.assertThat("--request", "").succeeds(
-        "method", Optional.of(""),
-        "headers", List.of(),
-        "verbose", false,
-        "include", false,
-        "url", List.of());
-    f.assertThat("-XPUT").succeeds(
-        "method", Optional.of("PUT"),
-        "headers", List.of(),
-        "verbose", false,
-        "include", false,
-        "url", List.of());
-    f.assertThat("-X", "PUT").succeeds(
-        "method", Optional.of("PUT"),
-        "headers", List.of(),
-        "verbose", false,
-        "include", false,
-        "url", List.of());
-    f.assertThat("-X=PUT").succeeds(
-        "method", Optional.of("=PUT"), // !
-        "headers", List.of(),
-        "verbose", false,
-        "include", false,
-        "url", List.of());
+    f.assertThat("--request=")
+        .has(CurlArguments::method, Optional.of(""))
+        .has(CurlArguments::headers, List.of())
+        .has(CurlArguments::verbose, false)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("--request= ")
+        .has(CurlArguments::method, Optional.of(" "))
+        .has(CurlArguments::headers, List.of())
+        .has(CurlArguments::verbose, false)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("--request", "")
+        .has(CurlArguments::method, Optional.of(""))
+        .has(CurlArguments::headers, List.of())
+        .has(CurlArguments::verbose, false)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-XPUT")
+        .has(CurlArguments::method, Optional.of("PUT"))
+        .has(CurlArguments::headers, List.of())
+        .has(CurlArguments::verbose, false)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-X", "PUT")
+        .has(CurlArguments::method, Optional.of("PUT"))
+        .has(CurlArguments::headers, List.of())
+        .has(CurlArguments::verbose, false)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
   }
 
   @Test
-  void testRepeatable() {
-    f.assertThat("-H1").succeeds(
-        "method", Optional.empty(),
-        "headers", singletonList("1"),
-        "verbose", false,
-        "include", false,
-        "url", List.of());
-    f.assertThat("-H1", "-H2").succeeds(
-        "method", Optional.empty(),
-        "headers", List.of("1", "2"),
-        "verbose", false,
-        "include", false,
-        "url", List.of());
-    f.assertThat("-H", "1").succeeds(
-        "method", Optional.empty(),
-        "headers", singletonList("1"),
-        "verbose", false,
-        "include", false,
-        "url", List.of());
-    f.assertThat("-H", "1", "-H", "2").succeeds(
-        "method", Optional.empty(),
-        "headers", List.of("1", "2"),
-        "verbose", false,
-        "include", false,
-        "url", List.of());
+  void invalidUnixArgument() {
+    f.assertThat("-X=PUT")
+        .has(CurlArguments::method, Optional.of("=PUT")) // !
+        .has(CurlArguments::headers, List.of())
+        .has(CurlArguments::verbose, false)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+  }
+
+  @Test
+  void testOneHeader() {
+    f.assertThat("-H1")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of("1"))
+        .has(CurlArguments::verbose, false)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-H", "1")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of("1"))
+        .has(CurlArguments::verbose, false)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+  }
+
+  @Test
+  void listTwoHeaders() {
+    f.assertThat("-H1", "-H2")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of("1", "2"))
+        .has(CurlArguments::verbose, false)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-H", "1", "-H", "2")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of("1", "2"))
+        .has(CurlArguments::verbose, false)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
   }
 
   @Test
   void variousTests() {
-    f.assertThat("-v", "-H1").succeeds(
-        "method", Optional.empty(),
-        "headers", singletonList("1"),
-        "verbose", true,
-        "include", false,
-        "url", List.of());
-    f.assertThat("-v", "-i", "-H1").succeeds(
-        "method", Optional.empty(),
-        "headers", singletonList("1"),
-        "verbose", true,
-        "include", true,
-        "url", List.of());
-    f.assertThat("-i", "-v", "-H1").succeeds(
-        "method", Optional.empty(),
-        "headers", singletonList("1"),
-        "verbose", true,
-        "include", true,
-        "url", List.of());
-    f.assertThat("-v", "-i", "1").succeeds(
-        "method", Optional.empty(),
-        "headers", List.of(),
-        "verbose", true,
-        "include", true,
-        "url", singletonList("1"));
-    f.assertThat("-v", "-H", "1", "-H2").succeeds(
-        "method", Optional.empty(),
-        "headers", List.of("1", "2"),
-        "verbose", true,
-        "include", false,
-        "url", List.of());
-    f.assertThat("-v", "-i", "-H", "1", "-H2").succeeds(
-        "method", Optional.empty(),
-        "headers", List.of("1", "2"),
-        "verbose", true,
-        "include", true,
-        "url", List.of());
-    f.assertThat("-v", "-H1", "-H2").succeeds(
-        "method", Optional.empty(),
-        "headers", List.of("1", "2"),
-        "verbose", true,
-        "include", false,
-        "url", List.of());
-    f.assertThat("-v", "-i", "-H1", "-H2").succeeds(
-        "method", Optional.empty(),
-        "headers", List.of("1", "2"),
-        "verbose", true,
-        "include", true,
-        "url", List.of());
-    f.assertThat("-v", "-XPOST").succeeds(
-        "method", Optional.of("POST"),
-        "headers", List.of(),
-        "verbose", true,
-        "include", false,
-        "url", List.of());
-    f.assertThat("-v", "-i", "-XPOST").succeeds(
-        "method", Optional.of("POST"),
-        "headers", List.of(),
-        "verbose", true,
-        "include", true,
-        "url", List.of());
-    f.assertThat("-v", "-i", "-XPOST").succeeds(
-        "method", Optional.of("POST"),
-        "headers", List.of(),
-        "verbose", true,
-        "include", true,
-        "url", List.of());
+    f.assertThat("-v", "-H1")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of("1"))
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-v", "-i", "-H1")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of("1"))
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, true)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-i", "-v", "-H1")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of("1"))
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, true)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-v", "-i", "1")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of())
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, true)
+        .has(CurlArguments::url, List.of("1"));
+    f.assertThat("-v", "-H", "1", "-H2")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of("1", "2"))
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-v", "-i", "-H", "1", "-H2")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of("1", "2"))
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, true)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-v", "-H1", "-H2")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of("1", "2"))
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-v", "-i", "-H1", "-H2")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of("1", "2"))
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, true)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-v", "-XPOST")
+        .has(CurlArguments::method, Optional.of("POST"))
+        .has(CurlArguments::headers, List.of())
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-v", "-i", "-XPOST")
+        .has(CurlArguments::method, Optional.of("POST"))
+        .has(CurlArguments::headers, List.of())
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, true)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-v", "-i", "-XPOST")
+        .has(CurlArguments::method, Optional.of("POST"))
+        .has(CurlArguments::headers, List.of())
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, true)
+        .has(CurlArguments::url, List.of());
   }
 
   @Test
