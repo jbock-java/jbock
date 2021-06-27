@@ -14,7 +14,8 @@ class GradleArgumentsFooTest {
 
   @Test
   void testParserForNestedClass() {
-    f.assertThat("--bar=4").succeeds("bar", Optional.of(4));
+    f.assertThat("--bar=4")
+        .has(GradleArguments.Foo::bar, Optional.of(4));
   }
 
   @Test

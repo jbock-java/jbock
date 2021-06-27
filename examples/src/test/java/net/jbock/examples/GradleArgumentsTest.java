@@ -55,25 +55,25 @@ class GradleArgumentsTest {
 
   @Test
   void testDetachedLong() {
-    f.assertThat("--message", "hello").succeeds(
-        "message", Optional.of("hello"),
-        "file", List.of(),
-        "dir", Optional.empty(),
-        "cmos", false,
-        "verbose", false,
-        "otherTokens", List.of());
+    f.assertThat("--message", "hello")
+        .has(GradleArguments::message, Optional.of("hello"))
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::otherTokens, List.of());
   }
 
   @Test
   void testInterestingTokens() {
-    f.assertThat("--message=hello", "b-a-b-a", "--", "->", "<=>", "", " ").succeeds(
-        "message", Optional.of("hello"),
-        "file", List.of(),
-        "dir", Optional.empty(),
-        "cmos", false,
-        "verbose", false,
-        "mainToken", Optional.of("b-a-b-a"),
-        "otherTokens", List.of("->", "<=>", "", " "));
+    f.assertThat("--message=hello", "b-a-b-a", "--", "->", "<=>", "", " ")
+        .has(GradleArguments::message, Optional.of("hello"))
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::mainToken, Optional.of("b-a-b-a"))
+        .has(GradleArguments::otherTokens, List.of("->", "<=>", "", " "));
   }
 
   @Test
