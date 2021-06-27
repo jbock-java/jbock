@@ -19,7 +19,8 @@ class ListIntegerArgumentsTest {
 
   @Test
   void testPresent() {
-    f.assertThat("-a", "1").succeeds("a", List.of(1));
+    f.assertThat("-a", "1")
+        .has(ListIntegerArguments::a, List.of(1));
   }
 
   @Test

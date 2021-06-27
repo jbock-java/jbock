@@ -32,16 +32,16 @@ class MvArgumentsTest {
 
   @Test
   void validInvocation() {
-    f.assertThat("a", "b").succeeds(
-        "source", "a",
-        "dest", "b");
+    f.assertThat("a", "b")
+        .has(MvArguments::source, "a")
+        .has(MvArguments::dest, "b");
   }
 
   @Test
   void valid() {
-    f.assertThat("a", "b").succeeds(
-        "source", "a",
-        "dest", "b");
+    f.assertThat("a", "b")
+        .has(MvArguments::source, "a")
+        .has(MvArguments::dest, "b");
   }
 
   @Test

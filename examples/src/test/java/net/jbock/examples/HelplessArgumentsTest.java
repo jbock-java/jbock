@@ -12,29 +12,29 @@ class HelplessArgumentsTest {
 
   @Test
   void success0() {
-    f.assertThat("x").succeeds(
-        "required", "x",
-        "help", false);
+    f.assertThat("x")
+        .has(HelplessArguments::required, "x")
+        .has(HelplessArguments::help, false);
   }
 
   @Test
   void success1() {
-    f.assertThat("x", "--help").succeeds(
-        "required", "x",
-        "help", true);
+    f.assertThat("x", "--help")
+        .has(HelplessArguments::required, "x")
+        .has(HelplessArguments::help, true);
   }
 
   @Test
   void success2() {
-    f.assertThat("--help", "x").succeeds(
-        "required", "x",
-        "help", true);
+    f.assertThat("--help", "x")
+        .has(HelplessArguments::required, "x")
+        .has(HelplessArguments::help, true);
   }
 
   @Test
   void errorNoArguments() {
-    String[] emptyInput = new String[0];
-    f.assertThat(emptyInput).fails("Missing required parameter REQUIRED");
+    f.assertThat(/* empty */)
+        .fails("Missing required parameter REQUIRED");
   }
 
   @Test

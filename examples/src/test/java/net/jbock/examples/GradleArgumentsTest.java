@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Collections.singletonList;
-
 class GradleArgumentsTest {
 
   private final GradleArgumentsParser parser = new GradleArgumentsParser();
@@ -78,127 +76,144 @@ class GradleArgumentsTest {
 
   @Test
   void testPassEmptyString() {
-    f.assertThat("-m", "").succeeds(
-        "message", Optional.of(""),
-        "file", List.of(),
-        "dir", Optional.empty(),
-        "cmos", false,
-        "verbose", false,
-        "otherTokens", List.of());
-    f.assertThat("--message=").succeeds(
-        "message", Optional.of(""),
-        "file", List.of(),
-        "dir", Optional.empty(),
-        "cmos", false,
-        "verbose", false,
-        "otherTokens", List.of());
-    f.assertThat("--message", "").succeeds(
-        "message", Optional.of(""),
-        "file", List.of(),
-        "dir", Optional.empty(),
-        "cmos", false,
-        "verbose", false,
-        "otherTokens", List.of());
+    f.assertThat("-m", "")
+        .has(GradleArguments::message, Optional.of(""))
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::otherTokens, List.of());
+    f.assertThat("--message=")
+        .has(GradleArguments::message, Optional.of(""))
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::otherTokens, List.of());
+    f.assertThat("--message", "")
+        .has(GradleArguments::message, Optional.of(""))
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::otherTokens, List.of());
   }
 
   @Test
   void testAllForms() {
-    Object[] expectation = {
-        "message", Optional.of("hello"),
-        "file", List.of(),
-        "dir", Optional.empty(),
-        "cmos", false,
-        "verbose", false,
-        "otherTokens", List.of()};
-    f.assertThat("-mhello").succeeds(expectation);
-    f.assertThat("-m", "hello").succeeds(expectation);
-    f.assertThat("--message=hello").succeeds(expectation);
-    f.assertThat("--message", "hello").succeeds(expectation);
+    f.assertThat("-mhello")
+        .has(GradleArguments::message, Optional.of("hello"))
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::otherTokens, List.of());
+    f.assertThat("-m", "hello")
+        .has(GradleArguments::message, Optional.of("hello"))
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::otherTokens, List.of());
+    f.assertThat("--message=hello")
+        .has(GradleArguments::message, Optional.of("hello"))
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::otherTokens, List.of());
+    f.assertThat("--message", "hello")
+        .has(GradleArguments::message, Optional.of("hello"))
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::otherTokens, List.of());
   }
 
   @Test
   void testRepeatableShortAttached() {
-    f.assertThat("-fbar.txt").succeeds(
-        "message", Optional.empty(),
-        "file", singletonList("bar.txt"),
-        "dir", Optional.empty(),
-        "cmos", false,
-        "verbose", false,
-        "otherTokens", List.of());
-    f.assertThat("-fbar.txt", "--message=hello").succeeds(
-        "message", Optional.of("hello"),
-        "file", singletonList("bar.txt"),
-        "dir", Optional.empty(),
-        "cmos", false,
-        "verbose", false,
-        "otherTokens", List.of());
-    f.assertThat("--message=hello", "-fbar.txt").succeeds(
-        "message", Optional.of("hello"),
-        "file", singletonList("bar.txt"),
-        "dir", Optional.empty(),
-        "cmos", false,
-        "verbose", false,
-        "otherTokens", List.of());
+    f.assertThat("-fbar.txt")
+        .has(GradleArguments::message, Optional.empty())
+        .has(GradleArguments::file, List.of("bar.txt"))
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::otherTokens, List.of());
+    f.assertThat("-fbar.txt", "--message=hello")
+        .has(GradleArguments::message, Optional.of("hello"))
+        .has(GradleArguments::file, List.of("bar.txt"))
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::otherTokens, List.of());
+    f.assertThat("--message=hello", "-fbar.txt")
+        .has(GradleArguments::message, Optional.of("hello"))
+        .has(GradleArguments::file, List.of("bar.txt"))
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::otherTokens, List.of());
   }
 
   @Test
   void testFlag() {
-    f.assertThat("-c", "hello", "hello").succeeds(
-        "message", Optional.empty(),
-        "file", List.of(),
-        "dir", Optional.empty(),
-        "cmos", true,
-        "verbose", false,
-        "mainToken", Optional.of("hello"),
-        "otherTokens", singletonList("hello"));
+    f.assertThat("-c", "hello", "hello")
+        .has(GradleArguments::message, Optional.empty())
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, true)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::mainToken, Optional.of("hello"))
+        .has(GradleArguments::otherTokens, List.of("hello"));
   }
 
   @Test
   void testPositionalOnly() {
-    f.assertThat("hello", "goodbye").succeeds(
-        "message", Optional.empty(),
-        "file", List.of(),
-        "dir", Optional.empty(),
-        "cmos", false,
-        "verbose", false,
-        "mainToken", Optional.of("hello"),
-        "otherTokens", singletonList("goodbye"));
+    f.assertThat("hello", "goodbye")
+        .has(GradleArguments::message, Optional.empty())
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, false)
+        .has(GradleArguments::verbose, false)
+        .has(GradleArguments::mainToken, Optional.of("hello"))
+        .has(GradleArguments::otherTokens, List.of("goodbye"));
   }
 
   @Test
   void twoFlags() {
-    f.assertThat("-c", "-v").succeeds(
-        "message", Optional.empty(),
-        "file", List.of(),
-        "dir", Optional.empty(),
-        "cmos", true,
-        "verbose", true,
-        "otherTokens", List.of());
+    f.assertThat("-c", "-v")
+        .has(GradleArguments::message, Optional.empty())
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, true)
+        .has(GradleArguments::verbose, true)
+        .has(GradleArguments::otherTokens, List.of());
   }
 
   @Test
   void testClustering() {
-    f.assertThat("-cv").succeeds(
-        "message", Optional.empty(),
-        "file", List.of(),
-        "dir", Optional.empty(),
-        "cmos", true,
-        "verbose", true,
-        "otherTokens", List.of());
-    f.assertThat("-cvm", "hello").succeeds(
-        "message", Optional.of("hello"),
-        "file", List.of(),
-        "dir", Optional.empty(),
-        "cmos", true,
-        "verbose", true,
-        "otherTokens", List.of());
-    f.assertThat("-cvmhello").succeeds(
-        "message", Optional.of("hello"),
-        "file", List.of(),
-        "dir", Optional.empty(),
-        "cmos", true,
-        "verbose", true,
-        "otherTokens", List.of());
+    f.assertThat("-cv")
+        .has(GradleArguments::message, Optional.empty())
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, true)
+        .has(GradleArguments::verbose, true)
+        .has(GradleArguments::otherTokens, List.of());
+    f.assertThat("-cvm", "hello")
+        .has(GradleArguments::message, Optional.of("hello"))
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, true)
+        .has(GradleArguments::verbose, true)
+        .has(GradleArguments::otherTokens, List.of());
+    f.assertThat("-cvmhello")
+        .has(GradleArguments::message, Optional.of("hello"))
+        .has(GradleArguments::file, List.of())
+        .has(GradleArguments::dir, Optional.empty())
+        .has(GradleArguments::cmos, true)
+        .has(GradleArguments::verbose, true)
+        .has(GradleArguments::otherTokens, List.of());
   }
 
   @Test

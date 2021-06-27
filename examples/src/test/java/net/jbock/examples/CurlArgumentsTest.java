@@ -171,18 +171,18 @@ class CurlArgumentsTest {
 
   @Test
   void testClustering() {
-    f.assertThat("-H0", "-vH1", "-H2").succeeds(
-        "method", Optional.empty(),
-        "headers", List.of("0", "1", "2"),
-        "verbose", true,
-        "include", false,
-        "url", List.of());
-    f.assertThat("-vXPOST").succeeds(
-        "method", Optional.of("POST"),
-        "headers", List.of(),
-        "verbose", true,
-        "include", false,
-        "url", List.of());
+    f.assertThat("-H0", "-vH1", "-H2")
+        .has(CurlArguments::method, Optional.empty())
+        .has(CurlArguments::headers, List.of("0", "1", "2"))
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
+    f.assertThat("-vXPOST")
+        .has(CurlArguments::method, Optional.of("POST"))
+        .has(CurlArguments::headers, List.of())
+        .has(CurlArguments::verbose, true)
+        .has(CurlArguments::include, false)
+        .has(CurlArguments::url, List.of());
   }
 
   @Test

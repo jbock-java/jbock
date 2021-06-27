@@ -15,44 +15,50 @@ class NoNameArgumentsTest {
 
   @Test
   void testDifferentOrder() {
-    Object[] expected = {
-        "message", Optional.of("m"),
-        "file", List.of("f", "o", "o"),
-        "verbosity", Optional.empty(),
-        "number", 1,
-        "cmos", true};
     f.assertThat("--message=m", "--file=f", "--file=o", "--file=o", "--cmos", "-n1")
-        .succeeds(expected);
+        .has(NoNameArguments::message, Optional.of("m"))
+        .has(NoNameArguments::file, List.of("f", "o", "o"))
+        .has(NoNameArguments::verbosity, Optional.empty())
+        .has(NoNameArguments::number, 1)
+        .has(NoNameArguments::cmos, true);
     f.assertThat("-n1", "--cmos", "--message=m", "--file=f", "--file=o", "--file=o")
-        .succeeds(expected);
+        .has(NoNameArguments::message, Optional.of("m"))
+        .has(NoNameArguments::file, List.of("f", "o", "o"))
+        .has(NoNameArguments::verbosity, Optional.empty())
+        .has(NoNameArguments::number, 1)
+        .has(NoNameArguments::cmos, true);
     f.assertThat("--file", "f", "--message=m", "--file", "o", "--cmos", "-n1", "--file", "o")
-        .succeeds(expected);
+        .has(NoNameArguments::message, Optional.of("m"))
+        .has(NoNameArguments::file, List.of("f", "o", "o"))
+        .has(NoNameArguments::verbosity, Optional.empty())
+        .has(NoNameArguments::number, 1)
+        .has(NoNameArguments::cmos, true);
   }
 
   @Test
   void testFlag() {
-    f.assertThat("--cmos", "-n1").succeeds(
-        "message", Optional.empty(),
-        "file", List.of(),
-        "verbosity", Optional.empty(),
-        "number", 1,
-        "cmos", true);
+    f.assertThat("--cmos", "-n1")
+        .has(NoNameArguments::message, Optional.empty())
+        .has(NoNameArguments::file, List.of())
+        .has(NoNameArguments::verbosity, Optional.empty())
+        .has(NoNameArguments::number, 1)
+        .has(NoNameArguments::cmos, true);
   }
 
   @Test
   void testOptionalInt() {
-    f.assertThat("-v", "1", "-n1").succeeds(
-        "message", Optional.empty(),
-        "file", List.of(),
-        "verbosity", Optional.of(1),
-        "number", 1,
-        "cmos", false);
-    f.assertThat("-n1").succeeds(
-        "message", Optional.empty(),
-        "file", List.of(),
-        "verbosity", Optional.empty(),
-        "number", 1,
-        "cmos", false);
+    f.assertThat("-v", "1", "-n1")
+        .has(NoNameArguments::message, Optional.empty())
+        .has(NoNameArguments::file, List.of())
+        .has(NoNameArguments::verbosity, Optional.of(1))
+        .has(NoNameArguments::number, 1)
+        .has(NoNameArguments::cmos, true);
+    f.assertThat("-n1")
+        .has(NoNameArguments::message, Optional.empty())
+        .has(NoNameArguments::file, List.of())
+        .has(NoNameArguments::verbosity, Optional.empty())
+        .has(NoNameArguments::number, 1)
+        .has(NoNameArguments::cmos, false);
   }
 
   @Test
