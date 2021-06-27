@@ -52,7 +52,7 @@ class NoNameArgumentsTest {
         .has(NoNameArguments::file, List.of())
         .has(NoNameArguments::verbosity, Optional.of(1))
         .has(NoNameArguments::number, 1)
-        .has(NoNameArguments::cmos, true);
+        .has(NoNameArguments::cmos, false);
     f.assertThat("-n1")
         .has(NoNameArguments::message, Optional.empty())
         .has(NoNameArguments::file, List.of())
