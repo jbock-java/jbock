@@ -19,7 +19,7 @@ class OptionalIntArgumentsTest {
 
   @Test
   void testPresent() {
-    f.assertThat("-a", "1").succeeds("a", OptionalInt.of(1));
+    f.assertThat("-a", "1").has(OptionalIntArguments::a, OptionalInt.of(1));
   }
 
   @Test

@@ -21,7 +21,9 @@ class SimpleArgumentsTest {
 
   @Test
   void success() {
-    f.assertThat("--file", "1").succeeds("extract", false, "file", Optional.of("1"));
+    f.assertThat("--file", "1")
+        .has(SimpleArguments::extract, false)
+        .has(SimpleArguments::file, Optional.of("1"));
   }
 
   @Test

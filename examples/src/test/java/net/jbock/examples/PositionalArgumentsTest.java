@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Collections.singletonList;
-
 class PositionalArgumentsTest {
 
   private final PositionalArgumentsParser parser = new PositionalArgumentsParser();
@@ -23,72 +21,72 @@ class PositionalArgumentsTest {
 
   @Test
   void testRequiredOnly() {
-    f.assertThat("a", "b", "1").succeeds(
-        "source", "a",
-        "dest", "b",
-        "anotherInt", 1,
-        "optString", Optional.empty(),
-        "otherTokens", List.of());
+    f.assertThat("a", "b", "1")
+        .has(PositionalArguments::source, "a")
+        .has(PositionalArguments::dest, "b")
+        .has(PositionalArguments::anotherInt, 1)
+        .has(PositionalArguments::optString, Optional.empty())
+        .has(PositionalArguments::otherTokens, List.of());
   }
 
   @Test
   void testEmpty() {
-    f.assertThat("", "", "0").succeeds(
-        "source", "",
-        "dest", "",
-        "anotherInt", 0,
-        "optString", Optional.empty(),
-        "otherTokens", List.of());
+    f.assertThat("", "", "0")
+        .has(PositionalArguments::source, "")
+        .has(PositionalArguments::dest, "")
+        .has(PositionalArguments::anotherInt, 0)
+        .has(PositionalArguments::optString, Optional.empty())
+        .has(PositionalArguments::otherTokens, List.of());
   }
 
   @Test
   void testNoEscape() {
-    f.assertThat("a", "b", "1", "c", "d").succeeds(
-        "source", "a",
-        "dest", "b",
-        "anotherInt", 1,
-        "optString", Optional.of("c"),
-        "otherTokens", singletonList("d"));
+    f.assertThat("a", "b", "1", "c", "d")
+        .has(PositionalArguments::source, "a")
+        .has(PositionalArguments::dest, "b")
+        .has(PositionalArguments::anotherInt, 1)
+        .has(PositionalArguments::optString, Optional.of("c"))
+        .has(PositionalArguments::otherTokens, List.of("d"));
   }
 
   @Test
   void testEscapeAllOPPositions() {
-    f.assertThat("--", "-a", "-b", "-1", "-c", "-e").succeeds(
-        "source", "-a",
-        "dest", "-b",
-        "anotherInt", -1,
-        "optString", Optional.of("-c"),
-        "otherTokens", singletonList("-e"));
-    f.assertThat("a", "--", "-b", "-1", "-c", "-e").succeeds(
-        "source", "a",
-        "dest", "-b",
-        "anotherInt", -1,
-        "optString", Optional.of("-c"),
-        "otherTokens", singletonList("-e"));
-    f.assertThat("a", "b", "--", "-1", "-c", "-e").succeeds(
-        "source", "a",
-        "dest", "b",
-        "anotherInt", -1,
-        "optString", Optional.of("-c"),
-        "otherTokens", singletonList("-e"));
-    f.assertThat("a", "b", "1", "--", "-c", "-e").succeeds(
-        "source", "a",
-        "dest", "b",
-        "anotherInt", 1,
-        "optString", Optional.of("-c"),
-        "otherTokens", singletonList("-e"));
-    f.assertThat("a", "b", "1", "c", "--", "-e").succeeds(
-        "source", "a",
-        "dest", "b",
-        "anotherInt", 1,
-        "optString", Optional.of("c"),
-        "otherTokens", singletonList("-e"));
-    f.assertThat("a", "b", "1", "c", "e", "--").succeeds(
-        "source", "a",
-        "dest", "b",
-        "anotherInt", 1,
-        "optString", Optional.of("c"),
-        "otherTokens", singletonList("e"));
+    f.assertThat("--", "-a", "-b", "-1", "-c", "-e")
+        .has(PositionalArguments::source, "-a")
+        .has(PositionalArguments::dest, "-b")
+        .has(PositionalArguments::anotherInt, -1)
+        .has(PositionalArguments::optString, Optional.of("-c"))
+        .has(PositionalArguments::otherTokens, List.of("-e"));
+    f.assertThat("a", "--", "-b", "-1", "-c", "-e")
+        .has(PositionalArguments::source, "a")
+        .has(PositionalArguments::dest, "-b")
+        .has(PositionalArguments::anotherInt, -1)
+        .has(PositionalArguments::optString, Optional.of("-c"))
+        .has(PositionalArguments::otherTokens, List.of("-e"));
+    f.assertThat("a", "b", "--", "-1", "-c", "-e")
+        .has(PositionalArguments::source, "a")
+        .has(PositionalArguments::dest, "b")
+        .has(PositionalArguments::anotherInt, -1)
+        .has(PositionalArguments::optString, Optional.of("-c"))
+        .has(PositionalArguments::otherTokens, List.of("-e"));
+    f.assertThat("a", "b", "1", "--", "-c", "-e")
+        .has(PositionalArguments::source, "a")
+        .has(PositionalArguments::dest, "b")
+        .has(PositionalArguments::anotherInt, 1)
+        .has(PositionalArguments::optString, Optional.of("-c"))
+        .has(PositionalArguments::otherTokens, List.of("-e"));
+    f.assertThat("a", "b", "1", "c", "--", "-e")
+        .has(PositionalArguments::source, "a")
+        .has(PositionalArguments::dest, "b")
+        .has(PositionalArguments::anotherInt, 1)
+        .has(PositionalArguments::optString, Optional.of("c"))
+        .has(PositionalArguments::otherTokens, List.of("-e"));
+    f.assertThat("a", "b", "1", "c", "e", "--")
+        .has(PositionalArguments::source, "a")
+        .has(PositionalArguments::dest, "b")
+        .has(PositionalArguments::anotherInt, 1)
+        .has(PositionalArguments::optString, Optional.of("c"))
+        .has(PositionalArguments::otherTokens, List.of("e"));
   }
 
   @Test

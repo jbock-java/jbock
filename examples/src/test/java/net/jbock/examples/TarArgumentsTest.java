@@ -12,18 +12,18 @@ class TarArgumentsTest {
 
   @Test
   void testExtract() {
-    f.assertThat("-x", "-f", "foo.tar").succeeds(
-        "extract", true,
-        "create", false,
-        "verbose", false,
-        "compress", false,
-        "file", "foo.tar");
-    f.assertThat("-v", "-x", "-f", "foo.tar").succeeds(
-        "extract", true,
-        "create", false,
-        "verbose", true,
-        "compress", false,
-        "file", "foo.tar");
+    f.assertThat("-x", "-f", "foo.tar")
+        .has(TarArguments::extract, true)
+        .has(TarArguments::create, false)
+        .has(TarArguments::verbose, false)
+        .has(TarArguments::compress, false)
+        .has(TarArguments::file, "foo.tar");
+    f.assertThat("-v", "-x", "-f", "foo.tar")
+        .has(TarArguments::extract, true)
+        .has(TarArguments::create, false)
+        .has(TarArguments::verbose, true)
+        .has(TarArguments::compress, false)
+        .has(TarArguments::file, "foo.tar");
   }
 
   @Test

@@ -18,9 +18,9 @@ class RequiredArgumentsTest {
 
   @Test
   void success() {
-    f.assertThat("--dir", "A").succeeds(
-        "dir", "A",
-        "otherTokens", List.of());
+    f.assertThat("--dir", "A")
+        .has(RequiredArguments::dir, "A")
+        .has(RequiredArguments::otherTokens, List.of());
   }
 
   @Test

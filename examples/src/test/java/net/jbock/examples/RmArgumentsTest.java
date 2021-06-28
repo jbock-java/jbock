@@ -14,10 +14,10 @@ class RmArgumentsTest {
 
   @Test
   void testRest() {
-    f.assertThat("-f", "a", "--", "-r", "--", "-f").succeeds(
-        "recursive", false,
-        "force", true,
-        "otherTokens", List.of("a", "-r", "--", "-f"));
+    f.assertThat("-f", "a", "--", "-r", "--", "-f")
+        .has(RmArguments::recursive, false)
+        .has(RmArguments::force, true)
+        .has(RmArguments::otherTokens, List.of("a", "-r", "--", "-f"));
   }
 
   @Test

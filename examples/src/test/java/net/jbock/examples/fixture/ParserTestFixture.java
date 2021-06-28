@@ -6,8 +6,6 @@ import net.jbock.util.HasMessage;
 import net.jbock.util.NotSuccess;
 import org.junit.jupiter.api.Assertions;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -140,29 +138,6 @@ public final class ParserTestFixture<E> {
       V result = getter.apply(getParsed().getRight().get());
       Assertions.assertEquals(expectation, result);
       return this;
-    }
-
-    /**
-     * Assert that the parsing result matches the expected output.
-     *
-     * @param expected key-value pairs
-     */
-    public void succeeds(Object... expected) {
-      Either<NotSuccess, E> parsed = getParsed();
-      try {
-        assertTrue(parsed.getRight().isPresent(), "Parsing was not successful");
-        for (int i = 0; i < expected.length; i += 2) {
-          String key = (String) expected[i];
-          Object expectedValue = expected[i + 1];
-          Method method = parsed.getRight().get().getClass().getDeclaredMethod(key);
-          method.setAccessible(true);
-          Object result = method.invoke(parsed.getRight().get());
-          Assertions.assertEquals(expectedValue, result,
-              String.format("At `%s`: expecting %s but found %s", key, expectedValue, result));
-        }
-      } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-        fail(e);
-      }
     }
 
     public void fails(String m) {
