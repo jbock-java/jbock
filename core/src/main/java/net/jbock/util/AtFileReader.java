@@ -8,9 +8,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
@@ -72,7 +72,7 @@ public final class AtFileReader {
   }
 
   private List<String> readAtLines(List<String> lines) {
-    Iterator<String> it = removeTrailingEmptyLines(lines);
+    Iterator<String> it = removeEmptyLines(lines);
     List<String> tokens = new ArrayList<>(lines.size());
     while (it.hasNext()) {
       tokens.add(readTokenFromAtFile(it));
@@ -80,13 +80,11 @@ public final class AtFileReader {
     return tokens;
   }
 
-  private Iterator<String> removeTrailingEmptyLines(List<String> lines) {
-    ArrayList<String> arrayLines = new ArrayList<>(lines);
-    Collections.reverse(arrayLines);
-    ArrayList<String> copy = new ArrayList<>(arrayLines.size());
-    arrayLines.stream().dropWhile(String::isEmpty).forEach(copy::add);
-    Collections.reverse(copy);
-    return copy.iterator();
+  private Iterator<String> removeEmptyLines(List<String> lines) {
+    return lines.stream()
+        .filter(line -> !line.isEmpty())
+        .collect(Collectors.toList())
+        .iterator();
   }
 
   private String readTokenFromAtFile(Iterator<String> it) {

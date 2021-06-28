@@ -24,9 +24,7 @@ class AtFileReaderTest {
         "");
     List<String> tokens = invokeReadAtLines(lines);
     Assertions.assertEquals(List.of(
-        "",
         "1",
-        "",
         "2\" \\3  4 "),
         tokens);
   }
