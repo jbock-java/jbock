@@ -14,11 +14,13 @@ class OptionalIntArgumentsOptionalTest {
 
   @Test
   void testPresent() {
-    f.assertThat("-a", "1").succeeds("a", OptionalInt.of(1));
+    f.assertThat("-a", "1")
+        .has(OptionalIntArgumentsOptional::a, OptionalInt.of(1));
   }
 
   @Test
   void testAbsent() {
-    f.assertThat(/* empty */).succeeds("a", OptionalInt.empty());
+    f.assertThat(/* empty */)
+        .has(OptionalIntArgumentsOptional::a, OptionalInt.empty());
   }
 }
