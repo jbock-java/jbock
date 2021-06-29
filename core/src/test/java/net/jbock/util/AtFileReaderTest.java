@@ -40,4 +40,10 @@ class AtFileReaderTest {
     List<String> tokens = reader.readAtLines(List.of("'\\n'"));
     assertEquals(List.of("\\n"), tokens);
   }
+
+  @Test
+  void testSingleQuotesEmpty() {
+    List<String> tokens = reader.readAtLines(List.of("''"));
+    assertEquals(List.of(""), tokens);
+  }
 }
