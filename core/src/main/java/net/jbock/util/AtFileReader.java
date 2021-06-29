@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
@@ -63,7 +62,8 @@ public final class AtFileReader {
     try {
       Path path = Paths.get(fileName);
       List<String> lines = Files.readAllLines(path);
-      List<String> expanded = new ArrayList<>(readAtLines(lines));
+      List<String> atLines = readAtLines(lines);
+      List<String> expanded = new ArrayList<>(atLines);
       expanded.addAll(Arrays.asList(args).subList(1, args.length));
       return right(expanded);
     } catch (Exception e) {
@@ -72,7 +72,9 @@ public final class AtFileReader {
   }
 
   List<String> readAtLines(List<String> lines) {
-    Iterator<String> it = removeEmptyLines(lines);
+    Iterator<String> it = lines.stream()
+        .filter(line -> !line.isEmpty())
+        .iterator();
     List<String> tokens = new ArrayList<>(lines.size());
     while (it.hasNext()) {
       tokens.add(readTokenFromAtFile(it));
@@ -80,23 +82,16 @@ public final class AtFileReader {
     return tokens;
   }
 
-  private Iterator<String> removeEmptyLines(List<String> lines) {
-    return lines.stream()
-        .filter(line -> !line.isEmpty())
-        .collect(Collectors.toList())
-        .iterator();
-  }
-
   private String readTokenFromAtFile(Iterator<String> it) {
     StringBuilder sb = new StringBuilder();
-    boolean esc;
+    LineResult esc;
     do {
       esc = readLine(it.next(), sb);
-    } while (esc && it.hasNext());
+    } while (esc == LineResult.CONTINUE && it.hasNext());
     return sb.toString();
   }
 
-  private boolean readLine(String line, StringBuilder sb) {
+  private LineResult readLine(String line, StringBuilder sb) {
     boolean esc = false;
     boolean quote = false;
     int length = line.length();
@@ -122,7 +117,11 @@ public final class AtFileReader {
         sb.append(c);
       }
     }
-    return esc;
+    return esc ? LineResult.CONTINUE : LineResult.END;
+  }
+
+  enum LineResult {
+    CONTINUE, END, ERROR
   }
 
   private char escapeValue(char c) {
