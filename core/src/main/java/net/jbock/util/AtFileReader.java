@@ -71,7 +71,7 @@ public final class AtFileReader {
     }
   }
 
-  private List<String> readAtLines(List<String> lines) {
+  List<String> readAtLines(List<String> lines) {
     Iterator<String> it = removeEmptyLines(lines);
     List<String> tokens = new ArrayList<>(lines.size());
     while (it.hasNext()) {
@@ -98,10 +98,17 @@ public final class AtFileReader {
 
   private boolean readLine(String line, StringBuilder sb) {
     boolean esc = false;
+    boolean quote = false;
     int length = line.length();
     for (int i = 0; i < length; i++) {
       char c = line.charAt(i);
-      if (c == '\\') {
+      if (c == '\'') {
+        if (esc) {
+          sb.append('\'');
+        } else {
+          quote = !quote;
+        }
+      } else if (!quote && c == '\\') {
         if (esc) {
           sb.append('\\');
           esc = false;
@@ -111,7 +118,7 @@ public final class AtFileReader {
       } else if (esc) {
         sb.append(escapeValue(c));
         esc = false;
-      } else {
+      } else { // either quoted or not escaped
         sb.append(c);
       }
     }

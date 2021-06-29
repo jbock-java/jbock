@@ -1,10 +1,10 @@
 package net.jbock.util;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AtFileReaderTest {
 
@@ -22,22 +22,22 @@ class AtFileReaderTest {
         "",
         "",
         "");
-    List<String> tokens = invokeReadAtLines(lines);
-    Assertions.assertEquals(List.of(
+    List<String> tokens = reader.readAtLines(lines);
+    assertEquals(List.of(
         "1",
         "2\" \\3  4 "),
         tokens);
   }
 
-  private List<String> invokeReadAtLines(List<String> lines) {
-    try {
-      Method readAtLines = reader.getClass().getDeclaredMethod("readAtLines", List.class);
-      readAtLines.setAccessible(true);
-      @SuppressWarnings("unchecked")
-      List<String> tokens = (List<String>) readAtLines.invoke(reader, lines);
-      return tokens;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+  @Test
+  void testNewline() {
+    List<String> tokens = reader.readAtLines(List.of("\\n"));
+    assertEquals(List.of("\n"), tokens);
+  }
+
+  @Test
+  void testSingleQuotes() {
+    List<String> tokens = reader.readAtLines(List.of("'\\n'"));
+    assertEquals(List.of("\\n"), tokens);
   }
 }
