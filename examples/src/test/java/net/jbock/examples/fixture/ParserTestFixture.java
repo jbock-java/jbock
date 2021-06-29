@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -50,16 +49,14 @@ public final class ParserTestFixture<E> {
     String[] input = {"--help"};
     Either<NotSuccess, E> result = parser.apply(input);
     Assertions.assertTrue(result.getLeft().isPresent());
-    String[] actual = getUsageDocumentation(result.getLeft().get(), messages);
-    assertEquals(expected, actual);
+    result.acceptLeft(l -> {
+      String[] actual = getUsageDocumentation(l, messages);
+      assertEquals(expected, actual);
+    });
   }
 
   public void assertPrintsHelp(String... expected) {
-    String[] input = {"--help"};
-    Either<NotSuccess, E> result = parser.apply(input);
-    Assertions.assertTrue(result.getLeft().isPresent());
-    String[] actual = getUsageDocumentation(result.getLeft().get());
-    assertEquals(expected, actual);
+    assertPrintsHelp(Map.of(), expected);
   }
 
   public E parse(String... args) {
@@ -135,8 +132,10 @@ public final class ParserTestFixture<E> {
     public <V> AssertionBuilder<E> has(Function<E, V> getter, V expectation) {
       Either<NotSuccess, E> parsed = getParsed();
       assertTrue(parsed.getRight().isPresent(), "Parsing was not successful");
-      V result = getter.apply(getParsed().getRight().get());
-      Assertions.assertEquals(expectation, result);
+      parsed.acceptRight(r -> {
+        V result = getter.apply(r);
+        Assertions.assertEquals(expectation, result);
+      });
       return this;
     }
 
@@ -145,18 +144,16 @@ public final class ParserTestFixture<E> {
     }
 
     private void fails(Predicate<String> messageTest) {
-      Optional<HasMessage> hasMessage = parser.apply(args).getLeft()
-          .map(notSuccess -> (HasMessage) notSuccess);
-      Assertions.assertTrue(hasMessage.isPresent());
-      boolean success = messageTest.test(hasMessage.get().message());
-      if (!success) {
-        Assertions.fail("Assertion failed, message: " + hasMessage.get().message());
-      }
+      Either<NotSuccess, E> result = parser.apply(args);
+      Assertions.assertTrue(result.getLeft().isPresent());
+      result.mapLeft(notSuccess -> (HasMessage) notSuccess)
+          .acceptLeft(hasMessage -> {
+            boolean success = messageTest.test(hasMessage.message());
+            if (!success) {
+              Assertions.fail("Assertion failed, message: " + hasMessage.message());
+            }
+          });
     }
-  }
-
-  private String[] getUsageDocumentation(NotSuccess notSuccess) {
-    return getUsageDocumentation(notSuccess, Map.of());
   }
 
   private String[] getUsageDocumentation(

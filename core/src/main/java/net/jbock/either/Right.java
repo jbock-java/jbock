@@ -1,6 +1,7 @@
 package net.jbock.either;
 
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.function.Function;
 
 final class Right<L, R> extends Either<L, R> {
@@ -21,13 +22,18 @@ final class Right<L, R> extends Either<L, R> {
   }
 
   @Override
-  public Optional<L> getLeft() {
-    return Optional.empty();
+  public UnbalancedLeft<L> getLeft() {
+    return UnbalancedLeft.empty();
   }
 
   @Override
-  public Optional<R> getRight() {
-    return Optional.of(value);
+  public boolean isLeft() {
+    return false;
+  }
+
+  @Override
+  public UnbalancedRight<R> getRight() {
+    return UnbalancedRight.of(Optional.of(value));
   }
 
   @Override

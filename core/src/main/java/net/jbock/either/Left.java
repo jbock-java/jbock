@@ -21,13 +21,18 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public Optional<L> getLeft() {
-    return Optional.of(value);
+  public UnbalancedLeft<L> getLeft() {
+    return UnbalancedLeft.of(Optional.of(value));
   }
 
   @Override
-  public Optional<R> getRight() {
-    return Optional.empty();
+  public boolean isLeft() {
+    return true;
+  }
+
+  @Override
+  public UnbalancedRight<R> getRight() {
+    return UnbalancedRight.empty();
   }
 
   @Override

@@ -14,10 +14,24 @@ import static net.jbock.either.Either.right;
  */
 public final class UnbalancedLeft<L> {
 
+  private static final UnbalancedLeft<?> EMPTY = new UnbalancedLeft<>(Optional.empty());
+
   private final Optional<? extends L> left;
 
-  UnbalancedLeft(Optional<? extends L> left) {
+  private UnbalancedLeft(Optional<? extends L> left) {
     this.left = left;
+  }
+
+  static <L> UnbalancedLeft<L> of(Optional<? extends L> left) {
+    if (left.isEmpty()) {
+      return empty();
+    }
+    return new UnbalancedLeft<>(left);
+  }
+
+  @SuppressWarnings("unchecked")
+  static <L> UnbalancedLeft<L> empty() {
+    return (UnbalancedLeft<L>) EMPTY;
   }
 
   /**
@@ -43,6 +57,15 @@ public final class UnbalancedLeft<L> {
    */
   public <R> Either<L, R> orElseThrow() {
     return Either.left(left.orElseThrow());
+  }
+
+  /**
+   * If a Left value is present, returns true, otherwise false.
+   *
+   * @return {@code true} if a value is present, otherwise {@code false}
+   */
+  public boolean isPresent() {
+    return left.isPresent();
   }
 
   /**

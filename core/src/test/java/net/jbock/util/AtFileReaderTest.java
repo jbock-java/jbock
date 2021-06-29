@@ -1,10 +1,10 @@
 package net.jbock.util;
 
 import net.jbock.either.Either;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,6 +53,8 @@ class AtFileReaderTest {
   private List<String> read(List<String> lines) {
     Either<AtFileReader.LineResult, List<String>> either = reader.readAtLines(lines);
     assertTrue(either.getRight().isPresent());
-    return either.getRight().get();
+    return either.fold(l -> {
+      throw new RuntimeException();
+    }, Function.identity());
   }
 }

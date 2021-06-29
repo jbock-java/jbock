@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 class RequiredArgumentsTest {
 
   private final RequiredArgumentsParser parser = new RequiredArgumentsParser();
@@ -27,7 +29,7 @@ class RequiredArgumentsTest {
   void errorDirMissing() {
     Either<NotSuccess, RequiredArguments> result = new RequiredArgumentsParser().parse(/* empty */);
     Assertions.assertTrue(result.getLeft().isPresent());
-    Assertions.assertTrue(result.getLeft().get() instanceof HelpRequested);
+    result.acceptLeft(l -> assertTrue(l instanceof HelpRequested));
   }
 
   @Test

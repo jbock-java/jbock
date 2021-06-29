@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
@@ -82,11 +81,10 @@ public final class AtFileReader {
     List<String> tokens = new ArrayList<>(lines.size());
     while (it.hasNext()) {
       Either<LineResult, String> result = readTokenFromAtFile(it);
-      Optional<LineResult> left = result.getLeft();
-      if (left.isPresent()) {
-        return Either.unbalancedLeft(left).orElseThrow();
+      if (result.isLeft()) {
+        return result.getLeft().orElseThrow();
       } else {
-        result.getRight().ifPresent(tokens::add);
+        result.acceptRight(tokens::add);
       }
     }
     return right(tokens);
@@ -106,7 +104,7 @@ public final class AtFileReader {
 
   private LineResult readLine(String line, StringBuilder sb) {
     boolean esc = false;
-    boolean quote = false;
+    Mode mode = Mode.REGULAR;
     int length = line.length();
     for (int i = 0; i < length; i++) {
       char c = line.charAt(i);
@@ -114,9 +112,9 @@ public final class AtFileReader {
         if (esc) {
           sb.append('\'');
         } else {
-          quote = !quote;
+          mode = mode.toggle(Mode.SINGLE_QUOTE);
         }
-      } else if (!quote && c == '\\') {
+      } else if (mode != Mode.SINGLE_QUOTE && c == '\\') {
         if (esc) {
           sb.append('\\');
           esc = false;
@@ -130,11 +128,22 @@ public final class AtFileReader {
         sb.append(c);
       }
     }
+    if (mode != Mode.REGULAR) {
+      return LineResult.UNMATCHED_QUOTE;
+    }
     return esc ? LineResult.CONTINUE : LineResult.END;
   }
 
+  enum Mode {
+    SINGLE_QUOTE, QUOTE, REGULAR;
+
+    Mode toggle(Mode other) {
+      return this == other ? REGULAR : other;
+    }
+  }
+
   enum LineResult {
-    CONTINUE, END, ERROR() {
+    CONTINUE, END, UNMATCHED_QUOTE() {
       @Override
       boolean isError() {
         return true;
@@ -142,7 +151,7 @@ public final class AtFileReader {
 
       @Override
       String message() {
-        return "at-file syntax error";
+        return "unmatched quote";
       }
     };
 

@@ -27,6 +27,6 @@ class ListIntegerArgumentsTest {
   void testAbsent() {
     Either<NotSuccess, ListIntegerArguments> result = parser.parse(/* empty */);
     assertTrue(result.getLeft().isPresent());
-    assertTrue(result.getLeft().get() instanceof HelpRequested);
+    result.acceptLeft(l -> assertTrue(l instanceof HelpRequested));
   }
 }

@@ -1,12 +1,12 @@
 package net.jbock.either;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EitherTest {
 
@@ -14,8 +14,8 @@ class EitherTest {
   void testSingleLeft() {
     Either<String, Integer> hi = Either.left("hi");
     Either<String, List<Integer>> either = Stream.of(hi).collect(Either.toValidList());
-    Assertions.assertTrue(either.getLeft().isPresent());
-    Assertions.assertEquals("hi", either.getLeft().get());
+    assertTrue(either.getLeft().isPresent());
+    either.acceptLeft(l -> assertEquals("hi", l));
   }
 
   @Test
@@ -24,7 +24,7 @@ class EitherTest {
         Either.right(5),
         Either.right(6),
         Either.right(7)).collect(Either.toValidList());
-    Assertions.assertTrue(either.getRight().isPresent());
-    Assertions.assertEquals(List.of(5, 6, 7), either.getRight().get());
+    assertTrue(either.getRight().isPresent());
+    either.acceptRight(r -> assertEquals(List.of(5, 6, 7), r));
   }
 }

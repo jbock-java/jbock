@@ -13,10 +13,24 @@ import static net.jbock.either.Either.narrow;
  */
 public final class UnbalancedRight<R> {
 
+  private static final UnbalancedRight<?> EMPTY = new UnbalancedRight<>(Optional.empty());
+
   private final Optional<? extends R> right;
 
-  UnbalancedRight(Optional<? extends R> right) {
+  private UnbalancedRight(Optional<? extends R> right) {
     this.right = right;
+  }
+
+  static <R> UnbalancedRight<R> of(Optional<? extends R> right) {
+    if (right.isEmpty()) {
+      return empty();
+    }
+    return new UnbalancedRight<>(right);
+  }
+
+  @SuppressWarnings("unchecked")
+  static <L> UnbalancedRight<L> empty() {
+    return (UnbalancedRight<L>) EMPTY;
   }
 
   /**
@@ -30,6 +44,15 @@ public final class UnbalancedRight<R> {
    */
   public <L> Either<L, R> orElseLeft(Supplier<? extends L> left) {
     return flatMapLeft(() -> left(left.get()));
+  }
+
+  /**
+   * If a Right value is present, returns true, otherwise false.
+   *
+   * @return {@code true} if a value is present, otherwise {@code false}
+   */
+  public boolean isPresent() {
+    return right.isPresent();
   }
 
   /**

@@ -54,7 +54,7 @@ public abstract class Either<L, R> {
    * @return an unbalanced Left, possibly containing an LHS value
    */
   public static <L> UnbalancedLeft<L> unbalancedLeft(Optional<? extends L> left) {
-    return new UnbalancedLeft<>(left);
+    return UnbalancedLeft.of(left);
   }
 
   /**
@@ -65,7 +65,7 @@ public abstract class Either<L, R> {
    * @return an unbalanced Right, possibly containing an RHS value
    */
   public static <R> UnbalancedRight<R> unbalancedRight(Optional<? extends R> right) {
-    return new UnbalancedRight<>(right);
+    return UnbalancedRight.of(right);
   }
 
   /**
@@ -177,6 +177,28 @@ public abstract class Either<L, R> {
   }
 
   /**
+   * Apply the left action if this is a Left.
+   * Otherwise do nothing.
+   *
+   * @param leftAction action to run if this is a Left
+   */
+  public final void acceptLeft(Consumer<? super L> leftAction) {
+    accept(leftAction, r -> {
+    });
+  }
+
+  /**
+   * Apply the right action if this is a Right.
+   * Otherwise do nothing.
+   *
+   * @param rightAction action to run if this is a Right
+   */
+  public final void acceptRight(Consumer<? super R> rightAction) {
+    accept(l -> {
+    }, rightAction);
+  }
+
+  /**
    * Collect the RHS values in the stream into a Right,
    * or, if at least one LHS value exists in the stream,
    * return a Left containing one of the LHS values.
@@ -196,7 +218,24 @@ public abstract class Either<L, R> {
    *
    * @return the LHS value, or {@link Optional#empty()} if this is a Right
    */
-  public abstract Optional<L> getLeft();
+  public abstract UnbalancedLeft<L> getLeft();
+
+
+  /**
+   * If this is a Left, returns true, otherwise false.
+   *
+   * @return {@code true} if this is a Left, otherwise {@code false}
+   */
+  public abstract boolean isLeft();
+
+  /**
+   * If this is a Right, returns true, otherwise false.
+   *
+   * @return {@code true} if this is a Right, otherwise {@code false}
+   */
+  public final boolean isRight() {
+    return !isLeft();
+  }
 
   /**
    * Get the RHS value. The result will be present if and only if the
@@ -204,7 +243,7 @@ public abstract class Either<L, R> {
    *
    * @return the RHS value, or {@link Optional#empty()} if this is a Left
    */
-  public abstract Optional<R> getRight();
+  public abstract UnbalancedRight<R> getRight();
 
   @SuppressWarnings("unchecked")
   static <L, R> Either<L, R> narrow(Either<? extends L, ? extends R> either) {
