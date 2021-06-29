@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
@@ -62,33 +63,45 @@ public final class AtFileReader {
     try {
       Path path = Paths.get(fileName);
       List<String> lines = Files.readAllLines(path);
-      List<String> atLines = readAtLines(lines);
-      List<String> expanded = new ArrayList<>(atLines);
-      expanded.addAll(Arrays.asList(args).subList(1, args.length));
-      return right(expanded);
+      return readAtLines(lines)
+          .mapLeft(r -> new FileReadingError(null, null)) // TODO
+          .map(atLines -> {
+            List<String> expanded = new ArrayList<>(atLines);
+            expanded.addAll(Arrays.asList(args).subList(1, args.length));
+            return expanded;
+          });
     } catch (Exception e) {
       return left(new FileReadingError(e, fileName));
     }
   }
 
-  List<String> readAtLines(List<String> lines) {
+  Either<LineResult, List<String>> readAtLines(List<String> lines) {
     Iterator<String> it = lines.stream()
         .filter(line -> !line.isEmpty())
         .iterator();
     List<String> tokens = new ArrayList<>(lines.size());
     while (it.hasNext()) {
-      tokens.add(readTokenFromAtFile(it));
+      Either<LineResult, String> result = readTokenFromAtFile(it);
+      Optional<LineResult> left = result.getLeft();
+      if (left.isPresent()) {
+        return Either.unbalancedLeft(left).orElseThrow();
+      } else {
+        result.getRight().ifPresent(tokens::add);
+      }
     }
-    return tokens;
+    return right(tokens);
   }
 
-  private String readTokenFromAtFile(Iterator<String> it) {
+  private Either<LineResult, String> readTokenFromAtFile(Iterator<String> it) {
     StringBuilder sb = new StringBuilder();
     LineResult esc;
     do {
       esc = readLine(it.next(), sb);
     } while (esc == LineResult.CONTINUE && it.hasNext());
-    return sb.toString();
+    if (esc.isError()) {
+      return left(esc);
+    }
+    return right(sb.toString());
   }
 
   private LineResult readLine(String line, StringBuilder sb) {
@@ -121,7 +134,25 @@ public final class AtFileReader {
   }
 
   enum LineResult {
-    CONTINUE, END, ERROR
+    CONTINUE, END, ERROR() {
+      @Override
+      boolean isError() {
+        return true;
+      }
+
+      @Override
+      String message() {
+        return "at-file syntax error";
+      }
+    };
+
+    boolean isError() {
+      return false;
+    }
+
+    String message() {
+      return "";
+    }
   }
 
   private char escapeValue(char c) {

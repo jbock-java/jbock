@@ -1,10 +1,13 @@
 package net.jbock.util;
 
+import net.jbock.either.Either;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AtFileReaderTest {
 
@@ -22,7 +25,7 @@ class AtFileReaderTest {
         "",
         "",
         "");
-    List<String> tokens = reader.readAtLines(lines);
+    List<String> tokens = read(lines);
     assertEquals(List.of(
         "1",
         "2\" \\3  4 "),
@@ -31,19 +34,25 @@ class AtFileReaderTest {
 
   @Test
   void testNewline() {
-    List<String> tokens = reader.readAtLines(List.of("\\n"));
+    List<String> tokens = read(List.of("\\n"));
     assertEquals(List.of("\n"), tokens);
   }
 
   @Test
   void testSingleQuotes() {
-    List<String> tokens = reader.readAtLines(List.of("'\\n'"));
+    List<String> tokens = read(List.of("'\\n'"));
     assertEquals(List.of("\\n"), tokens);
   }
 
   @Test
   void testSingleQuotesEmpty() {
-    List<String> tokens = reader.readAtLines(List.of("''"));
+    List<String> tokens = read(List.of("''"));
     assertEquals(List.of(""), tokens);
+  }
+
+  private List<String> read(List<String> lines) {
+    Either<AtFileReader.LineResult, List<String>> either = reader.readAtLines(lines);
+    assertTrue(either.getRight().isPresent());
+    return either.getRight().get();
   }
 }
