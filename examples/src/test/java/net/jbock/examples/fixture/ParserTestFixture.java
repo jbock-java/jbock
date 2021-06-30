@@ -146,7 +146,7 @@ public final class ParserTestFixture<E> {
     private void fails(Predicate<String> messageTest) {
       Either<NotSuccess, E> result = parser.apply(args);
       Assertions.assertTrue(result.isLeft());
-      result.mapLeft(notSuccess -> (HasMessage) notSuccess)
+      result.mapLeft(HasMessage.class::cast)
           .acceptLeft(hasMessage -> {
             boolean success = messageTest.test(hasMessage.message());
             if (!success) {
