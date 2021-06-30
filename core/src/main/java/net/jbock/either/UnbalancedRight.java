@@ -1,5 +1,6 @@
 package net.jbock.either;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -19,16 +20,31 @@ public final class UnbalancedRight<R> extends UnbalancedBase<R> {
     super(right);
   }
 
-  static <R> UnbalancedRight<R> of(Optional<? extends R> right) {
+  /**
+   * Returns an {@code UnbalancedRight} containing the given
+   * non-{@code null} value.
+   *
+   * @param right the value, which must be non-{@code null}
+   * @param <R> the type of the value
+   * @return an {@code UnbalancedLeft} with the value present
+   * @throws NullPointerException if value is {@code null}
+   */
+  public static <R> UnbalancedRight<R> of(Optional<? extends R> right) {
     if (right.isEmpty()) {
       return empty();
     }
     return new UnbalancedRight<>(right);
   }
 
+  /**
+   * Returns an empty instance.
+   *
+   * @param <R> type of the non-existent value
+   * @return an empty {@code Optional}
+   */
   @SuppressWarnings("unchecked")
-  static <L> UnbalancedRight<L> empty() {
-    return (UnbalancedRight<L>) EMPTY;
+  public static <R> UnbalancedRight<R> empty() {
+    return (UnbalancedRight<R>) EMPTY;
   }
 
   /**
@@ -42,6 +58,18 @@ public final class UnbalancedRight<R> extends UnbalancedBase<R> {
    */
   public <L> Either<L, R> orElseLeft(Supplier<? extends L> left) {
     return flatMapLeft(() -> left(left.get()));
+  }
+
+  /**
+   * Creates a &quot;balanced&quot; instance containing the Right value,
+   * or throws a runtime exception if the Right value is not present.
+   *
+   * @param <L> an arbitrary LHS type
+   * @return an Either containing the Right value
+   * @throws NoSuchElementException – if no Right value is present
+   */
+  public <L> Either<L, R> orElseThrow() {
+    return Either.right(value.orElseThrow());
   }
 
   /**

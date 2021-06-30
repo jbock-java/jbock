@@ -20,15 +20,30 @@ public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
     super(left);
   }
 
-  static <L> UnbalancedLeft<L> of(Optional<? extends L> left) {
+  /**
+   * Returns an {@code UnbalancedRight} containing the given
+   * non-{@code null} value.
+   *
+   * @param left the value, which must be non-{@code null}
+   * @param <L> the type of the value
+   * @return an {@code UnbalancedLeft} with the value present
+   * @throws NullPointerException if value is {@code null}
+   */
+  public static <L> UnbalancedLeft<L> of(Optional<? extends L> left) {
     if (left.isEmpty()) {
       return empty();
     }
     return new UnbalancedLeft<>(left);
   }
 
+  /**
+   * Returns an empty instance.
+   *
+   * @param <L> type of the non-existent value
+   * @return an empty {@code Optional}
+   */
   @SuppressWarnings("unchecked")
-  static <L> UnbalancedLeft<L> empty() {
+  public static <L> UnbalancedLeft<L> empty() {
     return (UnbalancedLeft<L>) EMPTY;
   }
 
@@ -49,9 +64,9 @@ public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
    * Creates a &quot;balanced&quot; instance containing the Left value,
    * or throws a runtime exception if the Left value is not present.
    *
-   * @param <R> the RHS type
-   * @return a Left containing the {@code left} value
-   * @throws NoSuchElementException – if no value is present
+   * @param <R> an arbitrary RHS type
+   * @return an Either containing the Left value
+   * @throws NoSuchElementException – if no Left value is present
    */
   public <R> Either<L, R> orElseThrow() {
     return Either.left(value.orElseThrow());
