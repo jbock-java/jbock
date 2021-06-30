@@ -22,7 +22,7 @@ final class Left<L, R> extends Either<L, R> {
 
   @Override
   public UnbalancedLeft<L> getLeft() {
-    return UnbalancedLeft.of(Optional.of(value));
+    return UnbalancedLeft.of(value);
   }
 
   @Override

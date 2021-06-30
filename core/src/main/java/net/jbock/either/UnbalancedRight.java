@@ -29,18 +29,15 @@ public final class UnbalancedRight<R> extends UnbalancedBase<R> {
    * @return an {@code UnbalancedLeft} with the value present
    * @throws NullPointerException if value is {@code null}
    */
-  public static <R> UnbalancedRight<R> of(Optional<? extends R> right) {
-    if (right.isEmpty()) {
-      return empty();
-    }
-    return new UnbalancedRight<>(right);
+  public static <R> UnbalancedRight<R> of(R right) {
+    return new UnbalancedRight<>(Optional.of(right));
   }
 
   /**
    * Returns an empty instance.
    *
    * @param <R> type of the non-existent value
-   * @return an empty {@code Optional}
+   * @return an empty {@code UnbalancedRight}
    */
   @SuppressWarnings("unchecked")
   public static <R> UnbalancedRight<R> empty() {

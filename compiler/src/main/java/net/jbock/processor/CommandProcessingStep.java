@@ -10,6 +10,7 @@ import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
+import net.jbock.either.UnbalancedLeft;
 import net.jbock.validate.DaggerValidateComponent;
 import net.jbock.validate.ValidateComponent;
 import net.jbock.validate.ValidateModule;
@@ -22,7 +23,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -94,12 +94,13 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private Either<List<ValidationFailure>, SourceElement> validateSourceElement(
       TypeElement element) {
-    Optional<List<ValidationFailure>> failureList = util.commonTypeChecks(element)
+    return util.commonTypeChecks(element)
         .or(() -> util.checkNoDuplicateAnnotations(element,
             Annotations.typeLevelAnnotations()))
         .map(s -> new ValidationFailure(s, element))
-        .map(List::of);
-    return Either.unbalancedLeft(failureList)
+        .map(List::of)
+        .map(UnbalancedLeft::of)
+        .orElse(UnbalancedLeft.empty())
         .orElseRight(() -> SourceElement.create(element));
   }
 

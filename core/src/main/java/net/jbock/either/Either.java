@@ -47,28 +47,6 @@ public abstract class Either<L, R> {
   }
 
   /**
-   * Constructs an unbalanced Left value from an {@link Optional}.
-   *
-   * @param left an optional LHS value
-   * @param <L> the LHS type
-   * @return an unbalanced Left, possibly containing an LHS value
-   */
-  public static <L> UnbalancedLeft<L> unbalancedLeft(Optional<? extends L> left) {
-    return UnbalancedLeft.of(left);
-  }
-
-  /**
-   * Constructs an unbalanced Right value from an {@link Optional}.
-   *
-   * @param right an optional RHS value
-   * @param <R> the RHS type
-   * @return an unbalanced Right, possibly containing an RHS value
-   */
-  public static <R> UnbalancedRight<R> unbalancedRight(Optional<? extends R> right) {
-    return UnbalancedRight.of(right);
-  }
-
-  /**
    * Apply the supplied function to the RHS value if this is a Right,
    * otherwise return an equivalent Left instance with an updated RHS type.
    *
@@ -103,8 +81,8 @@ public abstract class Either<L, R> {
    * @param test the filter function
    * @return filter result
    */
-  public final Either<L, R> filter(Function<? super R, Optional<? extends L>> test) {
-    return flatMap(r -> unbalancedLeft(test.apply(r)).orElseRight(() -> r));
+  public final Either<L, R> filter(Function<? super R, UnbalancedLeft<? extends L>> test) {
+    return flatMap(r -> test.apply(r).orElseRight(() -> r));
   }
 
   /**

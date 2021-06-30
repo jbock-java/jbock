@@ -8,6 +8,7 @@ import net.jbock.convert.Mapped;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.either.Either;
+import net.jbock.either.UnbalancedRight;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.validate.ParameterStyle;
@@ -52,8 +53,8 @@ public class AutoConverterFinder extends MatchValidator {
       Optional<Match> match = matcher.tryMatch(parameter);
       if (match.isPresent()) {
         Match m = match.get();
-        return Either.unbalancedLeft(validateMatch(m))
-            .flatMap(() -> findConverter(m, parameter));
+        return validateMatch(m).flatMap(() ->
+            findConverter(m, parameter));
       }
     }
     return left(noMatchError(sourceMethod.returnType()));
@@ -66,7 +67,7 @@ public class AutoConverterFinder extends MatchValidator {
   }
 
   private Either<String, MapExpr> enumConverter(TypeMirror baseType) {
-    return Either.unbalancedRight(asEnumType(baseType))
+    return asEnumType(baseType)
         .orElseLeft(() -> noMatchError(baseType))
         .map(TypeElement::asType)
         .map(enumType -> {
@@ -96,11 +97,13 @@ public class AutoConverterFinder extends MatchValidator {
     return code.build();
   }
 
-  private Optional<TypeElement> asEnumType(TypeMirror type) {
+  private UnbalancedRight<TypeElement> asEnumType(TypeMirror type) {
     return TypeTool.AS_DECLARED.visit(type)
         .map(DeclaredType::asElement)
         .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
-        .filter(element -> element.getKind() == ElementKind.ENUM);
+        .filter(element -> element.getKind() == ElementKind.ENUM)
+        .map(UnbalancedRight::of)
+        .orElse(UnbalancedRight.empty());
   }
 
   private String noMatchError(TypeMirror type) {

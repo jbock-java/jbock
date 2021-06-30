@@ -3,6 +3,7 @@ package net.jbock.convert;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
+import net.jbock.either.UnbalancedLeft;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
@@ -10,7 +11,6 @@ import net.jbock.processor.SourceElement;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
@@ -57,11 +57,13 @@ public class PositionalParamFactory {
     if (!c.isRepeatable()) {
       return right(c);
     }
-    Optional<String> failure = alreadyCreated.stream()
+    return alreadyCreated.stream()
         .filter(Mapped::isRepeatable)
         .map(p -> "positional parameter " + p.paramLabel() + " is also repeatable")
-        .findAny();
-    return Either.unbalancedLeft(failure).orElseRight(() -> c);
+        .findAny()
+        .map(UnbalancedLeft::of)
+        .orElse(UnbalancedLeft.empty())
+        .orElseRight(() -> c);
   }
 
   private Either<String, Mapped<PositionalParameter>> checkPositionNotNegative(

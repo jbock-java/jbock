@@ -3,6 +3,7 @@ package net.jbock.convert.reference;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.either.Either;
+import net.jbock.either.UnbalancedRight;
 import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
@@ -15,7 +16,6 @@ import java.util.function.Supplier;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
-import static net.jbock.either.Either.unbalancedRight;
 
 @ParameterScope
 public class ReferenceTool {
@@ -43,9 +43,11 @@ public class ReferenceTool {
       return left(converterRawType());
     }
     TypeMirror typeArgument = declaredType.getTypeArguments().get(0);
-    return unbalancedRight(AS_DECLARED.visit(typeArgument)
+    return AS_DECLARED.visit(typeArgument)
         .filter(suppliedFunction -> tool.isSameErasure(suppliedFunction,
-            StringConverter.class.getCanonicalName())))
+            StringConverter.class.getCanonicalName()))
+        .map(UnbalancedRight::of)
+        .orElse(UnbalancedRight.empty())
         .orElseLeft(this::errorConverterType)
         .flatMap(suppliedType -> handleStringConverter(suppliedType, true));
   }

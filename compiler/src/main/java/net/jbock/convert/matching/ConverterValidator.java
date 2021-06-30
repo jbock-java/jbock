@@ -9,6 +9,7 @@ import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.convert.reference.StringConverterType;
 import net.jbock.either.Either;
+import net.jbock.either.UnbalancedLeft;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
@@ -57,11 +58,12 @@ public class ConverterValidator extends MatchValidator {
   public <P extends AbstractItem> Either<String, Mapped<P>> validate(
       P parameter,
       TypeElement converter) {
-    Optional<String> maybeFailure = util.commonTypeChecks(converter)
+    return util.commonTypeChecks(converter)
         .or(() -> checkNotAbstract(converter))
         .or(() -> checkNoTypevars(converter))
-        .or(() -> checkConverterAnnotationPresent(converter));
-    return Either.unbalancedLeft(maybeFailure)
+        .or(() -> checkConverterAnnotationPresent(converter))
+        .map(UnbalancedLeft::of)
+        .orElse(UnbalancedLeft.empty())
         .flatMap(() -> referenceTool.getReferencedType(converter))
         .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
   }
@@ -77,7 +79,7 @@ public class ConverterValidator extends MatchValidator {
       match = match.filter(m -> isValidMatch(m, functionType));
       if (match.isPresent()) {
         Match m = match.get();
-        return Either.unbalancedLeft(validateMatch(m))
+        return validateMatch(m)
             .orElseRight(() -> getMapExpr(functionType, converter))
             .map(code -> new MapExpr(code, m.baseType(), false))
             .map(mapExpr -> m.toConvertedParameter(mapExpr, parameter));

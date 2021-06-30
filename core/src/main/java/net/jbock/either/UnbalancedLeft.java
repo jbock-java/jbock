@@ -1,6 +1,7 @@
 package net.jbock.either;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -29,18 +30,15 @@ public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
    * @return an {@code UnbalancedLeft} with the value present
    * @throws NullPointerException if value is {@code null}
    */
-  public static <L> UnbalancedLeft<L> of(Optional<? extends L> left) {
-    if (left.isEmpty()) {
-      return empty();
-    }
-    return new UnbalancedLeft<>(left);
+  public static <L> UnbalancedLeft<L> of(L left) {
+    return new UnbalancedLeft<>(Optional.of(left));
   }
 
   /**
    * Returns an empty instance.
    *
    * @param <L> type of the non-existent value
-   * @return an empty {@code Optional}
+   * @return an empty {@code UnbalancedLeft}
    */
   @SuppressWarnings("unchecked")
   public static <L> UnbalancedLeft<L> empty() {

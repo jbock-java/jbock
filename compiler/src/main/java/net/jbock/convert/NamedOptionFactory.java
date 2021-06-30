@@ -3,6 +3,7 @@ package net.jbock.convert;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
+import net.jbock.either.UnbalancedLeft;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
@@ -13,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
@@ -82,9 +82,9 @@ public class NamedOptionFactory {
     }
     List<String> result = new ArrayList<>();
     for (String name : sourceMethod.names()) {
-      Optional<String> check = checkName(name);
+      UnbalancedLeft<String> check = checkName(name);
       if (check.isPresent()) {
-        return Either.unbalancedLeft(check).orElseRight(List::of);
+        return check.orElseThrow();
       }
       if (result.contains(name)) {
         return left("duplicate option name: " + name);
@@ -95,32 +95,32 @@ public class NamedOptionFactory {
     return right(result);
   }
 
-  private Optional<String> checkName(String name) {
+  private UnbalancedLeft<String> checkName(String name) {
     if (Objects.toString(name, "").length() <= 1 || "--".equals(name)) {
-      return Optional.of("invalid name: " + name);
+      return UnbalancedLeft.of("invalid name: " + name);
     }
     if (!name.startsWith("-")) {
-      return Optional.of("the name must start with a dash character: " + name);
+      return UnbalancedLeft.of("the name must start with a dash character: " + name);
     }
     if (name.startsWith("---")) {
-      return Optional.of("the name must start with one or two dashes, not three:" + name);
+      return UnbalancedLeft.of("the name must start with one or two dashes, not three:" + name);
     }
     if (!name.startsWith("--") && name.length() > 2) {
-      return Optional.of("single-dash names must be single-character names: " + name);
+      return UnbalancedLeft.of("single-dash names must be single-character names: " + name);
     }
     if (sourceElement.helpEnabled() && "--help".equals(name)) {
-      return Optional.of("'--help' is reserved, set 'helpEnabled=false' to allow it");
+      return UnbalancedLeft.of("'--help' is reserved, set 'helpEnabled=false' to allow it");
     }
     for (int i = 0; i < name.length(); i++) {
       char c = name.charAt(i);
       if (isWhitespace(c)) {
-        return Optional.of("the name contains whitespace characters: " + name);
+        return UnbalancedLeft.of("the name contains whitespace characters: " + name);
       }
       if (c == '=') {
-        return Optional.of("the name contains '=': " + name);
+        return UnbalancedLeft.of("the name contains '=': " + name);
       }
     }
-    return Optional.empty();
+    return UnbalancedLeft.empty();
   }
 
   private NamedOption createNamedOption(List<String> names) {
