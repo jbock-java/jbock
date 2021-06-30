@@ -12,14 +12,12 @@ import static net.jbock.either.Either.right;
  *
  * @param <L> the LHS type
  */
-public final class UnbalancedLeft<L> {
+public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
 
   private static final UnbalancedLeft<?> EMPTY = new UnbalancedLeft<>(Optional.empty());
 
-  private final Optional<? extends L> left;
-
   private UnbalancedLeft(Optional<? extends L> left) {
-    this.left = left;
+    super(left);
   }
 
   static <L> UnbalancedLeft<L> of(Optional<? extends L> left) {
@@ -56,16 +54,7 @@ public final class UnbalancedLeft<L> {
    * @throws NoSuchElementException – if no value is present
    */
   public <R> Either<L, R> orElseThrow() {
-    return Either.left(left.orElseThrow());
-  }
-
-  /**
-   * If a Left value is present, returns true, otherwise false.
-   *
-   * @return {@code true} if a value is present, otherwise {@code false}
-   */
-  public boolean isPresent() {
-    return left.isPresent();
+    return Either.left(value.orElseThrow());
   }
 
   /**
@@ -80,7 +69,7 @@ public final class UnbalancedLeft<L> {
    */
   public <R> Either<L, R> flatMap(
       Supplier<? extends Either<? extends L, ? extends R>> choice) {
-    return left.<Either<L, R>>map(Either::left)
+    return value.<Either<L, R>>map(Either::left)
         .orElseGet(() -> narrow(choice.get()));
   }
 }

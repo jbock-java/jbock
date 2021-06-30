@@ -11,14 +11,12 @@ import static net.jbock.either.Either.narrow;
  *
  * @param <R> the RHS type
  */
-public final class UnbalancedRight<R> {
+public final class UnbalancedRight<R> extends UnbalancedBase<R> {
 
   private static final UnbalancedRight<?> EMPTY = new UnbalancedRight<>(Optional.empty());
 
-  private final Optional<? extends R> right;
-
   private UnbalancedRight(Optional<? extends R> right) {
-    this.right = right;
+    super(right);
   }
 
   static <R> UnbalancedRight<R> of(Optional<? extends R> right) {
@@ -47,15 +45,6 @@ public final class UnbalancedRight<R> {
   }
 
   /**
-   * If a Right value is present, returns true, otherwise false.
-   *
-   * @return {@code true} if a value is present, otherwise {@code false}
-   */
-  public boolean isPresent() {
-    return right.isPresent();
-  }
-
-  /**
    * If the {@code right} value is absent, invoke the supplied Supplier
    * to create a balanced instance.
    * Otherwise return a balanced Right.
@@ -67,7 +56,7 @@ public final class UnbalancedRight<R> {
    */
   public <L> Either<L, R> flatMapLeft(
       Supplier<? extends Either<? extends L, ? extends R>> choice) {
-    return right.<Either<L, R>>map(Either::right)
+    return value.<Either<L, R>>map(Either::right)
         .orElseGet(() -> narrow(choice.get()));
   }
 }

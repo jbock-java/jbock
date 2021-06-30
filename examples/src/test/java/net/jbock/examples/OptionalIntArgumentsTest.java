@@ -25,7 +25,7 @@ class OptionalIntArgumentsTest {
   @Test
   void testAbsent() {
     Either<NotSuccess, OptionalIntArguments> result = parser.parse(/* empty */);
-    assertTrue(result.getLeft().isPresent());
+    assertTrue(result.isLeft());
     result.acceptLeft(l -> assertTrue(l instanceof HelpRequested));
   }
 }

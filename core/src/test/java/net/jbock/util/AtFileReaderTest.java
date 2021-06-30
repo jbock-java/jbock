@@ -52,7 +52,7 @@ class AtFileReaderTest {
 
   private List<String> read(List<String> lines) {
     Either<AtFileReader.LineResult, List<String>> either = reader.readAtLines(lines);
-    assertTrue(either.getRight().isPresent());
+    assertTrue(either.isRight());
     return either.fold(l -> {
       throw new RuntimeException();
     }, Function.identity());

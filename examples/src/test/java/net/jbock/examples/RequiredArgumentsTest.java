@@ -28,7 +28,7 @@ class RequiredArgumentsTest {
   @Test
   void errorDirMissing() {
     Either<NotSuccess, RequiredArguments> result = new RequiredArgumentsParser().parse(/* empty */);
-    Assertions.assertTrue(result.getLeft().isPresent());
+    Assertions.assertTrue(result.isLeft());
     result.acceptLeft(l -> assertTrue(l instanceof HelpRequested));
   }
 

@@ -48,7 +48,7 @@ public final class ParserTestFixture<E> {
   public void assertPrintsHelp(Map<String, String> messages, String... expected) {
     String[] input = {"--help"};
     Either<NotSuccess, E> result = parser.apply(input);
-    Assertions.assertTrue(result.getLeft().isPresent());
+    Assertions.assertTrue(result.isLeft());
     result.acceptLeft(l -> {
       String[] actual = getUsageDocumentation(l, messages);
       assertEquals(expected, actual);
@@ -131,7 +131,7 @@ public final class ParserTestFixture<E> {
 
     public <V> AssertionBuilder<E> has(Function<E, V> getter, V expectation) {
       Either<NotSuccess, E> parsed = getParsed();
-      assertTrue(parsed.getRight().isPresent(), "Parsing was not successful");
+      assertTrue(parsed.isRight(), "Parsing was not successful");
       parsed.acceptRight(r -> {
         V result = getter.apply(r);
         Assertions.assertEquals(expectation, result);
@@ -145,7 +145,7 @@ public final class ParserTestFixture<E> {
 
     private void fails(Predicate<String> messageTest) {
       Either<NotSuccess, E> result = parser.apply(args);
-      Assertions.assertTrue(result.getLeft().isPresent());
+      Assertions.assertTrue(result.isLeft());
       result.mapLeft(notSuccess -> (HasMessage) notSuccess)
           .acceptLeft(hasMessage -> {
             boolean success = messageTest.test(hasMessage.message());
