@@ -3,7 +3,7 @@ package net.jbock.convert;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
-import net.jbock.either.UnbalancedLeft;
+import net.jbock.either.LeftOptional;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
@@ -61,8 +61,8 @@ public class PositionalParamFactory {
         .filter(Mapped::isRepeatable)
         .map(p -> "positional parameter " + p.paramLabel() + " is also repeatable")
         .findAny()
-        .map(UnbalancedLeft::of)
-        .orElse(UnbalancedLeft.empty())
+        .map(LeftOptional::of)
+        .orElse(LeftOptional.empty())
         .orElseRight(() -> c);
   }
 

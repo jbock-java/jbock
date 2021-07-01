@@ -3,7 +3,7 @@ package net.jbock.validate;
 import net.jbock.Parameters;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
-import net.jbock.either.UnbalancedLeft;
+import net.jbock.either.LeftOptional;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
 
@@ -50,17 +50,17 @@ public class MethodsFactory {
         .filter(this::validateAtLeastOneParameterInSuperCommand);
   }
 
-  private UnbalancedLeft<List<ValidationFailure>> detectInheritanceCollision(
+  private LeftOptional<List<ValidationFailure>> detectInheritanceCollision(
       List<ExecutableElement> methods) {
     Map<Name, List<ExecutableElement>> map = methods.stream()
         .collect(Collectors.groupingBy(ExecutableElement::getSimpleName));
     for (ExecutableElement method : methods) {
       if (map.get(method.getSimpleName()).size() >= 2) {
         ValidationFailure f = new ValidationFailure("inheritance collision", method);
-        return UnbalancedLeft.of(List.of(f));
+        return LeftOptional.of(List.of(f));
       }
     }
-    return UnbalancedLeft.empty();
+    return LeftOptional.empty();
   }
 
   private AbstractMethods createAbstractMethods(
@@ -75,30 +75,30 @@ public class MethodsFactory {
     return new AbstractMethods(params, options);
   }
 
-  private UnbalancedLeft<List<ValidationFailure>> validateAtLeastOneParameterInSuperCommand(
+  private LeftOptional<List<ValidationFailure>> validateAtLeastOneParameterInSuperCommand(
       AbstractMethods abstractMethods) {
     if (!sourceElement.isSuperCommand() ||
         !abstractMethods.positionalParameters().isEmpty()) {
-      return UnbalancedLeft.empty();
+      return LeftOptional.empty();
     }
     String message = "at least one positional parameter must be defined" +
         " when the superCommand attribute is set";
-    return UnbalancedLeft.of(List.of(sourceElement.fail(message)));
+    return LeftOptional.of(List.of(sourceElement.fail(message)));
   }
 
-  private UnbalancedLeft<List<ValidationFailure>> validateDuplicateParametersAnnotation(
+  private LeftOptional<List<ValidationFailure>> validateDuplicateParametersAnnotation(
       List<SourceMethod> sourceMethods) {
     List<SourceMethod> parametersMethods = sourceMethods.stream()
         .filter(m -> m.style() == ParameterStyle.PARAMETERS)
         .collect(Collectors.toUnmodifiableList());
     if (parametersMethods.size() >= 2) {
       String message = "duplicate @" + Parameters.class.getSimpleName() + " annotation";
-      return UnbalancedLeft.of(List.of(sourceMethods.get(1).fail(message)));
+      return LeftOptional.of(List.of(sourceMethods.get(1).fail(message)));
     }
-    return UnbalancedLeft.empty();
+    return LeftOptional.empty();
   }
 
-  private UnbalancedLeft<List<ValidationFailure>> validateParameterMethods(
+  private LeftOptional<List<ValidationFailure>> validateParameterMethods(
       List<ExecutableElement> sourceMethods) {
     List<ValidationFailure> failures = new ArrayList<>();
     for (ExecutableElement sourceMethod : sourceMethods) {
@@ -107,9 +107,9 @@ public class MethodsFactory {
           .ifPresent(failures::add);
     }
     if (!failures.isEmpty()) {
-      return UnbalancedLeft.of(failures);
+      return LeftOptional.of(failures);
     }
-    return UnbalancedLeft.empty();
+    return LeftOptional.empty();
   }
 
   private List<SourceMethod> createSourceMethods(List<ExecutableElement> methods) {

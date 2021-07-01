@@ -10,7 +10,7 @@ import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
-import net.jbock.either.UnbalancedLeft;
+import net.jbock.either.LeftOptional;
 import net.jbock.validate.DaggerValidateComponent;
 import net.jbock.validate.ValidateComponent;
 import net.jbock.validate.ValidateModule;
@@ -99,8 +99,8 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             Annotations.typeLevelAnnotations()))
         .map(s -> new ValidationFailure(s, element))
         .map(List::of)
-        .map(UnbalancedLeft::of)
-        .orElse(UnbalancedLeft.empty())
+        .map(LeftOptional::of)
+        .orElse(LeftOptional.empty())
         .orElseRight(() -> SourceElement.create(element));
   }
 

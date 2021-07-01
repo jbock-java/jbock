@@ -3,7 +3,7 @@ package net.jbock.convert;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
-import net.jbock.either.UnbalancedLeft;
+import net.jbock.either.LeftOptional;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
@@ -82,7 +82,7 @@ public class NamedOptionFactory {
     }
     List<String> result = new ArrayList<>();
     for (String name : sourceMethod.names()) {
-      UnbalancedLeft<String> check = checkName(name);
+      LeftOptional<String> check = checkName(name);
       if (check.isPresent()) {
         return check.orElseThrow();
       }
@@ -95,32 +95,32 @@ public class NamedOptionFactory {
     return right(result);
   }
 
-  private UnbalancedLeft<String> checkName(String name) {
+  private LeftOptional<String> checkName(String name) {
     if (Objects.toString(name, "").length() <= 1 || "--".equals(name)) {
-      return UnbalancedLeft.of("invalid name: " + name);
+      return LeftOptional.of("invalid name: " + name);
     }
     if (!name.startsWith("-")) {
-      return UnbalancedLeft.of("the name must start with a dash character: " + name);
+      return LeftOptional.of("the name must start with a dash character: " + name);
     }
     if (name.startsWith("---")) {
-      return UnbalancedLeft.of("the name must start with one or two dashes, not three:" + name);
+      return LeftOptional.of("the name must start with one or two dashes, not three:" + name);
     }
     if (!name.startsWith("--") && name.length() > 2) {
-      return UnbalancedLeft.of("single-dash names must be single-character names: " + name);
+      return LeftOptional.of("single-dash names must be single-character names: " + name);
     }
     if (sourceElement.helpEnabled() && "--help".equals(name)) {
-      return UnbalancedLeft.of("'--help' is reserved, set 'helpEnabled=false' to allow it");
+      return LeftOptional.of("'--help' is reserved, set 'helpEnabled=false' to allow it");
     }
     for (int i = 0; i < name.length(); i++) {
       char c = name.charAt(i);
       if (isWhitespace(c)) {
-        return UnbalancedLeft.of("the name contains whitespace characters: " + name);
+        return LeftOptional.of("the name contains whitespace characters: " + name);
       }
       if (c == '=') {
-        return UnbalancedLeft.of("the name contains '=': " + name);
+        return LeftOptional.of("the name contains '=': " + name);
       }
     }
-    return UnbalancedLeft.empty();
+    return LeftOptional.empty();
   }
 
   private NamedOption createNamedOption(List<String> names) {

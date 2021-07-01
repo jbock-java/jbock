@@ -3,14 +3,13 @@ package net.jbock.convert.reference;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.either.Either;
-import net.jbock.either.UnbalancedRight;
+import net.jbock.either.Optional;
 import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import static net.jbock.common.TypeTool.AS_DECLARED;
@@ -28,8 +27,8 @@ public class ReferenceTool {
   }
 
   public Either<String, StringConverterType> getReferencedType(TypeElement converter) {
-    Optional<DeclaredType> supplier = checkSupplier(converter);
-    Optional<DeclaredType> stringConverter = checkStringConverter(converter);
+    java.util.Optional<DeclaredType> supplier = checkSupplier(converter);
+    java.util.Optional<DeclaredType> stringConverter = checkStringConverter(converter);
     if (supplier.isPresent() && stringConverter.isPresent()) {
       return left(errorConverterType() + " but not both");
     }
@@ -46,8 +45,8 @@ public class ReferenceTool {
     return AS_DECLARED.visit(typeArgument)
         .filter(suppliedFunction -> tool.isSameErasure(suppliedFunction,
             StringConverter.class.getCanonicalName()))
-        .map(UnbalancedRight::of)
-        .orElse(UnbalancedRight.empty())
+        .map(Optional::of)
+        .orElse(Optional.empty())
         .orElseLeft(this::errorConverterType)
         .flatMap(suppliedType -> handleStringConverter(suppliedType, true));
   }
@@ -61,16 +60,16 @@ public class ReferenceTool {
     return right(new StringConverterType(typeArgument, isSupplier));
   }
 
-  private Optional<DeclaredType> checkSupplier(TypeElement converter) {
+  private java.util.Optional<DeclaredType> checkSupplier(TypeElement converter) {
     return converter.getInterfaces().stream()
         .filter(inter -> tool.isSameErasure(inter, Supplier.class))
         .map(AS_DECLARED::visit)
-        .flatMap(Optional::stream)
+        .flatMap(java.util.Optional::stream)
         .findFirst();
   }
 
-  private Optional<DeclaredType> checkStringConverter(TypeElement converter) {
-    return Optional.of(converter.getSuperclass())
+  private java.util.Optional<DeclaredType> checkStringConverter(TypeElement converter) {
+    return java.util.Optional.of(converter.getSuperclass())
         .filter(inter -> tool.isSameErasure(inter, StringConverter.class))
         .flatMap(AS_DECLARED::visit);
   }

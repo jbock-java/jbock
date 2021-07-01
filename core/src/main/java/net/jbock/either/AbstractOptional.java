@@ -2,13 +2,12 @@ package net.jbock.either;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.function.Function;
 
-abstract class UnbalancedBase<T> {
+abstract class AbstractOptional<T> {
 
   private final T value;
 
-  UnbalancedBase(T value) {
+  AbstractOptional(T value) {
     this.value = value;
   }
 
@@ -38,7 +37,7 @@ abstract class UnbalancedBase<T> {
     return value;
   }
 
-  boolean isEqual(UnbalancedBase<?> other) {
+  boolean isEqual(AbstractOptional<?> other) {
     return Objects.equals(value, other.value);
   }
 

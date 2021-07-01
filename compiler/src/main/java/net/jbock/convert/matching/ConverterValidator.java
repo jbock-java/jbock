@@ -9,7 +9,7 @@ import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.convert.reference.StringConverterType;
 import net.jbock.either.Either;
-import net.jbock.either.UnbalancedLeft;
+import net.jbock.either.LeftOptional;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
@@ -62,8 +62,8 @@ public class ConverterValidator extends MatchValidator {
         .or(() -> checkNotAbstract(converter))
         .or(() -> checkNoTypevars(converter))
         .or(() -> checkConverterAnnotationPresent(converter))
-        .map(UnbalancedLeft::of)
-        .orElse(UnbalancedLeft.empty())
+        .map(LeftOptional::of)
+        .orElse(LeftOptional.empty())
         .flatMap(() -> referenceTool.getReferencedType(converter))
         .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
   }

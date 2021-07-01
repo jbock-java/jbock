@@ -20,8 +20,8 @@ final class Right<L, R> extends Either<L, R> {
   }
 
   @Override
-  public UnbalancedLeft<L> getLeft() {
-    return UnbalancedLeft.empty();
+  public LeftOptional<L> getLeft() {
+    return LeftOptional.empty();
   }
 
   @Override
@@ -30,8 +30,8 @@ final class Right<L, R> extends Either<L, R> {
   }
 
   @Override
-  public UnbalancedRight<R> getRight() {
-    return UnbalancedRight.of(value);
+  public Optional<R> getRight() {
+    return Optional.of(value);
   }
 
   @Override

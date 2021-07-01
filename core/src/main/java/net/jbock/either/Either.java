@@ -2,7 +2,6 @@ package net.jbock.either;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collector;
@@ -86,7 +85,7 @@ public abstract class Either<L, R> {
    * @param test the filter function
    * @return filter result
    */
-  public final Either<L, R> filter(Function<? super R, UnbalancedLeft<? extends L>> test) {
+  public final Either<L, R> filter(Function<? super R, LeftOptional<? extends L>> test) {
     return flatMap(r -> test.apply(r).orElseRight(() -> r));
   }
 
@@ -199,9 +198,9 @@ public abstract class Either<L, R> {
    * Get the LHS value. The result will be present if and only if the
    * result of {@link #getRight()} is absent.
    *
-   * @return the LHS value, or {@link Optional#empty()} if this is a Right
+   * @return the LHS value, or {@link java.util.Optional#empty()} if this is a Right
    */
-  public abstract UnbalancedLeft<L> getLeft();
+  public abstract LeftOptional<L> getLeft();
 
 
   /**
@@ -224,9 +223,9 @@ public abstract class Either<L, R> {
    * Get the RHS value. The result will be present if and only if the
    * result of {@link #getLeft()} is absent.
    *
-   * @return the RHS value, or {@link Optional#empty()} if this is a Left
+   * @return the RHS value, or {@link java.util.Optional#empty()} if this is a Left
    */
-  public abstract UnbalancedRight<R> getRight();
+  public abstract Optional<R> getRight();
 
   @SuppressWarnings("unchecked")
   static <L, R> Either<L, R> narrow(Either<? extends L, ? extends R> either) {

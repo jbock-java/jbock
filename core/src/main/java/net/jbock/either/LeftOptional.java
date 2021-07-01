@@ -14,72 +14,72 @@ import static net.jbock.either.Either.right;
  *
  * @param <L> the type of the Left value
  */
-public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
+public final class LeftOptional<L> extends AbstractOptional<L> {
 
-  private static final UnbalancedLeft<?> EMPTY = new UnbalancedLeft<>(null);
+  private static final LeftOptional<?> EMPTY = new LeftOptional<>(null);
 
-  private UnbalancedLeft(L left) {
+  private LeftOptional(L left) {
     super(left);
   }
 
   /**
-   * Returns an {@code UnbalancedRight} containing the given
+   * Returns a {@code LeftOptional} containing the given
    * non-{@code null} value.
    *
    * @param left the value, which must be non-{@code null}
    * @param <L> the type of the value
-   * @return an {@code UnbalancedLeft} with the value present
+   * @return a {@code LeftOptional} with the value present
    * @throws NullPointerException if value is {@code null}
    */
-  public static <L> UnbalancedLeft<L> of(L left) {
-    return new UnbalancedLeft<>(Objects.requireNonNull(left));
+  public static <L> LeftOptional<L> of(L left) {
+    return new LeftOptional<>(Objects.requireNonNull(left));
   }
 
   /**
    * Returns an empty instance.
    *
    * @param <L> type of the non-existent value
-   * @return an empty {@code UnbalancedLeft}
+   * @return an empty {@code LeftOptional}
    */
   @SuppressWarnings("unchecked")
-  public static <L> UnbalancedLeft<L> empty() {
-    return (UnbalancedLeft<L>) EMPTY;
+  public static <L> LeftOptional<L> empty() {
+    return (LeftOptional<L>) EMPTY;
   }
 
   /**
-   * Creates a &quot;balanced&quot; instance by providing an alternative
-   * Right value.
+   * If a value is present, returns a Left-{@link Either}
+   * containing that value.
+   * Otherwise returns a Right-Either containing the supplied value.
    *
    * @param right supplier of a Right value
    * @param <R> the RHS type
-   * @return a Left containing the {@code left} value if it is present,
-   *         or otherwise a Right the result of invoking {@code right.get()}
+   * @return if the value is present, a Left containing that value,
+   *         otherwise a Right containing the supplied value
    */
   public <R> Either<L, R> orElseRight(Supplier<? extends R> right) {
     return flatMap(() -> right(right.get()));
   }
 
   /**
-   * Creates a &quot;balanced&quot; instance containing the Left value,
-   * or throws a runtime exception if the Left value is not present.
+   * If a value is present, returns a Left-{@link Either} containing the value,
+   * otherwise throws a runtime exception.
    *
    * @param <R> an arbitrary RHS type
-   * @return an Either containing the Left value
-   * @throws NoSuchElementException – if no Left value is present
+   * @return a Left containing the value
+   * @throws NoSuchElementException – if no value is present
    */
   public <R> Either<L, R> orElseThrow() {
     return Either.left(unsafeGet());
   }
 
   /**
-   * If the {@code left} value is absent, invoke the supplied Supplier
-   * to create a balanced instance.
-   * Otherwise return a balanced Left.
+   * If a value is present, return a Left-{@link Either} containing
+   * that value. Otherwise return the supplied Either instance.
    *
    * @param choice a choice function
    * @param <R> the RHS type
-   * @return an equivalent instance if this is a Left, otherwise the result of
-   *         invoking {@code choice}
+   * @return a Left-Either containing the value, or if no value is present,
+   *         the result of invoking {@code choice.get()}
    */
   public <R> Either<L, R> flatMap(
       Supplier<? extends Either<? extends L, ? extends R>> choice) {
@@ -92,40 +92,40 @@ public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
   /**
    * If a value is present, returns the result of applying the given
    * mapping function to the value, otherwise returns
-   * an empty {@code UnbalancedLeft}.
+   * an empty {@code LeftOptional}.
    *
-   * @param <L2> The type of value of the {@code UnbalancedLeft} returned by the
-   *            mapping function
+   * @param <L2> The type of value of the {@code LeftOptional} returned by the
+   *             mapping function
    * @param mapper the mapping function to apply to a value, if present
-   * @return the result of applying an {@code UnbalancedLeft}-bearing mapping
-   *         function to the value of this {@code UnbalancedLeft}, if a value is
-   *         present, otherwise an empty {@code UnbalancedLeft}
+   * @return the result of applying an {@code LeftOptional}-bearing mapping
+   *         function to the value of this {@code LeftOptional}, if a value is
+   *         present, otherwise an empty {@code LeftOptional}
    */
-  public <L2> UnbalancedLeft<L2> flatMapLeft(Function<? super L, UnbalancedLeft<? extends L2>> mapper) {
+  public <L2> LeftOptional<L2> flatMapLeft(Function<? super L, LeftOptional<? extends L2>> mapper) {
     if (isEmpty()) {
       return empty();
     }
     @SuppressWarnings("unchecked")
-    UnbalancedLeft<L2> result = (UnbalancedLeft<L2>) mapper.apply(unsafeGet());
+    LeftOptional<L2> result = (LeftOptional<L2>) mapper.apply(unsafeGet());
     return result;
   }
 
   /**
-   * If a value is present, returns an {@code UnbalancedLeft} containing
+   * If a value is present, returns an {@code LeftOptional} containing
    * the result of applying the given mapping function to
-   * the value, otherwise returns an empty {@code UnbalancedLeft}.
+   * the value, otherwise returns an empty {@code LeftOptional}.
    *
    * <p>If the mapping function returns a {@code null} result then this method
    * throws a {@code NullPointerException}.
    *
    * @param mapper the mapping function to apply to a value, if present
    * @param <L2> The type of the value returned from the mapping function
-   * @return an {@code UnbalancedLeft} describing the result of applying a mapping
+   * @return a {@code LeftOptional} describing the result of applying a mapping
    *         function to the value, if a value is
-   *         present, otherwise an empty {@code UnbalancedLeft}
+   *         present, otherwise an empty {@code LeftOptional}
    * @throws NullPointerException if the mapping function returns {@code null}
    */
-  public <L2> UnbalancedLeft<L2> mapLeft(Function<? super L, ? extends L2> mapper) {
+  public <L2> LeftOptional<L2> mapLeft(Function<? super L, ? extends L2> mapper) {
     if (isEmpty()) {
       return empty();
     }
@@ -133,7 +133,7 @@ public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
   }
 
   /**
-   * Returns a string representation of this {@code UnbalancedLeft}
+   * Returns a string representation of this {@code LeftOptional}
    * suitable for debugging. The exact presentation format is unspecified and
    * may vary between implementations and versions.
    *
@@ -142,8 +142,8 @@ public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
   @Override
   public String toString() {
     return isPresent()
-        ? String.format("UnbalancedLeft[%s]", unsafeGet())
-        : "UnbalancedLeft.empty";
+        ? String.format("OptionalLeft[%s]", unsafeGet())
+        : "Optional.empty";
   }
 
   @Override
@@ -152,11 +152,11 @@ public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
       return true;
     }
 
-    if (!(obj instanceof UnbalancedLeft)) {
+    if (!(obj instanceof LeftOptional)) {
       return false;
     }
 
-    UnbalancedLeft<?> other = (UnbalancedLeft<?>) obj;
+    LeftOptional<?> other = (LeftOptional<?>) obj;
     return isEqual(other);
   }
 }
