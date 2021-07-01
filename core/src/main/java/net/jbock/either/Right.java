@@ -45,4 +45,28 @@ final class Right<L, R> extends Either<L, R> {
       Function<? super R, ? extends U> rightMapper) {
     return rightMapper.apply(value);
   }
+
+  @Override
+  public String toString() {
+    return String.format("Right[%s]", value);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+
+    if (!(obj instanceof Right)) {
+      return false;
+    }
+
+    Right<?, ?> other = (Right<?, ?>) obj;
+    return value.equals(other.value);
+  }
+
+  @Override
+  public int hashCode() {
+    return value.hashCode();
+  }
 }

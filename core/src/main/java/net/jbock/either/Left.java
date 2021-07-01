@@ -1,6 +1,5 @@
 package net.jbock.either;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 final class Left<L, R> extends Either<L, R> {
@@ -45,5 +44,29 @@ final class Left<L, R> extends Either<L, R> {
       Function<? super L, ? extends U> leftMapper,
       Function<? super R, ? extends U> rightMapper) {
     return leftMapper.apply(value);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Left[%s]", value);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+
+    if (!(obj instanceof Left)) {
+      return false;
+    }
+
+    Left<?, ?> other = (Left<?, ?>) obj;
+    return value.equals(other.value);
+  }
+
+  @Override
+  public int hashCode() {
+    return value.hashCode();
   }
 }

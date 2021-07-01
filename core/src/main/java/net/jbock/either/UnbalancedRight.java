@@ -1,6 +1,7 @@
 package net.jbock.either;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -14,9 +15,9 @@ import static net.jbock.either.Either.narrow;
  */
 public final class UnbalancedRight<R> extends UnbalancedBase<R> {
 
-  private static final UnbalancedRight<?> EMPTY = new UnbalancedRight<>(Optional.empty());
+  private static final UnbalancedRight<?> EMPTY = new UnbalancedRight<>(null);
 
-  private UnbalancedRight(Optional<? extends R> right) {
+  private UnbalancedRight(R right) {
     super(right);
   }
 
@@ -30,7 +31,7 @@ public final class UnbalancedRight<R> extends UnbalancedBase<R> {
    * @throws NullPointerException if value is {@code null}
    */
   public static <R> UnbalancedRight<R> of(R right) {
-    return new UnbalancedRight<>(Optional.of(right));
+    return new UnbalancedRight<>(Objects.requireNonNull(right));
   }
 
   /**
@@ -66,7 +67,7 @@ public final class UnbalancedRight<R> extends UnbalancedBase<R> {
    * @throws NoSuchElementException – if no Right value is present
    */
   public <L> Either<L, R> orElseThrow() {
-    return Either.right(value.orElseThrow());
+    return Either.right(unsafeGet());
   }
 
   /**
@@ -81,7 +82,37 @@ public final class UnbalancedRight<R> extends UnbalancedBase<R> {
    */
   public <L> Either<L, R> flatMapLeft(
       Supplier<? extends Either<? extends L, ? extends R>> choice) {
-    return value.<Either<L, R>>map(Either::right)
-        .orElseGet(() -> narrow(choice.get()));
+    if (isPresent()) {
+      return Either.right(unsafeGet());
+    }
+    return narrow(choice.get());
+  }
+
+  /**
+   * Returns a string representation of this {@code UnbalancedRight}
+   * suitable for debugging.  The exact presentation format is unspecified and
+   * may vary between implementations and versions.
+   *
+   * @return the string representation of this instance
+   */
+  @Override
+  public String toString() {
+    return isPresent()
+        ? String.format("UnbalancedRight[%s]", unsafeGet())
+        : "UnbalancedRight.empty";
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+
+    if (!(obj instanceof UnbalancedRight)) {
+      return false;
+    }
+
+    UnbalancedRight<?> other = (UnbalancedRight<?>) obj;
+    return isEqual(other);
   }
 }

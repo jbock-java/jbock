@@ -1,10 +1,10 @@
 package net.jbock.either;
 
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.narrow;
 import static net.jbock.either.Either.right;
 
@@ -15,9 +15,9 @@ import static net.jbock.either.Either.right;
  */
 public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
 
-  private static final UnbalancedLeft<?> EMPTY = new UnbalancedLeft<>(Optional.empty());
+  private static final UnbalancedLeft<?> EMPTY = new UnbalancedLeft<>(null);
 
-  private UnbalancedLeft(Optional<? extends L> left) {
+  private UnbalancedLeft(L left) {
     super(left);
   }
 
@@ -31,7 +31,7 @@ public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
    * @throws NullPointerException if value is {@code null}
    */
   public static <L> UnbalancedLeft<L> of(L left) {
-    return new UnbalancedLeft<>(Optional.of(left));
+    return new UnbalancedLeft<>(left);
   }
 
   /**
@@ -67,7 +67,7 @@ public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
    * @throws NoSuchElementException – if no Left value is present
    */
   public <R> Either<L, R> orElseThrow() {
-    return Either.left(value.orElseThrow());
+    return Either.left(unsafeGet());
   }
 
   /**
@@ -82,7 +82,37 @@ public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
    */
   public <R> Either<L, R> flatMap(
       Supplier<? extends Either<? extends L, ? extends R>> choice) {
-    return value.<Either<L, R>>map(Either::left)
-        .orElseGet(() -> narrow(choice.get()));
+    if (isPresent()) {
+      return left(unsafeGet());
+    }
+    return narrow(choice.get());
+  }
+
+  /**
+   * Returns a string representation of this {@code UnbalancedLeft}
+   * suitable for debugging.  The exact presentation format is unspecified and
+   * may vary between implementations and versions.
+   *
+   * @return the string representation of this instance
+   */
+  @Override
+  public String toString() {
+    return isPresent()
+        ? String.format("UnbalancedLeft[%s]", unsafeGet())
+        : "UnbalancedLeft.empty";
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+
+    if (!(obj instanceof UnbalancedLeft)) {
+      return false;
+    }
+
+    UnbalancedLeft<?> other = (UnbalancedLeft<?>) obj;
+    return isEqual(other);
   }
 }

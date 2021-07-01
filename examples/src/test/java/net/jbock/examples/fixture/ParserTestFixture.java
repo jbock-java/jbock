@@ -27,8 +27,8 @@ public final class ParserTestFixture<E> {
     System.out.println(ANSI_RED + text + ANSI_RESET);
   }
 
-  private static void formatErr(String format, Object... args) {
-    System.out.print(ANSI_RED + String.format(format, args) + ANSI_RESET);
+  private static void formatErr(Object... args) {
+    System.out.print(ANSI_RED + String.format("%3d: %s%n", args) + ANSI_RESET);
   }
 
   private final Function<String[], Either<NotSuccess, E>> parser;
@@ -79,7 +79,7 @@ public final class ParserTestFixture<E> {
     for (int j = 0; j < actual.length; j++) {
       System.out.format("%3d: %s%n", j, expected[j]);
       if (!Objects.equals(expected[j], actual[j])) {
-        formatErr("%3d: %s%n", j, actual[j]);
+        formatErr(j, actual[j]);
       }
     }
     fail("Arrays differ at index " + diffIndex);
@@ -99,12 +99,12 @@ public final class ParserTestFixture<E> {
   private static void failDifferentLength(String[] expected, String[] actual) {
     printErr("Expected:");
     for (int i = 0; i < expected.length; i++) {
-      formatErr("%3d: %s%n", i, expected[i]);
+      formatErr(i, expected[i]);
     }
     System.out.println();
     printErr("Actual:");
     for (int i = 0; i < actual.length; i++) {
-      formatErr("%3d: %s%n", i, actual[i]);
+      formatErr(i, actual[i]);
     }
     fail(String.format("Expected length: %d, actual length: %d", expected.length, actual.length));
   }

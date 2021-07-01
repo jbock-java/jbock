@@ -1,6 +1,7 @@
 package net.jbock.either;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -23,27 +24,31 @@ public abstract class Either<L, R> {
   }
 
   /**
-   * Constructs a Left instance.
+   * Constructs a Left instance containing the given
+   * non-{@code null} value.
    *
    * @param value the LHS value, usually some kind of failure object
    * @param <L> the type of the LHS value
    * @param <R> an arbitrary RHS type
    * @return a Left containing the LHS value
+   * @throws NullPointerException if value is {@code null}
    */
   public static <L, R> Either<L, R> left(L value) {
-    return Left.create(value);
+    return Left.create(Objects.requireNonNull(value));
   }
 
   /**
-   * Constructs a Right instance.
+   * Constructs a Right instance containing the given
+   * non-{@code null} value.
    *
    * @param value the RHS value
    * @param <L> an arbitrary LHS type
    * @param <R> the type of the RHS value
    * @return a Right containing the RHS value
+   * @throws NullPointerException if value is {@code null}
    */
   public static <L, R> Either<L, R> right(R value) {
-    return Right.create(value);
+    return Right.create(Objects.requireNonNull(value));
   }
 
   /**
@@ -179,12 +184,12 @@ public abstract class Either<L, R> {
   /**
    * Collect the RHS values in the stream into a Right,
    * or, if at least one LHS value exists in the stream,
-   * return a Left containing one of the LHS values.
+   * return a Left containing the first such value.
    *
    * @param <L> the LHS type
    * @param <R> the RHS type
    * @return a list of the RHS values in the stream,
-   *         or, if it exists, one of the LHS values
+   *         or, if it exists, the first of the LHS values
    */
   public static <L, R> Collector<Either<L, R>, ?, Either<L, List<R>>> toValidList() {
     return new ValidatingCollector<>();
@@ -227,4 +232,16 @@ public abstract class Either<L, R> {
   static <L, R> Either<L, R> narrow(Either<? extends L, ? extends R> either) {
     return (Either<L, R>) either;
   }
+
+  /**
+   * Returns a string representation of this {@code Either}
+   * suitable for debugging.  The exact presentation format is unspecified and
+   * may vary between implementations and versions.
+   *
+   * @return the string representation of this instance
+   */
+  @Override
+  public abstract String toString();
+
+
 }
