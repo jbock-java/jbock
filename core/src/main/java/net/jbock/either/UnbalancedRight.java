@@ -2,16 +2,15 @@ package net.jbock.either;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.narrow;
 
 /**
- * An {@link Optional}, interpreted as an {@code Either<Void, R>}.
+ * A container object which may or may not contain a non-{@code null} Right value.
  *
- * @param <R> the RHS type
+ * @param <R> the type of the Right value
  */
 public final class UnbalancedRight<R> extends UnbalancedBase<R> {
 

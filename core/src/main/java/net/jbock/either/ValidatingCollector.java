@@ -20,24 +20,25 @@ class ValidatingCollector<L, R> implements Collector<Either<L, R>, ValidatingCol
   static final class Acc<L, R> {
 
     private L left;
-    private final List<R> values = new ArrayList<>();
+
+    private final List<R> right = new ArrayList<>();
 
     void accumulate(Either<L, R> either) {
-      if (this.left != null) {
+      if (left != null) {
         return;
       }
-      either.accept(l -> this.left = l,
-          this.values::add);
+      either.accept(l -> left = l,
+          right::add);
     }
 
     Acc<L, R> combine(Acc<L, R> other) {
-      if (this.left != null) {
+      if (left != null) {
         return this;
       }
       if (other.left != null) {
         return other;
       }
-      this.values.addAll(other.values);
+      right.addAll(other.right);
       return this;
     }
 
@@ -45,7 +46,7 @@ class ValidatingCollector<L, R> implements Collector<Either<L, R>, ValidatingCol
       if (left != null) {
         return Either.left(left);
       }
-      return Either.right(values);
+      return Either.right(right);
     }
   }
 

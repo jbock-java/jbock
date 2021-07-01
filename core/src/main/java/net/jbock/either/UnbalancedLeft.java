@@ -1,7 +1,8 @@
 package net.jbock.either;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.jbock.either.Either.left;
@@ -9,9 +10,9 @@ import static net.jbock.either.Either.narrow;
 import static net.jbock.either.Either.right;
 
 /**
- * An {@link Optional}, interpreted as an {@code Either<L, Void>}.
+ * A container object which may or may not contain a non-{@code null} Left value.
  *
- * @param <L> the LHS type
+ * @param <L> the type of the Left value
  */
 public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
 
@@ -31,7 +32,7 @@ public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
    * @throws NullPointerException if value is {@code null}
    */
   public static <L> UnbalancedLeft<L> of(L left) {
-    return new UnbalancedLeft<>(left);
+    return new UnbalancedLeft<>(Objects.requireNonNull(left));
   }
 
   /**
@@ -89,8 +90,51 @@ public final class UnbalancedLeft<L> extends UnbalancedBase<L> {
   }
 
   /**
+   * If a value is present, returns the result of applying the given
+   * mapping function to the value, otherwise returns
+   * an empty {@code UnbalancedLeft}.
+   *
+   * @param <L2> The type of value of the {@code UnbalancedLeft} returned by the
+   *            mapping function
+   * @param mapper the mapping function to apply to a value, if present
+   * @return the result of applying an {@code UnbalancedLeft}-bearing mapping
+   *         function to the value of this {@code UnbalancedLeft}, if a value is
+   *         present, otherwise an empty {@code UnbalancedLeft}
+   */
+  public <L2> UnbalancedLeft<L2> flatMapLeft(Function<? super L, UnbalancedLeft<? extends L2>> mapper) {
+    if (isEmpty()) {
+      return empty();
+    }
+    @SuppressWarnings("unchecked")
+    UnbalancedLeft<L2> result = (UnbalancedLeft<L2>) mapper.apply(unsafeGet());
+    return result;
+  }
+
+  /**
+   * If a value is present, returns an {@code UnbalancedLeft} containing
+   * the result of applying the given mapping function to
+   * the value, otherwise returns an empty {@code UnbalancedLeft}.
+   *
+   * <p>If the mapping function returns a {@code null} result then this method
+   * throws a {@code NullPointerException}.
+   *
+   * @param mapper the mapping function to apply to a value, if present
+   * @param <L2> The type of the value returned from the mapping function
+   * @return an {@code UnbalancedLeft} describing the result of applying a mapping
+   *         function to the value, if a value is
+   *         present, otherwise an empty {@code UnbalancedLeft}
+   * @throws NullPointerException if the mapping function returns {@code null}
+   */
+  public <L2> UnbalancedLeft<L2> mapLeft(Function<? super L, ? extends L2> mapper) {
+    if (isEmpty()) {
+      return empty();
+    }
+    return of(mapper.apply(unsafeGet()));
+  }
+
+  /**
    * Returns a string representation of this {@code UnbalancedLeft}
-   * suitable for debugging.  The exact presentation format is unspecified and
+   * suitable for debugging. The exact presentation format is unspecified and
    * may vary between implementations and versions.
    *
    * @return the string representation of this instance
