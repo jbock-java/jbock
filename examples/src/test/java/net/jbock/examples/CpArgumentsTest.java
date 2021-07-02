@@ -1,10 +1,9 @@
 package net.jbock.examples;
 
+import net.jbock.either.Optional;
 import net.jbock.examples.CpArguments.Control;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 class CpArgumentsTest {
 

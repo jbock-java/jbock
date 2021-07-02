@@ -16,6 +16,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +30,7 @@ class OptionalMatcherTest {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeMirror optionalInt = elements.getTypeElement(OptionalInt.class.getCanonicalName()).asType();
       TypeTool tool = new TypeTool(new SafeElements(elements), types);
-      OptionalMatcher optionalish = createMatcher(elements, tool, optionalInt);
+      OptionalMatcher optionalish = createMatcher(types, elements, tool, optionalInt);
       optionalish.tryMatch(parameter).map(match -> {
         TypeMirror baseType = match.baseType();
         assertEquals("java.lang.Integer", baseType.toString());
@@ -45,7 +46,7 @@ class OptionalMatcherTest {
       TypeMirror integer = elements.getTypeElement(Integer.class.getCanonicalName()).asType();
       TypeTool tool = new TypeTool(new SafeElements(elements), types);
       DeclaredType optionalInteger = types.getDeclaredType(optional, integer);
-      OptionalMatcher optionalish = createMatcher(elements, tool, optionalInteger);
+      OptionalMatcher optionalish = createMatcher(types, elements, tool, optionalInteger);
       optionalish.tryMatch(parameter).map(match -> {
         TypeMirror baseType = match.baseType();
         assertEquals("java.lang.Integer", baseType.toString());
@@ -59,7 +60,7 @@ class OptionalMatcherTest {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeMirror primitiveInt = types.getPrimitiveType(TypeKind.INT);
       TypeTool tool = new TypeTool(new SafeElements(elements), types);
-      OptionalMatcher optionalish = createMatcher(elements, tool, primitiveInt);
+      OptionalMatcher optionalish = createMatcher(types, elements, tool, primitiveInt);
       Assertions.assertFalse(optionalish.tryMatch(parameter).isPresent());
     });
   }
@@ -69,16 +70,20 @@ class OptionalMatcherTest {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeMirror string = elements.getTypeElement(String.class.getCanonicalName()).asType();
       TypeTool tool = new TypeTool(new SafeElements(elements), types);
-      OptionalMatcher optionalish = createMatcher(elements, tool, string);
+      OptionalMatcher optionalish = createMatcher(types, elements, tool, string);
       Assertions.assertFalse(optionalish.tryMatch(parameter).isPresent());
     });
   }
 
-  private OptionalMatcher createMatcher(Elements elements, TypeTool tool, TypeMirror returnType) {
+  private OptionalMatcher createMatcher(
+      Types types,
+      Elements elements,
+      TypeTool tool,
+      TypeMirror returnType) {
     ExecutableElement sourceMethod = Mockito.mock(ExecutableElement.class);
     Mockito.when(sourceMethod.getAnnotation(Mockito.any())).thenReturn(Mockito.mock(Option.class));
     Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
     return new OptionalMatcher(SourceMethod.create(sourceMethod),
-        tool, new SafeElements(elements));
+        tool, new SafeElements(elements), types);
   }
 }

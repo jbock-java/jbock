@@ -1,5 +1,6 @@
 package net.jbock.examples;
 
+import net.jbock.either.Optional;
 import net.jbock.examples.CustomMapperArguments.MyEnum;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,6 @@ import org.opentest4j.AssertionFailedError;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalInt;
 
 import static java.util.Collections.singleton;

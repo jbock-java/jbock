@@ -82,23 +82,20 @@ public class TypeTool {
   }
 
   /**
-   * The class must be a class with exactly one type parameter.
+   * {@code someClass} must be a class with exactly one type parameter.
    */
   public Optional<TypeMirror> getSingleTypeArgument(
-      TypeMirror mirror, Class<?> someClass) {
-    String canonicalName = someClass.getCanonicalName();
+      TypeMirror mirror, TypeElement someClass) {
     return AS_DECLARED.visit(mirror)
         .filter(declaredType -> declaredType.getTypeArguments().size() == 1)
-        .filter(declaredType -> isSameErasure(declaredType, canonicalName))
+        .filter(declaredType -> types.isSameType(
+            types.erasure(declaredType),
+            types.erasure(someClass.asType())))
         .map(declaredType -> declaredType.getTypeArguments().get(0));
   }
 
   public boolean isSameErasure(TypeMirror x, Class<?> y) {
-    return isSameErasure(x, y.getCanonicalName());
-  }
-
-  public boolean isSameErasure(TypeMirror x, String y) {
-    return elements.getTypeElement(y)
+    return elements.getTypeElement(y.getCanonicalName())
         .map(TypeElement::asType)
         .map(type -> types.isSameType(types.erasure(x), types.erasure(type)))
         .orElse(false);

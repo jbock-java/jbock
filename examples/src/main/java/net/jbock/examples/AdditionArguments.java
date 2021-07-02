@@ -2,9 +2,9 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Parameter;
+import net.jbock.either.Optional;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Command
 abstract class AdditionArguments {

@@ -4,6 +4,7 @@ import net.jbock.Command;
 import net.jbock.Converter;
 import net.jbock.Option;
 import net.jbock.Parameters;
+import net.jbock.either.Optional;
 import net.jbock.util.StringConverter;
 
 import java.math.BigInteger;
@@ -12,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Supplier;

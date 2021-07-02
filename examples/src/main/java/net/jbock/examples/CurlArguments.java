@@ -3,9 +3,9 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameters;
+import net.jbock.either.Optional;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * curl  is  a  tool  to  transfer data from or to a server

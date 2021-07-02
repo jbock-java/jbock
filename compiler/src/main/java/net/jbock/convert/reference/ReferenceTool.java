@@ -44,7 +44,7 @@ public class ReferenceTool {
     TypeMirror typeArgument = declaredType.getTypeArguments().get(0);
     return AS_DECLARED.visit(typeArgument)
         .filter(suppliedFunction -> tool.isSameErasure(suppliedFunction,
-            StringConverter.class.getCanonicalName()))
+            StringConverter.class))
         .map(Optional::of)
         .orElse(Optional.empty())
         .orElseLeft(this::errorConverterType)

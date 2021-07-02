@@ -40,6 +40,20 @@ class PositionalTest {
   }
 
   @Test
+  void eitherOptional() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Parameter(index = 0)",
+        "  abstract net.jbock.either.Optional<String> a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(Processor.testInstance())
+        .compilesWithoutError();
+  }
+
+  @Test
   void superComplexOptional() {
     JavaFileObject javaFile = fromSource(
         "@Command(superCommand = true)",

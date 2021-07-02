@@ -3,8 +3,7 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
-
-import java.util.Optional;
+import net.jbock.either.Optional;
 
 @Command(unixClustering = false)
 abstract class CpArguments {

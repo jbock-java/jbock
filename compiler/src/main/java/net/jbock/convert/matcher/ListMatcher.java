@@ -1,5 +1,6 @@
 package net.jbock.convert.matcher;
 
+import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matching.Match;
@@ -10,26 +11,29 @@ import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
-import java.util.List;
 
 @ParameterScope
 public class ListMatcher implements Matcher {
 
   private final SourceMethod sourceMethod;
+  private final SafeElements elements;
   private final TypeTool tool;
 
   @Inject
   ListMatcher(
       SourceMethod sourceMethod,
+      SafeElements elements,
       TypeTool tool) {
     this.sourceMethod = sourceMethod;
+    this.elements = elements;
     this.tool = tool;
   }
 
   @Override
   public Optional<Match> tryMatch(AbstractItem parameter) {
     TypeMirror returnType = sourceMethod.returnType();
-    return tool.getSingleTypeArgument(returnType, List.class)
-        .map(typeArg -> Match.create(typeArg, Multiplicity.REPEATABLE));
+    return elements.getTypeElement("java.util.List")
+        .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
+            .map(typeArg -> Match.create(typeArg, Multiplicity.REPEATABLE)));
   }
 }
