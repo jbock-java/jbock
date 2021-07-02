@@ -84,7 +84,7 @@ public class NamedOptionFactory {
     for (String name : sourceMethod.names()) {
       LeftOptional<String> check = checkName(name);
       if (check.isPresent()) {
-        return check.orElseThrow();
+        return left(check.orElseThrow());
       }
       if (result.contains(name)) {
         return left("duplicate option name: " + name);

@@ -1,8 +1,8 @@
 package net.jbock.either;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static net.jbock.either.Either.left;
@@ -61,18 +61,6 @@ public final class LeftOptional<L> extends AbstractOptional<L> {
   }
 
   /**
-   * If a value is present, returns a Left-{@link Either} containing the value,
-   * otherwise throws a runtime exception.
-   *
-   * @param <R> an arbitrary RHS type
-   * @return a Left containing the value
-   * @throws NoSuchElementException – if no value is present
-   */
-  public <R> Either<L, R> orElseThrow() {
-    return Either.left(unsafeGet());
-  }
-
-  /**
    * If a value is present, return a Left-{@link Either} containing
    * that value. Otherwise return the supplied Either instance.
    *
@@ -84,7 +72,7 @@ public final class LeftOptional<L> extends AbstractOptional<L> {
   public <R> Either<L, R> flatMap(
       Supplier<? extends Either<? extends L, ? extends R>> choice) {
     if (isPresent()) {
-      return left(unsafeGet());
+      return left(orElseThrow());
     }
     return narrow(choice.get());
   }
@@ -106,8 +94,45 @@ public final class LeftOptional<L> extends AbstractOptional<L> {
       return empty();
     }
     @SuppressWarnings("unchecked")
-    LeftOptional<L2> result = (LeftOptional<L2>) mapper.apply(unsafeGet());
+    LeftOptional<L2> result = (LeftOptional<L2>) mapper.apply(orElseThrow());
     return result;
+  }
+
+  /**
+   * If a value is present, returns an {@code LeftOptional} describing the value,
+   * otherwise returns a {@code LeftOptional} produced by the supplying function.
+   *
+   * @param supplier the supplying function that produces an {@code LeftOptional}
+   *        to be returned
+   * @return returns an {@code LeftOptional} describing the value of this
+   *         {@code LeftOptional}, if a value is present, otherwise an
+   *         {@code LeftOptional} produced by the supplying function.
+   */
+  public LeftOptional<L> or(Supplier<? extends LeftOptional<? extends L>> supplier) {
+    if (isPresent()) {
+      return this;
+    }
+    @SuppressWarnings("unchecked")
+    LeftOptional<L> result = (LeftOptional<L>) supplier.get();
+    return result;
+  }
+
+  /**
+   * If a value is present, and the value matches the given predicate,
+   * returns an {@code LeftOptional} describing the value, otherwise returns an
+   * empty {@code LeftOptional}.
+   *
+   * @param predicate the predicate to apply to a value, if present
+   * @return an {@code LeftOptional} describing the value of this
+   *         {@code LeftOptional}, if a value is present and the value matches the
+   *         given predicate, otherwise an empty {@code LeftOptional}
+   * @throws NullPointerException if the predicate is {@code null}
+   */
+  public LeftOptional<L> filter(Predicate<? super L> predicate) {
+    if (!isPresent()) {
+      return this;
+    }
+    return predicate.test(orElseThrow()) ? this : empty();
   }
 
   /**
@@ -129,7 +154,7 @@ public final class LeftOptional<L> extends AbstractOptional<L> {
     if (isEmpty()) {
       return empty();
     }
-    return of(mapper.apply(unsafeGet()));
+    return of(mapper.apply(orElseThrow()));
   }
 
   /**
@@ -142,10 +167,17 @@ public final class LeftOptional<L> extends AbstractOptional<L> {
   @Override
   public String toString() {
     return isPresent()
-        ? String.format("OptionalLeft[%s]", unsafeGet())
+        ? String.format("OptionalLeft[%s]", orElseThrow())
         : "Optional.empty";
   }
 
+  /**
+   * Indicates whether some other object is "equal to" this {@code Optional}.
+   *
+   * @param obj an object to be tested for equality
+   * @return {@code true} if the other object is "equal to" this object
+   *         otherwise {@code false}
+   */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {

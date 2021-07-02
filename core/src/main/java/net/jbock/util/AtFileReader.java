@@ -82,7 +82,7 @@ public final class AtFileReader {
     while (it.hasNext()) {
       Either<LineResult, String> result = readTokenFromAtFile(it);
       if (result.isLeft()) {
-        return result.getLeft().orElseThrow();
+        return left(result.getLeft().orElseThrow());
       } else {
         result.acceptRight(tokens::add);
       }
