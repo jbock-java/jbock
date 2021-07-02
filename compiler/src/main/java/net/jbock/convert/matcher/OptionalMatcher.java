@@ -4,13 +4,13 @@ import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matching.Match;
+import net.jbock.either.Optional;
 import net.jbock.model.Multiplicity;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
-import java.util.Optional;
 
 @ParameterScope
 public class OptionalMatcher implements Matcher {
@@ -33,8 +33,8 @@ public class OptionalMatcher implements Matcher {
   public Optional<Match> tryMatch(AbstractItem parameter) {
     TypeMirror returnType = sourceMethod.returnType();
     return getOptionalPrimitive(returnType)
-        .or(() ->
-            tool.getSingleTypeArgument(returnType, Optional.class)
+        .or(() -> // TODO support other kinds of Optional
+            tool.getSingleTypeArgument(returnType, java.util.Optional.class)
                 .map(typeArg -> Match.create(typeArg, Multiplicity.OPTIONAL)));
   }
 

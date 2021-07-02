@@ -27,8 +27,8 @@ public class ReferenceTool {
   }
 
   public Either<String, StringConverterType> getReferencedType(TypeElement converter) {
-    java.util.Optional<DeclaredType> supplier = checkSupplier(converter);
-    java.util.Optional<DeclaredType> stringConverter = checkStringConverter(converter);
+    Optional<DeclaredType> supplier = checkSupplier(converter);
+    Optional<DeclaredType> stringConverter = checkStringConverter(converter);
     if (supplier.isPresent() && stringConverter.isPresent()) {
       return left(errorConverterType() + " but not both");
     }
@@ -60,16 +60,18 @@ public class ReferenceTool {
     return right(new StringConverterType(typeArgument, isSupplier));
   }
 
-  private java.util.Optional<DeclaredType> checkSupplier(TypeElement converter) {
+  private Optional<DeclaredType> checkSupplier(TypeElement converter) {
     return converter.getInterfaces().stream()
         .filter(inter -> tool.isSameErasure(inter, Supplier.class))
         .map(AS_DECLARED::visit)
-        .flatMap(java.util.Optional::stream)
-        .findFirst();
+        .flatMap(Optional::stream)
+        .findFirst()
+        .map(Optional::of)
+        .orElse(Optional.empty());
   }
 
-  private java.util.Optional<DeclaredType> checkStringConverter(TypeElement converter) {
-    return java.util.Optional.of(converter.getSuperclass())
+  private Optional<DeclaredType> checkStringConverter(TypeElement converter) {
+    return Optional.of(converter.getSuperclass())
         .filter(inter -> tool.isSameErasure(inter, StringConverter.class))
         .flatMap(AS_DECLARED::visit);
   }

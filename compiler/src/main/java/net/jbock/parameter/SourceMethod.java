@@ -2,13 +2,13 @@ package net.jbock.parameter;
 
 import net.jbock.common.SafeElements;
 import net.jbock.common.ValidationFailure;
+import net.jbock.either.Optional;
 import net.jbock.validate.ParameterStyle;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
 

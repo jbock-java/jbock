@@ -1,11 +1,11 @@
 package net.jbock.context;
 
 import net.jbock.convert.Mapped;
+import net.jbock.either.Optional;
 import net.jbock.parameter.PositionalParameter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PositionalParameters {
@@ -26,7 +26,9 @@ public class PositionalParameters {
         .collect(Collectors.toUnmodifiableList());
     Optional<Mapped<PositionalParameter>> repeatable = all.stream()
         .filter(Mapped::isRepeatable)
-        .findFirst();
+        .findFirst()
+        .map(Optional::of)
+        .orElse(Optional.empty());
     return new PositionalParameters(regular, repeatable);
   }
 

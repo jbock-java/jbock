@@ -1,5 +1,7 @@
 package net.jbock.common;
 
+import net.jbock.either.Optional;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.TypeElement;
@@ -10,7 +12,6 @@ import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.SimpleElementVisitor9;
 import javax.lang.model.util.SimpleTypeVisitor9;
 import javax.lang.model.util.Types;
-import java.util.Optional;
 
 public class TypeTool {
 

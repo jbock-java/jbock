@@ -17,11 +17,8 @@ import static net.jbock.either.Either.narrow;
  *   <li>The {@link #map(Function)} method throws an exception if the mapper
  *       function returns a {@code null} result.
  *   <li>There is no {@code get()} method. Use {@link #orElseThrow()} instead.
- *   <li>There is only one version of {@code orElseThrow()}, which does not take an argument.
  *   <li>Some null-checks are omitted. For example, the result of applying
  *       the mapper is not null-checked in {@link #flatMap(Function)}.
- *   <li>There is no static {@code ofNullable(Object)} factory method.
- *       Use either {@link #of(Object)} or {@link #empty()}.
  * </ul>
  *
  * <p>Other than the methods that are basically copied from {@code java.util.Optional},
@@ -59,6 +56,19 @@ public final class Optional<R> extends AbstractOptional<R> {
   @SuppressWarnings("unchecked")
   public static <R> Optional<R> empty() {
     return (Optional<R>) EMPTY;
+  }
+
+  /**
+   * Returns an {@code Optional} describing the given value, if
+   * non-{@code null}, otherwise returns an empty {@code Optional}.
+   *
+   * @param value the possibly-{@code null} value to describe
+   * @param <T> the type of the value
+   * @return an {@code Optional} with a present value if the specified value
+   *         is non-{@code null}, otherwise an empty {@code Optional}
+   */
+  public static <T> Optional<T> ofNullable(T value) {
+    return value == null ? empty() : of(value);
   }
 
   /**
@@ -112,12 +122,12 @@ public final class Optional<R> extends AbstractOptional<R> {
    * @return the result of applying the mapping function to the value, if a value
    *         is present, otherwise an empty {@code Optional}
    */
-  public <R2> Optional<R> flatMap(Function<? super R, Optional<? extends R2>> mapper) {
+  public <R2> Optional<R2> flatMap(Function<? super R, Optional<? extends R2>> mapper) {
     if (!isPresent()) {
       return empty();
     }
     @SuppressWarnings("unchecked")
-    Optional<R> result = (Optional<R>) mapper.apply(orElseThrow());
+    Optional<R2> result = (Optional<R2>) mapper.apply(orElseThrow());
     return result;
   }
 

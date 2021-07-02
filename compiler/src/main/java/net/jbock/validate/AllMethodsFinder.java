@@ -1,5 +1,6 @@
 package net.jbock.validate;
 
+import net.jbock.either.Optional;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -47,7 +47,7 @@ public class AllMethodsFinder {
       if (element.isEmpty()) {
         return acc;
       }
-      TypeElement el = element.get();
+      TypeElement el = element.orElseThrow();
       List<ExecutableElement> methods = methodsIn(el.getEnclosedElements());
       acc.addAll(methods);
       mirror = el.getSuperclass();

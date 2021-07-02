@@ -5,6 +5,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.convert.Mapped;
 import net.jbock.either.Either;
+import net.jbock.either.Optional;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.HelpRequested;
@@ -12,7 +13,6 @@ import net.jbock.util.NotSuccess;
 import net.jbock.util.SuperResult;
 
 import javax.inject.Inject;
-import java.util.Optional;
 
 @ContextScope
 public class GeneratedTypes {

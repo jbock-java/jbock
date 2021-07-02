@@ -49,9 +49,9 @@ public class AutoConverterFinder extends MatchValidator {
 
   public <P extends AbstractItem> Either<String, Mapped<P>> findConverter(P parameter) {
     for (Matcher matcher : matchers) {
-      java.util.Optional<Match> match = matcher.tryMatch(parameter);
+      Optional<Match> match = matcher.tryMatch(parameter);
       if (match.isPresent()) {
-        Match m = match.get();
+        Match m = match.orElseThrow();
         return validateMatch(m).flatMap(() ->
             findConverter(m, parameter));
       }
@@ -100,9 +100,7 @@ public class AutoConverterFinder extends MatchValidator {
     return TypeTool.AS_DECLARED.visit(type)
         .map(DeclaredType::asElement)
         .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
-        .filter(element -> element.getKind() == ElementKind.ENUM)
-        .map(Optional::of)
-        .orElse(Optional.empty());
+        .filter(element -> element.getKind() == ElementKind.ENUM);
   }
 
   private String noMatchError(TypeMirror type) {

@@ -5,11 +5,11 @@ import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.common.Descriptions;
 import net.jbock.common.SafeElements;
+import net.jbock.either.Optional;
 
 import javax.lang.model.element.ExecutableElement;
 import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalInt;
 
 public enum ParameterStyle {

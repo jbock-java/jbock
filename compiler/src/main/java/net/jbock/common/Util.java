@@ -2,6 +2,7 @@ package net.jbock.common;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.either.Optional;
 import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
@@ -18,7 +19,6 @@ import javax.lang.model.util.Types;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Util {
@@ -88,7 +88,7 @@ public class Util {
     if (el.isEmpty()) {
       return false;
     }
-    return extendsRuntimeException(el.get().getSuperclass());
+    return extendsRuntimeException(el.orElseThrow().getSuperclass());
   }
 
   public List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
@@ -104,7 +104,7 @@ public class Util {
       if (opt.isEmpty()) {
         return result;
       }
-      current = opt.get();
+      current = opt.orElseThrow();
       result.add(current);
     }
     return result;

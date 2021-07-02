@@ -16,7 +16,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
-import java.util.Optional;
 import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,7 +41,7 @@ class OptionalMatcherTest {
   @Test
   void testOptionalInteger() {
     EvaluatingProcessor.source().run((elements, types) -> {
-      TypeElement optional = elements.getTypeElement(Optional.class.getCanonicalName());
+      TypeElement optional = elements.getTypeElement(java.util.Optional.class.getCanonicalName());
       TypeMirror integer = elements.getTypeElement(Integer.class.getCanonicalName()).asType();
       TypeTool tool = new TypeTool(new SafeElements(elements), types);
       DeclaredType optionalInteger = types.getDeclaredType(optional, integer);

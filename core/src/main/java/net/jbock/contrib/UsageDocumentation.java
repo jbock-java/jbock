@@ -1,5 +1,6 @@
 package net.jbock.contrib;
 
+import net.jbock.either.Optional;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Item;
 import net.jbock.model.Option;
@@ -11,12 +12,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 final class UsageDocumentation {
 
   private static final int CONTINUATION_INDENT_USAGE = 8;
+
+  private final Pattern whitespace = Pattern.compile("\\s+");
 
   private final PrintStream out;
   private final int terminalWidth;
@@ -118,10 +121,10 @@ final class UsageDocumentation {
     List<String> description = new ArrayList<>();
     String desc = messages.get(descriptionKey);
     if (desc != null) {
-      Collections.addAll(description, desc.split("\\s+", -1));
+      Collections.addAll(description, whitespace.split(desc, -1));
     } else {
       for (String line : descriptionLines) {
-        Collections.addAll(description, line.split("\\s+", -1));
+        Collections.addAll(description, whitespace.split(line, -1));
       }
     }
     makeLines("", description).forEach(out::println);
@@ -155,15 +158,17 @@ final class UsageDocumentation {
   }
 
   private void printItemDocumentation(Item item, String itemName, String indent) {
-    String message = item.descriptionKey().isEmpty() ? null : messages.get(item.descriptionKey());
+    Optional<String> message = item.descriptionKey().isEmpty() ?
+        Optional.empty() :
+        Optional.ofNullable(messages.get(item.descriptionKey()));
     List<String> tokens = new ArrayList<>();
     tokens.add(itemName);
-    tokens.addAll(Optional.ofNullable(message)
+    tokens.addAll(message
         .map(String::trim)
-        .map(s -> s.split("\\s+", -1))
+        .map(s -> whitespace.split(s, -1))
         .map(Arrays::asList)
         .orElseGet(() -> item.description().stream()
-            .map(s -> s.split("\\s+", -1))
+            .map(s -> whitespace.split(s, -1))
             .flatMap(Arrays::stream)
             .collect(Collectors.toList())));
     makeLines(indent, tokens).forEach(out::println);

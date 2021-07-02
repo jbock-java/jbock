@@ -1,10 +1,11 @@
 package net.jbock.common;
 
+import net.jbock.either.Optional;
+
 import javax.lang.model.element.Element;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 public class Descriptions {
 

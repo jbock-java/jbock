@@ -10,6 +10,7 @@ import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.convert.reference.StringConverterType;
 import net.jbock.either.Either;
 import net.jbock.either.LeftOptional;
+import net.jbock.either.Optional;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
@@ -22,7 +23,6 @@ import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.either.Either.left;
@@ -78,7 +78,7 @@ public class ConverterValidator extends MatchValidator {
       match.ifPresent(matches::add);
       match = match.filter(m -> isValidMatch(m, functionType));
       if (match.isPresent()) {
-        Match m = match.get();
+        Match m = match.orElseThrow();
         return validateMatch(m)
             .orElseRight(() -> getMapExpr(functionType, converter))
             .map(code -> new MapExpr(code, m.baseType(), false))

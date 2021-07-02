@@ -126,6 +126,23 @@ public abstract class AbstractOptional<T> {
   }
 
   /**
+   * If a value is present, returns the value, otherwise throws an exception
+   * produced by the exception supplying function.
+   *
+   * @param <X> Type of the exception to be thrown
+   * @param exceptionSupplier the supplying function that produces an
+   *        exception to be thrown
+   * @return the value, if present
+   * @throws X if no value is present
+   */
+  public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
+    if (value != null) {
+      return value;
+    }
+    throw exceptionSupplier.get();
+  }
+
+  /**
    * Returns the hash code of the value, if present, otherwise {@code 0}
    * (zero) if no value is present.
    *

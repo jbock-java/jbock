@@ -7,12 +7,12 @@ import net.jbock.common.Descriptions;
 import net.jbock.common.SafeElements;
 import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;
+import net.jbock.either.Optional;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static net.jbock.common.Constants.ACCESS_MODIFIERS;

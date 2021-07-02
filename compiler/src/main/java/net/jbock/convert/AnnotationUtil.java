@@ -5,6 +5,7 @@ import com.google.auto.common.MoreTypes;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
+import net.jbock.either.Optional;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -13,7 +14,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleAnnotationValueVisitor9;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -54,7 +54,9 @@ class AnnotationUtil {
     return sourceMethod.getAnnotationMirrors().stream()
         .filter(AnnotationUtil::hasAnnotationTypeIn)
         .map((AnnotationMirror a) -> a) // Avoid returning Optional<? extends AnnotationMirror>.
-        .findFirst();
+        .findFirst()
+        .map(Optional::of)
+        .orElse(Optional.empty());
   }
 
   private static boolean hasAnnotationTypeIn(AnnotationMirror annotation) {

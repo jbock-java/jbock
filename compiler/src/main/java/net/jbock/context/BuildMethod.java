@@ -6,6 +6,7 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.common.Util;
 import net.jbock.convert.Mapped;
 import net.jbock.either.Either;
+import net.jbock.either.Optional;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
@@ -17,7 +18,6 @@ import net.jbock.util.ItemType;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;

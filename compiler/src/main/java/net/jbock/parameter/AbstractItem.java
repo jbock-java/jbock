@@ -6,10 +6,10 @@ import net.jbock.Parameter;
 import net.jbock.common.EnumName;
 import net.jbock.common.SafeElements;
 import net.jbock.common.ValidationFailure;
+import net.jbock.either.Optional;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * This class represents an {@code abstract} Method in the command class,

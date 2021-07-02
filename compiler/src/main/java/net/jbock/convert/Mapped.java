@@ -6,13 +6,13 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.common.EnumName;
 import net.jbock.convert.matching.MapExpr;
+import net.jbock.either.Optional;
 import net.jbock.model.Multiplicity;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.NamedOption;
 import net.jbock.util.StringConverter;
 
 import javax.lang.model.type.PrimitiveType;
-import java.util.Optional;
 import java.util.function.Function;
 
 public final class Mapped<P extends AbstractItem> {

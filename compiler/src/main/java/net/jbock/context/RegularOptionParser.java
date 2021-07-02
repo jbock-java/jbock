@@ -8,10 +8,10 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.Constants;
 import net.jbock.common.Util;
+import net.jbock.either.Optional;
 import net.jbock.util.ExToken;
 
 import javax.inject.Inject;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;

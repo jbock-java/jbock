@@ -1,5 +1,6 @@
 package net.jbock.contrib;
 
+import net.jbock.either.Optional;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Item;
 import net.jbock.model.Multiplicity;
@@ -8,7 +9,6 @@ import net.jbock.model.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -80,7 +80,9 @@ final class Synopsis {
   }
 
   private Optional<Parameter> repeatableParameter() {
-    return filterBySkew(parameters, REPEATABLE).findAny();
+    return filterBySkew(parameters, REPEATABLE).findAny()
+        .map(Optional::of)
+        .orElse(Optional.empty());
   }
 
   private static <E extends Item> Stream<E> filterBySkew(List<E> items, Multiplicity skew) {
