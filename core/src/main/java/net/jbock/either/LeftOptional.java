@@ -31,21 +31,21 @@ public final class LeftOptional<L> extends AbstractOptional<L> {
 
   private static final LeftOptional<?> EMPTY = new LeftOptional<>(null);
 
-  private LeftOptional(L left) {
-    super(left);
+  private LeftOptional(L value) {
+    super(value);
   }
 
   /**
    * Returns a {@code LeftOptional} containing the given
    * non-{@code null} value.
    *
-   * @param left the value, which must be non-{@code null}
+   * @param value the value, which must be non-{@code null}
    * @param <L> the type of the value
    * @return a {@code LeftOptional} with the value present
    * @throws NullPointerException if value is {@code null}
    */
-  public static <L> LeftOptional<L> of(L left) {
-    return new LeftOptional<>(Objects.requireNonNull(left));
+  public static <L> LeftOptional<L> of(L value) {
+    return new LeftOptional<>(Objects.requireNonNull(value));
   }
 
   /**
@@ -157,13 +157,13 @@ public final class LeftOptional<L> extends AbstractOptional<L> {
    * Otherwise returns a Right-Either containing the value produced
    * by the supplier.
    *
-   * @param right supplier of a Right value
+   * @param supplier supplier of a Right value
    * @param <R> the RHS type
    * @return if the value is present, a Left containing that value,
    *         otherwise a Right containing the result of invoking {@code supplier.get()}
    */
-  public <R> Either<L, R> orElseRight(Supplier<? extends R> right) {
-    return flatMapRight(() -> right(right.get()));
+  public <R> Either<L, R> orElseRight(Supplier<? extends R> supplier) {
+    return flatMapRight(() -> right(supplier.get()));
   }
 
   /**

@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.narrow;
+import static net.jbock.either.Either.right;
 
 /**
  * A container object which may or may not contain a non-{@code null} value.
@@ -29,21 +30,21 @@ public final class Optional<R> extends AbstractOptional<R> {
 
   private static final Optional<?> EMPTY = new Optional<>(null);
 
-  private Optional(R right) {
-    super(right);
+  private Optional(R value) {
+    super(value);
   }
 
   /**
    * Returns an {@code Optional} containing the given
    * non-{@code null} value.
    *
-   * @param right the value, which must be non-{@code null}
+   * @param value the value, which must be non-{@code null}
    * @param <R> the type of the value
    * @return an {@code Optional} with the value present
    * @throws NullPointerException if value is {@code null}
    */
-  public static <R> Optional<R> of(R right) {
-    return new Optional<>(Objects.requireNonNull(right));
+  public static <R> Optional<R> of(R value) {
+    return new Optional<>(Objects.requireNonNull(value));
   }
 
   /**
@@ -177,7 +178,7 @@ public final class Optional<R> extends AbstractOptional<R> {
   public <L> Either<L, R> flatMapLeft(
       Supplier<? extends Either<? extends L, ? extends R>> supplier) {
     if (isPresent()) {
-      return Either.right(orElseThrow());
+      return right(orElseThrow());
     }
     return narrow(supplier.get());
   }

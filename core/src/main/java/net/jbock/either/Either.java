@@ -8,8 +8,8 @@ import java.util.stream.Collector;
 
 /**
  * A class that acts as a container for a value of one of two types. An Either
- * will be either be a &quot;Left&quot; or a &quot;Right&quot;,
- * but not &quot;none&quot; or &quot;both&quot;.
+ * will be either be a "Left" or a "Right",
+ * but not "none" or "both".
  * An Either can be used to express a success or failure case. By convention,
  * Right is used to store a success value, and Left is used to store a failure
  * value.
@@ -48,6 +48,34 @@ public abstract class Either<L, R> {
    */
   public static <L, R> Either<L, R> right(R value) {
     return Right.create(Objects.requireNonNull(value));
+  }
+
+  /**
+   * Collect the RHS values in the stream into a Right,
+   * or, if the stream contains an LHS value,
+   * return a Left containing the first such value.
+   *
+   * @param <L> the LHS type
+   * @param <R> the RHS type
+   * @return a Right containing all RHS values in the stream,
+   *         or, if an LHS value exists, a Left containing the first such value
+   */
+  public static <L, R> Collector<Either<L, R>, ?, Either<L, List<R>>> toValidList() {
+    return new ValidatingCollector<>();
+  }
+
+  /**
+   * Collect the RHS values in the stream into a Right,
+   * or, if the stream an LHS value,
+   * return a Left containing all LHS values in the original order.
+   *
+   * @param <L> the LHS type
+   * @param <R> the RHS type
+   * @return a list of the RHS values in the stream,
+   *         or, if an LHS value exists, a nonempty list of all LHS values
+   */
+  public static <L, R> Collector<Either<L, R>, ?, Either<List<L>, List<R>>> toValidListAll() {
+    return new ValidatingCollectorAll<>();
   }
 
   /**
@@ -178,20 +206,6 @@ public abstract class Either<L, R> {
   public final void acceptRight(Consumer<? super R> rightAction) {
     accept(l -> {
     }, rightAction);
-  }
-
-  /**
-   * Collect the RHS values in the stream into a Right,
-   * or, if at least one LHS value exists in the stream,
-   * return a Left containing the first such value.
-   *
-   * @param <L> the LHS type
-   * @param <R> the RHS type
-   * @return a list of the RHS values in the stream,
-   *         or, if it exists, the first of the LHS values
-   */
-  public static <L, R> Collector<Either<L, R>, ?, Either<L, List<R>>> toValidList() {
-    return new ValidatingCollector<>();
   }
 
   /**

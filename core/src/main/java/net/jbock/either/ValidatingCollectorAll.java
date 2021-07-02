@@ -10,42 +10,45 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
- * A collector that implements {@link Either#toValidList()}.
+ * A collector that implements {@link Either#toValidListAll()}.
  *
  * @param <L> the LHS type
  * @param <R> the RHS type
  */
-class ValidatingCollector<L, R> implements Collector<Either<L, R>, ValidatingCollector.Acc<L, R>, Either<L, List<R>>> {
+class ValidatingCollectorAll<L, R> implements Collector<Either<L, R>, ValidatingCollectorAll.Acc<L, R>, Either<List<L>, List<R>>> {
 
   static final class Acc<L, R> {
 
-    private L left;
+    private final List<L> left = new ArrayList<>();
     private final List<R> right = new ArrayList<>();
 
     void accumulate(Either<L, R> either) {
-      if (left != null) {
-        return;
+      if (left.isEmpty()) {
+        either.accept(left::add, right::add);
+      } else {
+        either.acceptLeft(left::add);
       }
-      either.accept(l -> left = l,
-          right::add);
     }
 
     Acc<L, R> combine(Acc<L, R> other) {
-      if (left != null) {
+      if (!left.isEmpty()) {
+        left.addAll(other.left);
         return this;
       }
-      if (other.left != null) {
+      if (!other.left.isEmpty()) {
+        other.left.addAll(left);
         return other;
       }
       right.addAll(other.right);
       return this;
     }
 
-    Either<L, List<R>> finish() {
-      if (left != null) {
+    Either<List<L>, List<R>> finish() {
+      if (left.isEmpty()) {
+        return Either.right(right);
+      } else {
         return Either.left(left);
       }
-      return Either.right(right);
     }
   }
 
@@ -65,7 +68,7 @@ class ValidatingCollector<L, R> implements Collector<Either<L, R>, ValidatingCol
   }
 
   @Override
-  public Function<Acc<L, R>, Either<L, List<R>>> finisher() {
+  public Function<Acc<L, R>, Either<List<L>, List<R>>> finisher() {
     return Acc::finish;
   }
 
