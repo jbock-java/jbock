@@ -64,7 +64,7 @@ public class ConverterValidator extends MatchValidator {
         .or(() -> checkConverterAnnotationPresent(converter))
         .map(LeftOptional::of)
         .orElse(LeftOptional.empty())
-        .flatMap(() -> referenceTool.getReferencedType(converter))
+        .flatMapRight(() -> referenceTool.getReferencedType(converter))
         .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
   }
 

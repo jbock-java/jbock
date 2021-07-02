@@ -52,7 +52,7 @@ public class AutoConverterFinder extends MatchValidator {
       Optional<Match> match = matcher.tryMatch(parameter);
       if (match.isPresent()) {
         Match m = match.orElseThrow();
-        return validateMatch(m).flatMap(() ->
+        return validateMatch(m).flatMapRight(() ->
             findConverter(m, parameter));
       }
     }

@@ -17,12 +17,11 @@ import static net.jbock.either.Either.narrow;
  *   <li>The {@link #map(Function)} method throws an exception if the mapper
  *       function returns a {@code null} result.
  *   <li>There is no {@code get()} method. Use {@link #orElseThrow()} instead.
- *   <li>Some null-checks are omitted. For example, the result of applying
- *       the mapper is not null-checked in {@link #flatMap(Function)}.
  * </ul>
  *
- * <p>Other than the methods that are basically copied from {@code java.util.Optional},
- * this class contains some additional methods related to {@link Either}.
+ * <p>In addition to the methods that are basically copied from {@code java.util.Optional},
+ * this class contains some methods related to {@link Either},
+ * in particular {@link #orElseLeft(Supplier)} and {@link #flatMapLeft(Supplier)}.
  *
  * @param <R> the type of the value
  */
@@ -59,15 +58,15 @@ public final class Optional<R> extends AbstractOptional<R> {
   }
 
   /**
-   * Returns an {@code Optional} describing the given value, if
+   * Returns an {@code Optional} containing the given value, if
    * non-{@code null}, otherwise returns an empty {@code Optional}.
    *
-   * @param value the possibly-{@code null} value to describe
-   * @param <T> the type of the value
+   * @param value the possibly-{@code null} value
+   * @param <R> the type of the value
    * @return an {@code Optional} with a present value if the specified value
    *         is non-{@code null}, otherwise an empty {@code Optional}
    */
-  public static <T> Optional<T> ofNullable(T value) {
+  public static <R> Optional<R> ofNullable(R value) {
     return value == null ? empty() : of(value);
   }
 
@@ -108,12 +107,12 @@ public final class Optional<R> extends AbstractOptional<R> {
     if (!isPresent()) {
       return empty();
     }
-    return Optional.of(mapper.apply(orElseThrow()));
+    return of(mapper.apply(orElseThrow()));
   }
 
   /**
    * If a value is present, returns the result of applying the given
-   * {@code Optional}-bearing mapping function to the value, otherwise returns
+   * mapping function to the value, otherwise returns
    * an empty {@code Optional}.
    *
    * @param <R2> The type of value of the {@code Optional} returned by the
@@ -133,13 +132,13 @@ public final class Optional<R> extends AbstractOptional<R> {
 
   /**
    * If a value is present, returns an {@code Optional} describing the value,
-   * otherwise returns an {@code Optional} produced by the supplying function.
+   * otherwise returns an {@code Optional} produced by the supplier.
    *
-   * @param supplier the supplying function that produces an {@code Optional}
+   * @param supplier the supplier that produces an {@code Optional}
    *        to be returned
-   * @return returns an {@code Optional} describing the value of this
+   * @return returns an {@code Optional} containing the value of this
    *         {@code Optional}, if a value is present, otherwise an
-   *         {@code Optional} produced by the supplying function.
+   *         {@code Optional} produced by the supplier.
    */
   public Optional<R> or(Supplier<? extends Optional<? extends R>> supplier) {
     if (isPresent()) {
@@ -153,32 +152,34 @@ public final class Optional<R> extends AbstractOptional<R> {
   /**
    * If a value is present, returns a Right-{@link Either}
    * containing that value.
-   * Otherwise returns a Left-Either containing the supplied value.
+   * Otherwise returns a Left-Either containing the value produced
+   * by the supplier.
    *
-   * @param left supplier of a Left value
+   * @param supplier supplier of a Left value
    * @param <L> the LHS type
    * @return a Right-Either containing the value, if it exists,
-   *         or otherwise a Left-Either containing the result of invoking {@code left.get()}
+   *         or otherwise a Left-Either containing the result of invoking {@code supplier.get()}
    */
-  public <L> Either<L, R> orElseLeft(Supplier<? extends L> left) {
-    return flatMapLeft(() -> left(left.get()));
+  public <L> Either<L, R> orElseLeft(Supplier<? extends L> supplier) {
+    return flatMapLeft(() -> left(supplier.get()));
   }
 
   /**
-   * If a value is present, return a Right-{@link Either} containing
-   * that value. Otherwise return the supplied Either instance.
+   * If a value is present, returns a Right-{@link Either} containing
+   * that value. Otherwise returns the Either instance produced by
+   * the supplier.
    *
-   * @param choice a choice function
+   * @param supplier a supplier that yields an Either instance
    * @param <L> the LHS type
-   * @return an equivalent instance if this is a Right, otherwise the result of
-   *         invoking {@code choice}
+   * @return a Right-Either containing the value, if a value is present,
+   *         otherwise the result of invoking {@code supplier.get()}
    */
   public <L> Either<L, R> flatMapLeft(
-      Supplier<? extends Either<? extends L, ? extends R>> choice) {
+      Supplier<? extends Either<? extends L, ? extends R>> supplier) {
     if (isPresent()) {
       return Either.right(orElseThrow());
     }
-    return narrow(choice.get());
+    return narrow(supplier.get());
   }
 
   /**

@@ -241,6 +241,4 @@ public abstract class Either<L, R> {
    */
   @Override
   public abstract String toString();
-
-
 }
