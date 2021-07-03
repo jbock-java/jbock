@@ -3,7 +3,6 @@ package net.jbock.context;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import io.jbock.util.Either;
 import io.jbock.util.Optional;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.AbstractItem;
@@ -13,6 +12,8 @@ import net.jbock.util.NotSuccess;
 import net.jbock.util.SuperResult;
 
 import javax.inject.Inject;
+
+import static net.jbock.common.Constants.EITHER;
 
 @ContextScope
 public class GeneratedTypes {
@@ -72,7 +73,7 @@ public class GeneratedTypes {
 
     TypeName parseResultType() {
         return ParameterizedTypeName.get(
-                ClassName.get(Either.class),
+                EITHER,
                 ClassName.get(NotSuccess.class),
                 parseSuccessType());
     }
