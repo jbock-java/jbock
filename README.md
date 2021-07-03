@@ -12,7 +12,7 @@ that generates custom parsing code at compile time. jbock requires Java 11.
 
 Create an abstract class, or alternatively a Java interface,
 which has a `@Command` annotation.
-In this class or interface, each abstract method represents either a *named option* or a *positional parameter*.
+In this class or interface, each abstract method corresponds either to a *named option* or a *positional parameter*.
 
 ````java
 @Command(name = "rm", description = "Coffee time!")
