@@ -27,8 +27,6 @@ public final class Constants {
 
     public static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
 
-    public static final TypeName EITHER = ClassName.get("io.jbock.util", "Either");
-
     public static TypeName mapOf(TypeName keyType, TypeName valueType) {
         return ParameterizedTypeName.get(ClassName.get(Map.class), keyType, valueType);
     }

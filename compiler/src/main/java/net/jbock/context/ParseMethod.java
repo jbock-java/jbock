@@ -1,8 +1,10 @@
 package net.jbock.context;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.AtFileReader;
 import net.jbock.util.ExNotSuccess;
@@ -14,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.STRING_ARRAY;
 import static net.jbock.common.Constants.STRING_ITERATOR;
 
@@ -26,6 +27,10 @@ public class ParseMethod extends CachedMethod {
     private final SourceElement sourceElement;
     private final BuildMethod buildMethod;
     private final CreateModelMethod createModelMethod;
+
+    // fooling the shade plugin...
+    private final TypeName eitherType = ClassName.get(
+            String.join(".", List.of("io", "jbock", "util")), "Either");
 
     @Inject
     ParseMethod(
@@ -53,12 +58,12 @@ public class ParseMethod extends CachedMethod {
         if (sourceElement.helpEnabled()) {
             if (allItems.anyRequired()) {
                 code.add("if ($1N.length == 0 || $2S.equals($1N[0]))\n", args, "--help").indent()
-                        .addStatement("return $T.left(new $T($N()))", EITHER, HelpRequested.class,
+                        .addStatement("return $T.left(new $T($N()))", eitherType, HelpRequested.class,
                                 createModelMethod.get())
                         .unindent();
             } else {
                 code.add("if ($1N.length > 0 && $2S.equals($1N[0]))\n", args, "--help").indent()
-                        .addStatement("return $T.left(new $T($N()))", EITHER, HelpRequested.class,
+                        .addStatement("return $T.left(new $T($N()))", eitherType, HelpRequested.class,
                                 createModelMethod.get())
                         .unindent();
             }
@@ -92,10 +97,10 @@ public class ParseMethod extends CachedMethod {
         ParameterSpec e = builder(Exception.class, "e").build();
         return CodeBlock.builder().add("$T $N = new $T();\n", state.type, state, state.type)
                 .add("try {\n").indent()
-                .add("return $T.right($N.parse($N).$N());\n", EITHER, state, it, buildMethod.get())
+                .add("return $T.right($N.parse($N).$N());\n", eitherType, state, it, buildMethod.get())
                 .unindent().add("} catch ($T $N) {\n", ExNotSuccess.class, e).indent()
                 .add("return $T.left($N.toError($N()));\n",
-                        EITHER, e, createModelMethod.get())
+                        eitherType, e, createModelMethod.get())
                 .unindent().add("}\n")
                 .build();
     }
