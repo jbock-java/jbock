@@ -11,24 +11,24 @@ import java.util.Optional;
  */
 public class Main {
 
-  @Command
-  abstract static class Arguments {
+    @Command
+    abstract static class Arguments {
 
-    /**
-     * Verbosity enabled?
-     */
-    @Option(names = {"-v", "--verbose"})
-    abstract boolean verbose();
+        /**
+         * Verbosity enabled?
+         */
+        @Option(names = {"-v", "--verbose"})
+        abstract boolean verbose();
 
-    /**
-     * File name and path
-     */
-    @Option(names = {"-f", "--file"})
-    abstract Optional<String> file();
-  }
+        /**
+         * File name and path
+         */
+        @Option(names = {"-f", "--file"})
+        abstract Optional<String> file();
+    }
 
-  public static void main(String[] arguments) {
-    Arguments args = new Main_ArgumentsParser().parseOrExit(arguments);
-    System.out.println("The file '" + args.file() + "' was provided and verbosity is set to '" + args.verbose() + "'.");
-  }
+    public static void main(String[] arguments) {
+        Arguments args = new Main_ArgumentsParser().parseOrExit(arguments);
+        System.out.println("The file '" + args.file() + "' was provided and verbosity is set to '" + args.verbose() + "'.");
+    }
 }

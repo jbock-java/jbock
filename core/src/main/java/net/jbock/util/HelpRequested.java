@@ -8,12 +8,12 @@ import net.jbock.model.CommandModel;
  */
 public final class HelpRequested extends NotSuccess {
 
-  /**
-   * Public constructor that may be invoked from the generated code.
-   *
-   * @param commandModel command model
-   */
-  public HelpRequested(CommandModel commandModel) {
-    super(commandModel);
-  }
+    /**
+     * Public constructor that may be invoked from the generated code.
+     *
+     * @param commandModel command model
+     */
+    public HelpRequested(CommandModel commandModel) {
+        super(commandModel);
+    }
 }

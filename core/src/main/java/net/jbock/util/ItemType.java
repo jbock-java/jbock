@@ -19,15 +19,15 @@ import net.jbock.Parameter;
  */
 public enum ItemType {
 
-  /**
-   * Named option, or mode flag.
-   * The runtime model for this item is {@link Option}.
-   */
-  OPTION,
+    /**
+     * Named option, or mode flag.
+     * The runtime model for this item is {@link Option}.
+     */
+    OPTION,
 
-  /**
-   * Positional parameter.
-   * The runtime model for this item is {@link Parameter}.
-   */
-  PARAMETER,
+    /**
+     * Positional parameter.
+     * The runtime model for this item is {@link Parameter}.
+     */
+    PARAMETER,
 }

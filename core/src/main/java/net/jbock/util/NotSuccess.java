@@ -21,19 +21,19 @@ import net.jbock.model.CommandModel;
  */
 public abstract class NotSuccess {
 
-  private final CommandModel commandModel;
+    private final CommandModel commandModel;
 
-  NotSuccess(CommandModel commandModel) {
-    this.commandModel = commandModel;
-  }
+    NotSuccess(CommandModel commandModel) {
+        this.commandModel = commandModel;
+    }
 
-  /**
-   * Returns a complete model of the annotated class, to generate
-   * usage documentation or failure messages.
-   *
-   * @return command model
-   */
-  public CommandModel commandModel() {
-    return commandModel;
-  }
+    /**
+     * Returns a complete model of the annotated class, to generate
+     * usage documentation or failure messages.
+     *
+     * @return command model
+     */
+    public CommandModel commandModel() {
+        return commandModel;
+    }
 }

@@ -1,6 +1,6 @@
 package net.jbock.examples;
 
-import net.jbock.either.Either;
+import io.jbock.util.Either;
 import net.jbock.examples.fixture.ParserTestFixture;
 import net.jbock.util.HelpRequested;
 import net.jbock.util.NotSuccess;
@@ -12,21 +12,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ListIntegerArgumentsTest {
 
-  private final ListIntegerArgumentsParser parser = new ListIntegerArgumentsParser();
+    private final ListIntegerArgumentsParser parser = new ListIntegerArgumentsParser();
 
-  private final ParserTestFixture<ListIntegerArguments> f =
-      ParserTestFixture.create(parser::parse);
+    private final ParserTestFixture<ListIntegerArguments> f =
+            ParserTestFixture.create(parser::parse);
 
-  @Test
-  void testPresent() {
-    f.assertThat("-a", "1")
-        .has(ListIntegerArguments::a, List.of(1));
-  }
+    @Test
+    void testPresent() {
+        f.assertThat("-a", "1")
+                .has(ListIntegerArguments::a, List.of(1));
+    }
 
-  @Test
-  void testAbsent() {
-    Either<NotSuccess, ListIntegerArguments> result = parser.parse(/* empty */);
-    assertTrue(result.isLeft());
-    result.acceptLeft(l -> assertTrue(l instanceof HelpRequested));
-  }
+    @Test
+    void testAbsent() {
+        Either<NotSuccess, ListIntegerArguments> result = parser.parse(/* empty */);
+        assertTrue(result.isLeft());
+        result.acceptLeft(l -> assertTrue(l instanceof HelpRequested));
+    }
 }

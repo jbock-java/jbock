@@ -15,69 +15,69 @@ import static net.jbock.common.Constants.STRING_ITERATOR;
 
 public class TryParseOptionMethod extends CachedMethod {
 
-  private final SourceElement sourceElement;
-  private final NamedOptions namedOptions;
-  private final CommonFields commonFields;
-  private final ReadOptionNameMethod readOptionNameMethod;
+    private final SourceElement sourceElement;
+    private final NamedOptions namedOptions;
+    private final CommonFields commonFields;
+    private final ReadOptionNameMethod readOptionNameMethod;
 
-  @Inject
-  TryParseOptionMethod(
-      SourceElement sourceElement,
-      NamedOptions namedOptions,
-      CommonFields commonFields,
-      ReadOptionNameMethod readOptionNameMethod) {
-    this.sourceElement = sourceElement;
-    this.namedOptions = namedOptions;
-    this.commonFields = commonFields;
-    this.readOptionNameMethod = readOptionNameMethod;
-  }
+    @Inject
+    TryParseOptionMethod(
+            SourceElement sourceElement,
+            NamedOptions namedOptions,
+            CommonFields commonFields,
+            ReadOptionNameMethod readOptionNameMethod) {
+        this.sourceElement = sourceElement;
+        this.namedOptions = namedOptions;
+        this.commonFields = commonFields;
+        this.readOptionNameMethod = readOptionNameMethod;
+    }
 
-  @Override
-  MethodSpec define() {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    return MethodSpec.methodBuilder("tryParseOption")
-        .addException(ExToken.class)
-        .addParameter(token)
-        .addParameter(it)
-        .addCode(namedOptions.unixClusteringSupported() ?
-            tryParseOptionCodeClustering(token, it) :
-            tryParseOptionCodeSimple(token, it))
-        .returns(BOOLEAN)
-        .build();
-  }
+    @Override
+    MethodSpec define() {
+        ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+        ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
+        return MethodSpec.methodBuilder("tryParseOption")
+                .addException(ExToken.class)
+                .addParameter(token)
+                .addParameter(it)
+                .addCode(namedOptions.unixClusteringSupported() ?
+                        tryParseOptionCodeClustering(token, it) :
+                        tryParseOptionCodeSimple(token, it))
+                .returns(BOOLEAN)
+                .build();
+    }
 
-  private CodeBlock tryParseOptionCodeClustering(ParameterSpec token, ParameterSpec it) {
-    ParameterSpec t = ParameterSpec.builder(STRING, "t").build();
-    ParameterSpec option = ParameterSpec.builder(sourceElement.optionEnumType(), "opt").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $N.get($N($N))", sourceElement.optionEnumType(),
-        option, commonFields.optionNames(), readOptionNameMethod.get(), token);
-    code.add("if ($N == null)\n", option).indent()
-        .addStatement("return false")
-        .unindent();
-    code.addStatement("$T $N = $N", t.type, t, token);
-    code.add("while (($1N = $2N.get($3N).read($1N, $4N)) != null)\n",
-        t, commonFields.optionParsers(), option, it).indent();
-    code.add("if (($N = $N.get($N($N))) == null)\n", option, commonFields.optionNames(),
-        readOptionNameMethod.get(), t).indent();
-    code.addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
-        ErrTokenType.INVALID_UNIX_GROUP, token);
-    code.unindent().unindent();
-    code.addStatement("return true");
-    return code.build();
-  }
+    private CodeBlock tryParseOptionCodeClustering(ParameterSpec token, ParameterSpec it) {
+        ParameterSpec t = ParameterSpec.builder(STRING, "t").build();
+        ParameterSpec option = ParameterSpec.builder(sourceElement.optionEnumType(), "opt").build();
+        CodeBlock.Builder code = CodeBlock.builder();
+        code.addStatement("$T $N = $N.get($N($N))", sourceElement.optionEnumType(),
+                option, commonFields.optionNames(), readOptionNameMethod.get(), token);
+        code.add("if ($N == null)\n", option).indent()
+                .addStatement("return false")
+                .unindent();
+        code.addStatement("$T $N = $N", t.type, t, token);
+        code.add("while (($1N = $2N.get($3N).read($1N, $4N)) != null)\n",
+                t, commonFields.optionParsers(), option, it).indent();
+        code.add("if (($N = $N.get($N($N))) == null)\n", option, commonFields.optionNames(),
+                readOptionNameMethod.get(), t).indent();
+        code.addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
+                ErrTokenType.INVALID_UNIX_GROUP, token);
+        code.unindent().unindent();
+        code.addStatement("return true");
+        return code.build();
+    }
 
-  private CodeBlock tryParseOptionCodeSimple(ParameterSpec token, ParameterSpec it) {
-    ParameterSpec option = ParameterSpec.builder(sourceElement.optionEnumType(), "option").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $N.get($N($N))", sourceElement.optionEnumType(), option,
-        commonFields.optionNames(), readOptionNameMethod.get(), token);
-    code.add("if ($N == null)\n", option).indent()
-        .addStatement("return false")
-        .unindent();
-    code.addStatement("$N.get($N).read($N, $N)", commonFields.optionParsers(), option, token, it)
-        .addStatement("return true");
-    return code.build();
-  }
+    private CodeBlock tryParseOptionCodeSimple(ParameterSpec token, ParameterSpec it) {
+        ParameterSpec option = ParameterSpec.builder(sourceElement.optionEnumType(), "option").build();
+        CodeBlock.Builder code = CodeBlock.builder();
+        code.addStatement("$T $N = $N.get($N($N))", sourceElement.optionEnumType(), option,
+                commonFields.optionNames(), readOptionNameMethod.get(), token);
+        code.add("if ($N == null)\n", option).indent()
+                .addStatement("return false")
+                .unindent();
+        code.addStatement("$N.get($N).read($N, $N)", commonFields.optionParsers(), option, token, it)
+                .addStatement("return true");
+        return code.build();
+    }
 }

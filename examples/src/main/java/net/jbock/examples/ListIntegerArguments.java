@@ -13,17 +13,17 @@ import java.util.function.Supplier;
 @Command
 abstract class ListIntegerArguments {
 
-  private static final Function<String, Integer> PARSE_INT = Integer::parseInt;
+    private static final Function<String, Integer> PARSE_INT = Integer::parseInt;
 
-  @Option(names = {"--a", "-a"}, converter = Mapper.class)
-  abstract ArrayList<Integer> a();
+    @Option(names = {"--a", "-a"}, converter = Mapper.class)
+    abstract ArrayList<Integer> a();
 
-  @Converter
-  static class Mapper implements Supplier<StringConverter<ArrayList<Integer>>> {
+    @Converter
+    static class Mapper implements Supplier<StringConverter<ArrayList<Integer>>> {
 
-    @Override
-    public StringConverter<ArrayList<Integer>> get() {
-      return StringConverter.create(PARSE_INT.andThen(Collections::singletonList).andThen(ArrayList::new));
+        @Override
+        public StringConverter<ArrayList<Integer>> get() {
+            return StringConverter.create(PARSE_INT.andThen(Collections::singletonList).andThen(ArrayList::new));
+        }
     }
-  }
 }

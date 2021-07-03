@@ -12,24 +12,24 @@ import java.util.List;
 @ParameterScope
 public interface ConvertComponent {
 
-  PositionalParamFactory positionalParameterFactory();
+    PositionalParamFactory positionalParameterFactory();
 
-  NamedOptionFactory namedOptionFactory();
+    NamedOptionFactory namedOptionFactory();
 
-  @Component.Builder
-  interface Builder {
+    @Component.Builder
+    interface Builder {
 
-    @BindsInstance
-    Builder sourceMethod(SourceMethod sourceMethod);
+        @BindsInstance
+        Builder sourceMethod(SourceMethod sourceMethod);
 
-    @BindsInstance
-    Builder alreadyCreatedParams(List<Mapped<PositionalParameter>> alreadyCreated);
+        @BindsInstance
+        Builder alreadyCreatedParams(List<Mapped<PositionalParameter>> alreadyCreated);
 
-    @BindsInstance
-    Builder alreadyCreatedOptions(List<Mapped<NamedOption>> alreadyCreated);
+        @BindsInstance
+        Builder alreadyCreatedOptions(List<Mapped<NamedOption>> alreadyCreated);
 
-    Builder module(ConvertModule module);
+        Builder module(ConvertModule module);
 
-    ConvertComponent build();
-  }
+        ConvertComponent build();
+    }
 }

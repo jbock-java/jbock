@@ -11,13 +11,13 @@ package net.jbock.util;
  */
 public abstract class ConverterFailure {
 
-  ConverterFailure() {
-  }
+    ConverterFailure() {
+    }
 
-  /**
-   * Returns an error message to describe the failure.
-   *
-   * @return error message
-   */
-  public abstract String converterMessage();
+    /**
+     * Returns an error message to describe the failure.
+     *
+     * @return error message
+     */
+    public abstract String converterMessage();
 }

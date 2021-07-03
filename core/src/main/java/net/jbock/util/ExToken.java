@@ -10,22 +10,22 @@ import net.jbock.model.CommandModel;
  */
 public final class ExToken extends ExNotSuccess {
 
-  private final ErrTokenType errorType;
-  private final String token;
+    private final ErrTokenType errorType;
+    private final String token;
 
-  /**
-   * Public constructor that may be invoked from the generated code.
-   *
-   * @param errorType error type
-   * @param token offending token
-   */
-  public ExToken(ErrTokenType errorType, String token) {
-    this.errorType = errorType;
-    this.token = token;
-  }
+    /**
+     * Public constructor that may be invoked from the generated code.
+     *
+     * @param errorType error type
+     * @param token offending token
+     */
+    public ExToken(ErrTokenType errorType, String token) {
+        this.errorType = errorType;
+        this.token = token;
+    }
 
-  @Override
-  public NotSuccess toError(CommandModel model) {
-    return new ErrToken(model, errorType, token);
-  }
+    @Override
+    public NotSuccess toError(CommandModel model) {
+        return new ErrToken(model, errorType, token);
+    }
 }

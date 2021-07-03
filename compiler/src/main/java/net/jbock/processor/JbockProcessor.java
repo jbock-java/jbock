@@ -10,30 +10,30 @@ import static net.jbock.common.OperationMode.PRODUCTION;
 
 public final class JbockProcessor extends BasicAnnotationProcessor {
 
-  private final OperationMode operationMode;
+    private final OperationMode operationMode;
 
-  public JbockProcessor() {
-    this.operationMode = PRODUCTION;
-  }
+    public JbockProcessor() {
+        this.operationMode = PRODUCTION;
+    }
 
-  // visible for testing
-  JbockProcessor(boolean test) {
-    this.operationMode = OperationMode.valueOf(test);
-  }
+    // visible for testing
+    JbockProcessor(boolean test) {
+        this.operationMode = OperationMode.valueOf(test);
+    }
 
-  @Override
-  protected Iterable<? extends Step> steps() {
-    ProcessorComponent component = DaggerProcessorComponent.builder()
-        .processingEnv(processingEnv)
-        .operationMode(operationMode)
-        .build();
-    return List.of(component.commandProcessingStep(),
-        component.converterProcessingStep(),
-        component.parameterMethodProcessingStep());
-  }
+    @Override
+    protected Iterable<? extends Step> steps() {
+        ProcessorComponent component = DaggerProcessorComponent.builder()
+                .processingEnv(processingEnv)
+                .operationMode(operationMode)
+                .build();
+        return List.of(component.commandProcessingStep(),
+                component.converterProcessingStep(),
+                component.parameterMethodProcessingStep());
+    }
 
-  @Override
-  public SourceVersion getSupportedSourceVersion() {
-    return SourceVersion.latestSupported();
-  }
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
 }

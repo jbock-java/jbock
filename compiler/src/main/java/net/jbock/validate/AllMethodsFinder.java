@@ -1,6 +1,6 @@
 package net.jbock.validate;
 
-import net.jbock.either.Optional;
+import io.jbock.util.Optional;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -23,61 +23,61 @@ import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 @ValidateScope
 public class AllMethodsFinder {
 
-  private final SourceElement sourceElement;
+    private final SourceElement sourceElement;
 
-  @Inject
-  AllMethodsFinder(SourceElement sourceElement) {
-    this.sourceElement = sourceElement;
-  }
-
-  /**
-   * find all methods in source element, including inherited
-   */
-  List<ExecutableElement> findMethodsInSourceElement() {
-    TypeMirror mirror = sourceElement.element().asType();
-    return findMethodsIn(mirror);
-  }
-
-  private List<ExecutableElement> findMethodsIn(TypeMirror mirror) {
-    Map<Name, List<ExecutableElement>> methodsInInterfaces = findMethodsInInterfaces(mirror);
-    List<ExecutableElement> acc = new ArrayList<>();
-    methodsInInterfaces.values().forEach(acc::addAll);
-    while (true) {
-      Optional<TypeElement> element = asAbstractTypeElement(mirror);
-      if (element.isEmpty()) {
-        return acc;
-      }
-      TypeElement el = element.orElseThrow();
-      List<ExecutableElement> methods = methodsIn(el.getEnclosedElements());
-      acc.addAll(methods);
-      mirror = el.getSuperclass();
+    @Inject
+    AllMethodsFinder(SourceElement sourceElement) {
+        this.sourceElement = sourceElement;
     }
-  }
 
-  private Optional<TypeElement> asAbstractTypeElement(TypeMirror mirror) {
-    return AS_DECLARED.visit(mirror)
-        .map(DeclaredType::asElement)
-        .flatMap(AS_TYPE_ELEMENT::visit)
-        // interfaces are handled separately
-        .filter(typeElement -> typeElement.getKind() != INTERFACE)
-        // not abstract -> no relevant methods
-        .filter(typeElement -> typeElement.getModifiers().contains(ABSTRACT));
-  }
+    /**
+     * find all methods in source element, including inherited
+     */
+    List<ExecutableElement> findMethodsInSourceElement() {
+        TypeMirror mirror = sourceElement.element().asType();
+        return findMethodsIn(mirror);
+    }
 
-  private Map<Name, List<ExecutableElement>> findMethodsInInterfaces(TypeMirror mirror) {
-    return AS_DECLARED.visit(mirror)
-        .map(DeclaredType::asElement)
-        .flatMap(AS_TYPE_ELEMENT::visit)
-        .map(typeElement -> {
-          List<ExecutableElement> methods = typeElement.getKind() == INTERFACE ?
-              methodsIn(typeElement.getEnclosedElements()) :
-              List.of();
-          Map<Name, List<ExecutableElement>> acc = new HashMap<>();
-          acc.put(typeElement.getQualifiedName(), methods);
-          for (TypeMirror superInterface : typeElement.getInterfaces()) {
-            acc.putAll(findMethodsInInterfaces(superInterface)); // recursion
-          }
-          return acc;
-        }).orElse(Map.of());
-  }
+    private List<ExecutableElement> findMethodsIn(TypeMirror mirror) {
+        Map<Name, List<ExecutableElement>> methodsInInterfaces = findMethodsInInterfaces(mirror);
+        List<ExecutableElement> acc = new ArrayList<>();
+        methodsInInterfaces.values().forEach(acc::addAll);
+        while (true) {
+            Optional<TypeElement> element = asAbstractTypeElement(mirror);
+            if (element.isEmpty()) {
+                return acc;
+            }
+            TypeElement el = element.orElseThrow();
+            List<ExecutableElement> methods = methodsIn(el.getEnclosedElements());
+            acc.addAll(methods);
+            mirror = el.getSuperclass();
+        }
+    }
+
+    private Optional<TypeElement> asAbstractTypeElement(TypeMirror mirror) {
+        return AS_DECLARED.visit(mirror)
+                .map(DeclaredType::asElement)
+                .flatMap(AS_TYPE_ELEMENT::visit)
+                // interfaces are handled separately
+                .filter(typeElement -> typeElement.getKind() != INTERFACE)
+                // not abstract -> no relevant methods
+                .filter(typeElement -> typeElement.getModifiers().contains(ABSTRACT));
+    }
+
+    private Map<Name, List<ExecutableElement>> findMethodsInInterfaces(TypeMirror mirror) {
+        return AS_DECLARED.visit(mirror)
+                .map(DeclaredType::asElement)
+                .flatMap(AS_TYPE_ELEMENT::visit)
+                .map(typeElement -> {
+                    List<ExecutableElement> methods = typeElement.getKind() == INTERFACE ?
+                            methodsIn(typeElement.getEnclosedElements()) :
+                            List.of();
+                    Map<Name, List<ExecutableElement>> acc = new HashMap<>();
+                    acc.put(typeElement.getQualifiedName(), methods);
+                    for (TypeMirror superInterface : typeElement.getInterfaces()) {
+                        acc.putAll(findMethodsInInterfaces(superInterface)); // recursion
+                    }
+                    return acc;
+                }).orElse(Map.of());
+    }
 }

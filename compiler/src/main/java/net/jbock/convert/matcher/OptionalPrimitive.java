@@ -8,27 +8,27 @@ import java.util.OptionalLong;
 
 enum OptionalPrimitive {
 
-  INT(OptionalInt.class, Integer.class),
-  LONG(OptionalLong.class, Long.class),
-  DOUBLE(OptionalDouble.class, Double.class);
+    INT(OptionalInt.class, Integer.class),
+    LONG(OptionalLong.class, Long.class),
+    DOUBLE(OptionalDouble.class, Double.class);
 
-  private final Class<?> type;
-  private final String wrappedObjectType;
+    private final Class<?> type;
+    private final String wrappedObjectType;
 
-  OptionalPrimitive(Class<?> type, Class<? extends Number> wrappedObjectType) {
-    this.type = type;
-    this.wrappedObjectType = wrappedObjectType.getCanonicalName();
-  }
+    OptionalPrimitive(Class<?> type, Class<? extends Number> wrappedObjectType) {
+        this.type = type;
+        this.wrappedObjectType = wrappedObjectType.getCanonicalName();
+    }
 
-  CodeBlock extractExpr() {
-    return CodeBlock.of(".map($1T::of).orElse($1T.empty())", type);
-  }
+    CodeBlock extractExpr() {
+        return CodeBlock.of(".map($1T::of).orElse($1T.empty())", type);
+    }
 
-  public String type() {
-    return type.getCanonicalName();
-  }
+    public String type() {
+        return type.getCanonicalName();
+    }
 
-  public String wrappedObjectType() {
-    return wrappedObjectType;
-  }
+    public String wrappedObjectType() {
+        return wrappedObjectType;
+    }
 }

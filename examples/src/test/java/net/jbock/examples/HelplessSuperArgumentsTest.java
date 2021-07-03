@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Test;
 
 class HelplessSuperArgumentsTest {
 
-  private final HelplessSuperArgumentsParser parser = new HelplessSuperArgumentsParser();
+    private final HelplessSuperArgumentsParser parser = new HelplessSuperArgumentsParser();
 
-  private final ParserTestFixture<SuperResult<HelplessSuperArguments>> f =
-      ParserTestFixture.create(parser::parse);
+    private final ParserTestFixture<SuperResult<HelplessSuperArguments>> f =
+            ParserTestFixture.create(parser::parse);
 
-  @Test
-  void testHelpDisabled() {
-    f.assertThat("--help").fails("Invalid option: --help");
-  }
+    @Test
+    void testHelpDisabled() {
+        f.assertThat("--help").fails("Invalid option: --help");
+    }
 }

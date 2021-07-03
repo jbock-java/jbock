@@ -7,15 +7,15 @@ import java.util.Optional;
 
 class MainTest {
 
-  private final Main_ArgumentsParser parser = new Main_ArgumentsParser();
+    private final Main_ArgumentsParser parser = new Main_ArgumentsParser();
 
-  private final ParserTestFixture<Main.Arguments> f =
-      ParserTestFixture.create(parser::parse);
+    private final ParserTestFixture<Main.Arguments> f =
+            ParserTestFixture.create(parser::parse);
 
-  @Test
-  void testMain() {
-    f.assertThat("-v", "-f", "file.txt")
-        .has(Main.Arguments::file, Optional.of("file.txt"))
-        .has(Main.Arguments::verbose, true);
-  }
+    @Test
+    void testMain() {
+        f.assertThat("-v", "-f", "file.txt")
+                .has(Main.Arguments::file, Optional.of("file.txt"))
+                .has(Main.Arguments::verbose, true);
+    }
 }

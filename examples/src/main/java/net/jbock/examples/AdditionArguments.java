@@ -1,39 +1,39 @@
 package net.jbock.examples;
 
+import io.jbock.util.Optional;
 import net.jbock.Command;
 import net.jbock.Parameter;
-import net.jbock.either.Optional;
 
 import java.io.IOException;
 
 @Command
 abstract class AdditionArguments {
 
-  AdditionArguments() throws IndexOutOfBoundsException {
-  }
+    AdditionArguments() throws IndexOutOfBoundsException {
+    }
 
-  AdditionArguments(String s) throws IOException {
-  }
+    AdditionArguments(String s) throws IOException {
+    }
 
-  /**
-   * First argument
-   */
-  @Parameter(index = 0)
-  abstract int a() throws IllegalStateException;
+    /**
+     * First argument
+     */
+    @Parameter(index = 0)
+    abstract int a() throws IllegalStateException;
 
-  /**
-   * Second argument
-   */
-  @Parameter(index = 1)
-  abstract int b();
+    /**
+     * Second argument
+     */
+    @Parameter(index = 1)
+    abstract int b();
 
-  /**
-   * Optional third argument
-   */
-  @Parameter(index = 2)
-  abstract Optional<Integer> c();
+    /**
+     * Optional third argument
+     */
+    @Parameter(index = 2)
+    abstract Optional<Integer> c();
 
-  final int sum() {
-    return a() + b() + c().orElse(0);
-  }
+    final int sum() {
+        return a() + b() + c().orElse(0);
+    }
 }

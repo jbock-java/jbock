@@ -7,25 +7,25 @@ import java.util.Locale;
 
 public final class PositionalParameter extends AbstractItem {
 
-  // for @Parameter this is the index
-  // for @Parameters, greatest index plus one
-  private final int position;
+    // for @Parameter this is the index
+    // for @Parameters, greatest index plus one
+    private final int position;
 
-  public PositionalParameter(
-      SourceMethod sourceMethod,
-      EnumName enumName,
-      int position) {
-    super(sourceMethod, enumName);
-    this.position = position;
-  }
+    public PositionalParameter(
+            SourceMethod sourceMethod,
+            EnumName enumName,
+            int position) {
+        super(sourceMethod, enumName);
+        this.position = position;
+    }
 
-  @Override
-  public final String paramLabel() {
-    return sourceMethod().paramLabel()
-        .orElse(SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
-  }
+    @Override
+    public final String paramLabel() {
+        return sourceMethod().paramLabel()
+                .orElse(SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
+    }
 
-  public int position() {
-    return position;
-  }
+    public int position() {
+        return position;
+    }
 }

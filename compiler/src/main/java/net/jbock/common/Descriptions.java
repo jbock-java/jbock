@@ -1,6 +1,6 @@
 package net.jbock.common;
 
-import net.jbock.either.Optional;
+import io.jbock.util.Optional;
 
 import javax.lang.model.element.Element;
 import java.util.ArrayList;
@@ -9,40 +9,40 @@ import java.util.Objects;
 
 public class Descriptions {
 
-  public static Optional<String> optionalString(String s) {
-    if (s.isEmpty()) {
-      return Optional.empty();
+    public static Optional<String> optionalString(String s) {
+        if (s.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(s);
     }
-    return Optional.of(s);
-  }
 
-  public static List<String> getDescription(
-      Element element,
-      SafeElements elements,
-      String[] description) {
-    if (description.length == 0) {
-      return elements.getDocComment(element)
-          .map(Descriptions::tokenizeJavadoc)
-          .orElse(List.of());
+    public static List<String> getDescription(
+            Element element,
+            SafeElements elements,
+            String[] description) {
+        if (description.length == 0) {
+            return elements.getDocComment(element)
+                    .map(Descriptions::tokenizeJavadoc)
+                    .orElse(List.of());
+        }
+        return List.of(description);
     }
-    return List.of(description);
-  }
 
-  private static List<String> tokenizeJavadoc(String docComment) {
-    if (Objects.toString(docComment, "").trim().isEmpty()) {
-      return List.of();
+    private static List<String> tokenizeJavadoc(String docComment) {
+        if (Objects.toString(docComment, "").trim().isEmpty()) {
+            return List.of();
+        }
+        String[] tokens = docComment.trim().split("\\R", -1);
+        List<String> result = new ArrayList<>(tokens.length);
+        for (String t : tokens) {
+            String token = t.trim();
+            if (token.startsWith("@")) {
+                break;
+            }
+            if (!token.isEmpty()) {
+                result.add(token);
+            }
+        }
+        return result;
     }
-    String[] tokens = docComment.trim().split("\\R", -1);
-    List<String> result = new ArrayList<>(tokens.length);
-    for (String t : tokens) {
-      String token = t.trim();
-      if (token.startsWith("@")) {
-        break;
-      }
-      if (!token.isEmpty()) {
-        result.add(token);
-      }
-    }
-    return result;
-  }
 }

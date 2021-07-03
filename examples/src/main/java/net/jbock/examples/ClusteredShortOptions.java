@@ -6,15 +6,15 @@ import net.jbock.Option;
 @Command
 abstract class ClusteredShortOptions {
 
-  @Option(names = {"-a", "--aa"})
-  abstract boolean aaa();
+    @Option(names = {"-a", "--aa"})
+    abstract boolean aaa();
 
-  @Option(names = "-b")
-  abstract boolean bbb();
+    @Option(names = "-b")
+    abstract boolean bbb();
 
-  @Option(names = "-c")
-  abstract boolean ccc();
+    @Option(names = "-c")
+    abstract boolean ccc();
 
-  @Option(names = "-f")
-  abstract String file();
+    @Option(names = "-f")
+    abstract String file();
 }

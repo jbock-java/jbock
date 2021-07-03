@@ -12,294 +12,294 @@ import java.util.List;
  */
 public final class CommandModel {
 
-  private final String descriptionKey;
-  private final List<String> descriptionLines;
-  private final String programName;
-  private final boolean helpEnabled;
-  private final boolean superCommand;
-  private final boolean atFileExpansion;
-  private final boolean unixClustering;
-  private final List<Option> options;
-  private final List<Parameter> parameters;
+    private final String descriptionKey;
+    private final List<String> descriptionLines;
+    private final String programName;
+    private final boolean helpEnabled;
+    private final boolean superCommand;
+    private final boolean atFileExpansion;
+    private final boolean unixClustering;
+    private final List<Option> options;
+    private final List<Parameter> parameters;
 
-  private CommandModel(
-      String descriptionKey,
-      List<String> descriptionLines,
-      String programName,
-      boolean helpEnabled,
-      boolean superCommand,
-      boolean atFileExpansion,
-      boolean unixClustering,
-      List<Option> options,
-      List<Parameter> parameters) {
-    this.descriptionKey = descriptionKey;
-    this.descriptionLines = descriptionLines;
-    this.programName = programName;
-    this.helpEnabled = helpEnabled;
-    this.superCommand = superCommand;
-    this.atFileExpansion = atFileExpansion;
-    this.unixClustering = unixClustering;
-    this.options = options;
-    this.parameters = parameters;
-  }
-
-  /**
-   * Creates a builder instance.
-   * Public method that may be invoked from the generated code.
-   *
-   * @return empty builder
-   */
-  public static Builder builder() {
-    return new Builder();
-  }
-
-  /**
-   * Builder for {@link CommandModel}.
-   */
-  public static final class Builder {
-
-    private String descriptionKey = "";
-    private final List<String> descriptionLines = new ArrayList<>();
-    private String programName;
-    private boolean helpEnabled = true;
-    private boolean superCommand;
-    private boolean atFileExpansion = true;
-    private boolean unixClustering;
-    private final List<Option> options = new ArrayList<>();
-    private final List<Parameter> parameters = new ArrayList<>();
-
-    private Builder() {
+    private CommandModel(
+            String descriptionKey,
+            List<String> descriptionLines,
+            String programName,
+            boolean helpEnabled,
+            boolean superCommand,
+            boolean atFileExpansion,
+            boolean unixClustering,
+            List<Option> options,
+            List<Parameter> parameters) {
+        this.descriptionKey = descriptionKey;
+        this.descriptionLines = descriptionLines;
+        this.programName = programName;
+        this.helpEnabled = helpEnabled;
+        this.superCommand = superCommand;
+        this.atFileExpansion = atFileExpansion;
+        this.unixClustering = unixClustering;
+        this.options = options;
+        this.parameters = parameters;
     }
 
     /**
-     * Set the description key.
+     * Creates a builder instance.
      * Public method that may be invoked from the generated code.
      *
-     * @param descriptionKey a key, possibly blank
-     * @return the builder instance
+     * @return empty builder
      */
-    public Builder withDescriptionKey(String descriptionKey) {
-      this.descriptionKey = descriptionKey;
-      return this;
+    public static Builder builder() {
+        return new Builder();
     }
 
     /**
-     * Add a description line.
-     * Public method that may be invoked from the generated code.
-     *
-     * @param descriptionLine a line
-     * @return the builder instance
+     * Builder for {@link CommandModel}.
      */
-    public Builder addDescriptionLine(String descriptionLine) {
-      this.descriptionLines.add(descriptionLine);
-      return this;
+    public static final class Builder {
+
+        private String descriptionKey = "";
+        private final List<String> descriptionLines = new ArrayList<>();
+        private String programName;
+        private boolean helpEnabled = true;
+        private boolean superCommand;
+        private boolean atFileExpansion = true;
+        private boolean unixClustering;
+        private final List<Option> options = new ArrayList<>();
+        private final List<Parameter> parameters = new ArrayList<>();
+
+        private Builder() {
+        }
+
+        /**
+         * Set the description key.
+         * Public method that may be invoked from the generated code.
+         *
+         * @param descriptionKey a key, possibly blank
+         * @return the builder instance
+         */
+        public Builder withDescriptionKey(String descriptionKey) {
+            this.descriptionKey = descriptionKey;
+            return this;
+        }
+
+        /**
+         * Add a description line.
+         * Public method that may be invoked from the generated code.
+         *
+         * @param descriptionLine a line
+         * @return the builder instance
+         */
+        public Builder addDescriptionLine(String descriptionLine) {
+            this.descriptionLines.add(descriptionLine);
+            return this;
+        }
+
+        /**
+         * Set program name.
+         * Public method that may be invoked from the generated code.
+         *
+         * @param programName program name, not blank
+         * @return the builder instance
+         */
+        public Builder withProgramName(String programName) {
+            this.programName = programName;
+            return this;
+        }
+
+        /**
+         * Set help enabled property.
+         * Public method that may be invoked from the generated code.
+         *
+         * @param helpEnabled whether the {@code --help} option is understood
+         * @return the builder instance
+         */
+        public Builder withHelpEnabled(boolean helpEnabled) {
+            this.helpEnabled = helpEnabled;
+            return this;
+        }
+
+        /**
+         * Set the supercommand property.
+         * Public method that may be invoked from the generated code.
+         *
+         * @param superCommand whether this is a supercommand
+         * @return the builder instance
+         */
+        public Builder withSuperCommand(boolean superCommand) {
+            this.superCommand = superCommand;
+            return this;
+        }
+
+        /**
+         * Set at file expansion property.
+         * Public method that may be invoked from the generated code.
+         *
+         * @param atFileExpansion whether {@code @file}-expansion is enabled
+         * @return the builder instance
+         */
+        public Builder withAtFileExpansion(boolean atFileExpansion) {
+            this.atFileExpansion = atFileExpansion;
+            return this;
+        }
+
+        /**
+         * Set the unix clustering property.
+         * Public method that may be invoked from the generated code.
+         *
+         * @param unixClustering whether unix clustering is enabled
+         * @return the builder instance
+         */
+        public Builder withUnixClustering(boolean unixClustering) {
+            this.unixClustering = unixClustering;
+            return this;
+        }
+
+        /**
+         * Add an option.
+         * Public method that may be invoked from the generated code.
+         *
+         * @param option a named option
+         * @return the builder instance
+         */
+        public Builder addOption(Option option) {
+            this.options.add(option);
+            return this;
+        }
+
+        /**
+         * Add a parameter.
+         * Public method that may be invoked from the generated code.
+         *
+         * @param parameter a positional parameter
+         * @return the builder instance
+         */
+        public Builder addParameter(Parameter parameter) {
+            this.parameters.add(parameter);
+            return this;
+        }
+
+        /**
+         * Create the command model.
+         * Public method that may be invoked from the generated code.
+         *
+         * @return command model
+         */
+        public CommandModel build() {
+            return new CommandModel(descriptionKey, descriptionLines,
+                    programName, helpEnabled, superCommand,
+                    atFileExpansion, unixClustering, options, parameters);
+        }
     }
 
     /**
-     * Set program name.
-     * Public method that may be invoked from the generated code.
+     * Get the description key, possibly an empty string.
      *
-     * @param programName program name, not blank
-     * @return the builder instance
+     * @return non-null string
      */
-    public Builder withProgramName(String programName) {
-      this.programName = programName;
-      return this;
+    public String descriptionKey() {
+        return descriptionKey;
     }
 
     /**
-     * Set help enabled property.
-     * Public method that may be invoked from the generated code.
+     * Get the description that is present directly on the annotated class,
+     * either as a description attribute, or in the form of javadoc.
      *
-     * @param helpEnabled whether the {@code --help} option is understood
-     * @return the builder instance
+     * @return a list of lines, possibly empty
      */
-    public Builder withHelpEnabled(boolean helpEnabled) {
-      this.helpEnabled = helpEnabled;
-      return this;
+    public List<String> descriptionLines() {
+        return descriptionLines;
     }
 
     /**
-     * Set the supercommand property.
-     * Public method that may be invoked from the generated code.
+     * Get the program name from the {@link Command#name()} attribute,
+     * or, if none is set, a default program name that is derived
+     * from the class name of the annotated command class.
      *
-     * @param superCommand whether this is a supercommand
-     * @return the builder instance
+     * @return the program name, a nonempty string
      */
-    public Builder withSuperCommand(boolean superCommand) {
-      this.superCommand = superCommand;
-      return this;
+    public String programName() {
+        return programName;
     }
 
     /**
-     * Set at file expansion property.
-     * Public method that may be invoked from the generated code.
+     * Get the list of all named options, including mode flags.
      *
-     * @param atFileExpansion whether {@code @file}-expansion is enabled
-     * @return the builder instance
+     * @return named options
      */
-    public Builder withAtFileExpansion(boolean atFileExpansion) {
-      this.atFileExpansion = atFileExpansion;
-      return this;
+    public List<Option> options() {
+        return options;
     }
 
     /**
-     * Set the unix clustering property.
-     * Public method that may be invoked from the generated code.
+     * Get the list of all positional parameters.
      *
-     * @param unixClustering whether unix clustering is enabled
-     * @return the builder instance
+     * @return positional parameters
      */
-    public Builder withUnixClustering(boolean unixClustering) {
-      this.unixClustering = unixClustering;
-      return this;
+    public List<Parameter> parameters() {
+        return parameters;
     }
 
     /**
-     * Add an option.
-     * Public method that may be invoked from the generated code.
+     * Get the value of the {@link Command#helpEnabled()} attribute.
      *
-     * @param option a named option
-     * @return the builder instance
+     * @return {@code true} if the generated parser supports
+     *         the {@code --help} option
      */
-    public Builder addOption(Option option) {
-      this.options.add(option);
-      return this;
+    public boolean helpEnabled() {
+        return helpEnabled;
     }
 
     /**
-     * Add a parameter.
-     * Public method that may be invoked from the generated code.
+     * Check if the {@link Command} annotation
+     * is present on the command class.
      *
-     * @param parameter a positional parameter
-     * @return the builder instance
+     * @return {@code true} if the command is a SuperCommand,
+     *         {@code false} if it is a regular Command
+     *
      */
-    public Builder addParameter(Parameter parameter) {
-      this.parameters.add(parameter);
-      return this;
+    public boolean superCommand() {
+        return superCommand;
     }
 
     /**
-     * Create the command model.
-     * Public method that may be invoked from the generated code.
+     * Get the value of the {@link Command#atFileExpansion()}
+     * attribute.
      *
-     * @return command model
+     * @return {@code true} if {@code @file} expansion is enabled
      */
-    public CommandModel build() {
-      return new CommandModel(descriptionKey, descriptionLines,
-          programName, helpEnabled, superCommand,
-          atFileExpansion, unixClustering, options, parameters);
+    public boolean atFileExpansion() {
+        return atFileExpansion;
     }
-  }
 
-  /**
-   * Get the description key, possibly an empty string.
-   *
-   * @return non-null string
-   */
-  public String descriptionKey() {
-    return descriptionKey;
-  }
-
-  /**
-   * Get the description that is present directly on the annotated class,
-   * either as a description attribute, or in the form of javadoc.
-   *
-   * @return a list of lines, possibly empty
-   */
-  public List<String> descriptionLines() {
-    return descriptionLines;
-  }
-
-  /**
-   * Get the program name from the {@link Command#name()} attribute,
-   * or, if none is set, a default program name that is derived
-   * from the class name of the annotated command class.
-   *
-   * @return the program name, a nonempty string
-   */
-  public String programName() {
-    return programName;
-  }
-
-  /**
-   * Get the list of all named options, including mode flags.
-   *
-   * @return named options
-   */
-  public List<Option> options() {
-    return options;
-  }
-
-  /**
-   * Get the list of all positional parameters.
-   *
-   * @return positional parameters
-   */
-  public List<Parameter> parameters() {
-    return parameters;
-  }
-
-  /**
-   * Get the value of the {@link Command#helpEnabled()} attribute.
-   *
-   * @return {@code true} if the generated parser supports
-   *         the {@code --help} option
-   */
-  public boolean helpEnabled() {
-    return helpEnabled;
-  }
-
-  /**
-   * Check if the {@link Command} annotation
-   * is present on the command class.
-   *
-   * @return {@code true} if the command is a SuperCommand,
-   *         {@code false} if it is a regular Command
-   *
-   */
-  public boolean superCommand() {
-    return superCommand;
-  }
-
-  /**
-   * Get the value of the {@link Command#atFileExpansion()}
-   * attribute.
-   *
-   * @return {@code true} if {@code @file} expansion is enabled
-   */
-  public boolean atFileExpansion() {
-    return atFileExpansion;
-  }
-
-  /**
-   * Get the value of the {@link Command#unixClustering()}}
-   * attribute. Note, this may also return {@code false}
-   * if unix clustering is impossible because
-   * there are no unix-style mode flags.
-   *
-   * @return {@code true} if unix clustering is enabled
-   */
-  public boolean unixClustering() {
-    return unixClustering;
-  }
-
-  /**
-   * Get item by name and index.
-   *
-   * @param itemType item type
-   * @param index the index
-   * @return the item
-   * @throws IndexOutOfBoundsException if the index is out of range
-   */
-  public final Item getItem(ItemType itemType, int index) {
-    switch (itemType) {
-      case PARAMETER:
-        return parameters.get(index);
-      case OPTION:
-        return options.get(index);
-      default:
-        throw new AssertionError("all cases exhausted");
+    /**
+     * Get the value of the {@link Command#unixClustering()}}
+     * attribute. Note, this may also return {@code false}
+     * if unix clustering is impossible because
+     * there are no unix-style mode flags.
+     *
+     * @return {@code true} if unix clustering is enabled
+     */
+    public boolean unixClustering() {
+        return unixClustering;
     }
-  }
+
+    /**
+     * Get item by name and index.
+     *
+     * @param itemType item type
+     * @param index the index
+     * @return the item
+     * @throws IndexOutOfBoundsException if the index is out of range
+     */
+    public final Item getItem(ItemType itemType, int index) {
+        switch (itemType) {
+            case PARAMETER:
+                return parameters.get(index);
+            case OPTION:
+                return options.get(index);
+            default:
+                throw new AssertionError("all cases exhausted");
+        }
+    }
 }

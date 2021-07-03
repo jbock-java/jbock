@@ -5,11 +5,11 @@ package net.jbock.util;
  */
 public final class ConverterReturnedNull extends ConverterFailure {
 
-  ConverterReturnedNull() {
-  }
+    ConverterReturnedNull() {
+    }
 
-  @Override
-  public String converterMessage() {
-    return "converter returned null";
-  }
+    @Override
+    public String converterMessage() {
+        return "converter returned null";
+    }
 }

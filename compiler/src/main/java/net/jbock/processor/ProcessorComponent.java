@@ -10,21 +10,21 @@ import javax.annotation.processing.ProcessingEnvironment;
 @ProcessorScope
 interface ProcessorComponent {
 
-  ParameterMethodProcessingStep parameterMethodProcessingStep();
+    ParameterMethodProcessingStep parameterMethodProcessingStep();
 
-  ConverterProcessingStep converterProcessingStep();
+    ConverterProcessingStep converterProcessingStep();
 
-  CommandProcessingStep commandProcessingStep();
+    CommandProcessingStep commandProcessingStep();
 
-  @Component.Builder
-  interface Builder {
+    @Component.Builder
+    interface Builder {
 
-    @BindsInstance
-    Builder processingEnv(ProcessingEnvironment processingEnvironment);
+        @BindsInstance
+        Builder processingEnv(ProcessingEnvironment processingEnvironment);
 
-    @BindsInstance
-    Builder operationMode(OperationMode mode);
+        @BindsInstance
+        Builder operationMode(OperationMode mode);
 
-    ProcessorComponent build();
-  }
+        ProcessorComponent build();
+    }
 }

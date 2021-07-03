@@ -5,22 +5,22 @@ package net.jbock.model;
  */
 public enum Multiplicity {
 
-  /**
-   * The item is required.
-   * It must appear exactly once in the input array.
-   */
-  REQUIRED,
+    /**
+     * The item is required.
+     * It must appear exactly once in the input array.
+     */
+    REQUIRED,
 
-  /**
-   * The item is optional.
-   * It must either be absent, or appear exactly once
-   * in the input array.
-   */
-  OPTIONAL,
+    /**
+     * The item is optional.
+     * It must either be absent, or appear exactly once
+     * in the input array.
+     */
+    OPTIONAL,
 
-  /**
-   * The item is repeatable.
-   * It may appear any number of times in the input array.
-   */
-  REPEATABLE,
+    /**
+     * The item is repeatable.
+     * It may appear any number of times in the input array.
+     */
+    REPEATABLE,
 }

@@ -14,17 +14,17 @@ import java.util.Set;
 @ProcessorScope
 public class ConverterProcessingStep implements BasicAnnotationProcessor.Step {
 
-  @Inject
-  ConverterProcessingStep() {
-  }
+    @Inject
+    ConverterProcessingStep() {
+    }
 
-  @Override
-  public Set<String> annotations() {
-    return Set.of(Converter.class.getCanonicalName());
-  }
+    @Override
+    public Set<String> annotations() {
+        return Set.of(Converter.class.getCanonicalName());
+    }
 
-  @Override
-  public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
-    return Set.of();
-  }
+    @Override
+    public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
+        return Set.of();
+    }
 }

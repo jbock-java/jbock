@@ -14,31 +14,31 @@ import javax.annotation.processing.Messager;
 @ValidateScope
 public interface ValidateComponent {
 
-  CommandProcessor processor();
+    CommandProcessor processor();
 
-  @Component.Builder
-  interface Builder {
+    @Component.Builder
+    interface Builder {
 
-    @BindsInstance
-    Builder sourceElement(SourceElement sourceElement);
+        @BindsInstance
+        Builder sourceElement(SourceElement sourceElement);
 
-    @BindsInstance
-    Builder tool(TypeTool tool);
+        @BindsInstance
+        Builder tool(TypeTool tool);
 
-    @BindsInstance
-    Builder util(Util util);
+        @BindsInstance
+        Builder util(Util util);
 
-    @BindsInstance
-    Builder filer(Filer filer);
+        @BindsInstance
+        Builder filer(Filer filer);
 
-    @BindsInstance
-    Builder messager(Messager messager);
+        @BindsInstance
+        Builder messager(Messager messager);
 
-    @BindsInstance
-    Builder operationMode(OperationMode operationMode);
+        @BindsInstance
+        Builder operationMode(OperationMode operationMode);
 
-    Builder module(ValidateModule module);
+        Builder module(ValidateModule module);
 
-    ValidateComponent create();
-  }
+        ValidateComponent create();
+    }
 }

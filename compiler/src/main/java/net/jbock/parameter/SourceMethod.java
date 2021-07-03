@@ -1,8 +1,8 @@
 package net.jbock.parameter;
 
+import io.jbock.util.Optional;
 import net.jbock.common.SafeElements;
 import net.jbock.common.ValidationFailure;
-import net.jbock.either.Optional;
 import net.jbock.validate.ParameterStyle;
 
 import javax.lang.model.element.ExecutableElement;
@@ -16,64 +16,64 @@ import static net.jbock.common.Constants.ACCESS_MODIFIERS;
 
 public class SourceMethod {
 
-  private final ExecutableElement sourceMethod;
-  private final ParameterStyle parameterStyle;
-  private final List<Modifier> accessModifiers;
+    private final ExecutableElement sourceMethod;
+    private final ParameterStyle parameterStyle;
+    private final List<Modifier> accessModifiers;
 
-  private SourceMethod(
-      ExecutableElement sourceMethod,
-      ParameterStyle parameterStyle,
-      List<Modifier> accessModifiers) {
-    this.sourceMethod = sourceMethod;
-    this.parameterStyle = parameterStyle;
-    this.accessModifiers = accessModifiers;
-  }
+    private SourceMethod(
+            ExecutableElement sourceMethod,
+            ParameterStyle parameterStyle,
+            List<Modifier> accessModifiers) {
+        this.sourceMethod = sourceMethod;
+        this.parameterStyle = parameterStyle;
+        this.accessModifiers = accessModifiers;
+    }
 
-  public static SourceMethod create(ExecutableElement sourceMethod) {
-    List<Modifier> accessModifiers = sourceMethod.getModifiers().stream()
-        .filter(ACCESS_MODIFIERS::contains)
-        .collect(Collectors.toUnmodifiableList());
-    ParameterStyle parameterStyle = ParameterStyle.getStyle(sourceMethod);
-    return new SourceMethod(sourceMethod, parameterStyle, accessModifiers);
-  }
+    public static SourceMethod create(ExecutableElement sourceMethod) {
+        List<Modifier> accessModifiers = sourceMethod.getModifiers().stream()
+                .filter(ACCESS_MODIFIERS::contains)
+                .collect(Collectors.toUnmodifiableList());
+        ParameterStyle parameterStyle = ParameterStyle.getStyle(sourceMethod);
+        return new SourceMethod(sourceMethod, parameterStyle, accessModifiers);
+    }
 
-  public ExecutableElement method() {
-    return sourceMethod;
-  }
+    public ExecutableElement method() {
+        return sourceMethod;
+    }
 
-  public TypeMirror returnType() {
-    return sourceMethod.getReturnType();
-  }
+    public TypeMirror returnType() {
+        return sourceMethod.getReturnType();
+    }
 
-  public ParameterStyle style() {
-    return parameterStyle;
-  }
+    public ParameterStyle style() {
+        return parameterStyle;
+    }
 
-  public OptionalInt index() {
-    return parameterStyle.index(sourceMethod);
-  }
+    public OptionalInt index() {
+        return parameterStyle.index(sourceMethod);
+    }
 
-  public Optional<String> descriptionKey() {
-    return parameterStyle.descriptionKey(sourceMethod);
-  }
+    public Optional<String> descriptionKey() {
+        return parameterStyle.descriptionKey(sourceMethod);
+    }
 
-  public ValidationFailure fail(String message) {
-    return new ValidationFailure(message, sourceMethod);
-  }
+    public ValidationFailure fail(String message) {
+        return new ValidationFailure(message, sourceMethod);
+    }
 
-  public List<String> names() {
-    return parameterStyle.names(sourceMethod);
-  }
+    public List<String> names() {
+        return parameterStyle.names(sourceMethod);
+    }
 
-  public List<String> description(SafeElements elements) {
-    return parameterStyle.description(sourceMethod, elements);
-  }
+    public List<String> description(SafeElements elements) {
+        return parameterStyle.description(sourceMethod, elements);
+    }
 
-  public Optional<String> paramLabel() {
-    return parameterStyle.paramLabel(sourceMethod);
-  }
+    public Optional<String> paramLabel() {
+        return parameterStyle.paramLabel(sourceMethod);
+    }
 
-  public List<Modifier> accessModifiers() {
-    return accessModifiers;
-  }
+    public List<Modifier> accessModifiers() {
+        return accessModifiers;
+    }
 }

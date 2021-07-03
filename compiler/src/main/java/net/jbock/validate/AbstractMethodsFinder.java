@@ -1,7 +1,7 @@
 package net.jbock.validate;
 
+import io.jbock.util.Either;
 import net.jbock.common.ValidationFailure;
-import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
@@ -17,26 +17,26 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 @ValidateScope
 public class AbstractMethodsFinder {
 
-  private final Types types;
-  private final AllMethodsFinder allMethodsFinder;
+    private final Types types;
+    private final AllMethodsFinder allMethodsFinder;
 
-  @Inject
-  AbstractMethodsFinder(
-      Types types,
-      AllMethodsFinder allMethodsFinder) {
-    this.types = types;
-    this.allMethodsFinder = allMethodsFinder;
-  }
+    @Inject
+    AbstractMethodsFinder(
+            Types types,
+            AllMethodsFinder allMethodsFinder) {
+        this.types = types;
+        this.allMethodsFinder = allMethodsFinder;
+    }
 
-  Either<List<ValidationFailure>, List<ExecutableElement>> findAbstractMethods() {
-    List<ExecutableElement> methods = allMethodsFinder.findMethodsInSourceElement();
-    Map<Boolean, List<ExecutableElement>> partitions = methods.stream()
-        .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
-    List<ExecutableElement> abstractMethods = partitions.get(true);
-    Map<Name, List<ExecutableElement>> nonAbstractMethods = partitions.get(false)
-        .stream()
-        .collect(groupingBy(ExecutableElement::getSimpleName));
-    return new AbstractMethodsUtil(nonAbstractMethods, types)
-        .findRelevantAbstractMethods(abstractMethods);
-  }
+    Either<List<ValidationFailure>, List<ExecutableElement>> findAbstractMethods() {
+        List<ExecutableElement> methods = allMethodsFinder.findMethodsInSourceElement();
+        Map<Boolean, List<ExecutableElement>> partitions = methods.stream()
+                .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
+        List<ExecutableElement> abstractMethods = partitions.get(true);
+        Map<Name, List<ExecutableElement>> nonAbstractMethods = partitions.get(false)
+                .stream()
+                .collect(groupingBy(ExecutableElement::getSimpleName));
+        return new AbstractMethodsUtil(nonAbstractMethods, types)
+                .findRelevantAbstractMethods(abstractMethods);
+    }
 }

@@ -3,9 +3,9 @@ package net.jbock.context;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import io.jbock.util.Either;
+import io.jbock.util.Optional;
 import net.jbock.convert.Mapped;
-import net.jbock.either.Either;
-import net.jbock.either.Optional;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.HelpRequested;
@@ -17,69 +17,69 @@ import javax.inject.Inject;
 @ContextScope
 public class GeneratedTypes {
 
-  private final SourceElement sourceElement;
-  private final ClassName generatedClass;
+    private final SourceElement sourceElement;
+    private final ClassName generatedClass;
 
-  @Inject
-  GeneratedTypes(SourceElement sourceElement) {
-    this.sourceElement = sourceElement;
-    this.generatedClass = sourceElement.generatedClass();
-  }
-
-  TypeName parseSuccessType() {
-    return superResultType().orElse(sourceElement.typeName());
-  }
-
-  Optional<TypeName> superResultType() {
-    if (!sourceElement.isSuperCommand()) {
-      return Optional.empty();
+    @Inject
+    GeneratedTypes(SourceElement sourceElement) {
+        this.sourceElement = sourceElement;
+        this.generatedClass = sourceElement.generatedClass();
     }
-    ParameterizedTypeName type = ParameterizedTypeName.get(
-        ClassName.get(SuperResult.class),
-        sourceElement.typeName());
-    return Optional.of(type);
-  }
 
-  ClassName optionParserType() {
-    return generatedClass.nestedClass("OptionParser");
-  }
+    TypeName parseSuccessType() {
+        return superResultType().orElse(sourceElement.typeName());
+    }
 
-  ClassName repeatableOptionParserType() {
-    return generatedClass.nestedClass("RepeatableOptionParser");
-  }
+    Optional<TypeName> superResultType() {
+        if (!sourceElement.isSuperCommand()) {
+            return Optional.empty();
+        }
+        ParameterizedTypeName type = ParameterizedTypeName.get(
+                ClassName.get(SuperResult.class),
+                sourceElement.typeName());
+        return Optional.of(type);
+    }
 
-  ClassName flagParserType() {
-    return generatedClass.nestedClass("FlagParser");
-  }
+    ClassName optionParserType() {
+        return generatedClass.nestedClass("OptionParser");
+    }
 
-  ClassName regularOptionParserType() {
-    return generatedClass.nestedClass("RegularOptionParser");
-  }
+    ClassName repeatableOptionParserType() {
+        return generatedClass.nestedClass("RepeatableOptionParser");
+    }
 
-  ClassName statefulParserType() {
-    return generatedClass.nestedClass("StatefulParser");
-  }
+    ClassName flagParserType() {
+        return generatedClass.nestedClass("FlagParser");
+    }
 
-  ClassName implType() {
-    return generatedClass.nestedClass(sourceElement.element().getSimpleName() + "Impl");
-  }
+    ClassName regularOptionParserType() {
+        return generatedClass.nestedClass("RegularOptionParser");
+    }
 
-  ClassName multilineConverterType(Mapped<? extends AbstractItem> item) {
-    String name = item.enumName().original();
-    String capitalized = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-    return generatedClass.nestedClass(capitalized + "Converter");
-  }
+    ClassName statefulParserType() {
+        return generatedClass.nestedClass("StatefulParser");
+    }
 
-  TypeName parseResultType() {
-    return ParameterizedTypeName.get(
-        ClassName.get(Either.class),
-        ClassName.get(NotSuccess.class),
-        parseSuccessType());
-  }
+    ClassName implType() {
+        return generatedClass.nestedClass(sourceElement.element().getSimpleName() + "Impl");
+    }
 
-  Optional<ClassName> helpRequestedType() {
-    return sourceElement.helpEnabled() ?
-        Optional.of(ClassName.get(HelpRequested.class)) :
-        Optional.empty();
-  }
+    ClassName multilineConverterType(Mapped<? extends AbstractItem> item) {
+        String name = item.enumName().original();
+        String capitalized = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+        return generatedClass.nestedClass(capitalized + "Converter");
+    }
+
+    TypeName parseResultType() {
+        return ParameterizedTypeName.get(
+                ClassName.get(Either.class),
+                ClassName.get(NotSuccess.class),
+                parseSuccessType());
+    }
+
+    Optional<ClassName> helpRequestedType() {
+        return sourceElement.helpEnabled() ?
+                Optional.of(ClassName.get(HelpRequested.class)) :
+                Optional.empty();
+    }
 }

@@ -21,95 +21,95 @@ import static net.jbock.common.Constants.mapOf;
 
 class CommonFields {
 
-  private final FieldSpec optionNames;
-  private final FieldSpec params;
-  private final FieldSpec optionParsers;
+    private final FieldSpec optionNames;
+    private final FieldSpec params;
+    private final FieldSpec optionParsers;
 
-  private final FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
-      .build();
-  private final FieldSpec value = FieldSpec.builder(STRING, "value")
-      .build();
-  private final FieldSpec seen = FieldSpec.builder(BOOLEAN, "seen")
-      .build();
+    private final FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
+            .build();
+    private final FieldSpec value = FieldSpec.builder(STRING, "value")
+            .build();
+    private final FieldSpec seen = FieldSpec.builder(BOOLEAN, "seen")
+            .build();
 
 
-  private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest")
-      .initializer("new $T<>()", ArrayList.class)
-      .build();
+    private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest")
+            .initializer("new $T<>()", ArrayList.class)
+            .build();
 
-  private final FieldSpec suspiciousPattern = FieldSpec.builder(Pattern.class, "sus")
-      .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
-      .build();
+    private final FieldSpec suspiciousPattern = FieldSpec.builder(Pattern.class, "sus")
+            .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
+            .build();
 
-  private CommonFields(
-      FieldSpec optionNames,
-      FieldSpec params,
-      FieldSpec optionParsers) {
-    this.optionNames = optionNames;
-    this.params = params;
-    this.optionParsers = optionParsers;
-  }
+    private CommonFields(
+            FieldSpec optionNames,
+            FieldSpec params,
+            FieldSpec optionParsers) {
+        this.optionNames = optionNames;
+        this.params = params;
+        this.optionParsers = optionParsers;
+    }
 
-  static CommonFields create(
-      GeneratedTypes generatedTypes,
-      SourceElement sourceElement,
-      PositionalParameters positionalParameters,
-      NamedOptions namedOptions) {
-    ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.add(generatedTypes.helpRequestedType()
-        .map(helpRequestedType -> CodeBlock.builder()
-            .add("$N ->\n", result).indent()
-            .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, helpRequestedType)
-            .unindent().build())
-        .orElseGet(() -> CodeBlock.of("$N -> $T.exit(1)", result, System.class)));
-    long mapSize = namedOptions.stream()
-        .map(Mapped::item)
-        .map(NamedOption::names)
-        .map(List::size)
-        .mapToLong(i -> i)
-        .sum();
-    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, sourceElement.optionEnumType()), "optionNames")
-        .initializer("new $T<>($L)", HashMap.class, mapSize)
-        .build();
-    FieldSpec paramParsers = FieldSpec.builder(ArrayTypeName.of(STRING), "params")
-        .initializer("new $T[$L]", STRING, positionalParameters.regular().size())
-        .build();
-    FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionEnumType(), generatedTypes.optionParserType()), "optionParsers")
-        .initializer("new $T<>($T.class)", EnumMap.class, sourceElement.optionEnumType())
-        .build();
-    return new CommonFields(optionsByName, paramParsers, optionParsers);
-  }
+    static CommonFields create(
+            GeneratedTypes generatedTypes,
+            SourceElement sourceElement,
+            PositionalParameters positionalParameters,
+            NamedOptions namedOptions) {
+        ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
+        CodeBlock.Builder code = CodeBlock.builder();
+        code.add(generatedTypes.helpRequestedType()
+                .map(helpRequestedType -> CodeBlock.builder()
+                        .add("$N ->\n", result).indent()
+                        .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, helpRequestedType)
+                        .unindent().build())
+                .orElseGet(() -> CodeBlock.of("$N -> $T.exit(1)", result, System.class)));
+        long mapSize = namedOptions.stream()
+                .map(Mapped::item)
+                .map(NamedOption::names)
+                .map(List::size)
+                .mapToLong(i -> i)
+                .sum();
+        FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, sourceElement.optionEnumType()), "optionNames")
+                .initializer("new $T<>($L)", HashMap.class, mapSize)
+                .build();
+        FieldSpec paramParsers = FieldSpec.builder(ArrayTypeName.of(STRING), "params")
+                .initializer("new $T[$L]", STRING, positionalParameters.regular().size())
+                .build();
+        FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionEnumType(), generatedTypes.optionParserType()), "optionParsers")
+                .initializer("new $T<>($T.class)", EnumMap.class, sourceElement.optionEnumType())
+                .build();
+        return new CommonFields(optionsByName, paramParsers, optionParsers);
+    }
 
-  FieldSpec suspiciousPattern() {
-    return suspiciousPattern;
-  }
+    FieldSpec suspiciousPattern() {
+        return suspiciousPattern;
+    }
 
-  FieldSpec optionNames() {
-    return optionNames;
-  }
+    FieldSpec optionNames() {
+        return optionNames;
+    }
 
-  FieldSpec rest() {
-    return rest;
-  }
+    FieldSpec rest() {
+        return rest;
+    }
 
-  FieldSpec params() {
-    return params;
-  }
+    FieldSpec params() {
+        return params;
+    }
 
-  FieldSpec optionParsers() {
-    return optionParsers;
-  }
+    FieldSpec optionParsers() {
+        return optionParsers;
+    }
 
-  FieldSpec values() {
-    return values;
-  }
+    FieldSpec values() {
+        return values;
+    }
 
-  FieldSpec value() {
-    return value;
-  }
+    FieldSpec value() {
+        return value;
+    }
 
-  FieldSpec seen() {
-    return seen;
-  }
+    FieldSpec seen() {
+        return seen;
+    }
 }

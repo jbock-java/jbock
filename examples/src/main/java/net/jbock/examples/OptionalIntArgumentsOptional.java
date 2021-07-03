@@ -11,15 +11,15 @@ import java.util.function.Supplier;
 @Command
 abstract class OptionalIntArgumentsOptional {
 
-  @Option(names = {"--a", "-a"}, converter = MyConverter.class)
-  abstract OptionalInt a();
+    @Option(names = {"--a", "-a"}, converter = MyConverter.class)
+    abstract OptionalInt a();
 
-  @Converter
-  static class MyConverter implements Supplier<StringConverter<Integer>> {
+    @Converter
+    static class MyConverter implements Supplier<StringConverter<Integer>> {
 
-    @Override
-    public StringConverter<Integer> get() {
-      return StringConverter.create(Integer::parseInt);
+        @Override
+        public StringConverter<Integer> get() {
+            return StringConverter.create(Integer::parseInt);
+        }
     }
-  }
 }

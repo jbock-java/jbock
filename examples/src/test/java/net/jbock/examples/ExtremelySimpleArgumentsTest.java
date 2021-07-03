@@ -9,13 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ExtremelySimpleArgumentsTest {
 
-  private final ExtremelySimpleArgumentsParser parser = new ExtremelySimpleArgumentsParser();
+    private final ExtremelySimpleArgumentsParser parser = new ExtremelySimpleArgumentsParser();
 
-  private final ParserTestFixture<ExtremelySimpleArguments> f =
-      ParserTestFixture.create(parser::parse);
+    private final ParserTestFixture<ExtremelySimpleArguments> f =
+            ParserTestFixture.create(parser::parse);
 
-  @Test
-  void simpleTest() {
-    assertEquals(List.of("1"), f.parse("1").hello());
-  }
+    @Test
+    void simpleTest() {
+        assertEquals(List.of("1"), f.parse("1").hello());
+    }
 }

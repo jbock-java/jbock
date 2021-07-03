@@ -4,14 +4,14 @@ import com.squareup.javapoet.MethodSpec;
 
 abstract class CachedMethod {
 
-  private MethodSpec instance;
+    private MethodSpec instance;
 
-  abstract MethodSpec define();
+    abstract MethodSpec define();
 
-  final MethodSpec get() {
-    if (instance == null) {
-      instance = define();
+    final MethodSpec get() {
+        if (instance == null) {
+            instance = define();
+        }
+        return instance;
     }
-    return instance;
-  }
 }

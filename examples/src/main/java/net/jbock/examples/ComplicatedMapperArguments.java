@@ -12,47 +12,47 @@ import java.util.function.Supplier;
 @Command
 interface ComplicatedMapperArguments {
 
-  @Option(
-      names = {"-N", "--number"},
-      converter = MyConverter.class)
-  Integer number();
+    @Option(
+            names = {"-N", "--number"},
+            converter = MyConverter.class)
+    Integer number();
 
-  @Option(
-      names = "--numbers",
-      converter = LazyNumberConverter.class)
-  List<LazyNumber> numbers();
+    @Option(
+            names = "--numbers",
+            converter = LazyNumberConverter.class)
+    List<LazyNumber> numbers();
 
-  @Converter
-  class LazyNumberConverter implements Supplier<StringConverter<LazyNumber>> {
-    @Override
-    public StringConverter<LazyNumber> get() {
-      return StringConverter.create(s -> () -> Integer.valueOf(s));
+    @Converter
+    class LazyNumberConverter implements Supplier<StringConverter<LazyNumber>> {
+        @Override
+        public StringConverter<LazyNumber> get() {
+            return StringConverter.create(s -> () -> Integer.valueOf(s));
+        }
     }
-  }
 
-  interface LazyNumber extends Supplier<Integer> {
-  }
-
-  @Converter
-  class MyConverter implements Supplier<StringConverter<Integer>> {
-    @Override
-    public StringConverter<Integer> get() {
-      return StringConverter.create(new Zapper());
+    interface LazyNumber extends Supplier<Integer> {
     }
-  }
 
-  class Zapper implements Foo<String> {
-    public Integer apply(String s) {
-      return 1;
+    @Converter
+    class MyConverter implements Supplier<StringConverter<Integer>> {
+        @Override
+        public StringConverter<Integer> get() {
+            return StringConverter.create(new Zapper());
+        }
     }
-  }
 
-  interface Xi<A, T, B> extends Function<B, A> {
-  }
+    class Zapper implements Foo<String> {
+        public Integer apply(String s) {
+            return 1;
+        }
+    }
 
-  interface Zap<T, B, A> extends Xi<A, T, B> {
-  }
+    interface Xi<A, T, B> extends Function<B, A> {
+    }
 
-  interface Foo<X> extends Zap<X, String, Integer> {
-  }
+    interface Zap<T, B, A> extends Xi<A, T, B> {
+    }
+
+    interface Foo<X> extends Zap<X, String, Integer> {
+    }
 }

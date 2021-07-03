@@ -19,26 +19,26 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 @ContextScope
 public class OptionEnum {
 
-  private final NamedOptions options;
-  private final SourceElement sourceElement;
+    private final NamedOptions options;
+    private final SourceElement sourceElement;
 
-  @Inject
-  OptionEnum(
-      NamedOptions options,
-      SourceElement sourceElement) {
-    this.options = options;
-    this.sourceElement = sourceElement;
-  }
-
-  TypeSpec define() {
-    List<Mapped<NamedOption>> parameters = options.options();
-    TypeSpec.Builder spec = TypeSpec.enumBuilder(sourceElement.optionEnumType());
-    for (Mapped<NamedOption> param : parameters) {
-      EnumName enumName = param.enumName();
-      String enumConstant = enumName.enumConstant();
-      spec.addEnumConstant(enumConstant);
+    @Inject
+    OptionEnum(
+            NamedOptions options,
+            SourceElement sourceElement) {
+        this.options = options;
+        this.sourceElement = sourceElement;
     }
-    return spec.addModifiers(PRIVATE)
-        .build();
-  }
+
+    TypeSpec define() {
+        List<Mapped<NamedOption>> parameters = options.options();
+        TypeSpec.Builder spec = TypeSpec.enumBuilder(sourceElement.optionEnumType());
+        for (Mapped<NamedOption> param : parameters) {
+            EnumName enumName = param.enumName();
+            String enumConstant = enumName.enumConstant();
+            spec.addEnumConstant(enumConstant);
+        }
+        return spec.addModifiers(PRIVATE)
+                .build();
+    }
 }

@@ -8,13 +8,13 @@ import net.jbock.model.CommandModel;
  */
 public abstract class ExNotSuccess extends Exception {
 
-  /**
-   * Convert this exception to a failure object by removing
-   * the internal stacktrace and adding the command model.
-   * Public method that may be invoked from the generated code.
-   *
-   * @param model the command model
-   * @return failure object
-   */
-  public abstract NotSuccess toError(CommandModel model);
+    /**
+     * Convert this exception to a failure object by removing
+     * the internal stacktrace and adding the command model.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param model the command model
+     * @return failure object
+     */
+    public abstract NotSuccess toError(CommandModel model);
 }

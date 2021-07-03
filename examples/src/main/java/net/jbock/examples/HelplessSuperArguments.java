@@ -7,9 +7,9 @@ import net.jbock.Parameter;
 @Command(helpEnabled = false, superCommand = true)
 abstract class HelplessSuperArguments {
 
-  @Option(names = {"--quiet", "-q"})
-  abstract boolean quiet();
+    @Option(names = {"--quiet", "-q"})
+    abstract boolean quiet();
 
-  @Parameter(index = 0)
-  abstract String command();
+    @Parameter(index = 0)
+    abstract String command();
 }

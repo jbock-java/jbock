@@ -9,14 +9,14 @@ package net.jbock.model;
  */
 public enum Arity {
 
-  /**
-   * This option does not take an argument.
-   * It is, in fact, a mode flag.
-   */
-  NULLARY,
+    /**
+     * This option does not take an argument.
+     * It is, in fact, a mode flag.
+     */
+    NULLARY,
 
-  /**
-   * This option takes a single argument.
-   */
-  UNARY,
+    /**
+     * This option takes a single argument.
+     */
+    UNARY,
 }

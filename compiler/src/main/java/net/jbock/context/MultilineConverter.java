@@ -21,31 +21,31 @@ import static net.jbock.common.Constants.STRING;
 @ContextScope
 public class MultilineConverter {
 
-  private final GeneratedTypes generatedTypes;
+    private final GeneratedTypes generatedTypes;
 
-  @Inject
-  MultilineConverter(GeneratedTypes generatedTypes) {
-    this.generatedTypes = generatedTypes;
-  }
+    @Inject
+    MultilineConverter(GeneratedTypes generatedTypes) {
+        this.generatedTypes = generatedTypes;
+    }
 
-  TypeSpec define(Mapped<? extends AbstractItem> item) {
-    MapExpr mapExpr = item.mapExpr();
-    return TypeSpec.classBuilder(generatedTypes.multilineConverterType(item))
-        .addMethod(convertMethod(mapExpr))
-        .superclass(ParameterizedTypeName.get(
-            ClassName.get(StringConverter.class),
-            TypeName.get(mapExpr.type())))
-        .addModifiers(PRIVATE, STATIC)
-        .build();
-  }
+    TypeSpec define(Mapped<? extends AbstractItem> item) {
+        MapExpr mapExpr = item.mapExpr();
+        return TypeSpec.classBuilder(generatedTypes.multilineConverterType(item))
+                .addMethod(convertMethod(mapExpr))
+                .superclass(ParameterizedTypeName.get(
+                        ClassName.get(StringConverter.class),
+                        TypeName.get(mapExpr.type())))
+                .addModifiers(PRIVATE, STATIC)
+                .build();
+    }
 
-  private MethodSpec convertMethod(MapExpr mapExpr) {
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("convert");
-    spec.addAnnotation(Override.class);
-    spec.addCode(mapExpr.code());
-    spec.addParameter(ParameterSpec.builder(STRING, "token").build());
-    spec.addModifiers(PROTECTED);
-    spec.returns(TypeName.get(mapExpr.type()));
-    return spec.build();
-  }
+    private MethodSpec convertMethod(MapExpr mapExpr) {
+        MethodSpec.Builder spec = MethodSpec.methodBuilder("convert");
+        spec.addAnnotation(Override.class);
+        spec.addCode(mapExpr.code());
+        spec.addParameter(ParameterSpec.builder(STRING, "token").build());
+        spec.addModifiers(PROTECTED);
+        spec.returns(TypeName.get(mapExpr.type()));
+        return spec.build();
+    }
 }

@@ -16,72 +16,72 @@ import java.util.List;
 @Module
 public class ContextModule {
 
-  private final SourceElement sourceElement;
-  private final SafeElements elements;
-  private final List<Mapped<PositionalParameter>> positionalParams;
-  private final List<Mapped<NamedOption>> namedOptions;
-  private final Types types;
+    private final SourceElement sourceElement;
+    private final SafeElements elements;
+    private final List<Mapped<PositionalParameter>> positionalParams;
+    private final List<Mapped<NamedOption>> namedOptions;
+    private final Types types;
 
-  public ContextModule(
-      SourceElement sourceElement,
-      SafeElements elements,
-      List<Mapped<PositionalParameter>> positionalParams,
-      List<Mapped<NamedOption>> namedOptions,
-      Types types) {
-    this.sourceElement = sourceElement;
-    this.elements = elements;
-    this.positionalParams = positionalParams;
-    this.namedOptions = namedOptions;
-    this.types = types;
-  }
+    public ContextModule(
+            SourceElement sourceElement,
+            SafeElements elements,
+            List<Mapped<PositionalParameter>> positionalParams,
+            List<Mapped<NamedOption>> namedOptions,
+            Types types) {
+        this.sourceElement = sourceElement;
+        this.elements = elements;
+        this.positionalParams = positionalParams;
+        this.namedOptions = namedOptions;
+        this.types = types;
+    }
 
-  @ContextScope
-  @Provides
-  SourceElement sourceElement() {
-    return sourceElement;
-  }
+    @ContextScope
+    @Provides
+    SourceElement sourceElement() {
+        return sourceElement;
+    }
 
-  @ContextScope
-  @Provides
-  SafeElements elements() {
-    return elements;
-  }
+    @ContextScope
+    @Provides
+    SafeElements elements() {
+        return elements;
+    }
 
-  @ContextScope
-  @Provides
-  PositionalParameters positionalParameters() {
-    return PositionalParameters.create(positionalParams);
-  }
+    @ContextScope
+    @Provides
+    PositionalParameters positionalParameters() {
+        return PositionalParameters.create(positionalParams);
+    }
 
-  @ContextScope
-  @Provides
-  NamedOptions namedOptions(SourceElement sourceElement) {
-    return NamedOptions.create(namedOptions, sourceElement.unixClustering());
-  }
+    @ContextScope
+    @Provides
+    NamedOptions namedOptions(SourceElement sourceElement) {
+        return NamedOptions.create(namedOptions, sourceElement.unixClustering());
+    }
 
-  @ContextScope
-  @Provides
-  Util util() {
-    return new Util(types, new TypeTool(elements, types));
-  }
+    @ContextScope
+    @Provides
+    Util util() {
+        return new Util(types, new TypeTool(elements, types));
+    }
 
-  @ContextScope
-  @Provides
-  AllItems allItems(Util util) {
-    return AllItems.create(positionalParams, namedOptions, util);
-  }
+    @ContextScope
+    @Provides
+    AllItems allItems(Util util) {
+        return AllItems.create(positionalParams, namedOptions, util);
+    }
 
-  @ContextScope
-  @Provides
-  CommonFields commonFields(
-      GeneratedTypes generatedTypes,
-      SourceElement sourceElement,
-      PositionalParameters positionalParameters,
-      NamedOptions namedOptions) {
-    return CommonFields.create(
-        generatedTypes,
-        sourceElement,
-        positionalParameters,
-        namedOptions);
-  }
+    @ContextScope
+    @Provides
+    CommonFields commonFields(
+            GeneratedTypes generatedTypes,
+            SourceElement sourceElement,
+            PositionalParameters positionalParameters,
+            NamedOptions namedOptions) {
+        return CommonFields.create(
+                generatedTypes,
+                sourceElement,
+                positionalParameters,
+                namedOptions);
+    }
 }

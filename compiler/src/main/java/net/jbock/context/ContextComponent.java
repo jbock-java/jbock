@@ -6,11 +6,11 @@ import dagger.Component;
 @ContextScope
 public interface ContextComponent {
 
-  GeneratedClass generatedClass();
+    GeneratedClass generatedClass();
 
-  @Component.Factory
-  interface Builder {
+    @Component.Factory
+    interface Builder {
 
-    ContextComponent create(ContextModule module);
-  }
+        ContextComponent create(ContextModule module);
+    }
 }

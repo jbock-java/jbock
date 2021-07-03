@@ -18,167 +18,167 @@ import static net.jbock.common.Constants.STRING_ITERATOR;
 @ContextScope
 public class StatefulParseMethod {
 
-  private final GeneratedTypes generatedTypes;
+    private final GeneratedTypes generatedTypes;
 
-  private final ParameterSpec it = builder(STRING_ITERATOR, "it").build();
-  private final ParameterSpec token = builder(STRING, "token").build();
-  private final ParameterSpec position = builder(INT, "position").build();
-  private final ParameterSpec endOfOptionParsing = builder(BOOLEAN, "endOfOptionParsing").build();
-  private final NamedOptions namedOptions;
-  private final PositionalParameters positionalParameters;
-  private final CommonFields commonFields;
-  private final SourceElement sourceElement;
-  private final TryParseOptionMethod tryParseOptionMethod;
+    private final ParameterSpec it = builder(STRING_ITERATOR, "it").build();
+    private final ParameterSpec token = builder(STRING, "token").build();
+    private final ParameterSpec position = builder(INT, "position").build();
+    private final ParameterSpec endOfOptionParsing = builder(BOOLEAN, "endOfOptionParsing").build();
+    private final NamedOptions namedOptions;
+    private final PositionalParameters positionalParameters;
+    private final CommonFields commonFields;
+    private final SourceElement sourceElement;
+    private final TryParseOptionMethod tryParseOptionMethod;
 
-  @Inject
-  StatefulParseMethod(
-      GeneratedTypes generatedTypes,
-      NamedOptions namedOptions,
-      PositionalParameters positionalParameters,
-      CommonFields commonFields,
-      SourceElement sourceElement,
-      TryParseOptionMethod tryParseOptionMethod) {
-    this.generatedTypes = generatedTypes;
-    this.namedOptions = namedOptions;
-    this.positionalParameters = positionalParameters;
-    this.commonFields = commonFields;
-    this.sourceElement = sourceElement;
-    this.tryParseOptionMethod = tryParseOptionMethod;
-  }
-
-  MethodSpec define() {
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
-    if (sourceElement.isSuperCommand()) {
-      spec.addCode(superCommandCode());
-    } else {
-      spec.addCode(regularCode());
-    }
-    return spec.addParameter(it)
-        .addException(ExToken.class)
-        .returns(generatedTypes.statefulParserType())
-        .build();
-  }
-
-  private CodeBlock superCommandCode() {
-    CodeBlock.Builder code = initVariables();
-
-    // begin parsing loop
-    code.beginControlFlow("while ($N.hasNext())", it)
-        .addStatement("$T $N = $N.next()", STRING, token, it);
-
-    code.beginControlFlow("if ($N == $L)", position, positionalParameters.size())
-        .addStatement("$N.add($N)", commonFields.rest(), token)
-        .addStatement("continue")
-        .endControlFlow();
-
-    if (!namedOptions.isEmpty()) {
-      code.add(optionBlock());
-    }
-    code.add(checkSuspicious());
-
-    code.addStatement("$N[$N++] = $N", commonFields.params(),
-        position, token);
-
-    // end parsing loop
-    code.endControlFlow();
-
-    code.addStatement("return this");
-    return code.build();
-  }
-
-  private CodeBlock regularCode() {
-    CodeBlock.Builder code = initVariables();
-
-    // begin parsing loop
-    code.beginControlFlow("while ($N.hasNext())", it)
-        .addStatement("$T $N = $N.next()", STRING, token, it);
-
-    code.beginControlFlow("if (!$N && $S.equals($N))",
-        endOfOptionParsing, "--", token)
-        .addStatement("$N = $L", endOfOptionParsing, true)
-        .addStatement("continue")
-        .endControlFlow();
-
-    if (!namedOptions.isEmpty()) {
-      code.add(optionBlock());
+    @Inject
+    StatefulParseMethod(
+            GeneratedTypes generatedTypes,
+            NamedOptions namedOptions,
+            PositionalParameters positionalParameters,
+            CommonFields commonFields,
+            SourceElement sourceElement,
+            TryParseOptionMethod tryParseOptionMethod) {
+        this.generatedTypes = generatedTypes;
+        this.namedOptions = namedOptions;
+        this.positionalParameters = positionalParameters;
+        this.commonFields = commonFields;
+        this.sourceElement = sourceElement;
+        this.tryParseOptionMethod = tryParseOptionMethod;
     }
 
-    code.add("if (!$N && $N.matcher($N).matches())\n",
-        endOfOptionParsing, commonFields.suspiciousPattern(), token).indent()
-        .addStatement(throwInvalidOptionStatement(ErrTokenType.INVALID_OPTION))
-        .unindent();
+    MethodSpec define() {
 
-    if (positionalParameters.isEmpty()) {
-      code.addStatement(throwInvalidOptionStatement(ErrTokenType.EXCESS_PARAM));
-    } else if (!positionalParameters.anyRepeatable()) {
-      code.add("if ($N == $L)\n", position, positionalParameters.size()).indent()
-          .addStatement(throwInvalidOptionStatement(ErrTokenType.EXCESS_PARAM))
-          .unindent();
-    }
-
-    if (!positionalParameters.isEmpty()) {
-      if (positionalParameters.anyRepeatable()) {
-        if (positionalParameters.size() == 1) {
-          code.addStatement("$N.add($N)", commonFields.rest(), token);
+        MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
+        if (sourceElement.isSuperCommand()) {
+            spec.addCode(superCommandCode());
         } else {
-          code.add("if ($N < $L)\n", position, positionalParameters.size() - 1).indent()
-              .addStatement("$N[$N++] = $N", commonFields.params(),
-                  position, token)
-              .unindent()
-              .add("else\n").indent()
-              .addStatement("$N.add($N)", commonFields.rest(), token)
-              .unindent();
+            spec.addCode(regularCode());
         }
-      } else {
+        return spec.addParameter(it)
+                .addException(ExToken.class)
+                .returns(generatedTypes.statefulParserType())
+                .build();
+    }
+
+    private CodeBlock superCommandCode() {
+        CodeBlock.Builder code = initVariables();
+
+        // begin parsing loop
+        code.beginControlFlow("while ($N.hasNext())", it)
+                .addStatement("$T $N = $N.next()", STRING, token, it);
+
+        code.beginControlFlow("if ($N == $L)", position, positionalParameters.size())
+                .addStatement("$N.add($N)", commonFields.rest(), token)
+                .addStatement("continue")
+                .endControlFlow();
+
+        if (!namedOptions.isEmpty()) {
+            code.add(optionBlock());
+        }
+        code.add(checkSuspicious());
+
         code.addStatement("$N[$N++] = $N", commonFields.params(),
-            position, token);
-      }
+                position, token);
+
+        // end parsing loop
+        code.endControlFlow();
+
+        code.addStatement("return this");
+        return code.build();
     }
 
-    // end parsing loop
-    code.endControlFlow();
+    private CodeBlock regularCode() {
+        CodeBlock.Builder code = initVariables();
 
-    return code.addStatement("return this").build();
-  }
+        // begin parsing loop
+        code.beginControlFlow("while ($N.hasNext())", it)
+                .addStatement("$T $N = $N.next()", STRING, token, it);
 
-  private CodeBlock optionBlock() {
-    if (sourceElement.isSuperCommand()) {
-      return CodeBlock.builder()
-          .add("if ($N($N, $N))\n", tryParseOptionMethod.get(), token, it).indent()
-          .addStatement("continue")
-          .unindent()
-          .build();
-    } else {
-      return CodeBlock.builder()
-          .add("if (!$N && $N($N, $N))\n", endOfOptionParsing,
-              tryParseOptionMethod.get(), token, it).indent()
-          .addStatement("continue")
-          .unindent()
-          .build();
+        code.beginControlFlow("if (!$N && $S.equals($N))",
+                endOfOptionParsing, "--", token)
+                .addStatement("$N = $L", endOfOptionParsing, true)
+                .addStatement("continue")
+                .endControlFlow();
+
+        if (!namedOptions.isEmpty()) {
+            code.add(optionBlock());
+        }
+
+        code.add("if (!$N && $N.matcher($N).matches())\n",
+                endOfOptionParsing, commonFields.suspiciousPattern(), token).indent()
+                .addStatement(throwInvalidOptionStatement(ErrTokenType.INVALID_OPTION))
+                .unindent();
+
+        if (positionalParameters.isEmpty()) {
+            code.addStatement(throwInvalidOptionStatement(ErrTokenType.EXCESS_PARAM));
+        } else if (!positionalParameters.anyRepeatable()) {
+            code.add("if ($N == $L)\n", position, positionalParameters.size()).indent()
+                    .addStatement(throwInvalidOptionStatement(ErrTokenType.EXCESS_PARAM))
+                    .unindent();
+        }
+
+        if (!positionalParameters.isEmpty()) {
+            if (positionalParameters.anyRepeatable()) {
+                if (positionalParameters.size() == 1) {
+                    code.addStatement("$N.add($N)", commonFields.rest(), token);
+                } else {
+                    code.add("if ($N < $L)\n", position, positionalParameters.size() - 1).indent()
+                            .addStatement("$N[$N++] = $N", commonFields.params(),
+                                    position, token)
+                            .unindent()
+                            .add("else\n").indent()
+                            .addStatement("$N.add($N)", commonFields.rest(), token)
+                            .unindent();
+                }
+            } else {
+                code.addStatement("$N[$N++] = $N", commonFields.params(),
+                        position, token);
+            }
+        }
+
+        // end parsing loop
+        code.endControlFlow();
+
+        return code.addStatement("return this").build();
     }
-  }
 
-  private CodeBlock.Builder initVariables() {
-    CodeBlock.Builder code = CodeBlock.builder();
-    if (!positionalParameters.isEmpty() && !(positionalParameters.anyRepeatable() && positionalParameters.size() == 1)) {
-      code.addStatement("$T $N = $L", position.type, position, 0);
+    private CodeBlock optionBlock() {
+        if (sourceElement.isSuperCommand()) {
+            return CodeBlock.builder()
+                    .add("if ($N($N, $N))\n", tryParseOptionMethod.get(), token, it).indent()
+                    .addStatement("continue")
+                    .unindent()
+                    .build();
+        } else {
+            return CodeBlock.builder()
+                    .add("if (!$N && $N($N, $N))\n", endOfOptionParsing,
+                            tryParseOptionMethod.get(), token, it).indent()
+                    .addStatement("continue")
+                    .unindent()
+                    .build();
+        }
     }
-    if (!sourceElement.isSuperCommand()) {
-      code.addStatement("$T $N = $L", BOOLEAN, endOfOptionParsing, false);
+
+    private CodeBlock.Builder initVariables() {
+        CodeBlock.Builder code = CodeBlock.builder();
+        if (!positionalParameters.isEmpty() && !(positionalParameters.anyRepeatable() && positionalParameters.size() == 1)) {
+            code.addStatement("$T $N = $L", position.type, position, 0);
+        }
+        if (!sourceElement.isSuperCommand()) {
+            code.addStatement("$T $N = $L", BOOLEAN, endOfOptionParsing, false);
+        }
+        return code;
     }
-    return code;
-  }
 
-  private CodeBlock checkSuspicious() {
-    return CodeBlock.builder().add("if ($N.matcher($N).matches())\n",
-        commonFields.suspiciousPattern(), token).indent()
-        .addStatement(throwInvalidOptionStatement(ErrTokenType.INVALID_OPTION))
-        .unindent().build();
-  }
+    private CodeBlock checkSuspicious() {
+        return CodeBlock.builder().add("if ($N.matcher($N).matches())\n",
+                commonFields.suspiciousPattern(), token).indent()
+                .addStatement(throwInvalidOptionStatement(ErrTokenType.INVALID_OPTION))
+                .unindent().build();
+    }
 
-  private CodeBlock throwInvalidOptionStatement(ErrTokenType errorType) {
-    return CodeBlock.of("throw new $T($T.$L, $N)",
-        ExToken.class, ErrTokenType.class, errorType, token);
-  }
+    private CodeBlock throwInvalidOptionStatement(ErrTokenType errorType) {
+        return CodeBlock.of("throw new $T($T.$L, $N)",
+                ExToken.class, ErrTokenType.class, errorType, token);
+    }
 }

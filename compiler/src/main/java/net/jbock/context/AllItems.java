@@ -10,30 +10,30 @@ import java.util.List;
 
 final class AllItems {
 
-  private final List<Mapped<? extends AbstractItem>> items;
-  private final boolean anyRequired;
+    private final List<Mapped<? extends AbstractItem>> items;
+    private final boolean anyRequired;
 
-  private AllItems(
-      List<Mapped<? extends AbstractItem>> items,
-      boolean anyRequired) {
-    this.items = items;
-    this.anyRequired = anyRequired;
-  }
+    private AllItems(
+            List<Mapped<? extends AbstractItem>> items,
+            boolean anyRequired) {
+        this.items = items;
+        this.anyRequired = anyRequired;
+    }
 
-  static AllItems create(
-      List<Mapped<PositionalParameter>> positionalParams,
-      List<Mapped<NamedOption>> namedOptions,
-      Util util) {
-    boolean anyRequired = util.concat(namedOptions, positionalParams).stream()
-        .anyMatch(Mapped::isRequired);
-    return new AllItems(util.concat(namedOptions, positionalParams), anyRequired);
-  }
+    static AllItems create(
+            List<Mapped<PositionalParameter>> positionalParams,
+            List<Mapped<NamedOption>> namedOptions,
+            Util util) {
+        boolean anyRequired = util.concat(namedOptions, positionalParams).stream()
+                .anyMatch(Mapped::isRequired);
+        return new AllItems(util.concat(namedOptions, positionalParams), anyRequired);
+    }
 
-  public List<Mapped<? extends AbstractItem>> items() {
-    return items;
-  }
+    public List<Mapped<? extends AbstractItem>> items() {
+        return items;
+    }
 
-  boolean anyRequired() {
-    return anyRequired;
-  }
+    boolean anyRequired() {
+        return anyRequired;
+    }
 }

@@ -1,9 +1,9 @@
 package net.jbock.examples;
 
+import io.jbock.util.Optional;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameters;
-import net.jbock.either.Optional;
 
 import java.util.List;
 
@@ -17,27 +17,27 @@ import java.util.List;
 @Command(name = "curl")
 abstract class CurlArguments {
 
-  /**
-   * Optional<String> for regular arguments
-   */
-  @Option(names = {"--request", "-X"})
-  abstract Optional<String> method();
+    /**
+     * Optional<String> for regular arguments
+     */
+    @Option(names = {"--request", "-X"})
+    abstract Optional<String> method();
 
-  /**
-   * List<String> for repeatable arguments
-   */
-  @Option(names = {"--header", "-H"})
-  abstract List<String> headers();
+    /**
+     * List<String> for repeatable arguments
+     */
+    @Option(names = {"--header", "-H"})
+    abstract List<String> headers();
 
-  /**
-   * boolean for flags
-   */
-  @Option(names = {"--verbose", "-v"})
-  abstract boolean verbose();
+    /**
+     * boolean for flags
+     */
+    @Option(names = {"--verbose", "-v"})
+    abstract boolean verbose();
 
-  @Option(names = {"--include", "-i"})
-  abstract boolean include();
+    @Option(names = {"--include", "-i"})
+    abstract boolean include();
 
-  @Parameters
-  abstract List<String> url();
+    @Parameters
+    abstract List<String> url();
 }

@@ -9,16 +9,16 @@ import java.util.stream.Stream;
 
 class NamedOptionFactoryTest {
 
-  @Test
-  void testUnixNamesFirstComparator() {
-    Assertions.assertEquals(List.of("-x", "--a"), Stream.of("--a", "-x")
-        .sorted(NamedOptionFactory.UNIX_NAMES_FIRST_COMPARATOR)
-        .collect(Collectors.toList()));
-    Assertions.assertEquals(List.of("-a", "-b"), Stream.of("-b", "-a")
-        .sorted(NamedOptionFactory.UNIX_NAMES_FIRST_COMPARATOR)
-        .collect(Collectors.toList()));
-    Assertions.assertEquals(List.of("--a", "--b"), Stream.of("--b", "--a")
-        .sorted(NamedOptionFactory.UNIX_NAMES_FIRST_COMPARATOR)
-        .collect(Collectors.toList()));
-  }
+    @Test
+    void testUnixNamesFirstComparator() {
+        Assertions.assertEquals(List.of("-x", "--a"), Stream.of("--a", "-x")
+                .sorted(NamedOptionFactory.UNIX_NAMES_FIRST_COMPARATOR)
+                .collect(Collectors.toList()));
+        Assertions.assertEquals(List.of("-a", "-b"), Stream.of("-b", "-a")
+                .sorted(NamedOptionFactory.UNIX_NAMES_FIRST_COMPARATOR)
+                .collect(Collectors.toList()));
+        Assertions.assertEquals(List.of("--a", "--b"), Stream.of("--b", "--a")
+                .sorted(NamedOptionFactory.UNIX_NAMES_FIRST_COMPARATOR)
+                .collect(Collectors.toList()));
+    }
 }

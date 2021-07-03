@@ -5,23 +5,23 @@ package net.jbock.util;
  */
 public final class ConverterThrewException extends ConverterFailure {
 
-  private final Exception exception;
+    private final Exception exception;
 
-  ConverterThrewException(Exception exception) {
-    this.exception = exception;
-  }
+    ConverterThrewException(Exception exception) {
+        this.exception = exception;
+    }
 
-  @Override
-  public String converterMessage() {
-    return exception.getMessage();
-  }
+    @Override
+    public String converterMessage() {
+        return exception.getMessage();
+    }
 
-  /**
-   * Returns the exception that was caught in {@link StringConverter#apply(String)}
-   *
-   * @return the exception
-   */
-  public Exception exception() {
-    return exception;
-  }
+    /**
+     * Returns the exception that was caught in {@link StringConverter#apply(String)}
+     *
+     * @return the exception
+     */
+    public Exception exception() {
+        return exception;
+    }
 }

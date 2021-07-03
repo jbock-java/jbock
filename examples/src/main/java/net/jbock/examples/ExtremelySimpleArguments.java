@@ -6,11 +6,11 @@ import net.jbock.Parameters;
 import java.util.List;
 
 @Command(
-    helpEnabled = false,
-    atFileExpansion = false,
-    generateParseOrExitMethod = false)
+        helpEnabled = false,
+        atFileExpansion = false,
+        generateParseOrExitMethod = false)
 abstract class ExtremelySimpleArguments {
 
-  @Parameters
-  abstract List<String> hello();
+    @Parameters
+    abstract List<String> hello();
 }

@@ -1,8 +1,8 @@
 package net.jbock.convert.matcher;
 
+import io.jbock.util.Optional;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matching.Match;
-import net.jbock.either.Optional;
 import net.jbock.model.Multiplicity;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
@@ -17,31 +17,31 @@ import static net.jbock.common.TypeTool.AS_PRIMITIVE;
 @ParameterScope
 public class ExactMatcher implements Matcher {
 
-  private final SourceMethod sourceMethod;
-  private final Types types;
+    private final SourceMethod sourceMethod;
+    private final Types types;
 
-  @Inject
-  ExactMatcher(
-      SourceMethod sourceMethod,
-      Types types) {
-    this.sourceMethod = sourceMethod;
-    this.types = types;
-  }
-
-  @Override
-  public Optional<Match> tryMatch(AbstractItem parameter) {
-    Match match = Match.create(boxedReturnType(), Multiplicity.REQUIRED);
-    return Optional.of(match);
-  }
-
-  private TypeMirror boxedReturnType() {
-    TypeMirror sourceType = sourceMethod.returnType();
-    if (!sourceType.getKind().isPrimitive()) {
-      return sourceType;
+    @Inject
+    ExactMatcher(
+            SourceMethod sourceMethod,
+            Types types) {
+        this.sourceMethod = sourceMethod;
+        this.types = types;
     }
-    return AS_PRIMITIVE.visit(sourceType)
-        .map(types::boxedClass)
-        .map(TypeElement::asType)
-        .orElse(sourceType);
-  }
+
+    @Override
+    public Optional<Match> tryMatch(AbstractItem parameter) {
+        Match match = Match.create(boxedReturnType(), Multiplicity.REQUIRED);
+        return Optional.of(match);
+    }
+
+    private TypeMirror boxedReturnType() {
+        TypeMirror sourceType = sourceMethod.returnType();
+        if (!sourceType.getKind().isPrimitive()) {
+            return sourceType;
+        }
+        return AS_PRIMITIVE.visit(sourceType)
+                .map(types::boxedClass)
+                .map(TypeElement::asType)
+                .orElse(sourceType);
+    }
 }

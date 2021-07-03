@@ -10,16 +10,16 @@ import javax.inject.Inject;
 @ContextScope
 public class GeneratedAnnotation {
 
-  private static final String PROJECT_URL = "https://github.com/jbock-java";
+    private static final String PROJECT_URL = "https://github.com/jbock-java";
 
-  @Inject
-  GeneratedAnnotation() {
-  }
+    @Inject
+    GeneratedAnnotation() {
+    }
 
-  AnnotationSpec define() {
-    return AnnotationSpec.builder(Generated.class)
-        .addMember("value", CodeBlock.of("$S", JbockProcessor.class.getCanonicalName()))
-        .addMember("comments", CodeBlock.of("$S", PROJECT_URL))
-        .build();
-  }
+    AnnotationSpec define() {
+        return AnnotationSpec.builder(Generated.class)
+                .addMember("value", CodeBlock.of("$S", JbockProcessor.class.getCanonicalName()))
+                .addMember("comments", CodeBlock.of("$S", PROJECT_URL))
+                .build();
+    }
 }

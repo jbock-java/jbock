@@ -42,6 +42,7 @@ shadowJar {
         exclude('javax.annotation:jsr250-api:.*')
     }
     archiveClassifier.set('')
+    relocate('io.jbock.util', 'net.jbock.io.jbock.util')
     relocate('dagger', 'net.jbock.dagger')
     relocate('com.squareup.javapoet', 'net.jbock.javapoet')
     relocate('com.google', 'net.jbock.google')
@@ -51,6 +52,7 @@ shadowJar {
 
 dependencies {
     def core = project(':core')
+    implementation('io.github.jbock-java:either:1.0')
     implementation('com.squareup:javapoet:1.13.0')
     implementation('com.google.auto:auto-common:1.0')
     implementation('com.google.guava:guava:30.1.1-jre')

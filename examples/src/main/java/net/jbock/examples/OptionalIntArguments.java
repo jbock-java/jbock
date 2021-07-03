@@ -13,14 +13,14 @@ import java.util.OptionalInt;
 @Command
 abstract class OptionalIntArguments {
 
-  @Option(names = {"--a", "-a"}, converter = MyConverter.class)
-  abstract OptionalInt a();
+    @Option(names = {"--a", "-a"}, converter = MyConverter.class)
+    abstract OptionalInt a();
 
-  static class MyConverter extends StringConverter<OptionalInt> {
+    static class MyConverter extends StringConverter<OptionalInt> {
 
-    @Override
-    protected OptionalInt convert(String token) {
-      return OptionalInt.of(Integer.parseInt(token));
+        @Override
+        protected OptionalInt convert(String token) {
+            return OptionalInt.of(Integer.parseInt(token));
+        }
     }
-  }
 }

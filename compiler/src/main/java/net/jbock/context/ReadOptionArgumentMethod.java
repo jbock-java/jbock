@@ -18,35 +18,35 @@ import static net.jbock.common.Constants.STRING_ITERATOR;
 @ContextScope
 public class ReadOptionArgumentMethod extends CachedMethod {
 
-  @Inject
-  ReadOptionArgumentMethod() {
-  }
+    @Inject
+    ReadOptionArgumentMethod() {
+    }
 
-  @Override
-  MethodSpec define() {
-    ParameterSpec token = builder(STRING, "token").build();
-    ParameterSpec it = builder(STRING_ITERATOR, "it").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    ParameterSpec unix = builder(BOOLEAN, "unix").build();
-    code.addStatement("$T $N = !$N.startsWith($S)", BOOLEAN, unix, token, "--");
+    @Override
+    MethodSpec define() {
+        ParameterSpec token = builder(STRING, "token").build();
+        ParameterSpec it = builder(STRING_ITERATOR, "it").build();
+        CodeBlock.Builder code = CodeBlock.builder();
+        ParameterSpec unix = builder(BOOLEAN, "unix").build();
+        code.addStatement("$T $N = !$N.startsWith($S)", BOOLEAN, unix, token, "--");
 
-    code.add("if ($N && $N.length() > 2)\n", unix, token).indent()
-        .addStatement("return $N.substring(2)", token).unindent();
+        code.add("if ($N && $N.length() > 2)\n", unix, token).indent()
+                .addStatement("return $N.substring(2)", token).unindent();
 
-    code.add("if (!$N && $N.contains($S))\n", unix, token, "=").indent()
-        .addStatement("return $1N.substring($1N.indexOf('=') + 1)", token).unindent();
+        code.add("if (!$N && $N.contains($S))\n", unix, token, "=").indent()
+                .addStatement("return $1N.substring($1N.indexOf('=') + 1)", token).unindent();
 
-    code.add("if ($N.hasNext())\n", it).indent()
-        .addStatement("return $N.next()", it).unindent();
+        code.add("if ($N.hasNext())\n", it).indent()
+                .addStatement("return $N.next()", it).unindent();
 
-    code.addStatement("throw new $T($T.$L, $N)", ExToken.class,
-        ErrTokenType.class, ErrTokenType.MISSING_ARGUMENT, token);
+        code.addStatement("throw new $T($T.$L, $N)", ExToken.class,
+                ErrTokenType.class, ErrTokenType.MISSING_ARGUMENT, token);
 
-    return methodBuilder("readOptionArgument")
-        .addException(ExToken.class)
-        .addCode(code.build())
-        .addParameters(asList(token, it))
-        .returns(STRING)
-        .build();
-  }
+        return methodBuilder("readOptionArgument")
+                .addException(ExToken.class)
+                .addCode(code.build())
+                .addParameters(asList(token, it))
+                .returns(STRING)
+                .build();
+    }
 }

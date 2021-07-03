@@ -5,10 +5,10 @@ package net.jbock.util;
  */
 public interface HasMessage {
 
-  /**
-   * Returns an error message to describe the failure.
-   *
-   * @return error message
-   */
-  String message();
+    /**
+     * Returns an error message to describe the failure.
+     *
+     * @return error message
+     */
+    String message();
 }

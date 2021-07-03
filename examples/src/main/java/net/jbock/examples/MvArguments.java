@@ -6,11 +6,11 @@ import net.jbock.Parameter;
 @Command
 abstract class MvArguments implements MvArguments_Parent, MvArguments_ParentParent {
 
-  @Parameter(index = 1)
-  abstract String dest();
+    @Parameter(index = 1)
+    abstract String dest();
 
-  @Override
-  public boolean isSafe() {
-    return true;
-  }
+    @Override
+    public boolean isSafe() {
+        return true;
+    }
 }
