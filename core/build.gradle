@@ -1,5 +1,5 @@
 plugins {
-    id('java')
+    id('java-library')
     id('maven-publish')
     id('signing')
 }
@@ -35,7 +35,7 @@ tasks.withType(GenerateModuleMetadata) {
 }
 
 dependencies {
-    implementation('io.github.jbock-java:either:1.0')
+    api('io.github.jbock-java:either:1.0')
     testImplementation('org.junit.jupiter:junit-jupiter:5.7.1')
 }
 
