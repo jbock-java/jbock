@@ -3,8 +3,6 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import io.jbock.util.Either;
-import io.jbock.util.Optional;
 import net.jbock.common.Util;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
@@ -19,6 +17,8 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.jbock.common.Constants.EITHER;
+import static net.jbock.common.Constants.OPTIONAL;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
@@ -114,7 +114,7 @@ public class BuildMethod extends CachedMethod {
 
     private CodeBlock convertExpressionRegularParameter(Mapped<PositionalParameter> c, int i) {
         List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$T.ofNullable(this.$N[$L])", Optional.class, commonFields.params(),
+        code.add(CodeBlock.of("$T.ofNullable(this.$N[$L])", OPTIONAL, commonFields.params(),
                 c.item().position()));
         code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
                 .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
@@ -128,7 +128,7 @@ public class BuildMethod extends CachedMethod {
         code.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
         code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
                 .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
-        code.add(CodeBlock.of(".collect($T.toValidList())", Either.class));
+        code.add(CodeBlock.of(".collect($T.toValidList())", EITHER));
         code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.regular().size()));
         return util.joinByNewline(code);
     }
@@ -146,12 +146,12 @@ public class BuildMethod extends CachedMethod {
                         orElseThrowConverterError(ItemType.OPTION, i));
             case OPTIONAL:
                 return List.of(
-                        CodeBlock.of(".collect($T.toValidList())", Either.class),
+                        CodeBlock.of(".collect($T.toValidList())", EITHER),
                         orElseThrowConverterError(ItemType.OPTION, i),
                         CodeBlock.of(".stream().findAny()"));
             case REPEATABLE:
                 return List.of(
-                        CodeBlock.of(".collect($T.toValidList())", Either.class),
+                        CodeBlock.of(".collect($T.toValidList())", EITHER),
                         orElseThrowConverterError(ItemType.OPTION, i));
             default:
                 throw new IllegalArgumentException("unexpected multiplicity: " + c.multiplicity());
@@ -167,7 +167,7 @@ public class BuildMethod extends CachedMethod {
             case OPTIONAL:
                 return List.of(
                         CodeBlock.of(".stream()"),
-                        CodeBlock.of(".collect($T.toValidList())", Either.class),
+                        CodeBlock.of(".collect($T.toValidList())", EITHER),
                         orElseThrowConverterError(ItemType.PARAMETER, i),
                         CodeBlock.of(".stream().findAny()"));
             default:

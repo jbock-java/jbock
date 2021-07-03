@@ -31,6 +31,10 @@ public final class Constants {
     public static final ClassName EITHER = ClassName.get(
             String.join(".", List.of("io", "jbock", "util")), "Either");
 
+    // prevent shadowing
+    public static final ClassName OPTIONAL = ClassName.get(
+            String.join(".", List.of("io", "jbock", "util")), "Optional");
+
     public static TypeName mapOf(TypeName keyType, TypeName valueType) {
         return ParameterizedTypeName.get(ClassName.get(Map.class), keyType, valueType);
     }

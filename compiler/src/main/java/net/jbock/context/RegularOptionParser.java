@@ -6,7 +6,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
-import io.jbock.util.Optional;
 import net.jbock.common.Constants;
 import net.jbock.common.Util;
 import net.jbock.util.ExToken;
@@ -17,6 +16,7 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.common.Constants.OPTIONAL;
 import static net.jbock.common.Constants.STRING;
 
 @ContextScope
@@ -73,7 +73,7 @@ public class RegularOptionParser {
         ParameterizedTypeName streamOfString = ParameterizedTypeName.get(Stream.class, String.class);
         return MethodSpec.methodBuilder("stream")
                 .returns(streamOfString)
-                .addStatement("return $T.ofNullable($N).stream()", Optional.class, value)
+                .addStatement("return $T.ofNullable($N).stream()", OPTIONAL, value)
                 .build();
     }
 }
