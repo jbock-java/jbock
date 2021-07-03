@@ -126,6 +126,7 @@ public final class StandardErrorHandler {
      *    error messages, or printing standard usage documentation for
      *    the provided {@link CommandModel}.</p>
      *
+     * @param notSuccess an object describing the error condition
      * @return system return code
      */
     public int handle(NotSuccess notSuccess) {
