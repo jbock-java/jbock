@@ -4,7 +4,7 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1006' }
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1007' }
 }
 
 java {
