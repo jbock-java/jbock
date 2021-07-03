@@ -27,7 +27,7 @@ public final class Constants {
 
     public static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
 
-    // fooling the shade plugin...
+    // prevent shadowing
     public static final ClassName EITHER = ClassName.get(
             String.join(".", List.of("io", "jbock", "util")), "Either");
 
