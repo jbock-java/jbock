@@ -8,9 +8,9 @@ It is an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
 that generates custom parsing code at compile time. jbock requires Java 11.
 
-### Basic example
+### Quick overview
 
-Create an abstract class, or alternatively a Java interface,
+To get started, create an abstract class, or alternatively a Java interface,
 and add the `@Command` annotation.
 In this class or interface, each abstract method corresponds either to a *named option* or a *positional parameter*.
 
@@ -37,7 +37,7 @@ abstract class DeleteCommand {
 See here for the code this generates:
 [DeleteCommandParser.java](https://github.com/jbock-java/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommandParser.java)
 
-The generated parser is usually used in a `main` method:
+This generated parser is usually used in a `main` method:
 
 ````java
 public static void main(String[] args) {
