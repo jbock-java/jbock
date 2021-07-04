@@ -7,6 +7,7 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.HelpRequested;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -57,12 +58,10 @@ class CommonFields {
             NamedOptions namedOptions) {
         ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
         CodeBlock.Builder code = CodeBlock.builder();
-        code.add(generatedTypes.helpRequestedType()
-                .map(helpRequestedType -> CodeBlock.builder()
-                        .add("$N ->\n", result).indent()
-                        .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, helpRequestedType)
-                        .unindent().build())
-                .orElseGet(() -> CodeBlock.of("$N -> $T.exit(1)", result, System.class)));
+        code.add(CodeBlock.builder()
+                .add("$N ->\n", result).indent()
+                .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, HelpRequested.class)
+                .unindent().build());
         long mapSize = namedOptions.stream()
                 .map(Mapped::item)
                 .map(NamedOption::names)

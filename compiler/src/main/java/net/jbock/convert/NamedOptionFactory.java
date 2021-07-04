@@ -6,7 +6,6 @@ import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.SourceMethod;
-import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import javax.lang.model.util.Types;
@@ -32,7 +31,6 @@ public class NamedOptionFactory {
     private final ConverterFinder converterFinder;
     private final ConverterClass converterClass;
     private final SourceMethod sourceMethod;
-    private final SourceElement sourceElement;
     private final EnumName enumName;
     private final List<Mapped<NamedOption>> alreadyCreated;
     private final Types types;
@@ -42,14 +40,12 @@ public class NamedOptionFactory {
             ConverterClass converterClass,
             ConverterFinder converterFinder,
             SourceMethod sourceMethod,
-            SourceElement sourceElement,
             EnumName enumName,
             List<Mapped<NamedOption>> alreadyCreated,
             Types types) {
         this.converterFinder = converterFinder;
         this.converterClass = converterClass;
         this.sourceMethod = sourceMethod;
-        this.sourceElement = sourceElement;
         this.enumName = enumName;
         this.alreadyCreated = alreadyCreated;
         this.types = types;
@@ -107,9 +103,6 @@ public class NamedOptionFactory {
         }
         if (!name.startsWith("--") && name.length() > 2) {
             return LeftOptional.of("single-dash names must be single-character names: " + name);
-        }
-        if (sourceElement.helpEnabled() && "--help".equals(name)) {
-            return LeftOptional.of("'--help' is reserved, set 'helpEnabled=false' to allow it");
         }
         for (int i = 0; i < name.length(); i++) {
             char c = name.charAt(i);

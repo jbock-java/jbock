@@ -7,9 +7,9 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * <p>Marker annotation for a <em>repeatable</em> positional parameter.
+ * Marker annotation for a <em>repeatable</em> positional parameter.
  * This parameter will capture the remaining tokens,
- * after all positional parameters have been captured.</p>
+ * after all positional parameters have been captured.
  *
  * <ul>
  *   <li>The annotated method must be {@code abstract} and have an empty argument list.</li>
@@ -23,13 +23,14 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public @interface Parameters {
 
     /**
-     * <p>Class of a custom converter that will be used to convert to each
+     * Class of a custom converter that will be used to convert to each
      * individual token that's captured by this parameter.
      * This is either a class that extends
      * {@link net.jbock.util.StringConverter StringConverter}
-     * or a {@link java.util.function.Supplier Supplier} of a string converter.</p>
+     * or a {@link java.util.function.Supplier Supplier} of a string converter.
+     *
      * <p>Note: The same converter instance will be used to convert
-     * all relevant tokens in the input array.</p>
+     * all relevant tokens in the input array.
      *
      * @return converter class or {@code Void.class}
      */

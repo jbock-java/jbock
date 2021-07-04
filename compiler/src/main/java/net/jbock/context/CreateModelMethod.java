@@ -56,14 +56,8 @@ public class CreateModelMethod extends CachedMethod {
             code.add(CodeBlock.of(".addDescriptionLine($S)", descriptionLine));
         }
         code.add(CodeBlock.of(".withProgramName($S)", sourceElement.programName()));
-        if (!sourceElement.helpEnabled()) {
-            code.add(CodeBlock.of(".withHelpEnabled($L)", false));
-        }
         if (sourceElement.isSuperCommand()) {
             code.add(CodeBlock.of(".withSuperCommand($L)", true));
-        }
-        if (!sourceElement.atFileExpansion()) {
-            code.add(CodeBlock.of(".withAtFileExpansion($L)", false));
         }
         if (namedOptions.unixClusteringSupported()) {
             code.add(CodeBlock.of(".withUnixClustering($L)", true));

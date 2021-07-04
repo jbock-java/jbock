@@ -143,18 +143,13 @@ public final class StandardErrorHandler {
             return 0;
         }
         out.println(ansiStyle.red("ERROR:") + ' ' + ((HasMessage) notSuccess).message());
-        if (model.helpEnabled()) {
-            List<String> synopsis = Synopsis.create(model)
-                    .createSynopsis("Usage:");
-            out.println(String.join(" ", synopsis));
-            String helpCommand = model.programName() + " --help";
-            out.println("Type " +
-                    ansiStyle.bold(helpCommand).orElseGet(() -> "'" + helpCommand + "'") +
-                    " for more information.");
-        } else {
-            UsageDocumentation.builder(model)
-                    .build().printUsageDocumentation();
-        }
+        List<String> synopsis = Synopsis.create(model)
+                .createSynopsis("Usage:");
+        out.println(String.join(" ", synopsis));
+        String helpCommand = model.programName() + " --help";
+        out.println("Type " +
+                ansiStyle.bold(helpCommand).orElseGet(() -> "'" + helpCommand + "'") +
+                " for more information.");
         out.flush();
         return 1;
     }

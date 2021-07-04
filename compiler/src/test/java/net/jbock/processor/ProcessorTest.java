@@ -98,19 +98,6 @@ class ProcessorTest {
     }
 
     @Test
-    void helpName() {
-        JavaFileObject javaFile = fromSource(
-                "@Command",
-                "abstract class Arguments {",
-                "  @Option(names = {\"--help\"}) abstract String a();",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("'--help' is reserved, set 'helpEnabled=false' to allow it");
-    }
-
-    @Test
     void multiCharacterUnixOption() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
@@ -459,7 +446,7 @@ class ProcessorTest {
     @Test
     void simpleInt() {
         JavaFileObject javaFile = fromSource(
-                "@Command(description = \"y\", descriptionKey = \"y\", atFileExpansion = false)",
+                "@Command(description = \"y\", descriptionKey = \"y\")",
                 "abstract class Arguments {",
                 "",
                 "  @Option(names = \"--x\", description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",

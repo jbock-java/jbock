@@ -77,10 +77,4 @@ public class GeneratedTypes {
                 ClassName.get(NotSuccess.class),
                 parseSuccessType());
     }
-
-    Optional<ClassName> helpRequestedType() {
-        return sourceElement.helpEnabled() ?
-                Optional.of(ClassName.get(HelpRequested.class)) :
-                Optional.empty();
-    }
 }

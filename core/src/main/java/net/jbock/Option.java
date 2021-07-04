@@ -27,12 +27,13 @@ public @interface Option {
     String[] names() default {};
 
     /**
-     * <p>Class of a custom converter for this named option.
+     * Class of a custom converter for this named option.
      * This is either a class that extends
      * {@link net.jbock.util.StringConverter StringConverter}
-     * or a {@link java.util.function.Supplier Supplier} of a string converter.</p>
+     * or a {@link java.util.function.Supplier Supplier} of a string converter.
+     *
      * <p>Note for repeatable options: The same converter instance
-     * will be used to convert all relevant tokens in the input array.</p>
+     * will be used to convert all relevant tokens in the input array.
      *
      * @return converter class or {@code Void.class}
      */
@@ -55,9 +56,10 @@ public @interface Option {
     String[] description() default {};
 
     /**
-     * <p>A label to represent the option's argument in the usage documentation.
-     * If empty, a label will be chosen based on the {@link #names}.</p>
-     * <p>Note: Mode flags do not take an argument. Their label will be ignored.</p>
+     * A label to represent the option's argument in the usage documentation.
+     * If empty, a label will be chosen based on the {@link #names}.
+     *
+     * <p>Note: Mode flags do not take an argument. Their label will be ignored.
      *
      * @return a label
      */

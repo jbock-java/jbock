@@ -4,7 +4,7 @@ import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
 
-@Command(helpEnabled = false, superCommand = true)
+@Command(superCommand = true)
 abstract class HelplessSuperArguments {
 
     @Option(names = {"--quiet", "-q"})

@@ -69,14 +69,6 @@ public class SourceElement {
         return get().superCommand();
     }
 
-    public boolean helpEnabled() {
-        return get().helpEnabled();
-    }
-
-    public boolean atFileExpansion() {
-        return get().atFileExpansion();
-    }
-
     public List<Modifier> accessModifiers() {
         return accessModifiers;
     }

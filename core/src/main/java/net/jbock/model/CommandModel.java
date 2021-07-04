@@ -17,9 +17,7 @@ public final class CommandModel {
     private final String descriptionKey;
     private final List<String> descriptionLines;
     private final String programName;
-    private final boolean helpEnabled;
     private final boolean superCommand;
-    private final boolean atFileExpansion;
     private final boolean unixClustering;
     private final List<Option> options;
     private final List<Parameter> parameters;
@@ -29,9 +27,7 @@ public final class CommandModel {
             String descriptionKey,
             List<String> descriptionLines,
             String programName,
-            boolean helpEnabled,
             boolean superCommand,
-            boolean atFileExpansion,
             boolean unixClustering,
             List<Option> options,
             List<Parameter> parameters) {
@@ -39,9 +35,7 @@ public final class CommandModel {
         this.descriptionKey = descriptionKey;
         this.descriptionLines = descriptionLines;
         this.programName = programName;
-        this.helpEnabled = helpEnabled;
         this.superCommand = superCommand;
-        this.atFileExpansion = atFileExpansion;
         this.unixClustering = unixClustering;
         this.options = options;
         this.parameters = parameters;
@@ -66,9 +60,7 @@ public final class CommandModel {
         private String descriptionKey = "";
         private final List<String> descriptionLines = new ArrayList<>();
         private String programName;
-        private boolean helpEnabled = true;
         private boolean superCommand;
-        private boolean atFileExpansion = true;
         private boolean unixClustering;
         private final List<Option> options = new ArrayList<>();
         private final List<Parameter> parameters = new ArrayList<>();
@@ -78,7 +70,7 @@ public final class CommandModel {
         }
 
         /**
-         * Set the description key.
+         * Sets the description key.
          * Public method that may be invoked from the generated code.
          *
          * @param descriptionKey a key, possibly blank
@@ -90,7 +82,7 @@ public final class CommandModel {
         }
 
         /**
-         * Add a description line.
+         * Adds a description line.
          * Public method that may be invoked from the generated code.
          *
          * @param descriptionLine a line
@@ -102,7 +94,7 @@ public final class CommandModel {
         }
 
         /**
-         * Set program name.
+         * Sets program name.
          * Public method that may be invoked from the generated code.
          *
          * @param programName program name, not blank
@@ -114,19 +106,7 @@ public final class CommandModel {
         }
 
         /**
-         * Set help enabled property.
-         * Public method that may be invoked from the generated code.
-         *
-         * @param helpEnabled whether the {@code --help} option is understood
-         * @return the builder instance
-         */
-        public Builder withHelpEnabled(boolean helpEnabled) {
-            this.helpEnabled = helpEnabled;
-            return this;
-        }
-
-        /**
-         * Set the supercommand property.
+         * Sets the supercommand property.
          * Public method that may be invoked from the generated code.
          *
          * @param superCommand whether this is a supercommand
@@ -138,19 +118,7 @@ public final class CommandModel {
         }
 
         /**
-         * Set at file expansion property.
-         * Public method that may be invoked from the generated code.
-         *
-         * @param atFileExpansion whether {@code @file}-expansion is enabled
-         * @return the builder instance
-         */
-        public Builder withAtFileExpansion(boolean atFileExpansion) {
-            this.atFileExpansion = atFileExpansion;
-            return this;
-        }
-
-        /**
-         * Set the unix clustering property.
+         * Sets the unix clustering property.
          * Public method that may be invoked from the generated code.
          *
          * @param unixClustering whether unix clustering is enabled
@@ -162,7 +130,7 @@ public final class CommandModel {
         }
 
         /**
-         * Add an option.
+         * Adds an option.
          * Public method that may be invoked from the generated code.
          *
          * @param option a named option
@@ -174,7 +142,7 @@ public final class CommandModel {
         }
 
         /**
-         * Add a parameter.
+         * Adds a parameter.
          * Public method that may be invoked from the generated code.
          *
          * @param parameter a positional parameter
@@ -193,23 +161,25 @@ public final class CommandModel {
          */
         public CommandModel build() {
             return new CommandModel(request, descriptionKey, descriptionLines,
-                    programName, helpEnabled, superCommand,
-                    atFileExpansion, unixClustering, options, parameters);
+                    programName, superCommand,
+                    unixClustering, options, parameters);
         }
     }
 
     /**
-     * Get the description key, possibly an empty string.
+     * Returns the description key from the {@link Command#descriptionKey()} attribute,
+     * possibly an empty string.
      *
-     * @return non-null string
+     * @return description key
      */
     public String descriptionKey() {
         return descriptionKey;
     }
 
     /**
-     * Get the description that is present directly on the annotated class,
-     * either as a description attribute, or in the form of javadoc.
+     * Returns the command description,
+     * either from the {@link Command#description()} attribute, or, if that is
+     * empty, from the class javadoc of the command class.
      *
      * @return a list of lines, possibly empty
      */
@@ -219,7 +189,7 @@ public final class CommandModel {
 
     /**
      * Get the program name from the {@link Command#name()} attribute,
-     * or, if none is set, a default program name that is derived
+     * or, if that is empty, a default program name that is derived
      * from the class name of the annotated command class.
      *
      * @return the program name, a nonempty string
@@ -238,7 +208,8 @@ public final class CommandModel {
     }
 
     /**
-     * Get the list of all positional parameters.
+     * Get the list of all positional parameters, including
+     * the repeatable positional parameter, if it exists.
      *
      * @return positional parameters
      */
@@ -247,18 +218,7 @@ public final class CommandModel {
     }
 
     /**
-     * Get the value of the {@link Command#helpEnabled()} attribute.
-     *
-     * @return {@code true} if the generated parser supports
-     *         the {@code --help} option
-     */
-    public boolean helpEnabled() {
-        return helpEnabled;
-    }
-
-    /**
-     * Check if the {@link Command} annotation
-     * is present on the command class.
+     * Returns the value of the {@link Command#superCommand()} attribute.
      *
      * @return {@code true} if the command is a SuperCommand,
      *         {@code false} if it is a regular Command
@@ -269,17 +229,7 @@ public final class CommandModel {
     }
 
     /**
-     * Get the value of the {@link Command#atFileExpansion()}
-     * attribute.
-     *
-     * @return {@code true} if {@code @file} expansion is enabled
-     */
-    public boolean atFileExpansion() {
-        return atFileExpansion;
-    }
-
-    /**
-     * Get the value of the {@link Command#unixClustering()}}
+     * Returns the value of the {@link Command#unixClustering()}}
      * attribute. Note, this may also return {@code false}
      * if unix clustering is impossible because
      * there are no unix-style mode flags.
@@ -288,6 +238,15 @@ public final class CommandModel {
      */
     public boolean unixClustering() {
         return unixClustering;
+    }
+
+    /**
+     * Returns the parse request.
+     *
+     * @return the parse request
+     */
+    public ParseRequest request() {
+        return request;
     }
 
     /**
