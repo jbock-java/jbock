@@ -195,7 +195,7 @@ public final class AtFileReader {
 
             @Override
             String message() {
-                return "no next line";
+                return "backslash at end of file";
             }
         };
 

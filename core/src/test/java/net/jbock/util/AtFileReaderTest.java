@@ -45,11 +45,11 @@ class AtFileReaderTest {
     }
 
     @Test
-    void testTrailingEscape() {
+    void testEscapeAtEndOfFile() {
         AtFileReader.NumberedLineResult error = expectError(List.of("'a'\\"));
         assertTrue(error.lineResult().isError());
         assertEquals(1, error.number());
-        assertEquals("no next line", error.lineResult().message());
+        assertEquals("backslash at end of file", error.lineResult().message());
     }
 
     @Test
@@ -90,6 +90,12 @@ class AtFileReaderTest {
     void testDoubleQuotes() {
         List<String> tokens = read(List.of("\"\""));
         assertEquals(List.of(""), tokens);
+    }
+
+    @Test
+    void testMixedQuotes() {
+        assertEquals(List.of("\"\""), read(List.of("'\"\"'")));
+        assertEquals(List.of("''"), read(List.of("\"''\"")));
     }
 
     @Test
