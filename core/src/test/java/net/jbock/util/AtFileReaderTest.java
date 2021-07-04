@@ -100,8 +100,20 @@ class AtFileReaderTest {
 
     @Test
     void testSingleQuotesEmpty() {
-        List<String> tokens = read(List.of("''"));
-        assertEquals(List.of(""), tokens);
+        assertEquals(List.of(""), read(List.of("''")));
+    }
+
+    @Test
+    void testSingleBackslashInSingleQuotes() {
+        assertEquals(List.of("\\"), read(List.of("'\\'")));
+    }
+
+    @Test
+    void testSingleBackslashInDoubleQuotes() {
+        AtFileReader.NumberedLineResult error = expectError(List.of("\"\\\""));
+        assertTrue(error.lineResult().isError());
+        assertEquals(1, error.number());
+        assertEquals("unmatched quote", error.lineResult().message());
     }
 
     @Test

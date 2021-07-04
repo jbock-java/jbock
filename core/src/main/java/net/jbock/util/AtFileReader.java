@@ -15,12 +15,11 @@ import static io.jbock.util.Either.right;
 
 /**
  * <p>Allow reading some or all command line options from
- * a configuration file, if the user requests it by prefixing
- * the first command line token with a {@code "@"} character.</p>
+ * a configuration file, if at file reading is enabled via {@link Command#atFileExpansion()}
+ * and the first command line token starts with a {@code "@"} character.
  *
- * <p>The following escape sequences are recognized:</p>
+ * <p>The following escape sequences are recognized:
  *
- * <br/>
  * <table>
  *   <caption>Escape sequences</caption>
  *   <thead><tr><td><b>Code</b></td><td><b>Meaning</b></td></tr></thead>
@@ -30,15 +29,18 @@ import static io.jbock.util.Either.right;
  *   <tr><td>{@code \t}</td><td>horizontal tab</td></tr>
  * </table>
  *
- * <p>An unpaired backslash at the end of a line prevents
- * the newline from being read.</p>
+ * <p>Escape sequences are not interpreted inside single quotes.
+ * <p>Single quotes are not interpreted inside double quotes.
+ * <p>An unpaired backslash at the end of a line instructs the reader
+ * to continue reading the current token on the next line.
  * <p>Note: Even if set to {@code true},
  * and the user wants to pass exactly one positional parameter
  * that starts with an {@code @} character,
  * they can still prevent the {@code @file} expansion,
- * by passing {@code --} as the first token.</p>
- * <p>Note: additional arguments after the {@code @file}
- * are allowed and will be appended to the result.</p>
+ * by passing {@code --} as the first token.
+ * <p>Note: additional tokens in the input array, after the
+ * initial {@code @file} token, are allowed and will be appended to
+ * the result of reading the {@code @file}.
  */
 public final class AtFileReader {
 
@@ -156,7 +158,7 @@ public final class AtFileReader {
     }
 
     // visible for testing
-    final class NumberedLineResult {
+    static final class NumberedLineResult {
         private final int number;
         private final LineResult lineResult;
 
