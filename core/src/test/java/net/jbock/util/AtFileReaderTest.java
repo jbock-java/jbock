@@ -33,15 +33,63 @@ class AtFileReaderTest {
     }
 
     @Test
+    void testEmpty() {
+        List<String> tokens = read(List.of(""));
+        assertEquals(List.of(), tokens);
+    }
+
+    @Test
+    void testJoinedEmptyLines() {
+        List<String> tokens = read(List.of("\\", "''\\", "\\", "\"\""));
+        assertEquals(List.of(""), tokens);
+    }
+
+    @Test
+    void testTrailingEscape() {
+        AtFileReader.NumberedLineResult error = expectError(List.of("'a'\\"));
+        assertTrue(error.lineResult().isError());
+        assertEquals(1, error.number());
+        assertEquals("no next line", error.lineResult().message());
+    }
+
+    @Test
+    void testUnmatchedSingleQuote() {
+        AtFileReader.NumberedLineResult error = expectError(List.of("'"));
+        assertTrue(error.lineResult().isError());
+        assertEquals(1, error.number());
+        assertEquals("unmatched quote", error.lineResult().message());
+    }
+
+    @Test
+    void testUnmatchedDoubleQuote() {
+        AtFileReader.NumberedLineResult error = expectError(List.of("\""));
+        assertTrue(error.lineResult().isError());
+        assertEquals(1, error.number());
+        assertEquals("unmatched quote", error.lineResult().message());
+    }
+
+    @Test
     void testNewline() {
         List<String> tokens = read(List.of("\\n"));
         assertEquals(List.of("\n"), tokens);
     }
 
     @Test
-    void testSingleQuotes() {
+    void testNewlineSingleQuotes() {
         List<String> tokens = read(List.of("'\\n'"));
         assertEquals(List.of("\\n"), tokens);
+    }
+
+    @Test
+    void testNewlineDoubleQuotes() {
+        List<String> tokens = read(List.of("\"\\n\""));
+        assertEquals(List.of("\n"), tokens);
+    }
+
+    @Test
+    void testDoubleQuotes() {
+        List<String> tokens = read(List.of("\"\""));
+        assertEquals(List.of(""), tokens);
     }
 
     @Test
@@ -50,11 +98,29 @@ class AtFileReaderTest {
         assertEquals(List.of(""), tokens);
     }
 
+    @Test
+    void testSingleInDouble() {
+        assertEquals(List.of("a'\n'bc\\d"), read(List.of("\"a'\\n'\"b\"c\"'\\d'")));
+    }
+
+    @Test
+    void testDoubleInSingle() {
+        assertEquals(List.of("a\"\\n\"bcd"), read(List.of("'a\"\\n\"'b'c'\"\\d\"")));
+    }
+
     private List<String> read(List<String> lines) {
         Either<AtFileReader.NumberedLineResult, List<String>> either = reader.readAtLines(lines);
         assertTrue(either.isRight());
         return either.fold(l -> {
-            throw new RuntimeException();
+            throw new RuntimeException("expecting Right");
         }, Function.identity());
+    }
+
+    private AtFileReader.NumberedLineResult expectError(List<String> lines) {
+        Either<AtFileReader.NumberedLineResult, List<String>> either = reader.readAtLines(lines);
+        assertTrue(either.isLeft());
+        return either.fold(Function.identity(), l -> {
+            throw new RuntimeException("expecting Left");
+        });
     }
 }

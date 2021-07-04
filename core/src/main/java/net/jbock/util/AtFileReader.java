@@ -97,16 +97,19 @@ public final class AtFileReader {
         if (esc.isError()) {
             return left(new NumberedLineResult(current.number, esc));
         }
+        if (esc == LineResult.CONTINUE && !it.hasNext()) {
+            return left(new NumberedLineResult(current.number, LineResult.NO_NEXT_LINE));
+        }
         return right(sb.toString());
     }
 
     private LineResult readLine(String line, StringBuilder sb) {
         boolean esc = false;
-        Mode mode = Mode.REGULAR;
+        Mode mode = Mode.PLAIN;
         int length = line.length();
         for (int i = 0; i < length; i++) {
             char c = line.charAt(i);
-            if (c == '\'') {
+            if (c == '\'' && mode != Mode.DOUBLE_QUOTE) {
                 if (esc) {
                     sb.append('\'');
                 } else {
@@ -119,6 +122,8 @@ public final class AtFileReader {
                 } else {
                     esc = true;
                 }
+            } else if (mode != Mode.SINGLE_QUOTE && !esc && c == '\"') {
+                mode = mode.toggle(Mode.DOUBLE_QUOTE);
             } else if (esc) {
                 sb.append(escapeValue(c));
                 esc = false;
@@ -126,17 +131,17 @@ public final class AtFileReader {
                 sb.append(c);
             }
         }
-        if (mode != Mode.REGULAR) {
+        if (mode != Mode.PLAIN) {
             return LineResult.UNMATCHED_QUOTE;
         }
         return esc ? LineResult.CONTINUE : LineResult.END;
     }
 
     enum Mode {
-        SINGLE_QUOTE, QUOTE, REGULAR;
+        SINGLE_QUOTE, DOUBLE_QUOTE, PLAIN;
 
         Mode toggle(Mode other) {
-            return this == other ? REGULAR : other;
+            return this == other ? PLAIN : other;
         }
     }
 
@@ -181,6 +186,16 @@ public final class AtFileReader {
             @Override
             String message() {
                 return "unmatched quote";
+            }
+        }, NO_NEXT_LINE {
+            @Override
+            boolean isError() {
+                return true;
+            }
+
+            @Override
+            String message() {
+                return "no next line";
             }
         };
 
