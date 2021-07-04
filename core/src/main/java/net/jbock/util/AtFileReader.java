@@ -6,12 +6,9 @@ import net.jbock.Command;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
@@ -58,18 +55,18 @@ public final class AtFileReader {
         if (args.length == 0
                 || args[0].length() < 2
                 || !args[0].startsWith("@")) {
-            return right(Arrays.asList(args));
+            return right(List.of(args));
         }
         String fileName = args[0].substring(1);
         try {
             Path path = Paths.get(fileName);
             List<String> lines = Files.readAllLines(path);
             return readAtLines(lines)
-                    .mapLeft(r -> new AtFileSyntaxError(fileName, r.line, r.lineResult.message())) // TODO
+                    .mapLeft(r -> new AtFileSyntaxError(fileName, r.number, r.lineResult.message())) // TODO
                     .map(atLines -> {
-                        List<String> expanded = new ArrayList<>(atLines);
-                        expanded.addAll(Arrays.asList(args).subList(1, args.length));
-                        return expanded;
+                        List<String> atLinesWithRest = new ArrayList<>(atLines);
+                        atLinesWithRest.addAll(List.of(args).subList(1, args.length));
+                        return atLinesWithRest;
                     });
         } catch (Exception e) {
             return left(new AtFileReadError(e, fileName));
@@ -78,9 +75,9 @@ public final class AtFileReader {
 
     Either<NumberedLineResult, List<String>> readAtLines(List<String> lines) {
         int[] counter = {1};
-        Iterator<Entry<Integer, String>> it = lines.stream()
+        Iterator<NumberedLine> it = lines.stream()
                 .filter(line -> !line.isEmpty())
-                .<Entry<Integer, String>>map(line -> new SimpleImmutableEntry<>(counter[0]++, line))
+                .map(line -> new NumberedLine(counter[0]++, line))
                 .iterator();
         List<Either<NumberedLineResult, String>> tokens = new ArrayList<>(lines.size());
         while (it.hasNext()) {
@@ -89,16 +86,16 @@ public final class AtFileReader {
         return tokens.stream().collect(Either.toValidList());
     }
 
-    private Either<NumberedLineResult, String> readTokenFromAtFile(Iterator<Entry<Integer, String>> it) {
+    private Either<NumberedLineResult, String> readTokenFromAtFile(Iterator<NumberedLine> it) {
         StringBuilder sb = new StringBuilder();
-        Entry<Integer, String> current;
+        NumberedLine current;
         LineResult esc;
         do {
             current = it.next();
-            esc = readLine(current.getValue(), sb);
+            esc = readLine(current.line, sb);
         } while (esc == LineResult.CONTINUE && it.hasNext());
         if (esc.isError()) {
-            return left(new NumberedLineResult(current.getKey(), esc));
+            return left(new NumberedLineResult(current.number, esc));
         }
         return right(sb.toString());
     }
@@ -143,13 +140,34 @@ public final class AtFileReader {
         }
     }
 
-    static class NumberedLineResult {
-        final int line;
-        final LineResult lineResult;
+    private static class NumberedLine {
+        final int number;
+        final String line;
 
-        NumberedLineResult(int line, LineResult lineResult) {
+        NumberedLine(int number, String line) {
+            this.number = number;
             this.line = line;
+        }
+    }
+
+    // visible for testing
+    final class NumberedLineResult {
+        private final int number;
+        private final LineResult lineResult;
+
+        private NumberedLineResult(int number, LineResult lineResult) {
+            this.number = number;
             this.lineResult = lineResult;
+        }
+
+        // visible for testing
+        int number() {
+            return number;
+        }
+
+        // visible for testing
+        LineResult lineResult() {
+            return lineResult;
         }
     }
 

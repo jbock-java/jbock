@@ -11,9 +11,9 @@ import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 
@@ -55,7 +55,7 @@ public class FlagParser {
                         readMethodFlagCodeClustering(token) :
                         readMethodFlagCodeSimple(token))
                 .returns(namedOptions.readMethodReturnType())
-                .addParameters(asList(token, it)).build();
+                .addParameters(List.of(token, it)).build();
     }
 
     private CodeBlock readMethodFlagCodeClustering(ParameterSpec token) {

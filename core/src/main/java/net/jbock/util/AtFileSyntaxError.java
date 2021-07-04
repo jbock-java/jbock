@@ -9,12 +9,12 @@ import net.jbock.model.CommandModel;
  */
 final class AtFileSyntaxError extends AtFileError {
 
-    private final int line;
+    private final int number; // line number
     private final String message;
 
-    AtFileSyntaxError(String file, int line, String message) {
+    AtFileSyntaxError(String file, int number, String message) {
         super(file);
-        this.line = line;
+        this.number = number;
         this.message = message;
     }
 
@@ -27,6 +27,6 @@ final class AtFileSyntaxError extends AtFileError {
      */
     @Override
     public NotSuccess addModel(CommandModel model) {
-        return new ErrAtFile(model, file(), "at line " + line + ": " + message);
+        return new ErrAtFile(model, file(), "at line " + number + ": " + message);
     }
 }

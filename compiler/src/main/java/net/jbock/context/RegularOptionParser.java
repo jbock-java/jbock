@@ -11,9 +11,9 @@ import net.jbock.common.Util;
 import net.jbock.util.ExToken;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.common.Constants.OPTIONAL;
@@ -66,7 +66,7 @@ public class RegularOptionParser {
                 .addException(ExToken.class)
                 .addCode(code.build())
                 .returns(namedOptions.readMethodReturnType())
-                .addParameters(asList(token, it)).build();
+                .addParameters(List.of(token, it)).build();
     }
 
     private MethodSpec streamMethodRegular(FieldSpec value) {

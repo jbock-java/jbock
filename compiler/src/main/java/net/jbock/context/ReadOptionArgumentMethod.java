@@ -7,11 +7,11 @@ import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
 import javax.inject.Inject;
+import java.util.List;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
-import static java.util.Arrays.asList;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ITERATOR;
 
@@ -45,7 +45,7 @@ public class ReadOptionArgumentMethod extends CachedMethod {
         return methodBuilder("readOptionArgument")
                 .addException(ExToken.class)
                 .addCode(code.build())
-                .addParameters(asList(token, it))
+                .addParameters(List.of(token, it))
                 .returns(STRING)
                 .build();
     }

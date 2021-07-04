@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -81,7 +80,7 @@ public final class OptionParser {
         ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
         return MethodSpec.methodBuilder("read")
                 .addException(ExToken.class)
-                .addParameters(asList(token, it))
+                .addParameters(List.of(token, it))
                 .addModifiers(ABSTRACT)
                 .returns(namedOptions.readMethodReturnType())
                 .build();
