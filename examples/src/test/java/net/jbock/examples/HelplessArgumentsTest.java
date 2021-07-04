@@ -18,8 +18,8 @@ class HelplessArgumentsTest {
     @Test
     void testHelpIsAcceptedAsNormalOption() {
         Either<NotSuccess, HelplessArguments> result =
-                parser.parse(ParseRequest.noExpansion(List.of("--help", "x"))
-                        .withHelpEnabled(false)
+                parser.parse(ParseRequest.simple(List.of("--help", "x"))
+                        .withHelpRequested(false)
                         .build());
         f.assertThat(result)
                 .has(HelplessArguments::required, "x")
@@ -29,8 +29,8 @@ class HelplessArgumentsTest {
     @Test
     void errorNoArguments() {
         Either<NotSuccess, HelplessArguments> result =
-                parser.parse(ParseRequest.noExpansion(List.of(/* empty */))
-                        .withHelpEnabled(false)
+                parser.parse(ParseRequest.simple(List.of(/* empty */))
+                        .withHelpRequested(false)
                         .build());
         f.assertThat(result)
                 .fails("Missing required parameter REQUIRED");
@@ -39,8 +39,8 @@ class HelplessArgumentsTest {
     @Test
     void errorHelpDisabled() {
         Either<NotSuccess, HelplessArguments> result =
-                parser.parse(ParseRequest.noExpansion(List.of("--help"))
-                        .withHelpEnabled(false)
+                parser.parse(ParseRequest.simple(List.of("--help"))
+                        .withHelpRequested(false)
                         .build());
         f.assertThat(result)
                 .fails("Missing required parameter REQUIRED");

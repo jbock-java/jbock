@@ -4,6 +4,7 @@ import io.jbock.util.Either;
 import net.jbock.examples.fixture.ParserTestFixture;
 import net.jbock.util.HelpRequested;
 import net.jbock.util.NotSuccess;
+import net.jbock.util.ParseRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +28,8 @@ class RequiredArgumentsTest {
 
     @Test
     void errorDirMissing() {
-        Either<NotSuccess, RequiredArguments> result = new RequiredArgumentsParser().parse(/* empty */);
+        ParseRequest request = ParseRequest.simple(List.of()).withHelpRequested(true).build();
+        Either<NotSuccess, RequiredArguments> result = new RequiredArgumentsParser().parse(request);
         Assertions.assertTrue(result.isLeft());
         result.acceptLeft(l -> assertTrue(l instanceof HelpRequested));
     }

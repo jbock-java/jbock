@@ -8,47 +8,42 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /**
- * Input data for the generated parse method.
- * Use either {@link #expansion(Path, List)} to request {@code @file} expansion,
- * or {@link #noExpansion} to disable it.
- * Alternatively, leave this decision to the user by invoking
- * {@link #prepare(String[])}.
+ * Input for the generated parser.
  */
 public final class ParseRequest {
 
     private final Optional<Path> path; // if empty, no @-file expansion will be performed
     private final List<String> rest;
-    private final boolean helpEnabled;
+    private final boolean helpRequested;
 
-    private ParseRequest(Optional<Path> path, List<String> rest, boolean helpEnabled) {
+    private ParseRequest(Optional<Path> path, List<String> rest, boolean helpRequested) {
         this.path = path;
         this.rest = rest;
-        this.helpEnabled = helpEnabled;
+        this.helpRequested = helpRequested;
     }
 
     public static final class Builder {
         private final Optional<Path> path;
         private final List<String> rest;
-        private boolean helpEnabled = true;
+        private boolean helpRequested;
 
-        public Builder(Optional<Path> path, List<String> rest) {
+        private Builder(Optional<Path> path, List<String> rest) {
             this.path = path;
             this.rest = rest;
         }
 
-        public Builder withHelpEnabled(boolean helpEnabled) {
-            this.helpEnabled = helpEnabled;
+        public Builder withHelpRequested(boolean helpRequested) {
+            this.helpRequested = helpRequested;
             return this;
         }
 
         public ParseRequest build() {
-            return new ParseRequest(path, rest, helpEnabled);
+            return new ParseRequest(path, rest, helpRequested);
         }
     }
 
     /**
-     * Prepare reading the input, potentially from an {@code @file},
-     * by creating an intermediate {@code AtFileInput} object.
+     * Creates a builder.
      *
      * <p>{@code @file} expansion will be enabled if the input is not empty,
      * and the first token starts with an {@code "@"} character.
@@ -59,36 +54,35 @@ public final class ParseRequest {
      * @param args command line input
      * @return the options in the file, or an error report
      */
-    public static Builder prepare(String[] args) {
+    public static Builder standardBuilder(String[] args) {
         if (args.length >= 1
                 && args[0].length() >= 2
                 && args[0].startsWith("@")) {
             String fileName = args[0].substring(1);
             List<String> rest = List.of(args).subList(1, args.length);
-            return expansion(Paths.get(fileName), rest);
+            return expand(Paths.get(fileName), rest);
         }
-        return noExpansion(List.of(args));
+        return simple(List.of(args));
     }
 
     /**
-     * Creates an {@code AtFileInput} that disables {@code @file} expansion explicitly,
-     * regardless of the {@code args}.
+     * Creates a builder with {@code @file} expansion set to {@code false}.
      *
      * @param args command line input
      * @return a builder
      */
-    public static Builder noExpansion(List<String> args) {
+    public static Builder simple(List<String> args) {
         return new Builder(Optional.empty(), args);
     }
 
     /**
-     * Creates an {@code AtFileInput} that requests {@code @file} expansion explicitly.
+     * Creates a builder with {@code @file} expansion set to {@code true}.
      *
      * @param path a path to be used as input for {@code @file} expansion
      * @param rest the remaining command line arguments, if any
      * @return a builder
      */
-    public static Builder expansion(Path path, List<String> rest) {
+    public static Builder expand(Path path, List<String> rest) {
         return new Builder(Optional.of(path), rest);
     }
 
@@ -101,17 +95,6 @@ public final class ParseRequest {
     }
 
     public boolean isHelpRequested() {
-        if (path.isPresent() || !helpEnabled) {
-            return false;
-        }
-        return !rest.isEmpty() && "--help".equals(rest.get(0));
-    }
-
-    public boolean isHelpEnabled() {
-        return helpEnabled;
-    }
-
-    public boolean isEmpty() {
-        return !path.isPresent() && rest.isEmpty();
+        return helpRequested;
     }
 }

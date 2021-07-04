@@ -119,7 +119,7 @@ class CpArgumentsTest {
         Path path = foo.resolve("hello.txt");
         Files.write(path, List.of("-r", "\"a\"", "\"'b'\"", "--backup=\\", "'SIMPLE'", ""), StandardCharsets.UTF_8);
         Either<NotSuccess, CpArguments> result = parser.parse(
-                ParseRequest.expansion(path, List.of()).build());
+                ParseRequest.expand(path, List.of()).build());
         f.assertThat(result)
                 .has(CpArguments::source, "a")
                 .has(CpArguments::dest, "'b'")
