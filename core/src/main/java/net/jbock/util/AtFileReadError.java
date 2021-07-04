@@ -2,6 +2,8 @@ package net.jbock.util;
 
 import net.jbock.model.CommandModel;
 
+import java.nio.file.Path;
+
 /**
  * An instance of this class signals failure of a file reading operation.
  * This is an intermediate step in the construction of an
@@ -11,7 +13,7 @@ final class AtFileReadError extends AtFileError {
 
     private final Exception exception;
 
-    AtFileReadError(Exception exception, String file) {
+    AtFileReadError(Exception exception, Path file) {
         super(file);
         this.exception = exception;
     }

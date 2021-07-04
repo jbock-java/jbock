@@ -1,7 +1,12 @@
 package net.jbock.examples;
 
+import io.jbock.util.Either;
 import net.jbock.examples.fixture.ParserTestFixture;
+import net.jbock.util.NotSuccess;
+import net.jbock.util.ParseRequest;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 class HelplessArgumentsTest {
 
@@ -11,34 +16,33 @@ class HelplessArgumentsTest {
             ParserTestFixture.create(parser::parse);
 
     @Test
-    void success0() {
-        f.assertThat("x")
-                .has(HelplessArguments::required, "x")
-                .has(HelplessArguments::help, false);
-    }
-
-    @Test
-    void success1() {
-        f.assertThat("x", "--help")
-                .has(HelplessArguments::required, "x")
-                .has(HelplessArguments::help, true);
-    }
-
-    @Test
-    void success2() {
-        f.assertThat("--help", "x")
+    void testHelpIsAcceptedAsNormalOption() {
+        Either<NotSuccess, HelplessArguments> result =
+                parser.parse(ParseRequest.noExpansion(List.of("--help", "x"))
+                        .withHelpEnabled(false)
+                        .build());
+        f.assertThat(result)
                 .has(HelplessArguments::required, "x")
                 .has(HelplessArguments::help, true);
     }
 
     @Test
     void errorNoArguments() {
-        f.assertThat(/* empty */)
+        Either<NotSuccess, HelplessArguments> result =
+                parser.parse(ParseRequest.noExpansion(List.of(/* empty */))
+                        .withHelpEnabled(false)
+                        .build());
+        f.assertThat(result)
                 .fails("Missing required parameter REQUIRED");
     }
 
     @Test
-    void errorInvalidOption() {
-        f.assertThat("-p").fails("Invalid option: -p");
+    void errorHelpDisabled() {
+        Either<NotSuccess, HelplessArguments> result =
+                parser.parse(ParseRequest.noExpansion(List.of("--help"))
+                        .withHelpEnabled(false)
+                        .build());
+        f.assertThat(result)
+                .fails("Missing required parameter REQUIRED");
     }
 }

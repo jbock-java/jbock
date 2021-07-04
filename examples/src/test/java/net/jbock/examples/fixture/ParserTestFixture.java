@@ -45,6 +45,10 @@ public final class ParserTestFixture<E> {
         return new AssertionBuilder<>(args, parser);
     }
 
+    public AssertionBuilder<E> assertThat(Either<NotSuccess, E> parsed) {
+        return new AssertionBuilder<>(parsed);
+    }
+
     public void assertPrintsHelp(Map<String, String> messages, String... expected) {
         String[] input = {"--help"};
         Either<NotSuccess, E> result = parser.apply(input);
@@ -121,12 +125,17 @@ public final class ParserTestFixture<E> {
         }
 
         private final String[] args;
-
         private final Function<String[], Either<NotSuccess, E>> parser;
 
         private AssertionBuilder(String[] args, Function<String[], Either<NotSuccess, E>> parser) {
             this.args = args;
             this.parser = parser;
+        }
+
+        private AssertionBuilder(Either<NotSuccess, E> instance) {
+            this.args = null;
+            this.parser = null;
+            this.instance = instance;
         }
 
         public <V> AssertionBuilder<E> has(Function<E, V> getter, V expectation) {
@@ -144,7 +153,7 @@ public final class ParserTestFixture<E> {
         }
 
         private void fails(Predicate<String> messageTest) {
-            Either<NotSuccess, E> result = parser.apply(args);
+            Either<NotSuccess, E> result = getParsed();
             assertTrue(result.isLeft());
             result.mapLeft(HasMessage.class::cast)
                     .acceptLeft(hasMessage -> {

@@ -2,6 +2,7 @@ package net.jbock.context;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import net.jbock.common.SafeElements;
 import net.jbock.common.Util;
 import net.jbock.convert.Mapped;
@@ -12,6 +13,7 @@ import net.jbock.model.Parameter;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.ParseRequest;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -46,7 +48,8 @@ public class CreateModelMethod extends CachedMethod {
     @Override
     MethodSpec define() {
         List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("return $T.builder()", CommandModel.class));
+        ParameterSpec request = ParameterSpec.builder(ParseRequest.class, "request").build();
+        code.add(CodeBlock.of("return $T.builder($N)", CommandModel.class, request));
         sourceElement.descriptionKey().ifPresent(key ->
                 code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
         for (String descriptionLine : sourceElement.description(elements)) {
@@ -76,6 +79,7 @@ public class CreateModelMethod extends CachedMethod {
                 .addStatement(util.joinByNewline(code))
                 .returns(CommandModel.class)
                 .addModifiers(PRIVATE)
+                .addParameter(request)
                 .build();
     }
 

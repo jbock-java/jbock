@@ -2,6 +2,7 @@ package net.jbock.model;
 
 import net.jbock.Command;
 import net.jbock.util.ItemType;
+import net.jbock.util.ParseRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
  */
 public final class CommandModel {
 
+    private final ParseRequest request;
     private final String descriptionKey;
     private final List<String> descriptionLines;
     private final String programName;
@@ -23,6 +25,7 @@ public final class CommandModel {
     private final List<Parameter> parameters;
 
     private CommandModel(
+            ParseRequest request,
             String descriptionKey,
             List<String> descriptionLines,
             String programName,
@@ -32,6 +35,7 @@ public final class CommandModel {
             boolean unixClustering,
             List<Option> options,
             List<Parameter> parameters) {
+        this.request = request;
         this.descriptionKey = descriptionKey;
         this.descriptionLines = descriptionLines;
         this.programName = programName;
@@ -49,8 +53,8 @@ public final class CommandModel {
      *
      * @return empty builder
      */
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(ParseRequest request) {
+        return new Builder(request);
     }
 
     /**
@@ -58,6 +62,7 @@ public final class CommandModel {
      */
     public static final class Builder {
 
+        private final ParseRequest request;
         private String descriptionKey = "";
         private final List<String> descriptionLines = new ArrayList<>();
         private String programName;
@@ -68,7 +73,8 @@ public final class CommandModel {
         private final List<Option> options = new ArrayList<>();
         private final List<Parameter> parameters = new ArrayList<>();
 
-        private Builder() {
+        private Builder(ParseRequest request) {
+            this.request = request;
         }
 
         /**
@@ -186,7 +192,7 @@ public final class CommandModel {
          * @return command model
          */
         public CommandModel build() {
-            return new CommandModel(descriptionKey, descriptionLines,
+            return new CommandModel(request, descriptionKey, descriptionLines,
                     programName, helpEnabled, superCommand,
                     atFileExpansion, unixClustering, options, parameters);
         }

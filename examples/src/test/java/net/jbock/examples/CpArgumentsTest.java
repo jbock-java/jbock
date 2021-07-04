@@ -1,9 +1,21 @@
 package net.jbock.examples;
 
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Jimfs;
+import io.jbock.util.Either;
 import io.jbock.util.Optional;
 import net.jbock.examples.CpArguments.Control;
 import net.jbock.examples.fixture.ParserTestFixture;
+import net.jbock.util.NotSuccess;
+import net.jbock.util.ParseRequest;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
 class CpArgumentsTest {
 
@@ -94,6 +106,23 @@ class CpArgumentsTest {
         f.assertThat("-r", "a", "b", "--backup", "SIMPLE")
                 .has(CpArguments::source, "a")
                 .has(CpArguments::dest, "b")
+                .has(CpArguments::recursive, true)
+                .has(CpArguments::backup, Optional.of(Control.SIMPLE))
+                .has(CpArguments::suffix, Optional.empty());
+    }
+
+    @Test
+    void testAtFileSyntax() throws IOException {
+        FileSystem fs = Jimfs.newFileSystem(Configuration.unix());
+        Path foo = fs.getPath("/foo");
+        Files.createDirectory(foo);
+        Path path = foo.resolve("hello.txt");
+        Files.write(path, List.of("-r", "\"a\"", "\"'b'\"", "--backup=\\", "'SIMPLE'", ""), StandardCharsets.UTF_8);
+        Either<NotSuccess, CpArguments> result = parser.parse(
+                ParseRequest.expansion(path, List.of()).build());
+        f.assertThat(result)
+                .has(CpArguments::source, "a")
+                .has(CpArguments::dest, "'b'")
                 .has(CpArguments::recursive, true)
                 .has(CpArguments::backup, Optional.of(Control.SIMPLE))
                 .has(CpArguments::suffix, Optional.empty());

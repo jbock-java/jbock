@@ -2,13 +2,15 @@ package net.jbock.util;
 
 import net.jbock.model.CommandModel;
 
+import java.nio.file.Path;
+
 /**
  * Indicates that reading options from the {@code @file} was not successful.
  */
 public final class ErrAtFile extends NotSuccess implements HasMessage {
 
     private final String message;
-    private final String atFile;
+    private final Path atFile;
 
     /**
      * Public constructor that may be invoked from the generated code.
@@ -19,7 +21,7 @@ public final class ErrAtFile extends NotSuccess implements HasMessage {
      */
     public ErrAtFile(
             CommandModel commandModel,
-            String atFile,
+            Path atFile,
             String message) {
         super(commandModel);
         this.message = message;

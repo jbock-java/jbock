@@ -1,8 +1,8 @@
 package net.jbock.convert.reference;
 
+import io.jbock.util.Either;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
-import io.jbock.util.Either;
 import net.jbock.processor.EvaluatingProcessor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

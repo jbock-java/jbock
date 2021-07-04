@@ -4,8 +4,6 @@ import io.jbock.util.Either;
 import net.jbock.Command;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,30 +47,25 @@ public final class AtFileReader {
      * This method may be invoked from the generated code,
      * unless {@link Command#atFileExpansion()} is {@code false}.
      *
-     * @param args command line input, must contain at least one token,
-     *             and the first token must be two characters at least
-     * @return the options in the file, or an error report
+     * @param request a parse request containing the command line input
+     * @return the result of {@code file} expansion, if {@code @file} expansion is requested,
+     *         otherwise the same tokens as in the {@code request}
      */
-    public Either<? extends AtFileError, List<String>> read(String[] args) {
-        if (args.length == 0
-                || args[0].length() < 2
-                || !args[0].startsWith("@")) {
-            return right(List.of(args));
-        }
-        String fileName = args[0].substring(1);
-        try {
-            Path path = Paths.get(fileName);
-            List<String> lines = Files.readAllLines(path);
-            return readAtLines(lines)
-                    .mapLeft(r -> new AtFileSyntaxError(fileName, r.number, r.lineResult.message())) // TODO
-                    .map(atLines -> {
-                        List<String> atLinesWithRest = new ArrayList<>(atLines);
-                        atLinesWithRest.addAll(List.of(args).subList(1, args.length));
-                        return atLinesWithRest;
-                    });
-        } catch (Exception e) {
-            return left(new AtFileReadError(e, fileName));
-        }
+    public Either<? extends AtFileError, List<String>> read(ParseRequest request) {
+        return request.path().<Either<? extends AtFileError, List<String>>>map(path -> {
+            try {
+                List<String> lines = Files.readAllLines(path);
+                return readAtLines(lines)
+                        .mapLeft(r -> new AtFileSyntaxError(path, r.number, r.lineResult.message())) // TODO
+                        .map(atLines -> {
+                            List<String> atLinesWithRest = new ArrayList<>(atLines);
+                            atLinesWithRest.addAll(request.rest());
+                            return atLinesWithRest;
+                        });
+            } catch (Exception e) {
+                return left(new AtFileReadError(e, path));
+            }
+        }).orElseGet(() -> right(request.rest()));
     }
 
     Either<NumberedLineResult, List<String>> readAtLines(List<String> lines) {

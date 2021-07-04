@@ -15,6 +15,7 @@ import javax.lang.model.element.Modifier;
 public final class GeneratedClass {
 
     private final ParseMethod parseMethod;
+    private final ParseMethodOverloadRequest parseMethodOverloadRequest;
     private final Impl impl;
     private final OptionParser optionParser;
     private final OptionEnum optionEnum;
@@ -30,6 +31,7 @@ public final class GeneratedClass {
     @Inject
     GeneratedClass(
             ParseMethod parseMethod,
+            ParseMethodOverloadRequest parseMethodOverloadRequest,
             SourceElement sourceElement,
             Impl impl,
             OptionParser optionParser,
@@ -42,6 +44,7 @@ public final class GeneratedClass {
             CreateModelMethod createModelMethod,
             MultilineConverter multilineConverter) {
         this.parseMethod = parseMethod;
+        this.parseMethodOverloadRequest = parseMethodOverloadRequest;
         this.sourceElement = sourceElement;
         this.impl = impl;
         this.optionParser = optionParser;
@@ -57,7 +60,8 @@ public final class GeneratedClass {
 
     public TypeSpec define() {
         TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass())
-                .addMethod(parseMethod.get());
+                .addMethod(parseMethod.get())
+                .addMethod(parseMethodOverloadRequest.get());
         if (sourceElement.generateParseOrExitMethod()) {
             spec.addMethod(parseOrExitMethod.define());
         }

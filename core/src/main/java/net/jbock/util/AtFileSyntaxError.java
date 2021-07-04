@@ -2,6 +2,8 @@ package net.jbock.util;
 
 import net.jbock.model.CommandModel;
 
+import java.nio.file.Path;
+
 /**
  * Represents a syntax error in the at-file.
  * This is an intermediate step in the construction of an
@@ -12,7 +14,7 @@ final class AtFileSyntaxError extends AtFileError {
     private final int number; // line number
     private final String message;
 
-    AtFileSyntaxError(String file, int number, String message) {
+    AtFileSyntaxError(Path file, int number, String message) {
         super(file);
         this.number = number;
         this.message = message;
