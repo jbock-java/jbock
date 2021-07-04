@@ -4,9 +4,9 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.AtFileError;
 import net.jbock.util.AtFileReader;
 import net.jbock.util.ExNotSuccess;
-import net.jbock.util.FileReadingError;
 import net.jbock.util.HelpRequested;
 
 import javax.inject.Inject;
@@ -46,7 +46,7 @@ public class ParseMethod extends CachedMethod {
 
         ParameterSpec args = builder(STRING_ARRAY, "args").build();
         ParameterSpec it = builder(STRING_ITERATOR, "it").build();
-        ParameterSpec err = builder(FileReadingError.class, "err").build();
+        ParameterSpec err = builder(AtFileError.class, "err").build();
 
         CodeBlock.Builder code = CodeBlock.builder();
 

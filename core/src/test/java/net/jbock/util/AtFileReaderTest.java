@@ -51,7 +51,7 @@ class AtFileReaderTest {
     }
 
     private List<String> read(List<String> lines) {
-        Either<AtFileReader.LineResult, List<String>> either = reader.readAtLines(lines);
+        Either<AtFileReader.NumberedLineResult, List<String>> either = reader.readAtLines(lines);
         assertTrue(either.isRight());
         return either.fold(l -> {
             throw new RuntimeException();

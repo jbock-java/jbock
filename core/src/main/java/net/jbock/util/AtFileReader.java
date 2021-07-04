@@ -6,10 +6,12 @@ import net.jbock.Command;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
@@ -52,7 +54,7 @@ public final class AtFileReader {
      *             and the first token must be two characters at least
      * @return the options in the file, or an error report
      */
-    public Either<FileReadingError, List<String>> read(String[] args) {
+    public Either<? extends AtFileError, List<String>> read(String[] args) {
         if (args.length == 0
                 || args[0].length() < 2
                 || !args[0].startsWith("@")) {
@@ -63,41 +65,40 @@ public final class AtFileReader {
             Path path = Paths.get(fileName);
             List<String> lines = Files.readAllLines(path);
             return readAtLines(lines)
-                    .mapLeft(r -> new FileReadingError(null, null)) // TODO
+                    .mapLeft(r -> new AtFileSyntaxError(fileName, r.line, r.lineResult.message())) // TODO
                     .map(atLines -> {
                         List<String> expanded = new ArrayList<>(atLines);
                         expanded.addAll(Arrays.asList(args).subList(1, args.length));
                         return expanded;
                     });
         } catch (Exception e) {
-            return left(new FileReadingError(e, fileName));
+            return left(new AtFileReadError(e, fileName));
         }
     }
 
-    Either<LineResult, List<String>> readAtLines(List<String> lines) {
-        Iterator<String> it = lines.stream()
+    Either<NumberedLineResult, List<String>> readAtLines(List<String> lines) {
+        int[] counter = {1};
+        Iterator<Entry<Integer, String>> it = lines.stream()
                 .filter(line -> !line.isEmpty())
+                .<Entry<Integer, String>>map(line -> new SimpleImmutableEntry<>(counter[0]++, line))
                 .iterator();
-        List<String> tokens = new ArrayList<>(lines.size());
+        List<Either<NumberedLineResult, String>> tokens = new ArrayList<>(lines.size());
         while (it.hasNext()) {
-            Either<LineResult, String> result = readTokenFromAtFile(it);
-            if (result.isLeft()) {
-                return left(result.getLeft().orElseThrow());
-            } else {
-                result.acceptRight(tokens::add);
-            }
+            tokens.add(readTokenFromAtFile(it));
         }
-        return right(tokens);
+        return tokens.stream().collect(Either.toValidList());
     }
 
-    private Either<LineResult, String> readTokenFromAtFile(Iterator<String> it) {
+    private Either<NumberedLineResult, String> readTokenFromAtFile(Iterator<Entry<Integer, String>> it) {
         StringBuilder sb = new StringBuilder();
+        Entry<Integer, String> current;
         LineResult esc;
         do {
-            esc = readLine(it.next(), sb);
+            current = it.next();
+            esc = readLine(current.getValue(), sb);
         } while (esc == LineResult.CONTINUE && it.hasNext());
         if (esc.isError()) {
-            return left(esc);
+            return left(new NumberedLineResult(current.getKey(), esc));
         }
         return right(sb.toString());
     }
@@ -139,6 +140,16 @@ public final class AtFileReader {
 
         Mode toggle(Mode other) {
             return this == other ? REGULAR : other;
+        }
+    }
+
+    static class NumberedLineResult {
+        final int line;
+        final LineResult lineResult;
+
+        NumberedLineResult(int line, LineResult lineResult) {
+            this.line = line;
+            this.lineResult = lineResult;
         }
     }
 

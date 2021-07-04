@@ -7,20 +7,13 @@ import net.jbock.model.CommandModel;
  * This is an intermediate step in the construction of an
  * {@link ErrAtFile} instance.
  */
-public final class FileReadingError {
+final class AtFileReadError extends AtFileError {
 
     private final Exception exception;
-    private final String file;
 
-    /**
-     * Public constructor that may be invoked from the generated code.
-     *
-     * @param exception an exception that occurred when reading the {@code @file}
-     * @param file file name of the {@code @file}
-     */
-    FileReadingError(Exception exception, String file) {
+    AtFileReadError(Exception exception, String file) {
+        super(file);
         this.exception = exception;
-        this.file = file;
     }
 
     /**
@@ -30,7 +23,9 @@ public final class FileReadingError {
      * @param model command model
      * @return a failure object
      */
+    @Override
     public NotSuccess addModel(CommandModel model) {
-        return new ErrAtFile(model, file, exception);
+        return new ErrAtFile(model, file(), exception.getClass().getSimpleName()
+                + ": " + exception.getMessage());
     }
 }
