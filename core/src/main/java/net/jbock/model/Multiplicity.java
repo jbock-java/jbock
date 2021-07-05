@@ -1,13 +1,20 @@
 package net.jbock.model;
 
 /**
- * Number of times an {@link Item} can appear in the input array.
+ * Restricts the number of times an {@link Item} may
+ * appear in the command line input.
  */
 public enum Multiplicity {
 
     /**
      * The item is required.
      * It must appear exactly once in the input array.
+     * Return any type that is <em>not</em> an {@link java.util.Optional Optional<?>}
+     * or a {@link java.util.List List<?>} to declare a required item.
+     *
+     * <pre>{@code
+     * multiplicity = 1
+     * }</pre>
      */
     REQUIRED,
 
@@ -15,12 +22,24 @@ public enum Multiplicity {
      * The item is optional.
      * It must either be absent, or appear exactly once
      * in the input array.
+     * Return {@link java.util.Optional Optional<?>} from the
+     * item method to declare an optional item.
+     *
+     * <pre>{@code
+     * multiplicity = 0..1
+     * }</pre>
      */
     OPTIONAL,
 
     /**
      * The item is repeatable.
      * It may appear any number of times in the input array.
+     * Return {@link java.util.List List<?>} from the
+     * item method to declare a repeatable item.
+     *
+     * <pre>{@code
+     * multiplicity = 0..*
+     * }</pre>
      */
     REPEATABLE,
 }

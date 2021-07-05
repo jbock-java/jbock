@@ -3,13 +3,13 @@ package net.jbock.util;
 import net.jbock.model.CommandModel;
 
 /**
- * <p>An instance of this class represents a parsing
+ * An instance of this class represents a parsing
  * result that's different from &quot;success&quot;.
  * This will be returned from the generated {@code parse(String[])}
  * method, if the parsing is not successful, or if the user has
- * passed the {@code --help} option on the command line.</p>
+ * passed the {@code --help} option on the command line.
  *
- * <p>There are a fixed number of subclasses:</p>
+ * <p>There are a fixed number of subclasses:
  *
  * <ul>
  *   <li>{@link ErrAtFile}</li>

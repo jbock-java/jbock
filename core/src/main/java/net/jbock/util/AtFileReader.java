@@ -12,14 +12,13 @@ import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 
 /**
- * <p>Allow reading some or all command line options from
- * a configuration file, if at file reading is enabled via {@link Command#atFileExpansion()}
- * and the first command line token starts with a {@code "@"} character.
+ * Allows reading some command line options from
+ * a configuration file, if requested.
  *
- * <p>The following escape sequences are recognized:
+ * <p>In the configuration file, the following escape sequences are recognized:
  *
  * <table>
- *   <caption>Escape sequences</caption>
+ *   <caption></caption>
  *   <thead><tr><td><b>Code</b></td><td><b>Meaning</b></td></tr></thead>
  *   <tr><td>{@code \\}</td><td>backslash</td></tr>
  *   <tr><td>{@code \n}</td><td>newline</td></tr>
@@ -31,11 +30,6 @@ import static io.jbock.util.Either.right;
  * <p>Single quotes are not interpreted inside double quotes.
  * <p>An unpaired backslash at the end of a line instructs the reader
  * to continue reading the current token on the next line.
- * <p>Note: Even if set to {@code true},
- * and the user wants to pass exactly one positional parameter
- * that starts with an {@code @} character,
- * they can still prevent the {@code @file} expansion,
- * by passing {@code --} as the first token.
  * <p>Note: additional tokens in the input array, after the
  * initial {@code @file} token, are allowed and will be appended to
  * the result of reading the {@code @file}.
@@ -43,13 +37,14 @@ import static io.jbock.util.Either.right;
 public final class AtFileReader {
 
     /**
-     * Read the contents of the {@code @file} into a list of Strings.
-     * This method may be invoked from the generated code,
-     * unless {@link Command#atFileExpansion()} is {@code false}.
+     * If {@link ParseRequest#path() request.path()} is present, reads the contents
+     * of the {@code @file} into a list of Strings, and appends the remaining
+     * {@link ParseRequest#args() request.args()}.
+     * Otherwise, returns {@code request.args()}.
      *
      * @param request a parse request containing the command line input
      * @return the result of {@code file} expansion, if {@code @file} expansion is requested,
-     *         otherwise the same tokens as in the {@code request}
+     *         otherwise {@code request.args()}
      */
     public Either<? extends AtFileError, List<String>> read(ParseRequest request) {
         return request.path().<Either<? extends AtFileError, List<String>>>map(path -> {
@@ -59,13 +54,13 @@ public final class AtFileReader {
                         .mapLeft(r -> new AtFileSyntaxError(path, r.number, r.lineResult.message())) // TODO
                         .map(atLines -> {
                             List<String> atLinesWithRest = new ArrayList<>(atLines);
-                            atLinesWithRest.addAll(request.rest());
+                            atLinesWithRest.addAll(request.args());
                             return atLinesWithRest;
                         });
             } catch (Exception e) {
                 return left(new AtFileReadError(e, path));
             }
-        }).orElseGet(() -> right(request.rest()));
+        }).orElseGet(() -> right(request.args()));
     }
 
     Either<NumberedLineResult, List<String>> readAtLines(List<String> lines) {

@@ -8,6 +8,9 @@ import java.util.Locale;
 
 /**
  * Runtime model of a positional parameter.
+ *
+ * @see net.jbock.Parameter
+ * @see net.jbock.Parameters
  */
 public final class Parameter extends Item {
 

@@ -8,6 +8,8 @@ import java.util.Locale;
 
 /**
  * Runtime model of a named option or a mode flag.
+ *
+ * @see net.jbock.Option
  */
 public final class Option extends Item {
 

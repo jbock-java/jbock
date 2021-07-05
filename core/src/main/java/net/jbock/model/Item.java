@@ -6,6 +6,10 @@ import java.util.List;
 
 /**
  * Abstract superclass of {@link Option} and {@link Parameter}.
+ *
+ * @see net.jbock.Option
+ * @see net.jbock.Parameter
+ * @see net.jbock.Parameters
  */
 public abstract class Item {
 
@@ -30,6 +34,7 @@ public abstract class Item {
      * sample argument if this is a unary option.
      * Used in the LHS of the usage documentation.
      *
+     * @see net.jbock.Option#names()
      * @return a non-empty string
      */
     public abstract String namesOverview();
@@ -38,6 +43,7 @@ public abstract class Item {
      * An alternative form of {@link #namesOverview()} that is
      * commonly used to identify the item in error messages.
      *
+     * @see net.jbock.Option#names()
      * @return a non-empty string
      */
     public abstract String namesOverviewError();
@@ -49,6 +55,9 @@ public abstract class Item {
      * sample argument that's shown in the full usage
      * documentation.
      *
+     * @see net.jbock.Option#paramLabel()
+     * @see net.jbock.Parameter#paramLabel()
+     * @see net.jbock.Parameters#paramLabel()
      * @return param label, a non-empty string
      */
     public final String paramLabel() {
@@ -59,6 +68,9 @@ public abstract class Item {
      * Get the description that is present directly on the annotated method,
      * either as a description attribute, or in the form of javadoc.
      *
+     * @see net.jbock.Option#description()
+     * @see net.jbock.Parameter#description()
+     * @see net.jbock.Parameters#description()
      * @return a list of lines, possibly empty
      */
     public final List<String> description() {
@@ -68,6 +80,9 @@ public abstract class Item {
     /**
      * A string, possibly empty.
      *
+     * @see net.jbock.Option#descriptionKey()
+     * @see net.jbock.Parameter#descriptionKey()
+     * @see net.jbock.Parameters#descriptionKey()
      * @return description key
      */
     public final String descriptionKey() {

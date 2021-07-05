@@ -73,6 +73,7 @@ public final class CommandModel {
          * Sets the description key.
          * Public method that may be invoked from the generated code.
          *
+         * @see Command#descriptionKey()
          * @param descriptionKey a key, possibly blank
          * @return the builder instance
          */
@@ -85,6 +86,7 @@ public final class CommandModel {
          * Adds a description line.
          * Public method that may be invoked from the generated code.
          *
+         * @see Command#description()
          * @param descriptionLine a line
          * @return the builder instance
          */
@@ -95,8 +97,8 @@ public final class CommandModel {
 
         /**
          * Sets program name.
-         * Public method that may be invoked from the generated code.
          *
+         * @see Command#name()
          * @param programName program name, not blank
          * @return the builder instance
          */
@@ -107,8 +109,8 @@ public final class CommandModel {
 
         /**
          * Sets the supercommand property.
-         * Public method that may be invoked from the generated code.
          *
+         * @see Command#superCommand()
          * @param superCommand whether this is a supercommand
          * @return the builder instance
          */
@@ -119,8 +121,8 @@ public final class CommandModel {
 
         /**
          * Sets the unix clustering property.
-         * Public method that may be invoked from the generated code.
          *
+         * @see Command#unixClustering()
          * @param unixClustering whether unix clustering is enabled
          * @return the builder instance
          */
@@ -131,7 +133,6 @@ public final class CommandModel {
 
         /**
          * Adds an option.
-         * Public method that may be invoked from the generated code.
          *
          * @param option a named option
          * @return the builder instance
@@ -143,7 +144,6 @@ public final class CommandModel {
 
         /**
          * Adds a parameter.
-         * Public method that may be invoked from the generated code.
          *
          * @param parameter a positional parameter
          * @return the builder instance
@@ -154,8 +154,7 @@ public final class CommandModel {
         }
 
         /**
-         * Create the command model.
-         * Public method that may be invoked from the generated code.
+         * Creates the command model.
          *
          * @return command model
          */
@@ -170,6 +169,7 @@ public final class CommandModel {
      * Returns the description key from the {@link Command#descriptionKey()} attribute,
      * possibly an empty string.
      *
+     * @see Command#descriptionKey()
      * @return description key
      */
     public String descriptionKey() {
@@ -192,6 +192,7 @@ public final class CommandModel {
      * or, if that is empty, a default program name that is derived
      * from the class name of the annotated command class.
      *
+     * @see Command#name()
      * @return the program name, a nonempty string
      */
     public String programName() {
@@ -222,7 +223,6 @@ public final class CommandModel {
      *
      * @return {@code true} if the command is a SuperCommand,
      *         {@code false} if it is a regular Command
-     *
      */
     public boolean superCommand() {
         return superCommand;

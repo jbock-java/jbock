@@ -1,7 +1,6 @@
 package net.jbock.util;
 
 import io.jbock.util.Optional;
-import net.jbock.Command;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,16 +12,20 @@ import java.util.List;
 public final class ParseRequest {
 
     private final Optional<Path> path; // if empty, no @-file expansion will be performed
-    private final List<String> rest;
+    private final List<String> args; // command line arguments, excluding path
     private final boolean helpRequested;
 
-    private ParseRequest(Optional<Path> path, List<String> rest, boolean helpRequested) {
+    private ParseRequest(Optional<Path> path, List<String> args, boolean helpRequested) {
         this.path = path;
-        this.rest = rest;
+        this.args = args;
         this.helpRequested = helpRequested;
     }
 
+    /**
+     * A builder for {@link ParseRequest}.
+     */
     public static final class Builder {
+
         private final Optional<Path> path;
         private final List<String> rest;
         private boolean helpRequested;
@@ -32,11 +35,23 @@ public final class ParseRequest {
             this.rest = rest;
         }
 
+        /**
+         * Sets the help requested property.
+         * Setting this to {@code true} will cause the generated parser to skip parsing
+         * and print the online documentation instead.
+         *
+         * @return the builder instance
+         */
         public Builder withHelpRequested(boolean helpRequested) {
             this.helpRequested = helpRequested;
             return this;
         }
 
+        /**
+         * Creates the parse request.
+         *
+         * @return a parse request
+         */
         public ParseRequest build() {
             return new ParseRequest(path, rest, helpRequested);
         }
@@ -47,9 +62,6 @@ public final class ParseRequest {
      *
      * <p>{@code @file} expansion will be enabled if the input is not empty,
      * and the first token starts with an {@code "@"} character.
-     *
-     * <p>This method may be invoked from the generated code,
-     * unless {@link Command#atFileExpansion()} is {@code false}.
      *
      * @param args command line input
      * @return the options in the file, or an error report
@@ -78,22 +90,41 @@ public final class ParseRequest {
     /**
      * Creates a builder with {@code @file} expansion set to {@code true}.
      *
-     * @param path a path to be used as input for {@code @file} expansion
-     * @param rest the remaining command line arguments, if any
+     * @param atFile source for {@code @file} expansion
+     * @param rest the remaining command line arguments, possibly none
      * @return a builder
      */
-    public static Builder expand(Path path, List<String> rest) {
-        return new Builder(Optional.of(path), rest);
+    public static Builder expand(Path atFile, List<String> rest) {
+        return new Builder(Optional.of(atFile), rest);
     }
 
-    Optional<Path> path() {
+    /**
+     * Returns the {@code path} to be used as input for {@code @file} expansion.
+     * If it is empty, {@code @file} expansion should not be performed.
+     *
+     * @return input for {@code @file} expansion
+     */
+    public Optional<Path> path() {
         return path;
     }
 
-    List<String> rest() {
-        return rest;
+    /**
+     * If {@link #path} is empty, contains the command line arguments.
+     * If {@link #path} is nonempty, contains any remaining argument after
+     * the {@code @file} parameter.
+     *
+     * @return command line arguments
+     */
+    public List<String> args() {
+        return args;
     }
 
+    /**
+     * Returns {@code true} if parsing should be skipped, and usage documentation
+     * should be printed instead.
+     *
+     * @return {@code true} if usage documentation should be printed
+     */
     public boolean isHelpRequested() {
         return helpRequested;
     }
