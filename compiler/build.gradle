@@ -23,6 +23,7 @@ compileJava {
 
 repositories {
     mavenCentral()
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1022' }
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -50,7 +51,7 @@ shadowJar {
 }
 
 dependencies {
-    def core = project(':core')
+    def core = 'io.github.jbock-java:jbock:5.2'
     implementation('io.github.jbock-java:either:1.0')
     implementation('com.squareup:javapoet:1.13.0')
     implementation('com.google.auto:auto-common:1.0')
