@@ -3,7 +3,6 @@ package net.jbock.convert.matching;
 import com.squareup.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import io.jbock.util.LeftOptional;
-import io.jbock.util.Optional;
 import net.jbock.Converter;
 import net.jbock.common.Util;
 import net.jbock.convert.Mapped;
@@ -23,6 +22,7 @@ import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static io.jbock.util.Either.left;
 import static javax.lang.model.element.Modifier.ABSTRACT;

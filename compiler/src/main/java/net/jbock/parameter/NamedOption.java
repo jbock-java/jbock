@@ -1,6 +1,5 @@
 package net.jbock.parameter;
 
-import io.jbock.util.Optional;
 import net.jbock.common.EnumName;
 import net.jbock.common.SnakeName;
 
@@ -29,9 +28,7 @@ public final class NamedOption extends AbstractItem {
                 .filter(name -> name.startsWith("--"))
                 .map(name -> name.substring(2))
                 .map(s -> s.toUpperCase(Locale.US))
-                .findFirst()
-                .map(Optional::of)
-                .orElse(Optional.empty()))
+                .findFirst())
                 .orElse(SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
     }
 

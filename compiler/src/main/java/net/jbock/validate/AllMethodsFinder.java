@@ -1,6 +1,5 @@
 package net.jbock.validate;
 
-import io.jbock.util.Optional;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;

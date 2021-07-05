@@ -1,6 +1,6 @@
 package net.jbock.contrib;
 
-import io.jbock.util.Optional;
+import java.util.Optional;
 
 final class AnsiStyle {
 

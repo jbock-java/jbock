@@ -10,6 +10,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static javax.lang.model.element.Modifier.PROTECTED;
@@ -27,13 +28,11 @@ public final class Constants {
 
     public static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
 
+    public static final ClassName OPTIONAL = ClassName.get(Optional.class);
+
     // prevent shadowing
     public static final ClassName EITHER = ClassName.get(
             String.join(".", List.of("io", "jbock", "util")), "Either");
-
-    // prevent shadowing
-    public static final ClassName OPTIONAL = ClassName.get(
-            String.join(".", List.of("io", "jbock", "util")), "Optional");
 
     public static TypeName mapOf(TypeName keyType, TypeName valueType) {
         return ParameterizedTypeName.get(ClassName.get(Map.class), keyType, valueType);

@@ -3,7 +3,6 @@ package net.jbock.examples;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import io.jbock.util.Either;
-import io.jbock.util.Optional;
 import net.jbock.examples.CpArguments.Control;
 import net.jbock.examples.fixture.ParserTestFixture;
 import net.jbock.util.NotSuccess;
@@ -16,6 +15,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 class CpArgumentsTest {
 

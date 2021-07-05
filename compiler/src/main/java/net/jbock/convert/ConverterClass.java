@@ -1,8 +1,7 @@
 package net.jbock.convert;
 
-import io.jbock.util.Optional;
-
 import javax.lang.model.element.TypeElement;
+import java.util.Optional;
 
 public class ConverterClass {
 

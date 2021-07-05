@@ -1,10 +1,10 @@
 package net.jbock.examples;
 
-import io.jbock.util.Optional;
 import net.jbock.Command;
 import net.jbock.Option;
 
 import java.util.List;
+import java.util.Optional;
 
 @Command
 abstract class AllCharactersArguments {

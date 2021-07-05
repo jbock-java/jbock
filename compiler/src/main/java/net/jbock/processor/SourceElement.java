@@ -2,7 +2,6 @@ package net.jbock.processor;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
-import io.jbock.util.Optional;
 import net.jbock.Command;
 import net.jbock.common.Descriptions;
 import net.jbock.common.SafeElements;
@@ -13,6 +12,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static net.jbock.common.Constants.ACCESS_MODIFIERS;

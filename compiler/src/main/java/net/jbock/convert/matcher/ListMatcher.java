@@ -1,6 +1,5 @@
 package net.jbock.convert.matcher;
 
-import io.jbock.util.Optional;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
@@ -11,6 +10,7 @@ import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
 
 @ParameterScope
 public class ListMatcher implements Matcher {

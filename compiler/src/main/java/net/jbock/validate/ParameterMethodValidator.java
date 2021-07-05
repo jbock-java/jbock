@@ -1,6 +1,5 @@
 package net.jbock.validate;
 
-import io.jbock.util.Optional;
 import net.jbock.common.Util;
 
 import javax.inject.Inject;
@@ -9,6 +8,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;

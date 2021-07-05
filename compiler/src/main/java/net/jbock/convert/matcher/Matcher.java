@@ -1,8 +1,9 @@
 package net.jbock.convert.matcher;
 
-import io.jbock.util.Optional;
 import net.jbock.convert.matching.Match;
 import net.jbock.parameter.AbstractItem;
+
+import java.util.Optional;
 
 public interface Matcher {
 

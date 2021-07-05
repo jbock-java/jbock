@@ -1,7 +1,6 @@
 package net.jbock.convert.matcher;
 
 import com.squareup.javapoet.CodeBlock;
-import io.jbock.util.Optional;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
@@ -13,6 +12,7 @@ import net.jbock.parameter.SourceMethod;
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
+import java.util.Optional;
 
 @ParameterScope
 public class OptionalMatcher implements Matcher {
@@ -41,18 +41,12 @@ public class OptionalMatcher implements Matcher {
                 .or(() -> // base
                         elements.getTypeElement("java.util.Optional")
                                 .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
-                                        .map(typeArg -> Match.create(typeArg, Multiplicity.OPTIONAL,
-                                                CodeBlock.of(".map($1T::of).orElse($1T.empty())", types.erasure(el.asType()))))))
+                                        .map(typeArg -> Match.create(typeArg, Multiplicity.OPTIONAL))))
                 .or(() -> // vavr
                         elements.getTypeElement("io.vavr.control.Option")
                                 .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
                                         .map(typeArg -> Match.create(typeArg, Multiplicity.OPTIONAL,
-                                                CodeBlock.of(".map($1T::of).orElse($1T.none())", types.erasure(el.asType()))))))
-                .or(() -> // jbock
-                        elements.getTypeElement("io.jbock.util.Optional")
-                                .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
-                                        .map(typeArg -> Match.create(typeArg, Multiplicity.OPTIONAL,
-                                                CodeBlock.of(".map($1T::of).orElse($1T.empty())", types.erasure(el.asType()))))));
+                                                CodeBlock.of(".map($1T::of).orElse($1T.none())", types.erasure(el.asType()))))));
     }
 
     private Optional<Match> getOptionalPrimitive(TypeMirror type) {

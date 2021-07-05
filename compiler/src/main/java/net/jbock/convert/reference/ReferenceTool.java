@@ -1,7 +1,6 @@
 package net.jbock.convert.reference;
 
 import io.jbock.util.Either;
-import io.jbock.util.Optional;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.util.StringConverter;
@@ -10,6 +9,7 @@ import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static io.jbock.util.Either.left;
@@ -45,9 +45,8 @@ public class ReferenceTool {
         return AS_DECLARED.visit(typeArgument)
                 .filter(suppliedFunction -> tool.isSameErasure(suppliedFunction,
                         StringConverter.class))
-                .map(Optional::of)
-                .orElse(Optional.empty())
-                .orElseLeft(this::errorConverterType)
+                .<Either<String, DeclaredType>>map(Either::right)
+                .orElseGet(() -> left(errorConverterType()))
                 .flatMap(suppliedType -> handleStringConverter(suppliedType, true));
     }
 
@@ -65,9 +64,7 @@ public class ReferenceTool {
                 .filter(inter -> tool.isSameErasure(inter, Supplier.class))
                 .map(AS_DECLARED::visit)
                 .flatMap(Optional::stream)
-                .findFirst()
-                .map(Optional::of)
-                .orElse(Optional.empty());
+                .findFirst();
     }
 
     private Optional<DeclaredType> checkStringConverter(TypeElement converter) {

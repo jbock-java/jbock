@@ -3,15 +3,14 @@ package net.jbock.context;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import io.jbock.util.Optional;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.processor.SourceElement;
-import net.jbock.util.HelpRequested;
 import net.jbock.util.NotSuccess;
 import net.jbock.util.SuperResult;
 
 import javax.inject.Inject;
+import java.util.Optional;
 
 import static net.jbock.common.Constants.EITHER;
 

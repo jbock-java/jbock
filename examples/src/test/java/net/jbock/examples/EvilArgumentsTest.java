@@ -1,8 +1,9 @@
 package net.jbock.examples;
 
-import io.jbock.util.Optional;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 class EvilArgumentsTest {
 

@@ -1,6 +1,5 @@
 package net.jbock.examples;
 
-import io.jbock.util.Optional;
 import net.jbock.Command;
 import net.jbock.Converter;
 import net.jbock.Option;
@@ -13,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Supplier;

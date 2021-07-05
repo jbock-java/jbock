@@ -38,9 +38,6 @@ abstract class VariousArguments {
     @Option(names = "--bigIntegerOpt")
     abstract Optional<BigInteger> bigIntegerOpt();
 
-    @Option(names = "--eitherOpt")
-    abstract io.jbock.util.Optional<Integer> eitherOpt();
-
     @Option(names = "--vavrOpt")
     abstract io.vavr.control.Option<Integer> vavrOpt();
 

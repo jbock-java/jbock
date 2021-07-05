@@ -1,7 +1,6 @@
 package net.jbock.util;
 
 import io.jbock.util.Either;
-import net.jbock.Command;
 
 import java.nio.file.Files;
 import java.util.ArrayList;

@@ -1,6 +1,5 @@
 package net.jbock.validate;
 
-import io.jbock.util.Optional;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
@@ -10,6 +9,7 @@ import net.jbock.common.SafeElements;
 import javax.lang.model.element.ExecutableElement;
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalInt;
 
 public enum ParameterStyle {

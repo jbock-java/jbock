@@ -3,7 +3,6 @@ package net.jbock.convert.matching;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import io.jbock.util.Either;
-import io.jbock.util.Optional;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.convert.Mapped;
@@ -20,6 +19,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.jbock.util.Either.left;
@@ -67,8 +67,9 @@ public class AutoConverterFinder extends MatchValidator {
 
     private Either<String, MapExpr> enumConverter(TypeMirror baseType) {
         return asEnumType(baseType)
-                .orElseLeft(() -> noMatchError(baseType))
                 .map(TypeElement::asType)
+                .<Either<String, TypeMirror>>map(Either::right)
+                .orElseGet(() -> left(noMatchError(baseType)))
                 .map(enumType -> {
                     CodeBlock code = enumConvertBlock(enumType);
                     return new MapExpr(code, enumType, true);

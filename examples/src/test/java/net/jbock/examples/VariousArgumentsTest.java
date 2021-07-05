@@ -23,7 +23,6 @@ class VariousArgumentsTest {
                 "--localDate", "2001-02-01",
                 "--uri", "http://localhost:8080",
                 "--pattern", "^[abc]*$",
-                "--eitherOpt", "1",
                 "--vavrOpt", "1",
                 "6.02214076e23",
                 "60221407600000000000000",
@@ -36,7 +35,6 @@ class VariousArgumentsTest {
                 .has(VariousArguments::pathPos, Optional.of(Paths.get("/home")))
                 .has(VariousArguments::uri, URI.create("http://localhost:8080"))
                 .has(VariousArguments::uriPos, Optional.of(URI.create("http://localhost:8080")))
-                .has(VariousArguments::vavrOpt, io.vavr.control.Option.of(1))
-                .has(VariousArguments::eitherOpt, io.jbock.util.Optional.of(1));
+                .has(VariousArguments::vavrOpt, io.vavr.control.Option.of(1));
     }
 }

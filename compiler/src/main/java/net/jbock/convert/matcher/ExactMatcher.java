@@ -1,6 +1,5 @@
 package net.jbock.convert.matcher;
 
-import io.jbock.util.Optional;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.model.Multiplicity;
@@ -11,6 +10,7 @@ import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
+import java.util.Optional;
 
 import static net.jbock.common.TypeTool.AS_PRIMITIVE;
 

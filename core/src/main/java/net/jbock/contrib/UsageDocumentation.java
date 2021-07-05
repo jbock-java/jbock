@@ -1,6 +1,5 @@
 package net.jbock.contrib;
 
-import io.jbock.util.Optional;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Item;
 import net.jbock.model.Option;
@@ -12,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 

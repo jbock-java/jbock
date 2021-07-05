@@ -1,10 +1,9 @@
 package net.jbock.util;
 
-import io.jbock.util.Optional;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Input for the generated parser.

@@ -2,7 +2,6 @@ package net.jbock.common;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import io.jbock.util.Optional;
 import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
@@ -19,6 +18,7 @@ import javax.lang.model.util.Types;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Util {

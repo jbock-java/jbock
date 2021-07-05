@@ -2,7 +2,6 @@ package net.jbock.processor;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
-import io.jbock.util.Optional;
 import net.jbock.common.Annotations;
 import net.jbock.common.Util;
 
@@ -13,6 +12,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 

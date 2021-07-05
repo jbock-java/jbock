@@ -1,13 +1,13 @@
 package net.jbock.examples;
 
 
-import io.jbock.util.Optional;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 
 import java.util.List;
+import java.util.Optional;
 
 @Command(unixClustering = true)
 abstract class GradleArguments {

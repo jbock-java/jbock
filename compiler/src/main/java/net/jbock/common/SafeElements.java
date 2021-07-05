@@ -1,11 +1,10 @@
 package net.jbock.common;
 
-import io.jbock.util.Optional;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.util.Objects;
+import java.util.Optional;
 
 public class SafeElements {
 

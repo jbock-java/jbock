@@ -4,7 +4,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-import io.jbock.util.Optional;
 import net.jbock.common.EnumName;
 import net.jbock.convert.matching.MapExpr;
 import net.jbock.model.Multiplicity;
@@ -13,6 +12,7 @@ import net.jbock.parameter.NamedOption;
 import net.jbock.util.StringConverter;
 
 import javax.lang.model.type.PrimitiveType;
+import java.util.Optional;
 import java.util.function.Function;
 
 public final class Mapped<P extends AbstractItem> {
