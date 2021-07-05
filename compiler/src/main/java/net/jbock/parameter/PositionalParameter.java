@@ -22,7 +22,7 @@ public final class PositionalParameter extends AbstractItem {
     @Override
     public final String paramLabel() {
         return sourceMethod().paramLabel()
-                .orElse(SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
+                .orElseGet(() -> SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
     }
 
     public int position() {

@@ -29,7 +29,7 @@ public final class NamedOption extends AbstractItem {
                 .map(name -> name.substring(2))
                 .map(s -> s.toUpperCase(Locale.US))
                 .findFirst())
-                .orElse(SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
+                .orElseGet(() -> SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
     }
 
     public boolean hasUnixName() {
