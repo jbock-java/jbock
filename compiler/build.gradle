@@ -23,7 +23,6 @@ compileJava {
 
 repositories {
     mavenCentral()
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1024' }
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -120,9 +119,9 @@ publishing {
                 }
                 developers {
                     developer {
-                        id = 'h908714124'
-                        name = 'h908714124'
-                        email = 'kraftdurchblumen@gmx.de'
+                        id = 'Various'
+                        name = 'Various'
+                        email = 'jbock-java@gmx.de'
                     }
                 }
                 scm {
