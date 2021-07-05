@@ -12,7 +12,7 @@ public final class ExMissingItem extends ExNotSuccess {
     private final int itemIndex;
 
     /**
-     * Public constructor that may be invoked from the generated code.
+     * Public constructor.
      *
      * @param itemType the item type
      * @param itemIndex the item index

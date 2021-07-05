@@ -4,14 +4,17 @@ import net.jbock.model.CommandModel;
 import net.jbock.model.Item;
 
 /**
- * Indicates that a required item was missing on the command line.
+ * Non-exceptional failure object which indicates that a required item
+ * was missing on the command line.
+ *
+ * @see net.jbock.model.Multiplicity#REQUIRED
  */
 public final class ErrMissingItem extends NotSuccess implements HasMessage {
 
     private final Item item;
 
     /**
-     * Public constructor that may be invoked from the generated code.
+     * Public constructor.
      *
      * @param commandModel command model
      * @param item item

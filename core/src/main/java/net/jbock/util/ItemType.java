@@ -2,31 +2,26 @@ package net.jbock.util;
 
 import net.jbock.Option;
 import net.jbock.Parameter;
+import net.jbock.Parameters;
 
 /**
- * Item type as determined by its method's annotation.
- * An Item is either a <em>named option</em>
- * or a <em>positional parameter</em>.
- *
- * <table>
- *   <caption></caption>
- *   <thead><tr><td><b>Annotation</b></td><td><b>Item type</b></td></tr></thead>
- *   <tr><td>{@code @Parameter}</td><td>{@link ItemType#PARAMETER PARAMETER}</td></tr>
- *   <tr><td>{@code @Parameters}</td><td>{@link ItemType#PARAMETER PARAMETER}</td></tr>
- *   <tr><td>{@code @Option}</td><td>{@link ItemType#OPTION OPTION}</td></tr>
- * </table>
+ * The item type is determined by the annotation on the item method.
  */
 public enum ItemType {
 
     /**
-     * Named option, or mode flag.
-     * The runtime model for this item is {@link Option}.
+     * Item type for a named option, or a mode flag.
+     * The item's method is annotated with {@link Option}.
      */
     OPTION,
 
     /**
-     * Positional parameter.
-     * The runtime model for this item is {@link Parameter}.
+     * Item type for a positional parameter, possibly a
+     * repeatable positional parameter.
+     * The item's method is annotated with {@link Parameter}
+     * or {@link Parameters}.
+     *
+     * @see net.jbock.model.Multiplicity#REPEATABLE
      */
     PARAMETER,
 }

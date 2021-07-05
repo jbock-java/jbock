@@ -4,7 +4,8 @@ import net.jbock.model.CommandModel;
 import net.jbock.model.Item;
 
 /**
- * An instance of this class signals failure of a converter invocation.
+ * Non-exceptional failure object that represents
+ * any runtime error during a converter invocation.
  */
 public final class ErrConvert extends NotSuccess implements HasMessage {
 
@@ -12,7 +13,7 @@ public final class ErrConvert extends NotSuccess implements HasMessage {
     private final Item item;
 
     /**
-     * Public constructor that may be invoked from the generated code.
+     * Public constructor.
      *
      * @param commandModel the command model
      * @param converterFailure an object describing the specific converter failure

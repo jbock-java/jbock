@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Runtime model of a named option or a mode flag.
+ * Runtime model for a named option or a mode flag.
  *
  * @see net.jbock.Option
  */
@@ -24,13 +24,15 @@ public final class Option extends Item {
             Multiplicity multiplicity,
             Arity arity) {
         super(paramLabel, descriptionKey, description, multiplicity);
+        if (names.isEmpty()) {
+            throw new IllegalArgumentException("paramLabel may not be empty");
+        }
         this.names = names;
         this.arity = arity;
     }
 
     /**
      * Creates a builder instance.
-     * Public method that may be invoked from the generated code.
      *
      * @return empty builder
      */
@@ -54,9 +56,9 @@ public final class Option extends Item {
         }
 
         /**
-         * Set the param label.
-         * Public method that may be invoked from the generated code.
+         * Sets the param label.
          *
+         * @see net.jbock.Option#paramLabel()
          * @param paramLabel a non-empty string
          * @return the builder instance
          */
@@ -66,9 +68,9 @@ public final class Option extends Item {
         }
 
         /**
-         * Set the description key.
-         * Public method that may be invoked from the generated code.
+         * Sets the description key.
          *
+         * @see net.jbock.Option#descriptionKey()
          * @param descriptionKey a string, possibly empty
          * @return the builder instance
          */
@@ -78,9 +80,9 @@ public final class Option extends Item {
         }
 
         /**
-         * Add a line of description text.
-         * Public method that may be invoked from the generated code.
+         * Adds a line of description text.
          *
+         * @see net.jbock.Option#description()
          * @param descriptionLine a string, possibly empty
          * @return the builder instance
          */
@@ -90,9 +92,9 @@ public final class Option extends Item {
         }
 
         /**
-         * Set the list of all option names.
-         * Public method that may be invoked from the generated code.
+         * Sets the list of all option names.
          *
+         * @see net.jbock.Option#names()
          * @param names the option names
          * @return the builder instance
          */
@@ -102,8 +104,7 @@ public final class Option extends Item {
         }
 
         /**
-         * Set the multiplicity of this option.
-         * Public method that may be invoked from the generated code.
+         * Sets the multiplicity of this option.
          *
          * @param multiplicity the multiplicity
          * @return the builder instance
@@ -114,8 +115,7 @@ public final class Option extends Item {
         }
 
         /**
-         * Marks this option as a nullary mode flag.
-         * Public method that may be invoked from the generated code.
+         * Marks this option as a mode flag.
          *
          * @return the builder instance
          */
@@ -126,8 +126,7 @@ public final class Option extends Item {
         }
 
         /**
-         * Create the option model.
-         * Public method that may be invoked from the generated code.
+         * Creates the option model.
          *
          * @return option model
          */
@@ -167,18 +166,19 @@ public final class Option extends Item {
     }
 
     /**
-     * List of option names, sorted by length and then alphabetically.
+     * Returns a list of the option names, sorted by length and then alphabetically.
      *
-     * @return option names
+     * @see net.jbock.Option#names()
+     * @return a nonempty list of option names
      */
     public List<String> names() {
         return names;
     }
 
     /**
-     * The arity of this option.
+     * Returns the arity of this option.
      *
-     * @return arity
+     * @return this option's arity
      */
     public Arity arity() {
         return arity;

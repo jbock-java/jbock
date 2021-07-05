@@ -1,7 +1,9 @@
 package net.jbock.util;
 
+import net.jbock.Command;
+
 /**
- * Various types of token-based errors.
+ * Specific types of various possible errors in the command line syntax.
  */
 public enum ErrTokenType {
 
@@ -13,6 +15,8 @@ public enum ErrTokenType {
 
     /**
      * Invalid unix flag, or cluster of unix options.
+     *
+     * @see Command#unixClustering()
      */
     INVALID_UNIX_GROUP,
 
@@ -25,11 +29,15 @@ public enum ErrTokenType {
     /**
      * A non-repeatable option was found to be present more
      * than once in the input array.
+     *
+     * @see net.jbock.model.Multiplicity#REPEATABLE
      */
     OPTION_REPETITION,
 
     /**
      * Missing argument of a unary option.
+     *
+     * @see net.jbock.model.Arity#UNARY
      */
     MISSING_ARGUMENT,
 }

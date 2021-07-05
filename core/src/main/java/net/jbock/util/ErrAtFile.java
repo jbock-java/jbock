@@ -5,7 +5,8 @@ import net.jbock.model.CommandModel;
 import java.nio.file.Path;
 
 /**
- * Indicates that reading options from the {@code @file} was not successful.
+ * Non-exceptional failure object, indicates that reading options
+ * from the {@code @file} was unsuccessful.
  */
 public final class ErrAtFile extends NotSuccess implements HasMessage {
 
@@ -13,7 +14,7 @@ public final class ErrAtFile extends NotSuccess implements HasMessage {
     private final Path atFile;
 
     /**
-     * Public constructor that may be invoked from the generated code.
+     * Public constructor.
      *
      * @param commandModel the command model
      * @param message error message

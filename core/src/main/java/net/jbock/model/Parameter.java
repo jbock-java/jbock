@@ -1,5 +1,6 @@
 package net.jbock.model;
 
+import net.jbock.Parameters;
 import net.jbock.util.ItemType;
 
 import java.util.ArrayList;
@@ -7,7 +8,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Runtime model of a positional parameter.
+ * Runtime model for a positional parameter.
  *
  * @see net.jbock.Parameter
  * @see net.jbock.Parameters
@@ -24,9 +25,8 @@ public final class Parameter extends Item {
 
     /**
      * Creates a builder instance.
-     * Public method that may be invoked from the generated code.
      *
-     * @return empty builder
+     * @return an empty builder
      */
     public static Builder builder() {
         return new Builder();
@@ -46,9 +46,10 @@ public final class Parameter extends Item {
         }
 
         /**
-         * Set the param label.
-         * Public method that may be invoked from the generated code.
+         * Sets the param label.
          *
+         * @see Parameter#paramLabel()
+         * @see Parameters#paramLabel()
          * @param paramLabel a non-empty string
          * @return the builder instance
          */
@@ -58,9 +59,10 @@ public final class Parameter extends Item {
         }
 
         /**
-         * Set the description key.
-         * Public method that may be invoked from the generated code.
+         * Sets the description key.
          *
+         * @see Parameter#descriptionKey()
+         * @see Parameters#descriptionKey()
          * @param descriptionKey a string, possibly empty
          * @return the builder instance
          */
@@ -70,9 +72,10 @@ public final class Parameter extends Item {
         }
 
         /**
-         * Add a line of description text.
-         * Public method that may be invoked from the generated code.
+         * Adds a line of description text.
          *
+         * @see Parameter#description()
+         * @see Parameters#description()
          * @param descriptionLine a string, possibly empty
          * @return the builder instance
          */
@@ -82,8 +85,7 @@ public final class Parameter extends Item {
         }
 
         /**
-         * Set the multiplicity of this option.
-         * Public method that may be invoked from the generated code.
+         * Sets the multiplicity of this parameter.
          *
          * @param multiplicity the multiplicity
          * @return the builder instance
@@ -94,8 +96,7 @@ public final class Parameter extends Item {
         }
 
         /**
-         * Create the model for this parameter.
-         * Public method that may be invoked from the generated code.
+         * Creates the model for this parameter.
          *
          * @return parameter model
          */

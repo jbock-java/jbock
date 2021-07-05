@@ -1,14 +1,15 @@
 package net.jbock.util;
 
 /**
- * A failure with an error message.
+ * Superinterface of all non-exceptional failure objects which have
+ * an error message attached to them.
  */
 public interface HasMessage {
 
     /**
-     * Returns an error message to describe the failure.
+     * Returns an error message that describes the error.
      *
-     * @return error message
+     * @return the error message
      */
     String message();
 }

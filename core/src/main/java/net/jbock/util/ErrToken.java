@@ -3,7 +3,10 @@ package net.jbock.util;
 import net.jbock.model.CommandModel;
 
 /**
- * Indicates a parsing error.
+ * Non-exceptional failure object that indicates an error in this command's
+ * command line syntax.
+ *
+ * @see net.jbock.Command
  */
 public final class ErrToken extends NotSuccess implements HasMessage {
 
@@ -12,6 +15,7 @@ public final class ErrToken extends NotSuccess implements HasMessage {
 
     /**
      * Public constructor that may be invoked from the generated code.
+     *
      * @param commandModel command model
      * @param errorType error type
      * @param token offending token

@@ -14,7 +14,7 @@ public final class SuperResult<C> {
     private final String[] rest;
 
     /**
-     * Public constructor that may be invoked from the generated code.
+     * Public constructor.
      *
      * @param command command instance
      * @param rest remaining tokens from the input array

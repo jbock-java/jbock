@@ -43,8 +43,8 @@ public final class CommandModel {
 
     /**
      * Creates a builder instance.
-     * Public method that may be invoked from the generated code.
      *
+     * @param request the parse request
      * @return empty builder
      */
     public static Builder builder(ParseRequest request) {
@@ -71,7 +71,6 @@ public final class CommandModel {
 
         /**
          * Sets the description key.
-         * Public method that may be invoked from the generated code.
          *
          * @see Command#descriptionKey()
          * @param descriptionKey a key, possibly blank
@@ -84,7 +83,6 @@ public final class CommandModel {
 
         /**
          * Adds a description line.
-         * Public method that may be invoked from the generated code.
          *
          * @see Command#description()
          * @param descriptionLine a line
@@ -209,10 +207,11 @@ public final class CommandModel {
     }
 
     /**
-     * Get the list of all positional parameters, including
-     * the repeatable positional parameter, if it exists.
+     * Get the list of all positional parameters, in the correct order.
+     * If a repeatable positional parameter exists, it will be the last
+     * entry in this list.
      *
-     * @return positional parameters
+     * @return list of all positional parameters in the correct order
      */
     public List<Parameter> parameters() {
         return parameters;
@@ -221,10 +220,10 @@ public final class CommandModel {
     /**
      * Returns the value of the {@link Command#superCommand()} attribute.
      *
-     * @return {@code true} if the command is a SuperCommand,
-     *         {@code false} if it is a regular Command
+     * @return {@code true} if the command is a "super command",
+     *         {@code false} if it is a regular command
      */
-    public boolean superCommand() {
+    public boolean isSuperCommand() {
         return superCommand;
     }
 
@@ -236,7 +235,7 @@ public final class CommandModel {
      *
      * @return {@code true} if unix clustering is enabled
      */
-    public boolean unixClustering() {
+    public boolean isUnixClustering() {
         return unixClustering;
     }
 
@@ -257,7 +256,7 @@ public final class CommandModel {
      * @return the item
      * @throws IndexOutOfBoundsException if the index is out of range
      */
-    public final Item getItem(ItemType itemType, int index) {
+    public Item getItem(ItemType itemType, int index) {
         switch (itemType) {
             case PARAMETER:
                 return parameters.get(index);

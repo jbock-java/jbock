@@ -40,6 +40,7 @@ public final class ParseRequest {
          * Setting this to {@code true} will cause the generated parser to skip parsing
          * and print the online documentation instead.
          *
+         * @param helpRequested {@code true} to skip parsing and print usage documentation
          * @return the builder instance
          */
         public Builder withHelpRequested(boolean helpRequested) {

@@ -9,7 +9,7 @@ import net.jbock.model.CommandModel;
 public final class HelpRequested extends NotSuccess {
 
     /**
-     * Public constructor that may be invoked from the generated code.
+     * Public constructor.
      *
      * @param commandModel command model
      */

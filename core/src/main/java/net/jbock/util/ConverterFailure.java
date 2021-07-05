@@ -1,12 +1,12 @@
 package net.jbock.util;
 
 /**
- * An instance of this class represents converter failure.
+ * Non-exceptional failure object that represents any converter failure.
  * There are a fixed number of implementations:
  *
  * <ul>
- *   <li>{@link ConverterThrewException}</li>
- *   <li>{@link ConverterReturnedNull}</li>
+ *   <li>{@link ConverterThrewException}
+ *   <li>{@link ConverterReturnedNull}
  * </ul>
  */
 public abstract class ConverterFailure {
