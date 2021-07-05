@@ -3,8 +3,10 @@ package net.jbock.util;
 import net.jbock.model.CommandModel;
 
 /**
- * Superclass of internal exceptions that may be thrown and caught
- * in the generated code.
+ * Superclass of exceptions that may be used internally
+ * in the generated code. These are checked exceptions, to
+ * ensure none of them are thrown from the generated
+ * parse method.
  */
 public abstract class ExNotSuccess extends Exception {
 

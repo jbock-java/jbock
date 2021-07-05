@@ -1,12 +1,15 @@
 package net.jbock.util;
 
 import net.jbock.model.CommandModel;
+import net.jbock.model.Item;
 
 /**
- * Indicates that a parsing error occurred that is not
- * associated with a particular item.
+ * A checked exception to signal that a parsing error has occurred
+ * that is not associated with a particular item.
  * Internal exception that may be thrown and caught
  * in the generated code.
+ *
+ * @see Item
  */
 public final class ExToken extends ExNotSuccess {
 
@@ -14,7 +17,7 @@ public final class ExToken extends ExNotSuccess {
     private final String token;
 
     /**
-     * Public constructor that may be invoked from the generated code.
+     * Public constructor.
      *
      * @param errorType error type
      * @param token offending token

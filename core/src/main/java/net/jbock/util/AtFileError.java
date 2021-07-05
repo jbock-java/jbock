@@ -5,15 +5,15 @@ import net.jbock.model.CommandModel;
 import java.nio.file.Path;
 
 /**
- * An instance of this class signals failure of a file reading operation.
+ * An instance of this class represents failure of {@code @file} expansion.
  * This is an intermediate step in the construction of an
  * {@link ErrAtFile} instance.
  *
- * <p>There are a fixed number of subclasses:</p>
+ * <p>There are a fixed number of subclasses:
  *
  * <ul>
- *   <li>{@link AtFileSyntaxError}</li>
- *   <li>{@link AtFileReadError}</li>
+ *   <li>{@link AtFileSyntaxError}
+ *   <li>{@link AtFileReadError}
  * </ul>
  */
 public abstract class AtFileError {
@@ -29,11 +29,10 @@ public abstract class AtFileError {
     }
 
     /**
-     * Add the command model.
-     * Public method that may be invoked from the generated code.
+     * Adds the command model to create a {@code NotSuccess} instance.
      *
      * @param model command model
-     * @return a failure object
+     * @return a non-exceptional failure object
      */
     public abstract NotSuccess addModel(CommandModel model);
 }

@@ -3,8 +3,10 @@ package net.jbock.util;
 import net.jbock.model.CommandModel;
 
 /**
- * Internal exception that may be thrown and caught
- * in the generated code.
+ * A checked exception to signal that a required item was
+ * missing in the command line input.
+ *
+ * @see net.jbock.model.Multiplicity#REQUIRED
  */
 public final class ExMissingItem extends ExNotSuccess {
 

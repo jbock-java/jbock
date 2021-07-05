@@ -8,11 +8,11 @@ import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 
 /**
- * Converts strings to any arbitrary type.
- * The implementing class must be public
- * and have a public default constructor.
+ * Converter that converts a string to any arbitrary type.
+ * The implementing class must be a public class with no free type variables,
+ * and have a parameterless public constructor.
  *
- * @param <T> converter output type
+ * @param <T> the type of the conversion result
  */
 public abstract class StringConverter<T> implements Function<String, Either<ConverterFailure, T>> {
 
@@ -24,11 +24,15 @@ public abstract class StringConverter<T> implements Function<String, Either<Conv
      * so it may never be invoked if no such token exists.
      * All corresponding tokens will be handled by the same
      * converter, so this method may be invoked more
-     * than once on the same instance.
-     * The implementation can throw any {@link Exception}
-     * to signal converter failure.
-     * It is an error to return {@code null} from this method.
+     * than once on the same instance, if it is bound to a
+     * repeatable item.
      *
+     * <p>The implementation is free to throw any {@link Exception}
+     * to signal a converter failure.
+     * It is an error to return a {@code null} result
+     * from this method.
+     *
+     * @see net.jbock.model.Multiplicity#REPEATABLE
      * @param token a non-null string, possibly empty
      * @return an instance of {@code T}
      * @throws Exception converter failure

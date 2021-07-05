@@ -14,10 +14,10 @@ public final class ErrToken extends NotSuccess implements HasMessage {
     private final String token;
 
     /**
-     * Public constructor that may be invoked from the generated code.
+     * Public constructor.
      *
      * @param commandModel command model
-     * @param errorType error type
+     * @param errorType specific error type
      * @param token offending token
      */
     public ErrToken(CommandModel commandModel, ErrTokenType errorType, String token) {

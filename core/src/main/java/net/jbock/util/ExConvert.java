@@ -1,11 +1,17 @@
 package net.jbock.util;
 
+import net.jbock.Option;
+import net.jbock.Parameter;
+import net.jbock.Parameters;
 import net.jbock.model.CommandModel;
 
 /**
- * Indicates that an error occurred within a particular converter.
- * Internal exception that may be thrown and caught
- * in the generated code.
+ * A checked exception to signal that an error has occurred
+ * within a particular converter.
+ *
+ * @see Option#converter()
+ * @see Parameter#converter()
+ * @see Parameters#converter()
  */
 public final class ExConvert extends ExNotSuccess {
 
@@ -14,11 +20,13 @@ public final class ExConvert extends ExNotSuccess {
     private final int itemIndex;
 
     /**
-     * Public constructor that may be invoked from the generated code.
+     * Public constructor.
      *
-     * @param failure the failure
+     * @param failure the specific failure that has occurred
      * @param itemType the item type
-     * @param itemIndex the item index
+     * @param itemIndex the index of the converted item
+     *                  within {@link CommandModel#parameters()} or
+     *                  {@link CommandModel#options()}
      */
     public ExConvert(ConverterFailure failure, ItemType itemType, int itemIndex) {
         this.failure = failure;

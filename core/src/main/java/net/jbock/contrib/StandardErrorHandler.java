@@ -110,8 +110,7 @@ public final class StandardErrorHandler {
     }
 
     /**
-     * Create an empty builder instance.
-     * Public method that may be invoked from the generated code.
+     * Creates an empty builder instance.
      *
      * @return empty builder
      */
@@ -120,11 +119,8 @@ public final class StandardErrorHandler {
     }
 
     /**
-     * <p>Public method that may be invoked from the generated code.</p>
-     *
-     * <p>This method does standard error handling like printing of
-     *    error messages, or printing standard usage documentation for
-     *    the provided {@link CommandModel}.</p>
+     * This method does standard error handling like printing
+     * error messages, or printing usage documentation.
      *
      * @param notSuccess an object describing the error condition
      * @return system return code
