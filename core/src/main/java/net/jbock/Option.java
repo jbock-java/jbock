@@ -59,10 +59,10 @@ public @interface Option {
      * A label to represent the option's argument in the usage documentation.
      * If empty, a label will be chosen based on the {@link #names}.
      *
-     * <p>Note: Mode flags, a.k.a. {@code boolean} options, do not take an argument.
+     * <p>Note: Mode flags ({@code boolean} options) do not take an argument.
      *          Their label will be ignored.
      *
-     * @return a label
+     * @return description label for the option argument
      */
     String paramLabel() default "";
 }

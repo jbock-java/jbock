@@ -50,17 +50,16 @@ public @interface Command {
 
     /**
      * If {@code true}, the generated parser will stop parsing after the
-     * last positional parameter was read,
-     * and return the remaining tokens as an array of strings.
-     * The double-dash escape sequence
-     * is then not recognized as a special token.
+     * last positional parameter was read, and return the remaining tokens
+     * as an array of strings.
      *
      * <p>The following additional rules apply when
      * {@code superCommand = true}:
      *
      * <ul>
      *   <li>There must be at least one positional parameter.
-     *   <li>Repeatable positional parameters are not allowed.
+     *   <li>{@code @Parameters} is not allowed.
+     *   <li>The parser will not recognize the double-dash escape sequence.
      * </ul>
      *
      * @return {@code true} to make this a SuperCommand
@@ -68,7 +67,8 @@ public @interface Command {
     boolean superCommand() default false;
 
     /**
-     * Disables clustering of unix short options.
+     * If {@code true}, the generated parser will not recognize
+     * clustered options, as in {@code tar -xf foo.tar}.
      *
      * @return {@code false} to disable unix clustering
      */
@@ -78,7 +78,8 @@ public @interface Command {
      * If {@code false}, the generated parser will not contain
      * the {@code parseOrExit} method.
      *
-     * @return {@code false} to skip generating {@code parseOrExit}
+     * @return {@code false} to skip generating the
+     *         {@code parseOrExit} method
      */
     boolean generateParseOrExitMethod() default true;
 }

@@ -55,7 +55,7 @@ public @interface Parameters {
      * A label for this repeatable parameter, to address it in the usage documentation.
      * If empty, a label will be chosen based on the method name.
      *
-     * @return a label
+     * @return description label for these parameters
      */
     String paramLabel() default "";
 }

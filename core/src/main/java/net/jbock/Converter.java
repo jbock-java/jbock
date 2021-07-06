@@ -22,8 +22,9 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  *   <li>The return type of the referencing method is a primitive type,
  *   and {@code M} is the corresponding boxed type.
  *   <li>The return type of the referencing method is {@code Optional<M>}.
- *   <li>The return type of the referencing method is one of the types {@code [OptionalInt, OptionalLong, OptionalDouble]},
- *   and {@code M} is the corresponding boxed primitive.
+ *   <li>The return type of the referencing method is one of the types
+ *   {@code [OptionalInt, OptionalLong, OptionalDouble]}, and {@code M}
+ *   is the corresponding (boxed) primitive.
  *   <li>The return type of the referencing method is {@code List<M>}.
  * </ul>
  */
