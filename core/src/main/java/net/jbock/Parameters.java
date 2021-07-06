@@ -9,13 +9,13 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 /**
  * Marker annotation for a <em>repeatable</em> positional parameter.
  * This parameter will capture the remaining tokens,
- * after all positional parameters have been captured.
+ * after all other positional parameters have been read.
  *
  * <ul>
- *   <li>The annotated method must be {@code abstract} and have an empty argument list.</li>
- *   <li>It must return {@link java.util.List List&lt;E&gt;}, where {@code E} is a converted type.</li>
- *   <li>There cannot be more than one repeatable positional parameter per command.</li>
- *   <li>Cannot be used when the {@link Command#superCommand()} attribute is set.</li>
+ *   <li>The annotated method must be {@code abstract} and have an empty argument list.
+ *   <li>It must return {@link java.util.List List&lt;E&gt;}, where {@code E} is a converted type.
+ *   <li>There cannot be more than one repeatable positional parameter per command.
+ *   <li>Cannot be used when the {@link Command#superCommand()} attribute is set.
  * </ul>
  */
 @Target(METHOD)
@@ -23,28 +23,23 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public @interface Parameters {
 
     /**
-     * Class of a custom converter that will be used to convert to each
-     * individual token that's captured by this parameter.
+     * Class of a custom converter for this repeatable parameter.
      * This is either a class that extends
      * {@link net.jbock.util.StringConverter StringConverter}
-     * or a {@link java.util.function.Supplier Supplier} of a string converter.
+     * or a {@link java.util.function.Supplier Supplier} of a {@code StringConverter}.
      *
      * <p>Note: The same converter instance will be used to convert
-     * all relevant tokens in the input array.
+     * each individual token.
      *
      * @return converter class or {@code Void.class}
      */
     Class<?> converter() default Void.class;
 
     /**
-     * The key that is used to find the parameter
-     * description in the internationalization message map.
-     * If no {@code descriptionKey} is defined,
-     * or the runtime message map does not contain the description key,
-     * then the {@code description} attribute will be used.
-     * If that is also empty, the method's javadoc will be used as a fallback.
+     * The key that is used to find the description for these
+     * parameters in the internationalization bundle.
      *
-     * @return key or empty string
+     * @return description key or empty string
      */
     String descriptionKey() default "";
 
@@ -57,7 +52,7 @@ public @interface Parameters {
     String[] description() default {};
 
     /**
-     * A label for these parameters, to be used in the usage documentation.
+     * A label for this repeatable parameter, to address it in the usage documentation.
      * If empty, a label will be chosen based on the method name.
      *
      * @return a label

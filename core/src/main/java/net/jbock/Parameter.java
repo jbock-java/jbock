@@ -24,10 +24,10 @@ public @interface Parameter {
     int index();
 
     /**
-     * Class of a custom converter for this parameter.
+     * Class of a custom converter for this positional parameter.
      * This is either a class that extends
      * {@link net.jbock.util.StringConverter StringConverter}
-     * or a {@link java.util.function.Supplier Supplier} of a string converter.
+     * or a {@link java.util.function.Supplier Supplier} of a {@code StringConverter}.
      *
      * @return converter class or {@code Void.class} to represent &quot;none&quot;
      */
@@ -35,14 +35,14 @@ public @interface Parameter {
 
     /**
      * The key that is used to find the parameter
-     * description in an internationalization bundle.
+     * description in the internationalization bundle.
      *
      * @return description key or empty string
      */
     String descriptionKey() default "";
 
     /**
-     * Description text to be used when generating the usage documentation.
+     * Parameter description, used when generating the usage documentation.
      * Can be overridden via {@code descriptionKey}.
      *
      * @return description text
@@ -50,7 +50,7 @@ public @interface Parameter {
     String[] description() default {};
 
     /**
-     * A label for this parameter, to be used in the usage documentation.
+     * A label for this parameter, to address it in the usage documentation.
      * If empty, a label will be chosen based on the method name.
      *
      * @return a label

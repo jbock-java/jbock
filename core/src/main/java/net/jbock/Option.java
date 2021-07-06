@@ -30,10 +30,10 @@ public @interface Option {
      * Class of a custom converter for this named option.
      * This is either a class that extends
      * {@link net.jbock.util.StringConverter StringConverter}
-     * or a {@link java.util.function.Supplier Supplier} of a string converter.
+     * or a {@link java.util.function.Supplier Supplier} of a {@code StringConverter}.
      *
      * <p>Note for repeatable options: The same converter instance
-     * will be used to convert all relevant tokens in the input array.
+     * will be used to convert each option argument.
      *
      * @return converter class or {@code Void.class}
      */
@@ -41,7 +41,7 @@ public @interface Option {
 
     /**
      * The key that is used to find the option
-     * description in an internationalization bundle.
+     * description in the internationalization bundle.
      *
      * @return key or empty string
      */
@@ -59,7 +59,8 @@ public @interface Option {
      * A label to represent the option's argument in the usage documentation.
      * If empty, a label will be chosen based on the {@link #names}.
      *
-     * <p>Note: Mode flags do not take an argument. Their label will be ignored.
+     * <p>Note: Mode flags, a.k.a. {@code boolean} options, do not take an argument.
+     *          Their label will be ignored.
      *
      * @return a label
      */
