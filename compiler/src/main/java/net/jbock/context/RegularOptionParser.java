@@ -7,7 +7,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.Constants;
-import net.jbock.common.Util;
 import net.jbock.util.ExToken;
 
 import javax.inject.Inject;
@@ -26,7 +25,7 @@ public class RegularOptionParser {
     private final NamedOptions namedOptions;
     private final CommonFields commonFields;
     private final ReadOptionArgumentMethod readOptionArgumentMethod;
-    private final Util util;
+    private final ContextUtil contextUtil;
 
     @Inject
     RegularOptionParser(
@@ -34,12 +33,12 @@ public class RegularOptionParser {
             NamedOptions namedOptions,
             CommonFields commonFields,
             ReadOptionArgumentMethod readOptionArgumentMethod,
-            Util util) {
+            ContextUtil contextUtil) {
         this.generatedTypes = generatedTypes;
         this.namedOptions = namedOptions;
         this.commonFields = commonFields;
         this.readOptionArgumentMethod = readOptionArgumentMethod;
-        this.util = util;
+        this.contextUtil = contextUtil;
     }
 
     TypeSpec define() {
@@ -56,7 +55,7 @@ public class RegularOptionParser {
         ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
         CodeBlock.Builder code = CodeBlock.builder();
         code.add("if ($N != null)\n", value).indent()
-                .addStatement(util.throwRepetitionErrorStatement(token))
+                .addStatement(contextUtil.throwRepetitionErrorStatement(token))
                 .unindent();
         code.addStatement("$N = $N($N, $N)", value, readOptionArgumentMethod.get(), token, it);
         if (namedOptions.unixClusteringSupported()) {

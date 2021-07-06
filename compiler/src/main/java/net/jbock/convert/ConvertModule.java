@@ -2,6 +2,7 @@ package net.jbock.convert;
 
 import dagger.Module;
 import dagger.Provides;
+import net.jbock.common.Constants;
 import net.jbock.common.EnumName;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
@@ -28,7 +29,6 @@ public class ConvertModule {
 
     private final TypeTool tool;
     private final SourceElement sourceElement;
-    private final Util util;
     private final Types types;
     private final SafeElements elements;
 
@@ -36,11 +36,9 @@ public class ConvertModule {
             TypeTool tool,
             Types types,
             SourceElement sourceElement,
-            Util util,
             SafeElements elements) {
         this.tool = tool;
         this.sourceElement = sourceElement;
-        this.util = util;
         this.elements = elements;
         this.types = types;
     }
@@ -53,7 +51,7 @@ public class ConvertModule {
             List<Mapped<PositionalParameter>> alreadyCreatedParams) {
         String methodName = sourceMethod.method().getSimpleName().toString();
         EnumName originalName = EnumName.create(methodName);
-        Set<String> alreadyCreated = util.concat(alreadyCreatedOptions, alreadyCreatedParams)
+        Set<String> alreadyCreated = Constants.concat(alreadyCreatedOptions, alreadyCreatedParams)
                 .stream()
                 .map(Mapped::enumName)
                 .map(EnumName::enumConstant)

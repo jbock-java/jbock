@@ -1,7 +1,7 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
-import net.jbock.common.Util;
+import net.jbock.common.Constants;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.AbstractItem;
@@ -22,12 +22,10 @@ import static io.jbock.util.Either.right;
 public class ParamsFactory {
 
     private final SourceElement sourceElement;
-    private final Util util;
 
     @Inject
-    ParamsFactory(SourceElement sourceElement, Util util) {
+    ParamsFactory(SourceElement sourceElement) {
         this.sourceElement = sourceElement;
-        this.util = util;
     }
 
     Either<List<ValidationFailure>, Items> create(
@@ -45,7 +43,7 @@ public class ParamsFactory {
             List<Mapped<PositionalParameter>> positionalParams) {
         List<ValidationFailure> failures = new ArrayList<>();
         List<Mapped<? extends AbstractItem>> abstractParameters =
-                util.concat(namedOptions, positionalParams);
+                Constants.concat(namedOptions, positionalParams);
         Set<String> keys = new HashSet<>();
         sourceElement.descriptionKey().ifPresent(keys::add);
         for (Mapped<? extends AbstractItem> c : abstractParameters) {

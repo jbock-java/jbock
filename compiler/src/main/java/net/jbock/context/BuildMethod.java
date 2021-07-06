@@ -3,7 +3,6 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.common.Util;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
@@ -30,7 +29,7 @@ public class BuildMethod extends CachedMethod {
     private final NamedOptions namedOptions;
     private final PositionalParameters positionalParameters;
     private final CommonFields commonFields;
-    private final Util util;
+    private final ContextUtil contextUtil;
     private final ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
 
     @Inject
@@ -40,13 +39,13 @@ public class BuildMethod extends CachedMethod {
             NamedOptions namedOptions,
             PositionalParameters positionalParameters,
             CommonFields commonFields,
-            Util util) {
+            ContextUtil contextUtil) {
         this.generatedTypes = generatedTypes;
         this.sourceElement = sourceElement;
         this.namedOptions = namedOptions;
         this.positionalParameters = positionalParameters;
         this.commonFields = commonFields;
-        this.util = util;
+        this.contextUtil = contextUtil;
     }
 
     @Override
@@ -96,7 +95,7 @@ public class BuildMethod extends CachedMethod {
         positionalParameters.repeatable()
                 .map(c -> CodeBlock.of("$N", c.asParam()))
                 .ifPresent(code::add);
-        return util.joinByComma(code);
+        return contextUtil.joinByComma(code);
     }
 
     private CodeBlock convertExpressionOption(Mapped<NamedOption> c, int i) {
@@ -109,7 +108,7 @@ public class BuildMethod extends CachedMethod {
         }
         code.addAll(tailExpressionOption(c, i));
         c.extractExpr().ifPresent(code::add);
-        return util.joinByNewline(code);
+        return contextUtil.joinByNewline(code);
     }
 
     private CodeBlock convertExpressionRegularParameter(Mapped<PositionalParameter> c, int i) {
@@ -120,7 +119,7 @@ public class BuildMethod extends CachedMethod {
                 .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
         code.addAll(tailExpressionParameter(c, i));
         c.extractExpr().ifPresent(code::add);
-        return util.joinByNewline(code);
+        return contextUtil.joinByNewline(code);
     }
 
     private CodeBlock convertExpressionRepeatableParameter(Mapped<PositionalParameter> c) {
@@ -130,7 +129,7 @@ public class BuildMethod extends CachedMethod {
                 .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
         code.add(CodeBlock.of(".collect($T.toValidList())", EITHER));
         code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.regular().size()));
-        return util.joinByNewline(code);
+        return contextUtil.joinByNewline(code);
     }
 
     private List<CodeBlock> tailExpressionOption(Mapped<NamedOption> c, int i) {

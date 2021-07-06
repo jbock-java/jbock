@@ -4,7 +4,6 @@ import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.common.EnumName;
-import net.jbock.common.SafeElements;
 import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.Modifier;

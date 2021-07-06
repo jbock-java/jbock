@@ -3,7 +3,6 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.common.Util;
 import net.jbock.convert.Mapped;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Multiplicity;
@@ -24,18 +23,18 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 @ContextScope
 public class CreateModelMethod extends CachedMethod {
 
-    private final Util util;
+    private final ContextUtil contextUtil;
     private final SourceElement sourceElement;
     private final NamedOptions namedOptions;
     private final PositionalParameters positionalParameters;
 
     @Inject
     CreateModelMethod(
-            Util util,
+            ContextUtil contextUtil,
             SourceElement sourceElement,
             NamedOptions namedOptions,
             PositionalParameters positionalParameters) {
-        this.util = util;
+        this.contextUtil = contextUtil;
         this.sourceElement = sourceElement;
         this.namedOptions = namedOptions;
         this.positionalParameters = positionalParameters;
@@ -66,7 +65,7 @@ public class CreateModelMethod extends CachedMethod {
         }
         code.add(CodeBlock.of(".build()"));
         return methodBuilder("createModel")
-                .addStatement(util.joinByNewline(code))
+                .addStatement(contextUtil.joinByNewline(code))
                 .returns(CommandModel.class)
                 .addModifiers(PRIVATE)
                 .addParameter(request)
@@ -82,7 +81,7 @@ public class CreateModelMethod extends CachedMethod {
         code.add(CodeBlock.of("$T.builder()", Option.class));
         code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
         c.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
-        code.add(CodeBlock.of(".withNames($T.of($L))", List.class, util.joinByComma(names)));
+        code.add(CodeBlock.of(".withNames($T.of($L))", List.class, contextUtil.joinByComma(names)));
         if (c.isFlag()) {
             code.add(CodeBlock.of(".withModeFlag()"));
         } else if (c.multiplicity() != Multiplicity.OPTIONAL) {
@@ -92,7 +91,7 @@ public class CreateModelMethod extends CachedMethod {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
-        return util.joinByNewline(code);
+        return contextUtil.joinByNewline(code);
     }
 
     private CodeBlock parameterBlock(Mapped<PositionalParameter> c) {
@@ -107,6 +106,6 @@ public class CreateModelMethod extends CachedMethod {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
-        return util.joinByNewline(code);
+        return contextUtil.joinByNewline(code);
     }
 }

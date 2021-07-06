@@ -6,7 +6,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.Constants;
-import net.jbock.common.Util;
 import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
@@ -23,18 +22,18 @@ public class FlagParser {
     private final GeneratedTypes generatedTypes;
     private final NamedOptions namedOptions;
     private final CommonFields commonFields;
-    private final Util util;
+    private final ContextUtil contextUtil;
 
     @Inject
     FlagParser(
             GeneratedTypes generatedTypes,
             NamedOptions namedOptions,
             CommonFields commonFields,
-            Util util) {
+            ContextUtil contextUtil) {
         this.generatedTypes = generatedTypes;
         this.namedOptions = namedOptions;
         this.commonFields = commonFields;
-        this.util = util;
+        this.contextUtil = contextUtil;
     }
 
     TypeSpec define() {
@@ -61,7 +60,7 @@ public class FlagParser {
     private CodeBlock readMethodFlagCodeClustering(ParameterSpec token) {
         CodeBlock.Builder code = CodeBlock.builder();
         code.add("if ($N)\n", commonFields.seen()).indent()
-                .addStatement(util.throwRepetitionErrorStatement(token))
+                .addStatement(contextUtil.throwRepetitionErrorStatement(token))
                 .unindent();
         code.addStatement("$N = $L", commonFields.seen(), true);
         code.add("if ($1N.startsWith($2S) || $1N.length() == 2)\n", token, "--").indent()
@@ -78,7 +77,7 @@ public class FlagParser {
                         ErrTokenType.INVALID_OPTION, token)
                 .unindent();
         code.add("if ($N)\n", commonFields.seen()).indent()
-                .addStatement(util.throwRepetitionErrorStatement(token))
+                .addStatement(contextUtil.throwRepetitionErrorStatement(token))
                 .unindent();
         code.addStatement("$N = $L", commonFields.seen(), true);
         return code.build();

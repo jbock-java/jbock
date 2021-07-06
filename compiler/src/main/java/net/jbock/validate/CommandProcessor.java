@@ -4,7 +4,6 @@ import com.squareup.javapoet.TypeSpec;
 import io.jbock.util.Either;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
-import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.context.ContextModule;
 import net.jbock.context.DaggerContextComponent;
@@ -32,7 +31,6 @@ public class CommandProcessor {
     private final Types types;
     private final ParamsFactory paramsFactory;
     private final MethodsFactory methodsFactory;
-    private final Util util;
 
     @Inject
     CommandProcessor(
@@ -41,15 +39,13 @@ public class CommandProcessor {
             TypeTool tool,
             Types types,
             ParamsFactory paramsFactory,
-            MethodsFactory methodsFactory,
-            Util util) {
+            MethodsFactory methodsFactory) {
         this.sourceElement = sourceElement;
         this.elements = elements;
         this.tool = tool;
         this.types = types;
         this.paramsFactory = paramsFactory;
         this.methodsFactory = methodsFactory;
-        this.util = util;
     }
 
     public Either<List<ValidationFailure>, TypeSpec> generate() {
@@ -103,11 +99,11 @@ public class CommandProcessor {
     }
 
     private ConvertModule parameterModule() {
-        return new ConvertModule(tool, types, sourceElement, util, elements);
+        return new ConvertModule(tool, types, sourceElement, elements);
     }
 
     private ContextModule contextModule(Items items) {
-        return new ContextModule(sourceElement, elements, items.positionalParams(),
-                items.namedOptions(), types);
+        return new ContextModule(sourceElement, items.positionalParams(),
+                items.namedOptions());
     }
 }
