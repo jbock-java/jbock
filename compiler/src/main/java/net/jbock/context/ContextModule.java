@@ -43,12 +43,6 @@ public class ContextModule {
 
     @ContextScope
     @Provides
-    SafeElements elements() {
-        return elements;
-    }
-
-    @ContextScope
-    @Provides
     PositionalParameters positionalParameters() {
         return PositionalParameters.create(positionalParams);
     }

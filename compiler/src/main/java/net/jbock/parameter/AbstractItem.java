@@ -27,8 +27,8 @@ public abstract class AbstractItem {
         this.enumName = enumName;
     }
 
-    public final List<String> description(SafeElements elements) {
-        return sourceMethod.description(elements);
+    public final List<String> description() {
+        return sourceMethod.description();
     }
 
     public final String methodName() {

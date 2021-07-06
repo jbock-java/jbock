@@ -3,7 +3,6 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.common.SafeElements;
 import net.jbock.common.Util;
 import net.jbock.convert.Mapped;
 import net.jbock.model.CommandModel;
@@ -29,20 +28,17 @@ public class CreateModelMethod extends CachedMethod {
     private final SourceElement sourceElement;
     private final NamedOptions namedOptions;
     private final PositionalParameters positionalParameters;
-    private final SafeElements elements;
 
     @Inject
     CreateModelMethod(
             Util util,
             SourceElement sourceElement,
             NamedOptions namedOptions,
-            PositionalParameters positionalParameters,
-            SafeElements elements) {
+            PositionalParameters positionalParameters) {
         this.util = util;
         this.sourceElement = sourceElement;
         this.namedOptions = namedOptions;
         this.positionalParameters = positionalParameters;
-        this.elements = elements;
     }
 
     @Override
@@ -52,7 +48,7 @@ public class CreateModelMethod extends CachedMethod {
         code.add(CodeBlock.of("return $T.builder($N)", CommandModel.class, request));
         sourceElement.descriptionKey().ifPresent(key ->
                 code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
-        for (String descriptionLine : sourceElement.description(elements)) {
+        for (String descriptionLine : sourceElement.description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", descriptionLine));
         }
         code.add(CodeBlock.of(".withProgramName($S)", sourceElement.programName()));
@@ -92,7 +88,7 @@ public class CreateModelMethod extends CachedMethod {
         } else if (c.multiplicity() != Multiplicity.OPTIONAL) {
             code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
         }
-        for (String line : c.item().description(elements)) {
+        for (String line : c.item().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
@@ -107,7 +103,7 @@ public class CreateModelMethod extends CachedMethod {
         if (c.multiplicity() != Multiplicity.REQUIRED) {
             code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
         }
-        for (String line : c.item().description(elements)) {
+        for (String line : c.item().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));

@@ -4,7 +4,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Command;
 import net.jbock.common.Descriptions;
-import net.jbock.common.SafeElements;
 import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;
 
@@ -98,9 +97,8 @@ public class SourceElement {
         return Descriptions.optionalString(get().descriptionKey());
     }
 
-    public List<String> description(SafeElements elements) {
-        String[] description = get().description();
-        return Descriptions.getDescription(sourceElement, elements, description);
+    public List<String> description() {
+        return List.of(get().description());
     }
 
     public boolean unixClustering() {
