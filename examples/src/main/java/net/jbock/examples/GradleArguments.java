@@ -9,47 +9,38 @@ import net.jbock.Parameters;
 import java.util.List;
 import java.util.Optional;
 
-@Command(unixClustering = true)
+@Command
 abstract class GradleArguments {
 
-    /**
-     * the message
-     * message goes here
-     */
-    @Option(names = {"--message", "-m"})
+    @Option(names = {"--message", "-m"},
+            description = {"the message", "message goes here"})
     abstract Optional<String> message();
 
-    /**
-     * the files
-     */
-    @Option(names = {"--file", "-f"}, paramLabel = "INPUT_FILE")
+    @Option(names = {"--file", "-f"},
+            paramLabel = "INPUT_FILE",
+            description = "the files")
     abstract List<String> file();
 
-    /**
-     * the dir
-     */
-    @Option(names = "--dir", paramLabel = "INPUT_DIR")
+    @Option(names = "--dir",
+            paramLabel = "INPUT_DIR",
+            description = "the dir")
     abstract Optional<String> dir();
 
-    /**
-     * cmos flag
-     */
-    @Option(names = {"--c", "-c"}, paramLabel = "THIS_IS_IGNORED")
+    @Option(names = {"--c", "-c"},
+            paramLabel = "THIS_IS_IGNORED",
+            description = "cmos flag")
     abstract boolean cmos();
 
     @Option(names = {"--verbose", "-v"})
     abstract boolean verbose();
 
-    /**
-     * some token
-     */
-    @Parameter(index = 0, paramLabel = "SOME_TOKEN")
+    @Parameter(index = 0,
+            paramLabel = "SOME_TOKEN",
+            description = "some token")
     abstract Optional<String> mainToken();
 
-    /**
-     * some more tokens
-     */
-    @Parameters(paramLabel = "moreTokens")
+    @Parameters(paramLabel = "moreTokens",
+            description = "some more tokens")
     abstract List<String> otherTokens();
 
     @Command

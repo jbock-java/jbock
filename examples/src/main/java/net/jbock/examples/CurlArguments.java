@@ -7,32 +7,25 @@ import net.jbock.Parameters;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * curl  is  a  tool  to  transfer data from or to a server
- * using one of the supported protocols.
- * curl offers a busload of useful tricks.
- * curl is powered by libcurl for all transfer-related features.
- * See libcurl(3) for details.
- */
-@Command(name = "curl")
+@Command(name = "curl",
+        description = {
+                "curl  is  a  tool  to  transfer data from or to a server",
+                "using one of the supported protocols.",
+                "curl offers a busload of useful tricks.",
+                "curl is powered by libcurl for all transfer-related features.",
+                "See libcurl(3) for details."})
 abstract class CurlArguments {
 
-    /**
-     * Optional<String> for regular arguments
-     */
-    @Option(names = {"--request", "-X"})
+    @Option(names = {"--request", "-X"},
+            description = "Optional<String> for regular arguments")
     abstract Optional<String> method();
 
-    /**
-     * List<String> for repeatable arguments
-     */
-    @Option(names = {"--header", "-H"})
+    @Option(names = {"--header", "-H"},
+            description = "List<String> for repeatable arguments")
     abstract List<String> headers();
 
-    /**
-     * boolean for flags
-     */
-    @Option(names = {"--verbose", "-v"})
+    @Option(names = {"--verbose", "-v"},
+            description = "boolean for flags")
     abstract boolean verbose();
 
     @Option(names = {"--include", "-i"})

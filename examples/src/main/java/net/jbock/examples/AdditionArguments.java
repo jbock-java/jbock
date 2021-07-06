@@ -15,22 +15,13 @@ abstract class AdditionArguments {
     AdditionArguments(String s) throws IOException {
     }
 
-    /**
-     * First argument
-     */
-    @Parameter(index = 0)
+    @Parameter(index = 0, description = "First argument")
     abstract int a() throws IllegalStateException;
 
-    /**
-     * Second argument
-     */
-    @Parameter(index = 1)
+    @Parameter(index = 1, description = "Second argument")
     abstract int b();
 
-    /**
-     * Optional third argument
-     */
-    @Parameter(index = 2)
+    @Parameter(index = 2, description = {"Optional", "third", "argument"})
     abstract Optional<Integer> c();
 
     final int sum() {

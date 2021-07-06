@@ -61,7 +61,7 @@ public final class ParserTestFixture<E> {
         assertTrue(result.isLeft());
         result.acceptLeft(l -> {
             String[] actual = getUsageDocumentation(l, messages);
-            assertEquals(expected, actual);
+            assertArraysEquals(expected, actual);
         });
     }
 
@@ -74,10 +74,6 @@ public final class ParserTestFixture<E> {
                 .build();
         return parser.apply(request)
                 .orElseThrow(l -> new RuntimeException("expecting success but found " + l.getClass()));
-    }
-
-    static void assertEquals(String[] actual, String... expected) {
-        assertArraysEquals(expected, actual);
     }
 
     static void assertArraysEquals(String[] expected, String[] actual) {

@@ -13,10 +13,7 @@ abstract class PositionalArguments {
     @Parameter(index = 0)
     abstract String source();
 
-    /**
-     * Desc of dest.
-     */
-    @Parameter(index = 1)
+    @Parameter(index = 1, description = "Desc of dest.")
     abstract String dest();
 
     @Parameter(index = 2)

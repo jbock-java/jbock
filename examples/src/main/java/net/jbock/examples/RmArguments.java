@@ -10,27 +10,22 @@ import java.util.List;
 abstract class RmArguments {
 
     /**
-     * ALLES TURISTEN UND NONTEKNISCHEN LOOKENSPEEPERS!
-     * DAS KOMPUTERMASCHINE IST NICHT FUR DER GEFINGERPOKEN UND MITTENGRABEN!
-     * ODERWISE IST EASY TO SCHNAPPEN DER SPRINGENWERK, BLOWENFUSEN UND POPPENCORKEN MIT SPITZENSPARKEN.
-     * IST NICHT FUR GEWERKEN BEI DUMMKOPFEN.
-     * DER RUBBERNECKEN SIGHTSEEREN KEEPEN DAS COTTONPICKEN HANDER IN DAS POCKETS MUSS.
-     * ZO RELAXEN UND WATSCHEN DER BLINKENLICHTEN.
-     *
      * @return a boolean
      */
-    @Option(names = {"--recursive", "-r"})
+    @Option(names = {"--recursive", "-r"},
+            description = {
+                    "ALLES TURISTEN UND NONTEKNISCHEN LOOKENSPEEPERS!",
+                    "DAS KOMPUTERMASCHINE IST NICHT FUR DER GEFINGERPOKEN UND MITTENGRABEN!",
+                    "ODERWISE IST EASY TO SCHNAPPEN DER SPRINGENWERK, BLOWENFUSEN UND POPPENCORKEN MIT SPITZENSPARKEN.",
+                    "IST NICHT FUR GEWERKEN BEI DUMMKOPFEN.",
+                    "DER RUBBERNECKEN SIGHTSEEREN KEEPEN DAS COTTONPICKEN HANDER IN DAS POCKETS MUSS.",
+                    "ZO RELAXEN UND WATSCHEN DER BLINKENLICHTEN."})
     abstract boolean recursive();
 
-    /**
-     * Use the force, Luke.
-     */
-    @Option(names = {"--force", "-f"})
+    @Option(names = {"--force", "-f"},
+            description = "Use the force, Luke.")
     abstract boolean force();
 
-    /**
-     * This is a list that may be empty.
-     */
-    @Parameters
+    @Parameters(description = "This is a list that may be empty.")
     abstract List<String> otherTokens();
 }

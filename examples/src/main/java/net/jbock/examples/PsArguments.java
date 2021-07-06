@@ -11,9 +11,7 @@ abstract class PsArguments {
     @Option(names = {"--all", "-a"})
     abstract boolean all();
 
-    /**
-     * This is the description.
-     */
-    @Option(names = {"--width", "-w"})
+    @Option(names = {"--width", "-w"},
+            description = "This is the description.")
     abstract Optional<Integer> width();
 }

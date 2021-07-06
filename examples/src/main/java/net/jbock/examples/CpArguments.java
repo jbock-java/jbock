@@ -28,10 +28,7 @@ abstract class CpArguments {
     @Option(names = "--backup")
     abstract Optional<Control> backup();
 
-
-    /**
-     * Override the usual backup suffix
-     */
-    @Option(names = {"--suffix", "-s"})
+    @Option(names = {"--suffix", "-s"},
+            description = "Override the usual backup suffix")
     abstract Optional<String> suffix();
 }
