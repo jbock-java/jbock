@@ -8,9 +8,9 @@ It is an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
 that generates custom parsing code at compile time. jbock requires Java 11.
 
-### Quick overview
+### Quick start
 
-To get started, create an abstract class, or alternatively a Java interface,
+Create an abstract class, or alternatively a Java interface,
 and add the `@Command` annotation.
 In this class or interface, each abstract method corresponds either to a *named option* or a *positional parameter*.
 
