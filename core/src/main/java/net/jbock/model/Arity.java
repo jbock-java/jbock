@@ -1,11 +1,14 @@
 package net.jbock.model;
 
 /**
- * The number of arguments an {@link Option} takes,
- * per occurrence of the option name in the input array.
+ * Arity is the expected number of arguments of a unary named option,
+ * per occurrence of the option name in the command line input.
  *
- * <p>Note: A unary option can have the multiplicity
- * {@link Multiplicity#REPEATABLE REPEATABLE}.
+ * <p>Note: A unary option can still take multiple arguments:
+ *          Return {@code List<?>} from the item method
+ *          to declare a repeatable option.
+ *
+ * @see Multiplicity
  */
 public enum Arity {
 

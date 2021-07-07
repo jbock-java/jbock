@@ -5,11 +5,16 @@ import net.jbock.util.ItemType;
 import java.util.List;
 
 /**
- * Abstract superclass of {@link Option} and {@link Parameter}.
+ * This class is part of the command model.
+ * It represents an abstract method in the command class.
  *
- * @see net.jbock.Option
- * @see net.jbock.Parameter
- * @see net.jbock.Parameters
+ * <p>There are a fixed number of subclasses:
+ * <ul>
+ *     <li>{@link Option}
+ *     <li>{@link Parameter}
+ * </ul>
+ *
+ * @see net.jbock.Command
  */
 public abstract class Item {
 

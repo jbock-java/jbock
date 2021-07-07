@@ -1,8 +1,6 @@
 package net.jbock.parameter;
 
 import com.squareup.javapoet.TypeName;
-import net.jbock.Option;
-import net.jbock.Parameter;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 
@@ -10,10 +8,6 @@ import javax.lang.model.element.Modifier;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * This class represents an {@code abstract} Method in the command class,
- * which can be either an {@link Option} or a {@link Parameter}.
- */
 public abstract class AbstractItem {
 
     private final SourceMethod sourceMethod;

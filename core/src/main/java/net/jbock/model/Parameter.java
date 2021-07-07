@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Runtime model for a positional parameter.
+ * This class is part of the command model.
+ * It represents a positional parameter.
  *
  * @see net.jbock.Parameter
  * @see net.jbock.Parameters
+ * @see CommandModel
  */
 public final class Parameter extends Item {
 
@@ -33,7 +35,7 @@ public final class Parameter extends Item {
     }
 
     /**
-     * Builder for a {@link Parameter}.
+     * Builder for a {@code Parameter}.
      */
     public static final class Builder {
 

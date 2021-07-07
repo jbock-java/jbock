@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Runtime model for a named option or a mode flag.
+ * This class is part of the command model.
+ * It represents a named option or a mode flag.
  *
  * @see net.jbock.Option
+ * @see CommandModel
  */
 public final class Option extends Item {
 
@@ -41,7 +43,7 @@ public final class Option extends Item {
     }
 
     /**
-     * Builder for an {@link Option}.
+     * Builder for an {@code Option}.
      */
     public static final class Builder {
 

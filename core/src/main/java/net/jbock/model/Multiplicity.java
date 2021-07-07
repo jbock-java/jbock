@@ -1,7 +1,7 @@
 package net.jbock.model;
 
 /**
- * Restricts the number of times an {@link Item} may
+ * A restriction on the number of times an {@link Item} can
  * appear in the command line input.
  */
 public enum Multiplicity {
