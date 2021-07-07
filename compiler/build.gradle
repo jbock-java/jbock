@@ -50,7 +50,7 @@ shadowJar {
 }
 
 dependencies {
-    def core = project(':core')
+    def core = 'io.github.jbock-java:jbock:5.3'
     implementation('io.github.jbock-java:either:1.1')
     implementation('com.squareup:javapoet:1.13.0')
     implementation('com.google.auto:auto-common:1.0')
