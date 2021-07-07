@@ -14,15 +14,6 @@ fi
 
 MODULE="$1"
 VERSION="$2"
-TAG_PREFIX=""
-
-if [[ "$MODULE" == "core" ]]; then
-  TAG_PREFIX="core"
-elif [[ "$MODULE" == "compiler" ]]; then
-  TAG_PREFIX="compiler"
-else
-  die "$usage"
-fi
 
 if [[ -z "$VERSION" ]]; then
   die "$usage"
@@ -32,9 +23,14 @@ git pull origin $(git rev-parse --abbrev-ref HEAD)
 ./gradlew clean compiler:test examples:test
 ./gradlew -Pversion=${VERSION} ${MODULE}:publish
 
+if [[ "compiler" != "$MODULE" ]]; then
+  echo "Upload successful."
+  exit
+fi
+
 read -e -p "Upload successful. Also tag? [y/N]"
 if [[ "$REPLY" == [Yy]* ]]; then
-  git tag "${TAG_PREFIX}_${VERSION}"
+  git tag "v${VERSION}"
   git push origin --tags
 fi
 
