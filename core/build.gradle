@@ -34,7 +34,7 @@ tasks.withType(GenerateModuleMetadata) {
 }
 
 dependencies {
-    api('io.github.jbock-java:either:1.1')
+    api('io.github.jbock-java:either:1.2')
     testImplementation('org.junit.jupiter:junit-jupiter:5.7.1')
 }
 

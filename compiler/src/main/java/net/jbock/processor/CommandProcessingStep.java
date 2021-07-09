@@ -73,7 +73,9 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         elementsByAnnotation.forEach((annotationName, element) ->
                 ElementFilter.typesIn(List.of(element)).stream()
                         .map(this::validateSourceElement)
-                        .forEach(either -> either.accept(this::printFailures, this::processSourceElement)));
+                        .forEach(either -> either.ifPresentOrElse(
+                                this::printFailures,
+                                this::processSourceElement)));
         return Set.of();
     }
 
@@ -88,8 +90,9 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
                 .module(new ValidateModule(types, elements))
                 .create();
         component.processor().generate()
-                .accept(this::printFailures, type ->
-                        sourceFileGenerator.write(sourceElement, type));
+                .ifPresentOrElse(
+                        this::printFailures,
+                        type -> sourceFileGenerator.write(sourceElement, type));
     }
 
     private Either<List<ValidationFailure>, SourceElement> validateSourceElement(

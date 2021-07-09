@@ -29,6 +29,6 @@ class OptionalIntArgumentsTest {
         ParseRequest request = ParseRequest.simple(List.of()).withHelpRequested(true).build();
         Either<NotSuccess, OptionalIntArguments> result = parser.parse(request);
         assertTrue(result.isLeft());
-        result.acceptLeft(l -> assertTrue(l instanceof HelpRequested));
+        result.getLeft().ifPresent(l -> assertTrue(l instanceof HelpRequested));
     }
 }

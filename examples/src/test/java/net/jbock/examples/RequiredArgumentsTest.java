@@ -31,7 +31,7 @@ class RequiredArgumentsTest {
         ParseRequest request = ParseRequest.simple(List.of()).withHelpRequested(true).build();
         Either<NotSuccess, RequiredArguments> result = new RequiredArgumentsParser().parse(request);
         Assertions.assertTrue(result.isLeft());
-        result.acceptLeft(l -> assertTrue(l instanceof HelpRequested));
+        result.getLeft().ifPresent(l -> assertTrue(l instanceof HelpRequested));
     }
 
     @Test

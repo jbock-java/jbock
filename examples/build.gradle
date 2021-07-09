@@ -21,7 +21,7 @@ compileJava {
 dependencies {
     def core = project(':core')
     implementation(core)
-    implementation('io.github.jbock-java:either:1.1')
+    implementation('io.github.jbock-java:either:1.2')
     implementation 'io.vavr:vavr:1.0.0-alpha-3'
     annotationProcessor project(':compiler')
     annotationProcessor(core)
