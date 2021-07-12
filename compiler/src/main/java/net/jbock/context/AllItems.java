@@ -28,7 +28,7 @@ final class AllItems {
         return new AllItems(Constants.concat(namedOptions, positionalParams), anyRequired);
     }
 
-    public List<Mapped<? extends AbstractItem>> items() {
+    List<Mapped<? extends AbstractItem>> items() {
         return items;
     }
 

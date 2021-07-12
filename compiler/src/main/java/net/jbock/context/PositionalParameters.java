@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class PositionalParameters {
+class PositionalParameters {
 
     private final List<Mapped<PositionalParameter>> regular; // (optional|required)
     private final Optional<Mapped<PositionalParameter>> repeatable;
@@ -20,7 +20,7 @@ public class PositionalParameters {
         this.repeatable = repeatable;
     }
 
-    public static PositionalParameters create(List<Mapped<PositionalParameter>> all) {
+    static PositionalParameters create(List<Mapped<PositionalParameter>> all) {
         List<Mapped<PositionalParameter>> regular = all.stream()
                 .filter(c -> !c.isRepeatable())
                 .collect(Collectors.toUnmodifiableList());
@@ -30,11 +30,11 @@ public class PositionalParameters {
         return new PositionalParameters(regular, repeatable);
     }
 
-    public List<Mapped<PositionalParameter>> regular() {
+    List<Mapped<PositionalParameter>> regular() {
         return regular;
     }
 
-    public List<Mapped<PositionalParameter>> parameters() {
+    List<Mapped<PositionalParameter>> parameters() {
         if (repeatable.isEmpty()) {
             return regular;
         }
@@ -44,19 +44,19 @@ public class PositionalParameters {
         return result;
     }
 
-    public int size() {
+    int size() {
         return regular().size() + (anyRepeatable() ? 1 : 0);
     }
 
-    public Optional<Mapped<PositionalParameter>> repeatable() {
+    Optional<Mapped<PositionalParameter>> repeatable() {
         return repeatable;
     }
 
-    public boolean anyRepeatable() {
+    boolean anyRepeatable() {
         return repeatable.isPresent();
     }
 
-    public boolean isEmpty() {
+    boolean isEmpty() {
         return regular.isEmpty() && !anyRepeatable();
     }
 }
