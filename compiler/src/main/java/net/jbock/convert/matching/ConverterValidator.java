@@ -2,7 +2,6 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import io.jbock.util.Either;
-import io.jbock.util.LeftOptional;
 import net.jbock.Converter;
 import net.jbock.common.Util;
 import net.jbock.convert.Mapped;
@@ -62,9 +61,8 @@ public class ConverterValidator extends MatchValidator {
                 .or(() -> checkNotAbstract(converter))
                 .or(() -> checkNoTypevars(converter))
                 .or(() -> checkConverterAnnotationPresent(converter))
-                .map(LeftOptional::of)
-                .orElse(LeftOptional.empty())
-                .flatMapRight(() -> referenceTool.getReferencedType(converter))
+                .<Either<String, StringConverterType>>map(Either::left)
+                .orElseGet(() -> referenceTool.getReferencedType(converter))
                 .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
     }
 
@@ -80,7 +78,8 @@ public class ConverterValidator extends MatchValidator {
             if (match.isPresent()) {
                 Match m = match.orElseThrow();
                 return validateMatch(m)
-                        .orElseRight(() -> getMapExpr(functionType, converter))
+                        .<Either<String, CodeBlock>>map(Either::left)
+                        .orElseGet(() -> Either.right(getMapExpr(functionType, converter)))
                         .map(code -> new MapExpr(code, m.baseType(), false))
                         .map(mapExpr -> m.toConvertedParameter(mapExpr, parameter));
             }

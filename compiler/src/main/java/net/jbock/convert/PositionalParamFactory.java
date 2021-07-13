@@ -1,7 +1,6 @@
 package net.jbock.convert;
 
 import io.jbock.util.Either;
-import io.jbock.util.LeftOptional;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.parameter.PositionalParameter;
@@ -61,9 +60,8 @@ public class PositionalParamFactory {
                 .filter(Mapped::isRepeatable)
                 .map(p -> "positional parameter " + p.paramLabel() + " is also repeatable")
                 .findAny()
-                .map(LeftOptional::of)
-                .orElse(LeftOptional.empty())
-                .orElseRight(() -> c);
+                .<Either<String, Mapped<PositionalParameter>>>map(Either::left)
+                .orElseGet(() -> Either.right(c));
     }
 
     private Either<String, Mapped<PositionalParameter>> checkPositionNotNegative(

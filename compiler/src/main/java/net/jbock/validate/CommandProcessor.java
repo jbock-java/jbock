@@ -70,7 +70,7 @@ public class CommandProcessor {
                     .build()
                     .namedOptionFactory()
                     .createNamedOption()
-                    .ifPresentOrElse(failures::add, namedOptions::add);
+                    .ifLeftOrElse(failures::add, namedOptions::add);
         }
         if (!failures.isEmpty()) {
             return left(failures);
@@ -90,7 +90,7 @@ public class CommandProcessor {
                     .build()
                     .positionalParameterFactory()
                     .createPositionalParam(sourceMethod.index().orElse(methods.positionalParameters().size() - 1))
-                    .ifPresentOrElse(failures::add, positionalParams::add);
+                    .ifLeftOrElse(failures::add, positionalParams::add);
         }
         if (!failures.isEmpty()) {
             return left(failures);

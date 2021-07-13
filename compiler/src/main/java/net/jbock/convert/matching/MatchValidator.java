@@ -1,10 +1,11 @@
 package net.jbock.convert.matching;
 
-import io.jbock.util.LeftOptional;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.model.Multiplicity;
 import net.jbock.validate.ParameterStyle;
+
+import java.util.Optional;
 
 abstract class MatchValidator {
 
@@ -14,15 +15,17 @@ abstract class MatchValidator {
         this.parameterStyle = parameterStyle;
     }
 
-    LeftOptional<String> validateMatch(Match m) {
+    /* Left-Optional
+     */
+    Optional<String> validateMatch(Match m) {
         if (parameterStyle == ParameterStyle.PARAMETER
                 && m.multiplicity() == Multiplicity.REPEATABLE) {
-            return LeftOptional.of("use @" + Parameters.class.getSimpleName() + " here");
+            return Optional.of("use @" + Parameters.class.getSimpleName() + " here");
         }
         if (parameterStyle == ParameterStyle.PARAMETERS
                 && m.multiplicity() != Multiplicity.REPEATABLE) {
-            return LeftOptional.of("use @" + Parameter.class.getSimpleName() + " here");
+            return Optional.of("use @" + Parameter.class.getSimpleName() + " here");
         }
-        return LeftOptional.empty();
+        return Optional.empty();
     }
 }

@@ -3,7 +3,6 @@ package net.jbock.processor;
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
 import io.jbock.util.Either;
-import io.jbock.util.LeftOptional;
 import net.jbock.Command;
 import net.jbock.common.Annotations;
 import net.jbock.common.OperationMode;
@@ -73,7 +72,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         elementsByAnnotation.forEach((annotationName, element) ->
                 ElementFilter.typesIn(List.of(element)).stream()
                         .map(this::validateSourceElement)
-                        .forEach(either -> either.ifPresentOrElse(
+                        .forEach(either -> either.ifLeftOrElse(
                                 this::printFailures,
                                 this::processSourceElement)));
         return Set.of();
@@ -90,7 +89,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
                 .module(new ValidateModule(types, elements))
                 .create();
         component.processor().generate()
-                .ifPresentOrElse(
+                .ifLeftOrElse(
                         this::printFailures,
                         type -> sourceFileGenerator.write(sourceElement, type));
     }
@@ -102,9 +101,8 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
                         Annotations.typeLevelAnnotations()))
                 .map(s -> new ValidationFailure(s, element))
                 .map(List::of)
-                .map(LeftOptional::of)
-                .orElse(LeftOptional.empty())
-                .orElseRight(() -> SourceElement.create(element));
+                .<Either<List<ValidationFailure>, SourceElement>>map(Either::left)
+                .orElseGet(() -> Either.right(SourceElement.create(element)));
     }
 
     private void printFailures(List<ValidationFailure> failures) {

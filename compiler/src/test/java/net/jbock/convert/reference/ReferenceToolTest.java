@@ -28,7 +28,7 @@ class ReferenceToolTest {
             TypeElement typeElement = elements.getTypeElement("test.Foo");
             ReferenceTool referenceTool = new ReferenceTool(tool);
             Either<String, StringConverterType> result = referenceTool.getReferencedType(typeElement);
-            result.ifPresentOrElse(l -> Assertions.fail(), functionType -> Assertions.assertTrue(functionType.isSupplier()));
+            result.ifLeftOrElse(l -> Assertions.fail(), functionType -> Assertions.assertTrue(functionType.isSupplier()));
         });
     }
 }

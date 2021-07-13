@@ -17,13 +17,10 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.jbock.util.Either.left;
 import static net.jbock.common.Constants.STRING;
@@ -55,8 +52,9 @@ public class AutoConverterFinder extends MatchValidator {
             Optional<Match> match = matcher.tryMatch(parameter);
             if (match.isPresent()) {
                 Match m = match.orElseThrow();
-                return validateMatch(m).flatMapRight(() ->
-                        findConverter(m, parameter));
+                return validateMatch(m)
+                        .<Either<String, Mapped<P>>>map(Either::left)
+                        .orElseGet(() -> findConverter(m, parameter));
             }
         }
         return left(noMatchError(sourceMethod.returnType()));
@@ -69,14 +67,6 @@ public class AutoConverterFinder extends MatchValidator {
     }
 
     private Either<String, MapExpr> enumConverter(TypeMirror baseType) {
-        Either<String, BigInteger> e = Stream.generate(() -> ThreadLocalRandom.current().nextInt(1000))
-                .map(BigInteger::valueOf)
-                .limit(10)
-                .filter(n -> n.isProbablePrime(10))
-                .findAny()
-                .<Either<String, BigInteger>>map(Either::right)
-                .orElseGet(() -> left("my Left value"));
-
         return asEnumType(baseType)
                 .map(TypeElement::asType)
                 .<Either<String, TypeMirror>>map(Either::right)
