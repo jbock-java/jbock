@@ -8,6 +8,14 @@ import java.util.List;
 
 import static net.jbock.common.OperationMode.PRODUCTION;
 
+/**
+ * This is jbock's annotation processor.
+ * It defines "steps", which are like subprocessors,
+ * each of which handles a subset of the jbock annotations.
+ * Most validation, as well as the source code generation,
+ * is handled by {@link CommandProcessingStep}.
+ * The other steps perform some additional validation.
+ */
 public final class JbockProcessor extends BasicAnnotationProcessor {
 
     private final OperationMode operationMode;

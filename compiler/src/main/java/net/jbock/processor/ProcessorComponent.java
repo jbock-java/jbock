@@ -6,6 +6,9 @@ import net.jbock.common.OperationMode;
 
 import javax.annotation.processing.ProcessingEnvironment;
 
+/**
+ * @see ProcessorScope
+ */
 @Component(modules = ProcessorModule.class)
 @ProcessorScope
 interface ProcessorComponent {

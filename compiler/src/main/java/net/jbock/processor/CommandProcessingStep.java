@@ -29,6 +29,13 @@ import java.util.stream.Stream;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+/**
+ * This step handles the {@link Command} annotation.
+ * It performs validation and source generation,
+ * by creating a {@link ValidateModule}.
+ *
+ * @see ProcessorScope
+ */
 @ProcessorScope
 public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
