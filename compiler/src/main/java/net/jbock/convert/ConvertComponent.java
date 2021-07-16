@@ -9,7 +9,7 @@ import net.jbock.parameter.SourceMethod;
 import java.util.List;
 
 @Component(modules = ConvertModule.class)
-@ParameterScope
+@ConvertScope
 public interface ConvertComponent {
 
     PositionalParamFactory positionalParameterFactory();

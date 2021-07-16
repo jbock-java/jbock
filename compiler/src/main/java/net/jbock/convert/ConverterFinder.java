@@ -8,7 +8,7 @@ import net.jbock.parameter.AbstractItem;
 
 import javax.inject.Inject;
 
-@ParameterScope
+@ConvertScope
 public class ConverterFinder {
 
     private final Lazy<AutoConverterFinder> autoConverterFinder;

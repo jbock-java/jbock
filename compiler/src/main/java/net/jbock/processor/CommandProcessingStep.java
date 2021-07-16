@@ -10,6 +10,7 @@ import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
+import net.jbock.context.GeneratedClass;
 import net.jbock.validate.DaggerValidateComponent;
 import net.jbock.validate.ValidateComponent;
 import net.jbock.validate.ValidateModule;
@@ -89,6 +90,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
                 .module(new ValidateModule(types, elements))
                 .create();
         component.processor().generate()
+                .map(GeneratedClass::define)
                 .ifLeftOrElse(
                         this::printFailures,
                         type -> sourceFileGenerator.write(sourceElement, type));

@@ -6,7 +6,7 @@ import io.jbock.util.Either;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.convert.Mapped;
-import net.jbock.convert.ParameterScope;
+import net.jbock.convert.ConvertScope;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import static io.jbock.util.Either.left;
 import static net.jbock.common.Constants.STRING;
 
-@ParameterScope
+@ConvertScope
 public class AutoConverterFinder extends MatchValidator {
 
     private final AutoConverters autoConverter;

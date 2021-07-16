@@ -55,6 +55,11 @@ public final class GeneratedClass {
         this.multilineConverter = multilineConverter;
     }
 
+    /**
+     * Entry point for code generation.
+     *
+     * @return type spec of the generated {@code *Parser}
+     */
     public TypeSpec define() {
         TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass())
                 .addMethod(parseMethod.get());
@@ -77,7 +82,7 @@ public final class GeneratedClass {
 
         spec.addMethod(createModelMethod.get());
 
-        return spec.addOriginatingElement(sourceElement.element())
+        return spec.addOriginatingElement(sourceElement.element()) // important
                 .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]))
                 .addAnnotation(generatedAnnotation.define()).build();
     }

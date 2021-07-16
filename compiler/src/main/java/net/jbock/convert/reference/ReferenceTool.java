@@ -2,7 +2,7 @@ package net.jbock.convert.reference;
 
 import io.jbock.util.Either;
 import net.jbock.common.TypeTool;
-import net.jbock.convert.ParameterScope;
+import net.jbock.convert.ConvertScope;
 import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
@@ -16,7 +16,7 @@ import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 
-@ParameterScope
+@ConvertScope
 public class ReferenceTool {
 
     private final TypeTool tool;

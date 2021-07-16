@@ -9,12 +9,18 @@ import net.jbock.convert.matching.MapExpr;
 import net.jbock.model.Multiplicity;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.NamedOption;
+import net.jbock.parameter.PositionalParameter;
 import net.jbock.util.StringConverter;
 
 import javax.lang.model.type.PrimitiveType;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * An item with additional "mapping" information.
+ *
+ * @param <P> the type of item: either {@link NamedOption} or {@link PositionalParameter}
+ */
 public final class Mapped<P extends AbstractItem> {
 
     private final MapExpr mapExpr;

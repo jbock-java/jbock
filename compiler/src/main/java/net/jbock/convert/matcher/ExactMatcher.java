@@ -1,6 +1,6 @@
 package net.jbock.convert.matcher;
 
-import net.jbock.convert.ParameterScope;
+import net.jbock.convert.ConvertScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.model.Multiplicity;
 import net.jbock.parameter.AbstractItem;
@@ -14,7 +14,7 @@ import java.util.Optional;
 
 import static net.jbock.common.TypeTool.AS_PRIMITIVE;
 
-@ParameterScope
+@ConvertScope
 public class ExactMatcher implements Matcher {
 
     private final SourceMethod sourceMethod;

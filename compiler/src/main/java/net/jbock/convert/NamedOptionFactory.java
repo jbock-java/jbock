@@ -20,7 +20,7 @@ import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
 import static net.jbock.convert.Mapped.createFlag;
 
-@ParameterScope
+@ConvertScope
 public class NamedOptionFactory {
 
     // visible for testing

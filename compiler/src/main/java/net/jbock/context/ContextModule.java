@@ -9,6 +9,9 @@ import net.jbock.processor.SourceElement;
 
 import java.util.List;
 
+/**
+ * @see ContextScope
+ */
 @Module
 public class ContextModule {
 

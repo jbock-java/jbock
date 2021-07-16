@@ -6,6 +6,9 @@ import net.jbock.common.SafeElements;
 
 import javax.lang.model.util.Types;
 
+/**
+ * @see ValidateScope
+ */
 @Module
 public class ValidateModule {
 

@@ -3,7 +3,7 @@ package net.jbock.convert.matcher;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
-import net.jbock.convert.ParameterScope;
+import net.jbock.convert.ConvertScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.model.Multiplicity;
 import net.jbock.parameter.AbstractItem;
@@ -14,7 +14,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.util.Optional;
 
-@ParameterScope
+@ConvertScope
 public class OptionalMatcher implements Matcher {
 
     private final SourceMethod sourceMethod;

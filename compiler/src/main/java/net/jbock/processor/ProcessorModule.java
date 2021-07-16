@@ -11,6 +11,9 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.util.Types;
 
+/**
+ * @see ProcessorScope
+ */
 @Module
 public interface ProcessorModule {
 

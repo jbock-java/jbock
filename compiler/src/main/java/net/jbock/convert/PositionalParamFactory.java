@@ -14,7 +14,7 @@ import java.util.Locale;
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 
-@ParameterScope
+@ConvertScope
 public class PositionalParamFactory {
 
     private final ConverterFinder converterFinder;

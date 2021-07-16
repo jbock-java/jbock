@@ -5,7 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 import io.jbock.util.Either;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
-import net.jbock.convert.ParameterScope;
+import net.jbock.convert.ConvertScope;
 import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
@@ -27,7 +27,7 @@ import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 import static net.jbock.common.Constants.STRING;
 
-@ParameterScope
+@ConvertScope
 public class AutoConverters {
 
     private static final String NEW = "new";

@@ -1,12 +1,13 @@
 package net.jbock.validate;
 
-import com.squareup.javapoet.TypeSpec;
 import io.jbock.util.Either;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
+import net.jbock.context.ContextComponent;
 import net.jbock.context.ContextModule;
 import net.jbock.context.DaggerContextComponent;
+import net.jbock.context.GeneratedClass;
 import net.jbock.convert.ConvertModule;
 import net.jbock.convert.DaggerConvertComponent;
 import net.jbock.convert.Mapped;
@@ -18,10 +19,19 @@ import net.jbock.processor.SourceElement;
 import javax.inject.Inject;
 import javax.lang.model.util.Types;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.jbock.util.Either.left;
+import static io.jbock.util.Either.right;
 
+/**
+ * This class is responsible for item validation,
+ * and creating and invoking the remaining modules.
+ * If everything succeeds, an instance of {@link GeneratedClass}
+ * is created and returned.
+ */
 @ValidateScope
 public class CommandProcessor {
 
@@ -48,24 +58,37 @@ public class CommandProcessor {
         this.methodsFactory = methodsFactory;
     }
 
-    public Either<List<ValidationFailure>, TypeSpec> generate() {
+    /**
+     * Performs validation and creates an instance of {@code GeneratedClass},
+     * if validation succeeds.
+     *
+     * @return either a list of validation failures, or an instance of
+     *         {@code GeneratedClass}
+     */
+    public Either<List<ValidationFailure>, GeneratedClass> generate() {
         return methodsFactory.findAbstractMethods()
-                .flatMap(this::createPositionalParams)
-                .flatMap(this::createNamedOptions)
+                .flatMap(this::createItems)
                 .map(this::contextModule)
                 .map(module -> DaggerContextComponent.factory().create(module))
-                .map(component -> component.generatedClass().define());
+                .map(ContextComponent::generatedClass);
+    }
+
+    private Either<List<ValidationFailure>, Items> createItems(AbstractMethods methods) {
+        return createPositionalParams(methods)
+                .flatMap(positionalParameters -> createNamedOptions(
+                        methods.namedOptions(), positionalParameters));
     }
 
     private Either<List<ValidationFailure>, Items> createNamedOptions(
-            IntermediateResult intermediateResult) {
+            List<SourceMethod> options,
+            List<Mapped<PositionalParameter>> positionalParameters) {
         List<ValidationFailure> failures = new ArrayList<>();
-        List<Mapped<NamedOption>> namedOptions = new ArrayList<>(intermediateResult.options().size());
-        for (SourceMethod sourceMethod : intermediateResult.options()) {
+        List<Mapped<NamedOption>> namedOptions = new ArrayList<>(options.size());
+        for (SourceMethod sourceMethod : options) {
             DaggerConvertComponent.builder()
-                    .module(parameterModule())
+                    .module(convertModule())
                     .sourceMethod(sourceMethod)
-                    .alreadyCreatedParams(intermediateResult.positionalParameters())
+                    .alreadyCreatedParams(positionalParameters)
                     .alreadyCreatedOptions(namedOptions)
                     .build()
                     .namedOptionFactory()
@@ -75,15 +98,16 @@ public class CommandProcessor {
         if (!failures.isEmpty()) {
             return left(failures);
         }
-        return paramsFactory.create(intermediateResult.positionalParameters(), namedOptions);
+        return paramsFactory.create(positionalParameters, namedOptions);
     }
 
-    private Either<List<ValidationFailure>, IntermediateResult> createPositionalParams(AbstractMethods methods) {
+    private Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>> createPositionalParams(
+            AbstractMethods methods) {
         List<Mapped<PositionalParameter>> positionalParams = new ArrayList<>(methods.positionalParameters().size());
         List<ValidationFailure> failures = new ArrayList<>();
         for (SourceMethod sourceMethod : methods.positionalParameters()) {
             DaggerConvertComponent.builder()
-                    .module(parameterModule())
+                    .module(convertModule())
                     .sourceMethod(sourceMethod)
                     .alreadyCreatedParams(positionalParams)
                     .alreadyCreatedOptions(List.of())
@@ -92,18 +116,37 @@ public class CommandProcessor {
                     .createPositionalParam(sourceMethod.index().orElse(methods.positionalParameters().size() - 1))
                     .ifLeftOrElse(failures::add, positionalParams::add);
         }
+        failures.addAll(validatePositions(positionalParams));
         if (!failures.isEmpty()) {
             return left(failures);
         }
-        return IntermediateResult.create(methods.namedOptions(), positionalParams);
+        return right(positionalParams);
     }
 
-    private ConvertModule parameterModule() {
+    private List<ValidationFailure> validatePositions(
+            List<Mapped<PositionalParameter>> params) {
+        List<Mapped<PositionalParameter>> sorted = params.stream()
+                .sorted(Comparator.comparing(c -> c.item().position()))
+                .collect(Collectors.toUnmodifiableList());
+        List<ValidationFailure> failures = new ArrayList<>();
+        for (int i = 0; i < sorted.size(); i++) {
+            Mapped<PositionalParameter> c = sorted.get(i);
+            PositionalParameter p = c.item();
+            if (p.position() != i) {
+                String message = "Position " + p.position() + " is not available. Suggested position: " + i;
+                failures.add(p.fail(message));
+            }
+        }
+        return failures;
+    }
+
+    private ConvertModule convertModule() {
         return new ConvertModule(tool, types, sourceElement, elements);
     }
 
     private ContextModule contextModule(Items items) {
-        return new ContextModule(sourceElement, items.positionalParams(),
+        return new ContextModule(sourceElement,
+                items.positionalParams(),
                 items.namedOptions());
     }
 }

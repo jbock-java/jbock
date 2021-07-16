@@ -43,7 +43,7 @@ public class ConvertModule {
         this.types = types;
     }
 
-    @ParameterScope
+    @ConvertScope
     @Provides
     EnumName enumName(
             SourceMethod sourceMethod,
@@ -66,7 +66,7 @@ public class ConvertModule {
         return result;
     }
 
-    @ParameterScope
+    @ConvertScope
     @Provides
     List<Matcher> matchers(
             OptionalMatcher optionalMatcher,
@@ -75,43 +75,43 @@ public class ConvertModule {
         return List.of(optionalMatcher, listMatcher, exactMatcher);
     }
 
-    @ParameterScope
+    @ConvertScope
     @Provides
     TypeTool tool() {
         return tool;
     }
 
-    @ParameterScope
+    @ConvertScope
     @Provides
     Types types() {
         return types;
     }
 
-    @ParameterScope
+    @ConvertScope
     @Provides
     SafeElements elements() {
         return elements;
     }
 
-    @ParameterScope
+    @ConvertScope
     @Provides
     SourceElement sourceElement() {
         return sourceElement;
     }
 
-    @ParameterScope
+    @ConvertScope
     @Provides
     ConverterClass converter(SourceMethod sourceMethod) {
         return new ConverterClass(annotationUtil.getConverter(sourceMethod.method()));
     }
 
-    @ParameterScope
+    @ConvertScope
     @Provides
     Util util(TypeTool tool) {
         return new Util(types, tool);
     }
 
-    @ParameterScope
+    @ConvertScope
     @Provides
     ParameterStyle parameterStyle(SourceMethod sourceMethod) {
         return sourceMethod.style();
