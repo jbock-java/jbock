@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static io.jbock.util.Either.optionalList;
+
 /**
  * List of all items, after validation.
  * Each item is wrapped in a {@link Mapped} instance.
@@ -43,10 +45,7 @@ public class Items {
                 failures.add(p.fail(message));
             }
         }
-        if (failures.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(failures);
+        return optionalList(failures);
     }
 
     /**
