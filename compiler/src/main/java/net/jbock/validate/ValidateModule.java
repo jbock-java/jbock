@@ -20,11 +20,13 @@ public class ValidateModule {
         this.elements = elements;
     }
 
+    @ValidateScope
     @Provides
     Types types() {
         return types;
     }
 
+    @ValidateScope
     @Provides
     SafeElements elements() {
         return elements;

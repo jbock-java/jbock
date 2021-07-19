@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * An item with additional "mapping" information.
+ * An item with additional information about type conversion.
  *
  * @param <P> the type of item: either {@link NamedOption} or {@link PositionalParameter}
  */
