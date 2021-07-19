@@ -50,7 +50,7 @@ public final class AtFileReader {
             try {
                 List<String> lines = Files.readAllLines(path);
                 return readAtLines(lines)
-                        .mapLeft(r -> new AtFileSyntaxError(path, r.number, r.lineResult.message())) // TODO
+                        .mapLeft(r -> new AtFileSyntaxError(path, r.number, r.lineResult.message()))
                         .map(atLines -> {
                             List<String> atLinesWithRest = new ArrayList<>(atLines);
                             atLinesWithRest.addAll(request.args());
@@ -87,7 +87,7 @@ public final class AtFileReader {
             return left(new NumberedLineResult(current.number, esc));
         }
         if (esc == LineResult.CONTINUE && !it.hasNext()) {
-            return left(new NumberedLineResult(current.number, LineResult.NO_NEXT_LINE));
+            return left(new NumberedLineResult(current.number, LineResult.BACKSLASH_BEFORE_EOF));
         }
         return right(sb.toString());
     }
@@ -126,7 +126,7 @@ public final class AtFileReader {
         return esc ? LineResult.CONTINUE : LineResult.END;
     }
 
-    enum Mode {
+    private enum Mode {
         SINGLE_QUOTE, DOUBLE_QUOTE, PLAIN;
 
         Mode toggle(Mode other) {
@@ -165,6 +165,7 @@ public final class AtFileReader {
         }
     }
 
+    // visible for testing
     enum LineResult {
         CONTINUE, END, UNMATCHED_QUOTE() {
             @Override
@@ -176,7 +177,7 @@ public final class AtFileReader {
             String message() {
                 return "unmatched quote";
             }
-        }, NO_NEXT_LINE {
+        }, BACKSLASH_BEFORE_EOF {
             @Override
             boolean isError() {
                 return true;

@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.function.Function;
 
+import static net.jbock.util.AtFileReader.LineResult.BACKSLASH_BEFORE_EOF;
+import static net.jbock.util.AtFileReader.LineResult.UNMATCHED_QUOTE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -44,12 +46,27 @@ class AtFileReaderTest {
         assertEquals(List.of(""), tokens);
     }
 
+
     @Test
-    void testEscapeAtEndOfFile() {
+    void backslashBeforeEof() {
         AtFileReader.NumberedLineResult error = expectError(List.of("'a'\\"));
         assertTrue(error.lineResult().isError());
         assertEquals(1, error.number());
-        assertEquals("backslash at end of file", error.lineResult().message());
+        assertEquals(BACKSLASH_BEFORE_EOF, error.lineResult());
+    }
+
+    @Test
+    void backslashBeforeEofEscapedDouble() {
+        AtFileReader.NumberedLineResult error = expectError(List.of("\"\\"));
+        assertEquals(1, error.number());
+        assertEquals(UNMATCHED_QUOTE, error.lineResult());
+    }
+
+    @Test
+    void backslashBeforeEofEscapedSingle() {
+        AtFileReader.NumberedLineResult error = expectError(List.of("'\\"));
+        assertEquals(1, error.number());
+        assertEquals(UNMATCHED_QUOTE, error.lineResult());
     }
 
     @Test

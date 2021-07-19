@@ -66,7 +66,7 @@ public class CommandProcessor {
         return createPositionalParams(methods)
                 .flatMap(positionalParameters -> createItems(
                         methods.namedOptions(), positionalParameters))
-                .filter(Items::validatePositions); //filterList ?
+                .filter(Items::validatePositions);
     }
 
     private Either<List<ValidationFailure>, Items> createItems(
