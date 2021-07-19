@@ -51,11 +51,11 @@ public class CommandProcessor {
     }
 
     /**
-     * Performs validation and creates an instance of {@code GeneratedClass},
+     * Performs validation and creates an instance of {@link Items},
      * if validation succeeds.
      *
      * @return either a list of validation failures, or an instance of
-     *         {@code GeneratedClass}
+     *         {@code Items}
      */
     public Either<List<ValidationFailure>, Items> generate() {
         return methodsFactory.findAbstractMethods()
