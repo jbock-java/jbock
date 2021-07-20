@@ -122,7 +122,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter that implements Function<String, StringBuilder>");
+                .withErrorContaining("define a converter that implements StringConverter<StringBuilder>");
     }
 
     @Test
@@ -166,7 +166,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter that implements Function<String, List>");
+                .withErrorContaining("define a converter that implements StringConverter<List>");
     }
 
     @Test
@@ -181,7 +181,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter that implements Function<String, Optional>");
+                .withErrorContaining("define a converter that implements StringConverter<Optional>");
     }
 
     @Test
@@ -196,7 +196,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter that implements Function<String, Set<String>>");
+                .withErrorContaining("define a converter that implements StringConverter<Set<String>>");
     }
 
     @Test
@@ -271,7 +271,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter that implements Function<String, int[]>");
+                .withErrorContaining("define a converter that implements StringConverter<int[]>");
     }
 
     @Test
@@ -286,7 +286,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter that implements Function<String, Date>");
+                .withErrorContaining("define a converter that implements StringConverter<Date>");
     }
 
     @Test
@@ -440,7 +440,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter that implements Function<String, Boolean>");
+                .withErrorContaining("define a converter that implements StringConverter<Boolean>");
     }
 
     @Test
@@ -537,7 +537,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter that implements Function<String, Boolean>");
+                .withErrorContaining("define a converter that implements StringConverter<Boolean>");
     }
 
     @Test

@@ -106,6 +106,6 @@ public class AutoConverterFinder extends MatchValidator {
     }
 
     private String noMatchError(TypeMirror type) {
-        return "define a converter that implements Function<String, " + util.typeToString(type) + ">";
+        return "define a converter that implements StringConverter<" + util.typeToString(type) + ">";
     }
 }

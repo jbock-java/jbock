@@ -26,6 +26,8 @@ public class Util {
         this.tool = tool;
     }
 
+    /* Left-Optional
+     */
     public Optional<String> commonTypeChecks(TypeElement classToCheck) {
         if (classToCheck.getNestingKind().isNested() && !classToCheck.getModifiers().contains(Modifier.STATIC)) {
             return Optional.of("nested class must be static");
@@ -113,6 +115,8 @@ public class Util {
                 })).orElseGet(type::toString);
     }
 
+    /* Left-Optional
+     */
     public Optional<String> checkAtLeastOneAnnotation(
             Element element,
             List<Class<? extends Annotation>> annotations) {
@@ -126,6 +130,8 @@ public class Util {
                 .collect(Collectors.joining(", ")));
     }
 
+    /* Left-Optional
+     */
     public Optional<String> checkNoDuplicateAnnotations(
             Element element,
             List<Class<? extends Annotation>> annotations) {

@@ -5,6 +5,7 @@ import net.jbock.common.ValidationFailure;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -33,37 +34,31 @@ public class SourceMethodValidator {
         List<Class<? extends Annotation>> annotations = methodLevelAnnotations();
         return util.checkAtLeastOneAnnotation(sourceMethod, annotations)
                 .or(() -> util.checkNoDuplicateAnnotations(sourceMethod, annotations))
-                .or(() -> checkAccessibleType(sourceMethod))
+                .or(() -> checkAccessibleType(sourceMethod.getReturnType()))
                 .map(msg -> new ValidationFailure(msg, sourceMethod));
     }
 
-    private Optional<String> checkAccessibleType(ExecutableElement sourceMethod) {
-        if (isInaccessible(sourceMethod.getReturnType())) {
-            return Optional.of("inaccessible type: " +
-                    util.typeToString(sourceMethod.getReturnType()));
-        }
-        return Optional.empty();
+    /* Left-Optional
+     */
+    private Optional<String> checkAccessibleType(TypeMirror returnType) {
+        return AS_DECLARED.visit(returnType)
+                .filter(this::isInaccessible)
+                .map(type -> "inaccessible type: " + util.typeToString(type));
     }
 
-    private boolean isInaccessible(TypeMirror mirror) {
-        return AS_DECLARED.visit(mirror)
-                .filter(declared -> {
-                    if (declared.asElement().getModifiers().contains(PRIVATE)) {
-                        return true;
-                    }
-                    if (AS_TYPE_ELEMENT.visit(declared.asElement())
-                            .filter(t -> t.getNestingKind() == MEMBER)
-                            .filter(t -> !t.getModifiers().contains(STATIC))
-                            .isPresent()) {
-                        return true;
-                    }
-                    for (TypeMirror m : declared.getTypeArguments()) {
-                        if (isInaccessible(m)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                })
-                .isPresent();
+    private boolean isInaccessible(DeclaredType declared) {
+        if (declared.asElement().getModifiers().contains(PRIVATE)) {
+            return true;
+        }
+        if (AS_TYPE_ELEMENT.visit(declared.asElement())
+                .filter(t -> t.getNestingKind() == MEMBER)
+                .filter(t -> !t.getModifiers().contains(STATIC))
+                .isPresent()) {
+            return true;
+        }
+        return declared.getTypeArguments().stream()
+                .map(AS_DECLARED::visit)
+                .flatMap(Optional::stream)
+                .anyMatch(this::isInaccessible);
     }
 }

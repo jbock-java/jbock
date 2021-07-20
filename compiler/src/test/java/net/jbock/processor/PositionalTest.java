@@ -204,7 +204,7 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter that implements Function<String, StringBuilder>");
+                .withErrorContaining("define a converter that implements StringConverter<StringBuilder>");
     }
 
     @Test
