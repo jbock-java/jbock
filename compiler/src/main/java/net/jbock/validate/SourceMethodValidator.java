@@ -1,9 +1,9 @@
 package net.jbock.validate;
 
 import net.jbock.common.Util;
+import net.jbock.common.ValidationFailure;
 
 import javax.inject.Inject;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
@@ -18,20 +18,23 @@ import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
 @ValidateScope
-public class ParameterMethodValidator {
+public class SourceMethodValidator {
 
     private final Util util;
 
     @Inject
-    ParameterMethodValidator(Util util) {
+    SourceMethodValidator(Util util) {
         this.util = util;
     }
 
-    Optional<String> validateParameterMethod(ExecutableElement sourceMethod) {
+    /* Left-Optional
+     */
+    Optional<ValidationFailure> validateSourceMethod(ExecutableElement sourceMethod) {
         List<Class<? extends Annotation>> annotations = methodLevelAnnotations();
         return util.checkAtLeastOneAnnotation(sourceMethod, annotations)
                 .or(() -> util.checkNoDuplicateAnnotations(sourceMethod, annotations))
-                .or(() -> checkAccessibleType(sourceMethod));
+                .or(() -> checkAccessibleType(sourceMethod))
+                .map(msg -> new ValidationFailure(msg, sourceMethod));
     }
 
     private Optional<String> checkAccessibleType(ExecutableElement sourceMethod) {
@@ -44,18 +47,23 @@ public class ParameterMethodValidator {
 
     private boolean isInaccessible(TypeMirror mirror) {
         return AS_DECLARED.visit(mirror)
-                .map(declared -> {
-                    Element el = declared.asElement();
-                    if (el.getModifiers().contains(PRIVATE)) {
+                .filter(declared -> {
+                    if (declared.asElement().getModifiers().contains(PRIVATE)) {
                         return true;
                     }
-                    boolean badNesting = AS_TYPE_ELEMENT.visit(el)
-                            .map(t -> t.getNestingKind() == MEMBER
-                                    && !t.getModifiers().contains(STATIC))
-                            .orElse(false);
-                    return badNesting || declared.getTypeArguments().stream()
-                            .anyMatch(this::isInaccessible);
+                    if (AS_TYPE_ELEMENT.visit(declared.asElement())
+                            .filter(t -> t.getNestingKind() == MEMBER)
+                            .filter(t -> !t.getModifiers().contains(STATIC))
+                            .isPresent()) {
+                        return true;
+                    }
+                    for (TypeMirror m : declared.getTypeArguments()) {
+                        if (isInaccessible(m)) {
+                            return true;
+                        }
+                    }
+                    return false;
                 })
-                .orElse(false);
+                .isPresent();
     }
 }

@@ -21,21 +21,21 @@ import static io.jbock.util.Either.optionalList;
 @ValidateScope
 public class MethodsFactory {
 
-    // sort order that puts @Parameters last (they don't have an index)
+    // sort order that puts @Parameters last
     private static final Comparator<SourceMethod> POSITION_COMPARATOR =
             Comparator.comparingInt(m -> m.index().orElse(Integer.MAX_VALUE));
 
     private final SourceElement sourceElement;
-    private final ParameterMethodValidator parameterMethodValidator;
+    private final SourceMethodValidator sourceMethodValidator;
     private final AbstractMethodsFinder abstractMethodsFinder;
 
     @Inject
     MethodsFactory(
             SourceElement sourceElement,
-            ParameterMethodValidator parameterMethodValidator,
+            SourceMethodValidator sourceMethodValidator,
             AbstractMethodsFinder abstractMethodsFinder) {
         this.sourceElement = sourceElement;
-        this.parameterMethodValidator = parameterMethodValidator;
+        this.sourceMethodValidator = sourceMethodValidator;
         this.abstractMethodsFinder = abstractMethodsFinder;
     }
 
@@ -79,8 +79,6 @@ public class MethodsFactory {
         return new AbstractMethods(params, options);
     }
 
-    /* Left-Optional
-     */
     private List<ValidationFailure> validateAtLeastOneParameterInSuperCommand(
             AbstractMethods abstractMethods) {
         if (!sourceElement.isSuperCommand() ||
@@ -111,12 +109,10 @@ public class MethodsFactory {
      */
     private Optional<List<ValidationFailure>> validateParameterMethods(
             List<ExecutableElement> sourceMethods) {
-        List<ValidationFailure> failures = new ArrayList<>();
-        for (ExecutableElement sourceMethod : sourceMethods) {
-            parameterMethodValidator.validateParameterMethod(sourceMethod)
-                    .map(msg -> new ValidationFailure(msg, sourceMethod))
-                    .ifPresent(failures::add);
-        }
+        List<ValidationFailure> failures = sourceMethods.stream()
+                .map(sourceMethodValidator::validateSourceMethod)
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
         return optionalList(failures);
     }
 
