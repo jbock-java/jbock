@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static io.jbock.util.Either.optionalList;
+
 @ValidateScope
 public class MethodsFactory {
 
@@ -47,7 +49,7 @@ public class MethodsFactory {
                 .map(this::createSourceMethods)
                 .filter(this::validateDuplicateParametersAnnotation)
                 .map(this::createAbstractMethods)
-                .filter(this::validateAtLeastOneParameterInSuperCommand);
+                .filter(methods -> optionalList(validateAtLeastOneParameterInSuperCommand(methods)));
     }
 
     /* Left-Optional
@@ -56,13 +58,13 @@ public class MethodsFactory {
             List<ExecutableElement> methods) {
         Map<Name, List<ExecutableElement>> map = methods.stream()
                 .collect(Collectors.groupingBy(ExecutableElement::getSimpleName));
+        List<ValidationFailure> failures = new ArrayList<>();
         for (ExecutableElement method : methods) {
             if (map.get(method.getSimpleName()).size() >= 2) {
-                ValidationFailure f = new ValidationFailure("inheritance collision", method);
-                return Optional.of(List.of(f));
+                failures.add(new ValidationFailure("inheritance collision", method));
             }
         }
-        return Optional.empty();
+        return optionalList(failures);
     }
 
     private AbstractMethods createAbstractMethods(
@@ -79,15 +81,15 @@ public class MethodsFactory {
 
     /* Left-Optional
      */
-    private Optional<List<ValidationFailure>> validateAtLeastOneParameterInSuperCommand(
+    private List<ValidationFailure> validateAtLeastOneParameterInSuperCommand(
             AbstractMethods abstractMethods) {
         if (!sourceElement.isSuperCommand() ||
                 !abstractMethods.positionalParameters().isEmpty()) {
-            return Optional.empty();
+            return List.of();
         }
         String message = "at least one positional parameter must be defined" +
                 " when the superCommand attribute is set";
-        return Optional.of(List.of(sourceElement.fail(message)));
+        return List.of(sourceElement.fail(message));
     }
 
     /* Left-Optional
@@ -97,11 +99,12 @@ public class MethodsFactory {
         List<SourceMethod> parametersMethods = sourceMethods.stream()
                 .filter(m -> m.style() == ParameterStyle.PARAMETERS)
                 .collect(Collectors.toUnmodifiableList());
+        List<ValidationFailure> failures = new ArrayList<>();
         if (parametersMethods.size() >= 2) {
             String message = "duplicate @" + Parameters.class.getSimpleName() + " annotation";
-            return Optional.of(List.of(sourceMethods.get(1).fail(message)));
+            failures.add(sourceMethods.get(1).fail(message));
         }
-        return Optional.empty();
+        return optionalList(failures);
     }
 
     /* Left-Optional
@@ -114,10 +117,7 @@ public class MethodsFactory {
                     .map(msg -> new ValidationFailure(msg, sourceMethod))
                     .ifPresent(failures::add);
         }
-        if (!failures.isEmpty()) {
-            return Optional.of(failures);
-        }
-        return Optional.empty();
+        return optionalList(failures);
     }
 
     private List<SourceMethod> createSourceMethods(List<ExecutableElement> methods) {

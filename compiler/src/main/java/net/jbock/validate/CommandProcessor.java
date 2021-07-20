@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.jbock.util.Either.left;
+import static io.jbock.util.Either.optionalList;
 import static io.jbock.util.Either.right;
 
 /**
@@ -86,10 +87,9 @@ public class CommandProcessor {
                     .createNamedOption()
                     .ifLeftOrElse(failures::add, namedOptions::add);
         }
-        if (!failures.isEmpty()) {
-            return left(failures);
-        }
-        return paramsFactory.create(positionalParameters, namedOptions);
+        return optionalList(failures)
+                .<Either<List<ValidationFailure>, Items>>map(Either::left)
+                .orElseGet(() -> paramsFactory.create(positionalParameters, namedOptions));
     }
 
     private Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>> createPositionalParams(
