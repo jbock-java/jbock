@@ -58,12 +58,10 @@ public class MethodsFactory {
             List<ExecutableElement> methods) {
         Map<Name, List<ExecutableElement>> map = methods.stream()
                 .collect(Collectors.groupingBy(ExecutableElement::getSimpleName));
-        List<ValidationFailure> failures = new ArrayList<>();
-        for (ExecutableElement method : methods) {
-            if (map.get(method.getSimpleName()).size() >= 2) {
-                failures.add(new ValidationFailure("inheritance collision", method));
-            }
-        }
+        List<ValidationFailure> failures = methods.stream()
+                .filter(method -> map.get(method.getSimpleName()).size() >= 2)
+                .map(method -> new ValidationFailure("inheritance collision", method))
+                .collect(Collectors.toList());
         return optionalList(failures);
     }
 
