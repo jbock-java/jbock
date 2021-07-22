@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static net.jbock.common.Constants.EITHER;
+import static net.jbock.common.Constants.EITHERS;
 import static net.jbock.common.Constants.OPTIONAL;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
@@ -127,7 +128,7 @@ public class BuildMethod extends CachedMethod {
         code.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
         code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
                 .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
-        code.add(CodeBlock.of(".collect($T.toValidList())", EITHER));
+        code.add(CodeBlock.of(".collect($T.toValidList())", EITHERS));
         code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.regular().size()));
         return contextUtil.joinByNewline(code);
     }
@@ -145,12 +146,12 @@ public class BuildMethod extends CachedMethod {
                         orElseThrowConverterError(ItemType.OPTION, i));
             case OPTIONAL:
                 return List.of(
-                        CodeBlock.of(".collect($T.toValidList())", EITHER),
+                        CodeBlock.of(".collect($T.toValidList())", EITHERS),
                         orElseThrowConverterError(ItemType.OPTION, i),
                         CodeBlock.of(".stream().findAny()"));
             case REPEATABLE:
                 return List.of(
-                        CodeBlock.of(".collect($T.toValidList())", EITHER),
+                        CodeBlock.of(".collect($T.toValidList())", EITHERS),
                         orElseThrowConverterError(ItemType.OPTION, i));
             default:
                 throw new IllegalArgumentException("unexpected multiplicity: " + c.multiplicity());
@@ -166,7 +167,7 @@ public class BuildMethod extends CachedMethod {
             case OPTIONAL:
                 return List.of(
                         CodeBlock.of(".stream()"),
-                        CodeBlock.of(".collect($T.toValidList())", EITHER),
+                        CodeBlock.of(".collect($T.toValidList())", EITHERS),
                         orElseThrowConverterError(ItemType.PARAMETER, i),
                         CodeBlock.of(".stream().findAny()"));
             default:

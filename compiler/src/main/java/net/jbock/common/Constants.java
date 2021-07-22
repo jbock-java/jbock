@@ -5,6 +5,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import io.jbock.util.Either;
+import io.jbock.util.Eithers;
 
 import javax.lang.model.element.Modifier;
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ public final class Constants {
     public static final ClassName OPTIONAL = ClassName.get(Optional.class);
 
     public static final ClassName EITHER = ClassName.get(Either.class);
+
+    public static final ClassName EITHERS = ClassName.get(Eithers.class);
 
     public static TypeName mapOf(TypeName keyType, TypeName valueType) {
         return ParameterizedTypeName.get(ClassName.get(Map.class), keyType, valueType);
