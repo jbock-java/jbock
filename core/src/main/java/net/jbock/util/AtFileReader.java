@@ -9,6 +9,7 @@ import java.util.List;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
+import static io.jbock.util.Eithers.toValidList;
 
 /**
  * Allows reading some command line options from
@@ -72,7 +73,7 @@ public final class AtFileReader {
         while (it.hasNext()) {
             tokens.add(readTokenFromAtFile(it));
         }
-        return tokens.stream().collect(Either.toValidList());
+        return tokens.stream().collect(toValidList());
     }
 
     private Either<NumberedLineResult, String> readTokenFromAtFile(Iterator<NumberedLine> it) {

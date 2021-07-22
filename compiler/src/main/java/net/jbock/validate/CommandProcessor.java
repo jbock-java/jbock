@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.jbock.util.Either.left;
-import static io.jbock.util.Either.optionalList;
 import static io.jbock.util.Either.right;
+import static io.jbock.util.Eithers.optionalList;
 
 /**
  * This class is responsible for item validation.

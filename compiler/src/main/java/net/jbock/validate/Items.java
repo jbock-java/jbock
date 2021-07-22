@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static io.jbock.util.Either.optionalList;
+import static io.jbock.util.Eithers.optionalList;
 
 /**
  * List of all items, after validation.
