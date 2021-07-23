@@ -107,11 +107,10 @@ public class MethodsFactory {
      */
     private Optional<List<ValidationFailure>> validateParameterMethods(
             List<ExecutableElement> sourceMethods) {
-        List<ValidationFailure> failures = sourceMethods.stream()
+        return sourceMethods.stream()
                 .map(sourceMethodValidator::validateSourceMethod)
                 .flatMap(Optional::stream)
-                .collect(Collectors.toList());
-        return optionalList(failures);
+                .collect(toOptionalList());
     }
 
     private List<SourceMethod> createSourceMethods(List<ExecutableElement> methods) {
