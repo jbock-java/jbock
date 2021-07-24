@@ -148,9 +148,8 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("Position 2 is not available. Suggested position: 1");
+                .withErrorContaining("invalid position: expecting 1");
     }
-
 
     @Test
     void indexMissingZero() {
@@ -162,9 +161,8 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("Position 1 is not available. Suggested position: 0");
+                .withErrorContaining("invalid position: expecting ");
     }
-
 
     @Test
     void positionalOptionalsNegative() {
@@ -190,9 +188,8 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("duplicate position");
+                .withErrorContaining("invalid position: expecting 0");
     }
-
 
     @Test
     void positionalBadReturnTypeStringBuilder() {

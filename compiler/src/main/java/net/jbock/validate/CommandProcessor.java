@@ -12,11 +12,13 @@ import net.jbock.parameter.PositionalParameter;
 import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
 import static io.jbock.util.Eithers.toValidListAll;
 
@@ -56,8 +58,7 @@ public class CommandProcessor {
     private Either<List<ValidationFailure>, Items> createItems(AbstractMethods methods) {
         return createPositionalParams(methods)
                 .flatMap(positionalParameters -> createItems(
-                        methods.namedOptions(), positionalParameters))
-                .filter(Items::validatePositions);
+                        methods.namedOptions(), positionalParameters));
     }
 
     private Either<List<ValidationFailure>, Items> createItems(
@@ -97,17 +98,19 @@ public class CommandProcessor {
                 .map(ConvertComponent::positionalParameterFactory)
                 .map(factory -> factory.createPositionalParam(lastIndex))
                 .collect(toValidListAll())
-                .filter(this::validateUniquePositions)
+                .filter(this::validatePositions)
                 .filter(this::checkNoRequiredAfterOptional);
     }
 
-    private Optional<List<ValidationFailure>> validateUniquePositions(List<Mapped<PositionalParameter>> allPositionalParameters) {
-        Set<Integer> positions = new HashSet<>();
-        return allPositionalParameters.stream()
-                .map(Mapped::item)
-                .filter(item -> !positions.add(item.position()))
-                .map(item -> item.fail("duplicate position: " + item.position()))
-                .collect(toOptionalList());
+    private Optional<List<ValidationFailure>> validatePositions(List<Mapped<PositionalParameter>> allPositionalParameters) {
+        List<ValidationFailure> failures = new ArrayList<>();
+        for (int i = 0; i < allPositionalParameters.size(); i++) {
+            PositionalParameter item = allPositionalParameters.get(i).item();
+            if (item.position() != i) {
+                failures.add(item.fail("invalid position: expecting " + i));
+            }
+        }
+        return optionalList(failures);
     }
 
     private Optional<List<ValidationFailure>> checkNoRequiredAfterOptional(List<Mapped<PositionalParameter>> allPositionalParameters) {

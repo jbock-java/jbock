@@ -15,8 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
+import static io.jbock.util.Eithers.optionalList;
 
 @ValidateScope
 public class ParamsFactory {
@@ -31,31 +31,27 @@ public class ParamsFactory {
     Either<List<ValidationFailure>, Items> create(
             List<Mapped<PositionalParameter>> positionalParams,
             List<Mapped<NamedOption>> namedOptions) {
-        List<ValidationFailure> failures = checkDuplicateDescriptionKeys(namedOptions, positionalParams);
-        if (!failures.isEmpty()) {
-            return left(failures);
-        }
-        return right(new Items(positionalParams, namedOptions));
+        return optionalList(checkDuplicateDescriptionKeys(namedOptions, positionalParams))
+                .<Either<List<ValidationFailure>, Items>>map(Either::left)
+                .orElseGet(() -> right(new Items(positionalParams, namedOptions)));
     }
 
+    // TODO Mapped is not needed, validate this earlier
     private List<ValidationFailure> checkDuplicateDescriptionKeys(
             List<Mapped<NamedOption>> namedOptions,
             List<Mapped<PositionalParameter>> positionalParams) {
         List<ValidationFailure> failures = new ArrayList<>();
-        List<Mapped<? extends AbstractItem>> abstractParameters =
+        List<Mapped<? extends AbstractItem>> items =
                 Constants.concat(namedOptions, positionalParams);
         Set<String> keys = new HashSet<>();
         sourceElement.descriptionKey().ifPresent(keys::add);
-        for (Mapped<? extends AbstractItem> c : abstractParameters) {
-            AbstractItem p = c.item();
-            String key = p.descriptionKey().orElse("");
-            if (key.isEmpty()) {
-                continue;
-            }
-            if (!keys.add(key)) {
-                String message = "duplicate description key: " + key;
-                failures.add(p.fail(message));
-            }
+        for (Mapped<? extends AbstractItem> c : items) {
+            c.item().descriptionKey().ifPresent(key -> {
+                if (!keys.add(key)) {
+                    String message = "duplicate description key: " + key;
+                    failures.add(c.item().fail(message));
+                }
+            });
         }
         return failures;
     }
