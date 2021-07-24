@@ -258,7 +258,7 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("position must be less than position of optional parameter A");
+                .withErrorContaining("position of required parameter 'b' is greater than position of optional parameter 'a'");
     }
 
     @Test

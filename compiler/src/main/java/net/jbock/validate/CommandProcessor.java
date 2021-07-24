@@ -1,7 +1,6 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
-import io.jbock.util.Eithers;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.ConvertModule;
 import net.jbock.convert.DaggerConvertComponent;
@@ -11,14 +10,13 @@ import net.jbock.parameter.PositionalParameter;
 import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.jbock.util.Either.right;
-import static io.jbock.util.Eithers.optionalList;
+import static io.jbock.util.Eithers.toOptionalList;
+import static io.jbock.util.Eithers.toValidListAll;
 
 /**
  * This class is responsible for item validation.
@@ -67,11 +65,10 @@ public class CommandProcessor {
                 .map(sourceMethod -> DaggerConvertComponent.builder()
                         .module(convertModule)
                         .sourceMethod(sourceMethod)
-                        .alreadyCreatedParams(positionalParameters)
                         .build()
                         .namedOptionFactory()
                         .createNamedOption())
-                .collect(Eithers.toValidListAll())
+                .collect(toValidListAll())
                 .filter(this::validateUniqueOptionNames)
                 .flatMap(namedOptions -> paramsFactory.create(positionalParameters, namedOptions));
     }
@@ -84,25 +81,43 @@ public class CommandProcessor {
                         .filter(name -> !allNames.add(name))
                         .map(name -> "duplicate option name: " + name)
                         .map(item::fail))
-                .collect(Eithers.toOptionalList());
+                .collect(toOptionalList());
     }
 
     private Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>> createPositionalParams(
             AbstractMethods methods) {
-        List<Mapped<PositionalParameter>> positionalParams = new ArrayList<>(methods.positionalParameters().size());
-        List<ValidationFailure> failures = new ArrayList<>();
-        for (SourceMethod sourceMethod : methods.positionalParameters()) {
-            DaggerConvertComponent.builder()
-                    .module(convertModule)
-                    .sourceMethod(sourceMethod)
-                    .alreadyCreatedParams(positionalParams)
-                    .build()
-                    .positionalParameterFactory()
-                    .createPositionalParam(sourceMethod.index().orElse(methods.positionalParameters().size() - 1))
-                    .ifLeftOrElse(failures::add, positionalParams::add);
-        }
-        return optionalList(failures)
-                .<Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>>>map(Either::left)
-                .orElseGet(() -> right(positionalParams));
+        return methods.positionalParameters().stream()
+                .map(sourceMethod -> DaggerConvertComponent.builder()
+                        .module(convertModule)
+                        .sourceMethod(sourceMethod)
+                        .build()
+                        .positionalParameterFactory()
+                        .createPositionalParam(sourceMethod.index().orElse(methods.positionalParameters().size() - 1)))
+                .collect(toValidListAll())
+                .filter(this::validateUniquePositions)
+                .filter(this::checkNoRequiredAfterOptional);
+    }
+
+    private Optional<List<ValidationFailure>> validateUniquePositions(List<Mapped<PositionalParameter>> allPositionalParameters) {
+        Set<Integer> allNames = new HashSet<>();
+        return allPositionalParameters.stream()
+                .map(Mapped::item)
+                .filter(item -> !allNames.add(item.position()))
+                .map(item -> item.fail("duplicate position: " + item.position()))
+                .collect(toOptionalList());
+    }
+
+    private Optional<List<ValidationFailure>> checkNoRequiredAfterOptional(List<Mapped<PositionalParameter>> allPositionalParameters) {
+        return allPositionalParameters.stream()
+                .filter(Mapped::isOptional)
+                .findFirst()
+                .flatMap(firstOptional -> allPositionalParameters.stream()
+                        .filter(c -> c.item().position() > firstOptional.item().position())
+                        .filter(Mapped::isRequired)
+                        .map(c -> c.item().fail("position of required parameter '" +
+                                c.item().sourceMethod().method().getSimpleName() +
+                                "' is greater than position of optional parameter '" +
+                                firstOptional.item().sourceMethod().method().getSimpleName() + "'"))
+                        .collect(toOptionalList()));
     }
 }

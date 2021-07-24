@@ -46,7 +46,7 @@ public class NamedOptionFactory {
 
     public Either<ValidationFailure, Mapped<NamedOption>> createNamedOption() {
         return checkOptionNames()
-                .map(this::createNamedOption)
+                .map(names -> new NamedOption(names, sourceMethod))
                 .flatMap(namedOption -> {
                     if (!converterClass.isPresent() && sourceMethod.returnType().getKind() == BOOLEAN) {
                         return right(createFlag(namedOption, types.getPrimitiveType(BOOLEAN)));
@@ -100,9 +100,5 @@ public class NamedOptionFactory {
             }
         }
         return Optional.empty();
-    }
-
-    private NamedOption createNamedOption(List<String> names) {
-        return new NamedOption(names, sourceMethod);
     }
 }

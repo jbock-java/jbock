@@ -31,12 +31,6 @@ public class ValidateModule {
 
     @ValidateScope
     @Provides
-    SafeElements elements() {
-        return elements;
-    }
-
-    @ValidateScope
-    @Provides
     ConvertModule convertModule(TypeTool tool, SourceElement sourceElement) {
         return new ConvertModule(tool, types, sourceElement, elements);
     }
