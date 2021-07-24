@@ -1,6 +1,5 @@
 package net.jbock.parameter;
 
-import net.jbock.common.EnumName;
 import net.jbock.common.SnakeName;
 
 import java.util.List;
@@ -11,10 +10,9 @@ public final class NamedOption extends AbstractItem {
     private final List<String> names;
 
     public NamedOption(
-            EnumName enumName,
             List<String> names,
             SourceMethod sourceMethod) {
-        super(sourceMethod, enumName);
+        super(sourceMethod);
         this.names = names;
     }
 

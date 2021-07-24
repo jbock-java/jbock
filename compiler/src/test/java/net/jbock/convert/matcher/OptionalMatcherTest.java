@@ -1,6 +1,7 @@
 package net.jbock.convert.matcher;
 
 import net.jbock.Option;
+import net.jbock.common.EnumName;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.parameter.AbstractItem;
@@ -83,7 +84,7 @@ class OptionalMatcherTest {
         ExecutableElement sourceMethod = Mockito.mock(ExecutableElement.class);
         Mockito.when(sourceMethod.getAnnotation(Mockito.any())).thenReturn(Mockito.mock(Option.class));
         Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
-        return new OptionalMatcher(SourceMethod.create(sourceMethod),
+        return new OptionalMatcher(SourceMethod.create(sourceMethod, EnumName.create("aua")),
                 tool, new SafeElements(elements), types);
     }
 }

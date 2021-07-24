@@ -1,6 +1,7 @@
 package net.jbock.common;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class EnumName {
@@ -36,5 +37,18 @@ public class EnumName {
      */
     public String original() {
         return original;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EnumName other = (EnumName) o;
+        return enumConstant.equals(other.enumConstant);
+    }
+
+    @Override
+    public int hashCode() {
+        return enumConstant.hashCode();
     }
 }

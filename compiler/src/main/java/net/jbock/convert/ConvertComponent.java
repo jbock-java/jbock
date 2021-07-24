@@ -25,9 +25,6 @@ public interface ConvertComponent {
         @BindsInstance
         Builder alreadyCreatedParams(List<Mapped<PositionalParameter>> alreadyCreated);
 
-        @BindsInstance
-        Builder alreadyCreatedOptions(List<Mapped<NamedOption>> alreadyCreated);
-
         Builder module(ConvertModule module);
 
         ConvertComponent build();

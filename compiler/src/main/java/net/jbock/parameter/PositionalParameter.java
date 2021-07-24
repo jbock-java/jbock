@@ -1,6 +1,5 @@
 package net.jbock.parameter;
 
-import net.jbock.common.EnumName;
 import net.jbock.common.SnakeName;
 
 import java.util.Locale;
@@ -13,9 +12,8 @@ public final class PositionalParameter extends AbstractItem {
 
     public PositionalParameter(
             SourceMethod sourceMethod,
-            EnumName enumName,
             int position) {
-        super(sourceMethod, enumName);
+        super(sourceMethod);
         this.position = position;
     }
 

@@ -1,7 +1,6 @@
 package net.jbock.convert;
 
 import io.jbock.util.Either;
-import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.SourceMethod;
@@ -31,8 +30,6 @@ public class NamedOptionFactory {
     private final ConverterFinder converterFinder;
     private final ConverterClass converterClass;
     private final SourceMethod sourceMethod;
-    private final EnumName enumName;
-    private final List<Mapped<NamedOption>> alreadyCreated;
     private final Types types;
 
     @Inject
@@ -40,14 +37,10 @@ public class NamedOptionFactory {
             ConverterClass converterClass,
             ConverterFinder converterFinder,
             SourceMethod sourceMethod,
-            EnumName enumName,
-            List<Mapped<NamedOption>> alreadyCreated,
             Types types) {
         this.converterFinder = converterFinder;
         this.converterClass = converterClass;
         this.sourceMethod = sourceMethod;
-        this.enumName = enumName;
-        this.alreadyCreated = alreadyCreated;
         this.types = types;
     }
 
@@ -66,15 +59,6 @@ public class NamedOptionFactory {
     private Either<String, List<String>> checkOptionNames() {
         if (sourceMethod.names().isEmpty()) {
             return left("define at least one option name");
-        }
-        for (Mapped<NamedOption> c : alreadyCreated) {
-            for (String name : sourceMethod.names()) {
-                for (String previousName : c.item().names()) {
-                    if (name.equals(previousName)) {
-                        return left("duplicate option name: " + name);
-                    }
-                }
-            }
         }
         List<String> result = new ArrayList<>();
         for (String name : sourceMethod.names()) {
@@ -119,6 +103,6 @@ public class NamedOptionFactory {
     }
 
     private NamedOption createNamedOption(List<String> names) {
-        return new NamedOption(enumName, names, sourceMethod);
+        return new NamedOption(names, sourceMethod);
     }
 }

@@ -45,29 +45,6 @@ public class ConvertModule {
 
     @ConvertScope
     @Provides
-    EnumName enumName(
-            SourceMethod sourceMethod,
-            List<Mapped<NamedOption>> alreadyCreatedOptions,
-            List<Mapped<PositionalParameter>> alreadyCreatedParams) {
-        String methodName = sourceMethod.method().getSimpleName().toString();
-        EnumName originalName = EnumName.create(methodName);
-        Set<String> alreadyCreated = Constants.concat(alreadyCreatedOptions, alreadyCreatedParams)
-                .stream()
-                .map(Mapped::enumName)
-                .map(EnumName::enumConstant)
-                .collect(Collectors.toSet());
-        EnumName result = originalName;
-        for (int i = 0; i < 100 && alreadyCreated.contains(result.enumConstant()); i++) {
-            result = result.makeLonger();
-        }
-        if (alreadyCreated.contains(result.enumConstant())) {
-            throw new AssertionError();
-        }
-        return result;
-    }
-
-    @ConvertScope
-    @Provides
     List<Matcher> matchers(
             OptionalMatcher optionalMatcher,
             ListMatcher listMatcher,

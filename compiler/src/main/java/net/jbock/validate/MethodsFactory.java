@@ -2,6 +2,7 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import net.jbock.Parameters;
+import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
@@ -11,9 +12,11 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.jbock.util.Eithers.optionalList;
@@ -114,8 +117,19 @@ public class MethodsFactory {
     }
 
     private List<SourceMethod> createSourceMethods(List<ExecutableElement> methods) {
-        return methods.stream()
-                .map(SourceMethod::create)
-                .collect(Collectors.toUnmodifiableList());
+        Set<EnumName> enumNames = new HashSet<>();
+        List<SourceMethod> result = new ArrayList<>();
+        for (ExecutableElement method : methods) {
+            EnumName resultName = EnumName.create(method.getSimpleName().toString());
+            for (int i = 0; i < 100 && enumNames.contains(resultName); i++) {
+                resultName = resultName.makeLonger();
+            }
+            if (enumNames.contains(resultName)) {
+                throw new AssertionError("could not find a unique name: " + method.getSimpleName());
+            }
+            enumNames.add(resultName);
+            result.add(SourceMethod.create(method, resultName));
+        }
+        return result;
     }
 }

@@ -1,5 +1,6 @@
 package net.jbock.parameter;
 
+import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.validate.ParameterStyle;
 
@@ -16,24 +17,27 @@ import static net.jbock.common.Constants.ACCESS_MODIFIERS;
 public class SourceMethod {
 
     private final ExecutableElement sourceMethod;
+    private final EnumName enumName;
     private final ParameterStyle parameterStyle;
     private final List<Modifier> accessModifiers;
 
     private SourceMethod(
             ExecutableElement sourceMethod,
+            EnumName enumName,
             ParameterStyle parameterStyle,
             List<Modifier> accessModifiers) {
         this.sourceMethod = sourceMethod;
+        this.enumName = enumName;
         this.parameterStyle = parameterStyle;
         this.accessModifiers = accessModifiers;
     }
 
-    public static SourceMethod create(ExecutableElement sourceMethod) {
+    public static SourceMethod create(ExecutableElement sourceMethod, EnumName enumName) {
         List<Modifier> accessModifiers = sourceMethod.getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
                 .collect(Collectors.toUnmodifiableList());
         ParameterStyle parameterStyle = ParameterStyle.getStyle(sourceMethod);
-        return new SourceMethod(sourceMethod, parameterStyle, accessModifiers);
+        return new SourceMethod(sourceMethod, enumName, parameterStyle, accessModifiers);
     }
 
     public ExecutableElement method() {
@@ -74,5 +78,9 @@ public class SourceMethod {
 
     public List<Modifier> accessModifiers() {
         return accessModifiers;
+    }
+
+    public EnumName enumName() {
+        return enumName;
     }
 }

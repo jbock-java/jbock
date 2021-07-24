@@ -1,6 +1,7 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
+import io.jbock.util.Eithers;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.ConvertModule;
 import net.jbock.convert.DaggerConvertComponent;
@@ -11,7 +12,10 @@ import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.optionalList;
@@ -59,22 +63,28 @@ public class CommandProcessor {
     private Either<List<ValidationFailure>, Items> createItems(
             List<SourceMethod> options,
             List<Mapped<PositionalParameter>> positionalParameters) {
-        List<ValidationFailure> failures = new ArrayList<>();
-        List<Mapped<NamedOption>> namedOptions = new ArrayList<>(options.size());
-        for (SourceMethod sourceMethod : options) {
-            DaggerConvertComponent.builder()
-                    .module(convertModule)
-                    .sourceMethod(sourceMethod)
-                    .alreadyCreatedParams(positionalParameters)
-                    .alreadyCreatedOptions(namedOptions)
-                    .build()
-                    .namedOptionFactory()
-                    .createNamedOption()
-                    .ifLeftOrElse(failures::add, namedOptions::add);
-        }
-        return optionalList(failures)
-                .<Either<List<ValidationFailure>, Items>>map(Either::left)
-                .orElseGet(() -> paramsFactory.create(positionalParameters, namedOptions));
+        return options.stream()
+                .map(sourceMethod -> DaggerConvertComponent.builder()
+                        .module(convertModule)
+                        .sourceMethod(sourceMethod)
+                        .alreadyCreatedParams(positionalParameters)
+                        .build()
+                        .namedOptionFactory()
+                        .createNamedOption())
+                .collect(Eithers.toValidListAll())
+                .filter(this::validateUniqueOptionNames)
+                .flatMap(namedOptions -> paramsFactory.create(positionalParameters, namedOptions));
+    }
+
+    private Optional<List<ValidationFailure>> validateUniqueOptionNames(List<Mapped<NamedOption>> allOptions) {
+        Set<String> allNames = new HashSet<>();
+        return allOptions.stream()
+                .map(Mapped::item)
+                .flatMap(item -> item.names().stream()
+                        .filter(name -> !allNames.add(name))
+                        .map(name -> "duplicate option name: " + name)
+                        .map(item::fail))
+                .collect(Eithers.toOptionalList());
     }
 
     private Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>> createPositionalParams(
@@ -86,7 +96,6 @@ public class CommandProcessor {
                     .module(convertModule)
                     .sourceMethod(sourceMethod)
                     .alreadyCreatedParams(positionalParams)
-                    .alreadyCreatedOptions(List.of())
                     .build()
                     .positionalParameterFactory()
                     .createPositionalParam(sourceMethod.index().orElse(methods.positionalParameters().size() - 1))

@@ -11,13 +11,9 @@ import java.util.Optional;
 public abstract class AbstractItem {
 
     private final SourceMethod sourceMethod;
-    private final EnumName enumName;
 
-    AbstractItem(
-            SourceMethod sourceMethod,
-            EnumName enumName) {
+    AbstractItem(SourceMethod sourceMethod) {
         this.sourceMethod = sourceMethod;
-        this.enumName = enumName;
     }
 
     public final List<String> description() {
@@ -45,7 +41,7 @@ public abstract class AbstractItem {
     }
 
     public final EnumName enumName() {
-        return enumName;
+        return sourceMethod.enumName();
     }
 
     public abstract String paramLabel();

@@ -1,7 +1,6 @@
 package net.jbock.convert;
 
 import io.jbock.util.Either;
-import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.parameter.SourceMethod;
@@ -20,7 +19,6 @@ public class PositionalParamFactory {
     private final ConverterFinder converterFinder;
     private final SourceMethod sourceMethod;
     private final SourceElement sourceElement;
-    private final EnumName enumName;
     private final List<Mapped<PositionalParameter>> alreadyCreated;
 
     @Inject
@@ -28,19 +26,16 @@ public class PositionalParamFactory {
             ConverterFinder converterFinder,
             SourceMethod sourceMethod,
             SourceElement sourceElement,
-            EnumName enumName,
             List<Mapped<PositionalParameter>> alreadyCreated) {
         this.converterFinder = converterFinder;
         this.sourceMethod = sourceMethod;
         this.sourceElement = sourceElement;
-        this.enumName = enumName;
         this.alreadyCreated = alreadyCreated;
     }
 
     public Either<ValidationFailure, Mapped<PositionalParameter>> createPositionalParam(int position) {
         PositionalParameter positionalParameter = new PositionalParameter(
                 sourceMethod,
-                enumName,
                 position);
         return Either.<String, PositionalParameter>right(positionalParameter)
                 .flatMap(coercion -> converterFinder.findConverter(positionalParameter))
