@@ -1,8 +1,6 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
-import net.jbock.common.SafeElements;
-import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.ConvertModule;
 import net.jbock.convert.DaggerConvertComponent;
@@ -10,14 +8,11 @@ import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.parameter.SourceMethod;
-import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
-import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.optionalList;
 
@@ -28,27 +23,18 @@ import static io.jbock.util.Eithers.optionalList;
 @ValidateScope
 public class CommandProcessor {
 
-    private final SourceElement sourceElement;
-    private final SafeElements elements;
-    private final TypeTool tool;
-    private final Types types;
     private final ParamsFactory paramsFactory;
     private final MethodsFactory methodsFactory;
+    private final ConvertModule convertModule;
 
     @Inject
     CommandProcessor(
-            SourceElement sourceElement,
-            SafeElements elements,
-            TypeTool tool,
-            Types types,
             ParamsFactory paramsFactory,
-            MethodsFactory methodsFactory) {
-        this.sourceElement = sourceElement;
-        this.elements = elements;
-        this.tool = tool;
-        this.types = types;
+            MethodsFactory methodsFactory,
+            ConvertModule convertModule) {
         this.paramsFactory = paramsFactory;
         this.methodsFactory = methodsFactory;
+        this.convertModule = convertModule;
     }
 
     /**
@@ -75,7 +61,6 @@ public class CommandProcessor {
             List<Mapped<PositionalParameter>> positionalParameters) {
         List<ValidationFailure> failures = new ArrayList<>();
         List<Mapped<NamedOption>> namedOptions = new ArrayList<>(options.size());
-        ConvertModule convertModule = convertModule();
         for (SourceMethod sourceMethod : options) {
             DaggerConvertComponent.builder()
                     .module(convertModule)
@@ -96,7 +81,6 @@ public class CommandProcessor {
             AbstractMethods methods) {
         List<Mapped<PositionalParameter>> positionalParams = new ArrayList<>(methods.positionalParameters().size());
         List<ValidationFailure> failures = new ArrayList<>();
-        ConvertModule convertModule = convertModule();
         for (SourceMethod sourceMethod : methods.positionalParameters()) {
             DaggerConvertComponent.builder()
                     .module(convertModule)
@@ -108,13 +92,8 @@ public class CommandProcessor {
                     .createPositionalParam(sourceMethod.index().orElse(methods.positionalParameters().size() - 1))
                     .ifLeftOrElse(failures::add, positionalParams::add);
         }
-        if (!failures.isEmpty()) {
-            return left(failures);
-        }
-        return right(positionalParams);
-    }
-
-    private ConvertModule convertModule() {
-        return new ConvertModule(tool, types, sourceElement, elements);
+        return optionalList(failures)
+                .<Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>>>map(Either::left)
+                .orElseGet(() -> right(positionalParams));
     }
 }
