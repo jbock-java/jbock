@@ -2,9 +2,11 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import net.jbock.common.ValidationFailure;
+import net.jbock.convert.ConvertComponent;
 import net.jbock.convert.ConvertModule;
 import net.jbock.convert.DaggerConvertComponent;
 import net.jbock.convert.Mapped;
+import net.jbock.convert.NamedOptionFactory;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.parameter.SourceMethod;
@@ -65,9 +67,9 @@ public class CommandProcessor {
                 .map(sourceMethod -> DaggerConvertComponent.builder()
                         .module(convertModule)
                         .sourceMethod(sourceMethod)
-                        .build()
-                        .namedOptionFactory()
-                        .createNamedOption())
+                        .build())
+                .map(ConvertComponent::namedOptionFactory)
+                .map(NamedOptionFactory::createNamedOption)
                 .collect(toValidListAll())
                 .filter(this::validateUniqueOptionNames)
                 .flatMap(namedOptions -> paramsFactory.create(positionalParameters, namedOptions));
@@ -86,23 +88,24 @@ public class CommandProcessor {
 
     private Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>> createPositionalParams(
             AbstractMethods methods) {
+        int lastIndex = methods.positionalParameters().size() - 1;
         return methods.positionalParameters().stream()
                 .map(sourceMethod -> DaggerConvertComponent.builder()
                         .module(convertModule)
                         .sourceMethod(sourceMethod)
-                        .build()
-                        .positionalParameterFactory()
-                        .createPositionalParam(sourceMethod.index().orElse(methods.positionalParameters().size() - 1)))
+                        .build())
+                .map(ConvertComponent::positionalParameterFactory)
+                .map(factory -> factory.createPositionalParam(lastIndex))
                 .collect(toValidListAll())
                 .filter(this::validateUniquePositions)
                 .filter(this::checkNoRequiredAfterOptional);
     }
 
     private Optional<List<ValidationFailure>> validateUniquePositions(List<Mapped<PositionalParameter>> allPositionalParameters) {
-        Set<Integer> allNames = new HashSet<>();
+        Set<Integer> positions = new HashSet<>();
         return allPositionalParameters.stream()
                 .map(Mapped::item)
-                .filter(item -> !allNames.add(item.position()))
+                .filter(item -> !positions.add(item.position()))
                 .map(item -> item.fail("duplicate position: " + item.position()))
                 .collect(toOptionalList());
     }
@@ -111,13 +114,15 @@ public class CommandProcessor {
         return allPositionalParameters.stream()
                 .filter(Mapped::isOptional)
                 .findFirst()
+                .map(Mapped::item)
                 .flatMap(firstOptional -> allPositionalParameters.stream()
-                        .filter(c -> c.item().position() > firstOptional.item().position())
                         .filter(Mapped::isRequired)
-                        .map(c -> c.item().fail("position of required parameter '" +
-                                c.item().sourceMethod().method().getSimpleName() +
+                        .map(Mapped::item)
+                        .filter(item -> item.position() > firstOptional.position())
+                        .map(item -> item.fail("position of required parameter '" +
+                                item.sourceMethod().method().getSimpleName() +
                                 "' is greater than position of optional parameter '" +
-                                firstOptional.item().sourceMethod().method().getSimpleName() + "'"))
+                                firstOptional.sourceMethod().method().getSimpleName() + "'"))
                         .collect(toOptionalList()));
     }
 }
