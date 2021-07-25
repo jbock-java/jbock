@@ -14,6 +14,7 @@ import java.util.OptionalInt;
 public enum ParameterStyle {
 
     OPTION(Option.class) {
+
         @Override
         public Optional<String> descriptionKey(ExecutableElement method) {
             return Descriptions.optionalString(get(method).descriptionKey());
@@ -47,7 +48,10 @@ public enum ParameterStyle {
         private Option get(ExecutableElement method) {
             return method.getAnnotation(Option.class);
         }
-    }, PARAMETER(Parameter.class) {
+    },
+
+    PARAMETER(Parameter.class) {
+
         @Override
         public Optional<String> descriptionKey(ExecutableElement method) {
             return Descriptions.optionalString(get(method).descriptionKey());
@@ -81,7 +85,10 @@ public enum ParameterStyle {
         private Parameter get(ExecutableElement method) {
             return method.getAnnotation(Parameter.class);
         }
-    }, PARAMETERS(Parameters.class) {
+    },
+
+    PARAMETERS(Parameters.class) {
+
         @Override
         public Optional<String> descriptionKey(ExecutableElement method) {
             return Descriptions.optionalString(get(method).descriptionKey());
