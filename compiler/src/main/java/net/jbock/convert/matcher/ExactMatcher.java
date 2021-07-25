@@ -35,13 +35,9 @@ public class ExactMatcher implements Matcher {
     }
 
     private TypeMirror boxedReturnType() {
-        TypeMirror sourceType = sourceMethod.returnType();
-        if (!sourceType.getKind().isPrimitive()) {
-            return sourceType;
-        }
-        return AS_PRIMITIVE.visit(sourceType)
+        return AS_PRIMITIVE.visit(sourceMethod.returnType())
                 .map(types::boxedClass)
                 .map(TypeElement::asType)
-                .orElse(sourceType);
+                .orElse(sourceMethod.returnType());
     }
 }
