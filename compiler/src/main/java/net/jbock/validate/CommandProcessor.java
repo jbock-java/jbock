@@ -2,12 +2,9 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.ConvertComponent;
 import net.jbock.convert.ConvertModule;
 import net.jbock.convert.DaggerConvertComponent;
 import net.jbock.convert.Mapped;
-import net.jbock.convert.NamedOptionFactory;
-import net.jbock.convert.PositionalParamFactory;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.parameter.SourceMethod;
@@ -63,15 +60,13 @@ public class CommandProcessor {
     }
 
     private Either<List<ValidationFailure>, Items> createItems(
-            List<SourceMethod> options,
+            List<SourceMethod<?>> options,
             List<Mapped<PositionalParameter>> positionalParameters) {
         return options.stream()
                 .map(sourceMethod -> DaggerConvertComponent.builder()
                         .module(convertModule)
-                        .sourceMethod(sourceMethod)
-                        .build())
-                .map(ConvertComponent::namedOptionFactory)
-                .map(NamedOptionFactory::createNamedOption)
+                        .build()
+                        .namedOptionFactory().createNamedOption(sourceMethod))
                 .collect(toValidListAll())
                 .filter(this::validateUniqueOptionNames)
                 .flatMap(namedOptions -> paramsFactory.create(positionalParameters, namedOptions));
@@ -93,10 +88,9 @@ public class CommandProcessor {
         return methods.positionalParameters().stream()
                 .map(sourceMethod -> DaggerConvertComponent.builder()
                         .module(convertModule)
-                        .sourceMethod(sourceMethod)
-                        .build())
-                .map(ConvertComponent::positionalParameterFactory)
-                .map(PositionalParamFactory::createPositionalParam)
+                        .build()
+                        .positionalParameterFactory()
+                        .createPositionalParam(sourceMethod))
                 .collect(toValidListAll())
                 .filter(this::validatePositions)
                 .filter(this::checkNoRequiredAfterOptional);

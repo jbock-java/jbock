@@ -2,6 +2,8 @@ package net.jbock.annotated;
 
 import net.jbock.Parameter;
 import net.jbock.common.Descriptions;
+import net.jbock.method.MethodAnnotation;
+import net.jbock.method.ParameterAnnotation;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.List;
@@ -27,7 +29,7 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     }
 
     @Override
-    public Optional<String> paramLabel() {
+    public Optional<String> label() {
         return Descriptions.optionalString(parameter.paramLabel());
     }
 
@@ -44,6 +46,11 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     @Override
     public List<String> description() {
         return List.of(parameter.description());
+    }
+
+    @Override
+    public MethodAnnotation<?> annotation(int numberOfParameters) {
+        return new ParameterAnnotation(this);
     }
 
     public int index() {

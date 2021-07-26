@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public abstract class AbstractItem {
 
-    private final SourceMethod sourceMethod;
+    private final SourceMethod<?> sourceMethod;
 
-    AbstractItem(SourceMethod sourceMethod) {
+    AbstractItem(SourceMethod<?> sourceMethod) {
         this.sourceMethod = sourceMethod;
     }
 
@@ -46,7 +46,7 @@ public abstract class AbstractItem {
 
     public abstract String paramLabel();
 
-    public final SourceMethod sourceMethod() {
+    public final SourceMethod<?> sourceMethod() {
         return sourceMethod;
     }
 }

@@ -10,7 +10,6 @@ import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.convert.reference.StringConverterType;
 import net.jbock.parameter.AbstractItem;
-import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -31,7 +30,6 @@ public class ConverterValidator extends MatchValidator {
     private final List<Matcher> matchers;
     private final ReferenceTool referenceTool;
     private final Util util;
-    private final SourceMethod sourceMethod;
     private final SourceElement sourceElement;
     private final Types types;
 
@@ -40,14 +38,11 @@ public class ConverterValidator extends MatchValidator {
             List<Matcher> matchers,
             ReferenceTool referenceTool,
             Util util,
-            SourceMethod sourceMethod,
             SourceElement sourceElement,
             Types types) {
-        super(sourceMethod);
         this.matchers = matchers;
         this.referenceTool = referenceTool;
         this.util = util;
-        this.sourceMethod = sourceMethod;
         this.sourceElement = sourceElement;
         this.types = types;
     }
@@ -75,7 +70,7 @@ public class ConverterValidator extends MatchValidator {
             match = match.filter(m -> isValidMatch(m, functionType));
             if (match.isPresent()) {
                 Match m = match.orElseThrow();
-                return validateMatch(m)
+                return validateMatch(parameter.sourceMethod(), m)
                         .<Either<String, CodeBlock>>map(Either::left)
                         .orElseGet(() -> Either.right(getMapExpr(functionType, converter)))
                         .map(code -> new MapExpr(code, m.baseType(), false))
@@ -85,7 +80,7 @@ public class ConverterValidator extends MatchValidator {
         TypeMirror typeForErrorMessage = matches.stream()
                 .max(Comparator.comparing(Match::multiplicity))
                 .map(Match::baseType)
-                .orElse(sourceMethod.returnType());
+                .orElse(parameter.sourceMethod().returnType());
         return left(noMatchError(typeForErrorMessage));
     }
 

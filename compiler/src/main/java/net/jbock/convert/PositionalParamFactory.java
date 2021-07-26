@@ -15,20 +15,18 @@ import static io.jbock.util.Either.right;
 public class PositionalParamFactory {
 
     private final ConverterFinder converterFinder;
-    private final SourceMethod sourceMethod;
     private final SourceElement sourceElement;
 
     @Inject
     PositionalParamFactory(
             ConverterFinder converterFinder,
-            SourceMethod sourceMethod,
             SourceElement sourceElement) {
         this.converterFinder = converterFinder;
-        this.sourceMethod = sourceMethod;
         this.sourceElement = sourceElement;
     }
 
-    public Either<ValidationFailure, Mapped<PositionalParameter>> createPositionalParam() {
+    public Either<ValidationFailure, Mapped<PositionalParameter>> createPositionalParam(
+            SourceMethod<?> sourceMethod) {
         int position = sourceMethod.index().orElseThrow();
         PositionalParameter positionalParameter = new PositionalParameter(sourceMethod, position);
         return Either.<String, PositionalParameter>right(positionalParameter)

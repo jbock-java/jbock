@@ -1,20 +1,17 @@
 package net.jbock.method;
 
 import net.jbock.annotated.AnnotatedMethod;
-import net.jbock.annotated.AnnotatedOption;
-import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.annotated.AnnotatedParameters;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-public abstract class MethodAnnotation {
+public abstract class MethodAnnotation<M extends AnnotatedMethod> {
 
-    private final AnnotatedMethod annotatedMethod;
+    private final M annotatedMethod;
 
-    MethodAnnotation(AnnotatedMethod annotatedMethod) {
+    MethodAnnotation(M annotatedMethod) {
         this.annotatedMethod = annotatedMethod;
     }
 
@@ -22,8 +19,8 @@ public abstract class MethodAnnotation {
         return annotatedMethod.descriptionKey();
     }
 
-    public final Optional<String> paramLabel() {
-        return annotatedMethod.paramLabel();
+    public final Optional<String> label() {
+        return annotatedMethod.label();
     }
 
     public final boolean isPositional() {
@@ -48,22 +45,11 @@ public abstract class MethodAnnotation {
         return annotatedMethod.description();
     }
 
-    public static MethodAnnotation create(
-            AnnotatedMethod annotatedMethod,
-            int numberOfParameters) {
-        if (annotatedMethod instanceof AnnotatedOption) {
-            return new OptionAnnotation((AnnotatedOption) annotatedMethod);
-        }
-        if (annotatedMethod instanceof AnnotatedParameter) {
-            return new ParameterAnnotation(annotatedMethod, ((AnnotatedParameter) annotatedMethod).index());
-        }
-        if (annotatedMethod instanceof AnnotatedParameters) {
-            return new ParameterAnnotation(annotatedMethod, numberOfParameters);
-        }
-        throw new AssertionError("all cases exhausted: " + annotatedMethod.getClass());
-    }
-
     public ExecutableElement sourceMethod() {
         return annotatedMethod.sourceMethod();
+    }
+
+    public M annotatedMethod() {
+        return annotatedMethod;
     }
 }

@@ -28,7 +28,7 @@ import static io.jbock.util.Eithers.toOptionalList;
 public class MethodsFactory {
 
     // sort order that puts @Parameters last
-    private static final Comparator<SourceMethod> POSITION_COMPARATOR =
+    private static final Comparator<SourceMethod<?>> POSITION_COMPARATOR =
             Comparator.comparingInt(m -> m.index().orElse(Integer.MAX_VALUE));
 
     private final SourceElement sourceElement;
@@ -72,12 +72,12 @@ public class MethodsFactory {
                 .collect(toOptionalList());
     }
 
-    private AbstractMethods createAbstractMethods(List<SourceMethod> methods) {
-        List<SourceMethod> params = methods.stream()
+    private AbstractMethods createAbstractMethods(List<SourceMethod<?>> methods) {
+        List<SourceMethod<?>> params = methods.stream()
                 .filter(SourceMethod::isPositional)
                 .sorted(POSITION_COMPARATOR)
                 .collect(Collectors.toUnmodifiableList());
-        List<SourceMethod> options = methods.stream()
+        List<SourceMethod<?>> options = methods.stream()
                 .filter(m -> !m.isPositional())
                 .collect(Collectors.toUnmodifiableList());
         return new AbstractMethods(params, options);
@@ -97,8 +97,8 @@ public class MethodsFactory {
     /* Left-Optional
      */
     private Optional<List<ValidationFailure>> validateDuplicateParametersAnnotation(
-            List<SourceMethod> sourceMethods) {
-        List<SourceMethod> parametersMethods = sourceMethods.stream()
+            List<SourceMethod<?>> sourceMethods) {
+        List<SourceMethod<?>> parametersMethods = sourceMethods.stream()
                 .filter(SourceMethod::isParameters)
                 .collect(Collectors.toUnmodifiableList());
         List<ValidationFailure> failures = new ArrayList<>();
@@ -116,12 +116,12 @@ public class MethodsFactory {
                 .collect(Eithers.toValidListAll());
     }
 
-    private List<SourceMethod> createSourceMethods(List<AnnotatedMethod> methods) {
+    private List<SourceMethod<?>> createSourceMethods(List<AnnotatedMethod> methods) {
         int numberOfParameters = Math.toIntExact(methods.stream()
                 .filter(AnnotatedMethod::isParameter)
                 .count());
         Set<EnumName> names = new HashSet<>();
-        List<SourceMethod> result = new ArrayList<>();
+        List<SourceMethod<?>> result = new ArrayList<>();
         for (AnnotatedMethod method : methods) {
             EnumName name = EnumName.create(method.sourceMethod().getSimpleName().toString());
             while (names.contains(name)) {

@@ -11,7 +11,7 @@ public final class PositionalParameter extends AbstractItem {
     private final int position;
 
     public PositionalParameter(
-            SourceMethod sourceMethod,
+            SourceMethod<?> sourceMethod,
             int position) {
         super(sourceMethod);
         this.position = position;
@@ -19,7 +19,7 @@ public final class PositionalParameter extends AbstractItem {
 
     @Override
     public final String paramLabel() {
-        return sourceMethod().paramLabel()
+        return sourceMethod().label()
                 .orElseGet(() -> SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
     }
 

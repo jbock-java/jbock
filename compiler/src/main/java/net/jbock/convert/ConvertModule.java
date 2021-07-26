@@ -71,12 +71,6 @@ public class ConvertModule {
 
     @ConvertScope
     @Provides
-    ConverterClass converter(SourceMethod sourceMethod) {
-        return new ConverterClass(annotationUtil.getConverter(sourceMethod.method()));
-    }
-
-    @ConvertScope
-    @Provides
     Util util(TypeTool tool) {
         return new Util(types, tool);
     }

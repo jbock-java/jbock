@@ -4,9 +4,9 @@ import net.jbock.annotated.AnnotatedOption;
 
 import java.util.OptionalInt;
 
-final class OptionAnnotation extends MethodAnnotation {
+public final class OptionAnnotation extends MethodAnnotation<AnnotatedOption> {
 
-    OptionAnnotation(AnnotatedOption annotatedOption) {
+    public OptionAnnotation(AnnotatedOption annotatedOption) {
         super(annotatedOption);
     }
 

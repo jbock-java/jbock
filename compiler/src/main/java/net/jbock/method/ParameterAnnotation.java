@@ -1,22 +1,17 @@
 package net.jbock.method;
 
-import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.annotated.AnnotatedParameter;
 
 import java.util.OptionalInt;
 
-final class ParameterAnnotation extends MethodAnnotation {
+public final class ParameterAnnotation extends MethodAnnotation<AnnotatedParameter> {
 
-    private final int index;
-
-    ParameterAnnotation(
-            AnnotatedMethod annotatedMethod,
-            int index) {
+    public ParameterAnnotation(AnnotatedParameter annotatedMethod) {
         super(annotatedMethod);
-        this.index = index;
     }
 
     @Override
     public OptionalInt index() {
-        return OptionalInt.of(index);
+        return OptionalInt.of(annotatedMethod().index());
     }
 }

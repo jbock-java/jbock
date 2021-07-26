@@ -7,26 +7,28 @@ import net.jbock.convert.matching.ConverterValidator;
 import net.jbock.parameter.AbstractItem;
 
 import javax.inject.Inject;
+import javax.lang.model.element.TypeElement;
+import java.util.Optional;
 
 @ConvertScope
 public class ConverterFinder {
 
     private final Lazy<AutoConverterFinder> autoConverterFinder;
     private final Lazy<ConverterValidator> converterValidator;
-    private final ConverterClass converterClass;
+    private final AnnotationUtil annotationUtil;
 
     @Inject
     ConverterFinder(
             Lazy<AutoConverterFinder> autoConverterFinder,
             Lazy<ConverterValidator> converterValidator,
-            ConverterClass converterClass) {
+            AnnotationUtil annotationUtil) {
         this.autoConverterFinder = autoConverterFinder;
         this.converterValidator = converterValidator;
-        this.converterClass = converterClass;
+        this.annotationUtil = annotationUtil;
     }
 
     public <P extends AbstractItem> Either<String, Mapped<P>> findConverter(P parameter) {
-        return converterClass.converter()
+        return annotationUtil.getConverter(parameter.sourceMethod().method())
                 .map(converter -> converterValidator.get().validate(parameter, converter))
                 .orElseGet(() -> autoConverterFinder.get().findConverter(parameter));
     }

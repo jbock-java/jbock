@@ -7,7 +7,6 @@ import net.jbock.convert.ConvertScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.model.Multiplicity;
 import net.jbock.parameter.AbstractItem;
-import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
@@ -17,18 +16,15 @@ import java.util.Optional;
 @ConvertScope
 public class OptionalMatcher implements Matcher {
 
-    private final SourceMethod sourceMethod;
     private final TypeTool tool;
     private final SafeElements elements;
     private final Types types;
 
     @Inject
     OptionalMatcher(
-            SourceMethod sourceMethod,
             TypeTool tool,
             SafeElements elements,
             Types types) {
-        this.sourceMethod = sourceMethod;
         this.tool = tool;
         this.elements = elements;
         this.types = types;
@@ -36,7 +32,7 @@ public class OptionalMatcher implements Matcher {
 
     @Override
     public Optional<Match> tryMatch(AbstractItem parameter) {
-        TypeMirror returnType = sourceMethod.returnType();
+        TypeMirror returnType = parameter.sourceMethod().returnType();
         return getOptionalPrimitive(returnType)
                 .or(() -> // base
                         elements.getTypeElement("java.util.Optional")

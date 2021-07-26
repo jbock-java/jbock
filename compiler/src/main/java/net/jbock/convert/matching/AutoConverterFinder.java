@@ -9,7 +9,6 @@ import net.jbock.convert.ConvertScope;
 import net.jbock.convert.Mapped;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.parameter.AbstractItem;
-import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
@@ -29,19 +28,15 @@ public class AutoConverterFinder extends MatchValidator {
 
     private final AutoConverters autoConverter;
     private final List<Matcher> matchers;
-    private final SourceMethod sourceMethod;
     private final Util util;
 
     @Inject
     AutoConverterFinder(
             AutoConverters autoConverter,
             List<Matcher> matchers,
-            SourceMethod sourceMethod,
             Util util) {
-        super(sourceMethod);
         this.autoConverter = autoConverter;
         this.matchers = matchers;
-        this.sourceMethod = sourceMethod;
         this.util = util;
     }
 
@@ -50,12 +45,12 @@ public class AutoConverterFinder extends MatchValidator {
             Optional<Match> match = matcher.tryMatch(parameter);
             if (match.isPresent()) {
                 Match m = match.orElseThrow();
-                return validateMatch(m)
+                return validateMatch(parameter.sourceMethod(), m)
                         .<Either<String, Mapped<P>>>map(Either::left)
                         .orElseGet(() -> findConverter(m, parameter));
             }
         }
-        return left(noMatchError(sourceMethod.returnType()));
+        return left(noMatchError(parameter.sourceMethod().returnType()));
     }
 
     private <P extends AbstractItem> Either<String, Mapped<P>> findConverter(Match match, P parameter) {

@@ -15,15 +15,14 @@ import java.util.stream.Collectors;
 
 import static net.jbock.common.Constants.ACCESS_MODIFIERS;
 
-public class SourceMethod {
+public class SourceMethod<M extends AnnotatedMethod> {
 
-    // TODO type argument
-    private final MethodAnnotation methodAnnotation;
+    private final MethodAnnotation<M> methodAnnotation;
     private final EnumName enumName;
     private final List<Modifier> accessModifiers;
 
     private SourceMethod(
-            MethodAnnotation methodAnnotation,
+            MethodAnnotation<M> methodAnnotation,
             EnumName enumName,
             List<Modifier> accessModifiers) {
         this.methodAnnotation = methodAnnotation;
@@ -31,15 +30,15 @@ public class SourceMethod {
         this.accessModifiers = accessModifiers;
     }
 
-    public static SourceMethod create(
+    public static SourceMethod<?> create(
             AnnotatedMethod annotatedMethod,
             EnumName enumName,
             int numberOfParameters) {
         List<Modifier> accessModifiers = annotatedMethod.sourceMethod().getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
                 .collect(Collectors.toUnmodifiableList());
-        return new SourceMethod(annotatedMethod.annotation(numberOfParameters),
-                enumName, accessModifiers);
+        MethodAnnotation<?> annotation = annotatedMethod.annotation(numberOfParameters);
+        return new SourceMethod<>(annotation, enumName, accessModifiers);
     }
 
     public ExecutableElement method() {
@@ -82,8 +81,8 @@ public class SourceMethod {
         return methodAnnotation.description();
     }
 
-    public Optional<String> paramLabel() {
-        return methodAnnotation.paramLabel();
+    public Optional<String> label() {
+        return methodAnnotation.label();
     }
 
     public List<Modifier> accessModifiers() {

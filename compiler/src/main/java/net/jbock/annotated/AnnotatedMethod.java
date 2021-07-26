@@ -4,6 +4,7 @@ import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.common.Annotations;
+import net.jbock.common.EnumName;
 import net.jbock.method.MethodAnnotation;
 
 import javax.lang.model.element.ExecutableElement;
@@ -36,7 +37,7 @@ public abstract class AnnotatedMethod {
 
     public abstract Optional<String> descriptionKey();
 
-    public abstract Optional<String> paramLabel();
+    public abstract Optional<String> label();
 
     public final boolean isPositional() {
         return isParameter() || isParameters();
@@ -54,7 +55,5 @@ public abstract class AnnotatedMethod {
         return sourceMethod;
     }
 
-    public MethodAnnotation annotation(int numberOfParameters) {
-        return MethodAnnotation.create(this, numberOfParameters);
-    }
+    public abstract MethodAnnotation<?> annotation(int numberOfParameters);
 }

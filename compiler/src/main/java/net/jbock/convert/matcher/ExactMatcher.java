@@ -17,24 +17,20 @@ import static net.jbock.common.TypeTool.AS_PRIMITIVE;
 @ConvertScope
 public class ExactMatcher implements Matcher {
 
-    private final SourceMethod sourceMethod;
     private final Types types;
 
     @Inject
-    ExactMatcher(
-            SourceMethod sourceMethod,
-            Types types) {
-        this.sourceMethod = sourceMethod;
+    ExactMatcher(Types types) {
         this.types = types;
     }
 
     @Override
     public Optional<Match> tryMatch(AbstractItem parameter) {
-        Match match = Match.create(boxedReturnType(), Multiplicity.REQUIRED);
+        Match match = Match.create(boxedReturnType(parameter.sourceMethod()), Multiplicity.REQUIRED);
         return Optional.of(match);
     }
 
-    private TypeMirror boxedReturnType() {
+    private TypeMirror boxedReturnType(SourceMethod<?> sourceMethod) {
         return AS_PRIMITIVE.visit(sourceMethod.returnType())
                 .map(types::boxedClass)
                 .map(TypeElement::asType)

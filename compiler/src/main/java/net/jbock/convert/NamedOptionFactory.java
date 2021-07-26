@@ -6,6 +6,7 @@ import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,27 +29,25 @@ public class NamedOptionFactory {
             .thenComparing(String::toString);
 
     private final ConverterFinder converterFinder;
-    private final ConverterClass converterClass;
-    private final SourceMethod sourceMethod;
     private final Types types;
+    private final AnnotationUtil annotationUtil;
 
     @Inject
     NamedOptionFactory(
-            ConverterClass converterClass,
             ConverterFinder converterFinder,
-            SourceMethod sourceMethod,
-            Types types) {
+            Types types,
+            AnnotationUtil annotationUtil) {
         this.converterFinder = converterFinder;
-        this.converterClass = converterClass;
-        this.sourceMethod = sourceMethod;
         this.types = types;
+        this.annotationUtil = annotationUtil;
     }
 
-    public Either<ValidationFailure, Mapped<NamedOption>> createNamedOption() {
-        return checkOptionNames()
+    public Either<ValidationFailure, Mapped<NamedOption>> createNamedOption(SourceMethod<?> sourceMethod) {
+        Optional<TypeElement> converter = annotationUtil.getConverter(sourceMethod.method());
+        return checkOptionNames(sourceMethod)
                 .map(names -> new NamedOption(names, sourceMethod))
                 .flatMap(namedOption -> {
-                    if (!converterClass.isPresent() && sourceMethod.returnType().getKind() == BOOLEAN) {
+                    if (converter.isEmpty() && sourceMethod.returnType().getKind() == BOOLEAN) {
                         return right(createFlag(namedOption, types.getPrimitiveType(BOOLEAN)));
                     }
                     return converterFinder.findConverter(namedOption);
@@ -56,7 +55,7 @@ public class NamedOptionFactory {
                 .mapLeft(sourceMethod::fail);
     }
 
-    private Either<String, List<String>> checkOptionNames() {
+    private Either<String, List<String>> checkOptionNames(SourceMethod<?> sourceMethod) {
         if (sourceMethod.names().isEmpty()) {
             return left("define at least one option name");
         }

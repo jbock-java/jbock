@@ -2,6 +2,8 @@ package net.jbock.annotated;
 
 import net.jbock.Option;
 import net.jbock.common.Descriptions;
+import net.jbock.method.MethodAnnotation;
+import net.jbock.method.OptionAnnotation;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.List;
@@ -27,7 +29,7 @@ public final class AnnotatedOption extends AnnotatedMethod {
     }
 
     @Override
-    public Optional<String> paramLabel() {
+    public Optional<String> label() {
         return Descriptions.optionalString(option.paramLabel());
     }
 
@@ -44,5 +46,10 @@ public final class AnnotatedOption extends AnnotatedMethod {
     @Override
     public List<String> description() {
         return List.of(option.description());
+    }
+
+    @Override
+    public MethodAnnotation<?> annotation(int numberOfParameters) {
+        return new OptionAnnotation(this);
     }
 }

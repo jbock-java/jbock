@@ -9,15 +9,9 @@ import java.util.Optional;
 
 abstract class MatchValidator {
 
-    private final SourceMethod sourceMethod;
-
-    MatchValidator(SourceMethod sourceMethod) {
-        this.sourceMethod = sourceMethod;
-    }
-
     /* Left-Optional
      */
-    Optional<String> validateMatch(Match m) {
+    Optional<String> validateMatch(SourceMethod<?> sourceMethod, Match m) {
         if (sourceMethod.isParameter()
                 && m.multiplicity() == Multiplicity.REPEATABLE) {
             return Optional.of("use @" + Parameters.class.getSimpleName() + " here");

@@ -11,7 +11,7 @@ public final class NamedOption extends AbstractItem {
 
     public NamedOption(
             List<String> names,
-            SourceMethod sourceMethod) {
+            SourceMethod<?> sourceMethod) {
         super(sourceMethod);
         this.names = names;
     }
@@ -22,7 +22,7 @@ public final class NamedOption extends AbstractItem {
 
     @Override
     public final String paramLabel() {
-        return sourceMethod().paramLabel().or(() -> names.stream()
+        return sourceMethod().label().or(() -> names.stream()
                 .filter(name -> name.startsWith("--"))
                 .map(name -> name.substring(2))
                 .map(s -> s.toUpperCase(Locale.US))
