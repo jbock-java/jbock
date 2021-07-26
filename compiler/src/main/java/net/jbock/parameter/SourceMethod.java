@@ -1,6 +1,6 @@
 package net.jbock.parameter;
 
-import net.jbock.common.AnnotatedMethod;
+import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.method.MethodAnnotation;

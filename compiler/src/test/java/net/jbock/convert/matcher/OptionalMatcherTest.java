@@ -1,7 +1,7 @@
 package net.jbock.convert.matcher;
 
 import net.jbock.Option;
-import net.jbock.common.AnnotatedMethod;
+import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.EnumName;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;

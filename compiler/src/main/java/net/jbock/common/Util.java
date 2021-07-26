@@ -1,6 +1,7 @@
 package net.jbock.common;
 
 import io.jbock.util.Either;
+import net.jbock.annotated.AnnotatedMethod;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;

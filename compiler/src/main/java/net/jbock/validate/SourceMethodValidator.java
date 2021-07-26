@@ -1,7 +1,7 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
-import net.jbock.common.AnnotatedMethod;
+import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 

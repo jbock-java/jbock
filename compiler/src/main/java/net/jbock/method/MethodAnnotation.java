@@ -1,61 +1,69 @@
 package net.jbock.method;
 
-import net.jbock.Option;
-import net.jbock.Parameter;
-import net.jbock.Parameters;
-import net.jbock.common.Annotations;
+import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.annotated.AnnotatedOption;
+import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
 
 import javax.lang.model.element.ExecutableElement;
-import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
 public abstract class MethodAnnotation {
 
-    private final ExecutableElement sourceMethod;
+    private final AnnotatedMethod annotatedMethod;
 
-    MethodAnnotation(ExecutableElement sourceMethod) {
-        this.sourceMethod = sourceMethod;
+    MethodAnnotation(AnnotatedMethod annotatedMethod) {
+        this.annotatedMethod = annotatedMethod;
     }
 
-    public abstract Optional<String> descriptionKey();
+    public final Optional<String> descriptionKey() {
+        return annotatedMethod.descriptionKey();
+    }
 
-    public abstract Optional<String> paramLabel();
+    public final Optional<String> paramLabel() {
+        return annotatedMethod.paramLabel();
+    }
 
     public final boolean isPositional() {
-        return isParameter() || isParameters();
+        return annotatedMethod.isPositional();
     }
 
-    public abstract boolean isParameters();
+    public final boolean isParameters() {
+        return annotatedMethod.isParameters();
+    }
 
-    public abstract boolean isParameter();
+    public final boolean isParameter() {
+        return annotatedMethod.isParameter();
+    }
 
     public abstract OptionalInt index();
 
-    public abstract List<String> names();
+    public final List<String> names() {
+        return annotatedMethod.names();
+    }
 
-    public abstract List<String> description();
+    public final List<String> description() {
+        return annotatedMethod.description();
+    }
 
     public static MethodAnnotation create(
-            ExecutableElement sourceMethod,
-            Annotation annotation,
+            AnnotatedMethod annotatedMethod,
             int numberOfParameters) {
-        if (annotation instanceof Option) {
-            return new OptionAnnotation(sourceMethod, (Option) annotation);
+        if (annotatedMethod instanceof AnnotatedOption) {
+            return new OptionAnnotation((AnnotatedOption) annotatedMethod);
         }
-        if (annotation instanceof Parameter) {
-            return new ParameterAnnotation(sourceMethod, (Parameter) annotation);
+        if (annotatedMethod instanceof AnnotatedParameter) {
+            return new ParameterAnnotation((AnnotatedParameter) annotatedMethod);
         }
-        if (annotation instanceof Parameters) {
-            return new ParametersAnnotation(sourceMethod, (Parameters) annotation, numberOfParameters);
+        if (annotatedMethod instanceof AnnotatedParameters) {
+            return new ParametersAnnotation((AnnotatedParameters) annotatedMethod, numberOfParameters);
         }
-        throw new AssertionError("expecting one of " +
-                Annotations.methodLevelAnnotations() +
-                " but found: " + annotation);
+        throw new AssertionError("all cases exhausted: " + annotatedMethod.getClass());
     }
 
     public ExecutableElement sourceMethod() {
-        return sourceMethod;
+        return annotatedMethod.sourceMethod();
     }
 }
