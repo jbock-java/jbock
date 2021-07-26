@@ -55,10 +55,10 @@ public abstract class MethodAnnotation {
             return new OptionAnnotation((AnnotatedOption) annotatedMethod);
         }
         if (annotatedMethod instanceof AnnotatedParameter) {
-            return new ParameterAnnotation((AnnotatedParameter) annotatedMethod);
+            return new ParameterAnnotation(annotatedMethod, ((AnnotatedParameter) annotatedMethod).index());
         }
         if (annotatedMethod instanceof AnnotatedParameters) {
-            return new ParametersAnnotation((AnnotatedParameters) annotatedMethod, numberOfParameters);
+            return new ParameterAnnotation(annotatedMethod, numberOfParameters);
         }
         throw new AssertionError("all cases exhausted: " + annotatedMethod.getClass());
     }
