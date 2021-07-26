@@ -13,8 +13,8 @@ public final class AnnotatedOption extends AnnotatedMethod {
 
     private final Option option;
 
-    AnnotatedOption(ExecutableElement sourceMethod, Option option) {
-        super(sourceMethod);
+    AnnotatedOption(ExecutableElement method, Option option) {
+        super(method);
         this.option = option;
     }
 

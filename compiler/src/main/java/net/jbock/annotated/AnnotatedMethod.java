@@ -4,7 +4,6 @@ import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.common.Annotations;
-import net.jbock.common.EnumName;
 import net.jbock.method.MethodAnnotation;
 
 import javax.lang.model.element.ExecutableElement;
@@ -14,10 +13,10 @@ import java.util.Optional;
 
 public abstract class AnnotatedMethod {
 
-    private final ExecutableElement sourceMethod;
+    private final ExecutableElement method;
 
-    AnnotatedMethod(ExecutableElement sourceMethod) {
-        this.sourceMethod = sourceMethod;
+    AnnotatedMethod(ExecutableElement method) {
+        this.method = method;
     }
 
     public static AnnotatedMethod create(ExecutableElement sourceMethod, Annotation annotation) {
@@ -51,8 +50,8 @@ public abstract class AnnotatedMethod {
 
     public abstract List<String> description();
 
-    public ExecutableElement sourceMethod() {
-        return sourceMethod;
+    public ExecutableElement method() {
+        return method;
     }
 
     public abstract MethodAnnotation<?> annotation(int numberOfParameters);

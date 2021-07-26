@@ -13,8 +13,8 @@ public final class AnnotatedParameter extends AnnotatedMethod {
 
     private final Parameter parameter;
 
-    AnnotatedParameter(ExecutableElement sourceMethod, Parameter parameter) {
-        super(sourceMethod);
+    AnnotatedParameter(ExecutableElement method, Parameter parameter) {
+        super(method);
         this.parameter = parameter;
     }
 

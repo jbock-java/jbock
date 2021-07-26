@@ -4,6 +4,7 @@ import io.jbock.util.Either;
 import io.jbock.util.Eithers;
 import net.jbock.Parameters;
 import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.parameter.SourceMethod;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
@@ -63,10 +65,10 @@ public class MethodsFactory {
     private Optional<List<ValidationFailure>> detectInheritanceCollision(
             List<AnnotatedMethod> methods) {
         Map<Name, List<ExecutableElement>> map = methods.stream()
-                .map(AnnotatedMethod::sourceMethod)
+                .map(AnnotatedMethod::method)
                 .collect(Collectors.groupingBy(ExecutableElement::getSimpleName));
         return methods.stream()
-                .map(AnnotatedMethod::sourceMethod)
+                .map(AnnotatedMethod::method)
                 .filter(method -> map.get(method.getSimpleName()).size() >= 2)
                 .map(method -> new ValidationFailure("inheritance collision", method))
                 .collect(toOptionalList());
@@ -76,10 +78,13 @@ public class MethodsFactory {
         List<SourceMethod<?>> params = methods.stream()
                 .filter(SourceMethod::isPositional)
                 .sorted(POSITION_COMPARATOR)
-                .collect(Collectors.toUnmodifiableList());
-        List<SourceMethod<?>> options = methods.stream()
-                .filter(m -> !m.isPositional())
-                .collect(Collectors.toUnmodifiableList());
+                .collect(Collectors.toList());
+        List<SourceMethod<AnnotatedOption>> options = methods.stream()
+                .flatMap(m -> (m.methodAnnotation().annotatedMethod() instanceof AnnotatedOption)
+                        // is there a better way to filter, than this cast?
+                        ? Stream.of((SourceMethod<AnnotatedOption>) m) :
+                        Stream.empty())
+                .collect(Collectors.toList());
         return new AbstractMethods(params, options);
     }
 
@@ -123,7 +128,7 @@ public class MethodsFactory {
         Set<EnumName> names = new HashSet<>();
         List<SourceMethod<?>> result = new ArrayList<>();
         for (AnnotatedMethod method : methods) {
-            EnumName name = EnumName.create(method.sourceMethod().getSimpleName().toString());
+            EnumName name = EnumName.create(method.method().getSimpleName().toString());
             while (names.contains(name)) {
                 name = name.makeLonger();
             }

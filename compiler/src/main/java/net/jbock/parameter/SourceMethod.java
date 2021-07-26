@@ -34,7 +34,7 @@ public class SourceMethod<M extends AnnotatedMethod> {
             AnnotatedMethod annotatedMethod,
             EnumName enumName,
             int numberOfParameters) {
-        List<Modifier> accessModifiers = annotatedMethod.sourceMethod().getModifiers().stream()
+        List<Modifier> accessModifiers = annotatedMethod.method().getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
                 .collect(Collectors.toUnmodifiableList());
         MethodAnnotation<?> annotation = annotatedMethod.annotation(numberOfParameters);
@@ -42,11 +42,11 @@ public class SourceMethod<M extends AnnotatedMethod> {
     }
 
     public ExecutableElement method() {
-        return methodAnnotation.sourceMethod();
+        return methodAnnotation.method();
     }
 
     public TypeMirror returnType() {
-        return methodAnnotation.sourceMethod().getReturnType();
+        return methodAnnotation.method().getReturnType();
     }
 
     public boolean isPositional() {
@@ -70,7 +70,7 @@ public class SourceMethod<M extends AnnotatedMethod> {
     }
 
     public ValidationFailure fail(String message) {
-        return new ValidationFailure(message, methodAnnotation.sourceMethod());
+        return new ValidationFailure(message, methodAnnotation.method());
     }
 
     public List<String> names() {
@@ -91,5 +91,9 @@ public class SourceMethod<M extends AnnotatedMethod> {
 
     public EnumName enumName() {
         return enumName;
+    }
+
+    public MethodAnnotation<M> methodAnnotation() {
+        return methodAnnotation;
     }
 }

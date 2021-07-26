@@ -1,6 +1,7 @@
 package net.jbock.convert;
 
 import io.jbock.util.Either;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.parameter.SourceMethod;
@@ -26,7 +27,7 @@ public class PositionalParamFactory {
     }
 
     public Either<ValidationFailure, Mapped<PositionalParameter>> createPositionalParam(
-            SourceMethod<?> sourceMethod) {
+            SourceMethod<AnnotatedOption> sourceMethod) {
         int position = sourceMethod.index().orElseThrow();
         PositionalParameter positionalParameter = new PositionalParameter(sourceMethod, position);
         return Either.<String, PositionalParameter>right(positionalParameter)

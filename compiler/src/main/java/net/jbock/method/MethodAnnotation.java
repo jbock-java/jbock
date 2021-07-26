@@ -45,8 +45,8 @@ public abstract class MethodAnnotation<M extends AnnotatedMethod> {
         return annotatedMethod.description();
     }
 
-    public ExecutableElement sourceMethod() {
-        return annotatedMethod.sourceMethod();
+    public ExecutableElement method() {
+        return annotatedMethod.method();
     }
 
     public M annotatedMethod() {
