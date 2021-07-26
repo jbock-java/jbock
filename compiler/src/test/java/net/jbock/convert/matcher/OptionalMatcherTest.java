@@ -86,7 +86,7 @@ class OptionalMatcherTest {
         Option a = Mockito.mock(Option.class);
         Mockito.when(sourceMethod.getAnnotation(Mockito.any())).thenReturn(a);
         Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
-        return new OptionalMatcher(SourceMethod.create(AnnotatedMethod.create(sourceMethod, a), EnumName.create("aua")),
+        return new OptionalMatcher(SourceMethod.create(AnnotatedMethod.create(sourceMethod, a), EnumName.create("aua"), 0),
                 tool, new SafeElements(elements), types);
     }
 }

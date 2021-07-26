@@ -7,6 +7,7 @@ import net.jbock.convert.ConvertModule;
 import net.jbock.convert.DaggerConvertComponent;
 import net.jbock.convert.Mapped;
 import net.jbock.convert.NamedOptionFactory;
+import net.jbock.convert.PositionalParamFactory;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.parameter.SourceMethod;
@@ -89,14 +90,13 @@ public class CommandProcessor {
 
     private Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>> createPositionalParams(
             AbstractMethods methods) {
-        int lastIndex = methods.positionalParameters().size() - 1;
         return methods.positionalParameters().stream()
                 .map(sourceMethod -> DaggerConvertComponent.builder()
                         .module(convertModule)
                         .sourceMethod(sourceMethod)
                         .build())
                 .map(ConvertComponent::positionalParameterFactory)
-                .map(factory -> factory.createPositionalParam(lastIndex))
+                .map(PositionalParamFactory::createPositionalParam)
                 .collect(toValidListAll())
                 .filter(this::validatePositions)
                 .filter(this::checkNoRequiredAfterOptional);

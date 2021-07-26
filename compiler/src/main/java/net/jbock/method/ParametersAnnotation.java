@@ -11,10 +11,15 @@ import java.util.OptionalInt;
 final class ParametersAnnotation extends MethodAnnotation {
 
     private final Parameters parameters;
+    private final int numberOfParameters;
 
-    ParametersAnnotation(ExecutableElement sourceMethod, Parameters parameters) {
+    ParametersAnnotation(
+            ExecutableElement sourceMethod,
+            Parameters parameters,
+            int numberOfParameters) {
         super(sourceMethod);
         this.parameters = parameters;
+        this.numberOfParameters = numberOfParameters;
     }
 
     @Override
@@ -39,7 +44,7 @@ final class ParametersAnnotation extends MethodAnnotation {
 
     @Override
     public OptionalInt index() {
-        return OptionalInt.empty();
+        return OptionalInt.of(numberOfParameters);
     }
 
     @Override

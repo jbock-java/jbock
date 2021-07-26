@@ -37,7 +37,10 @@ public abstract class MethodAnnotation {
 
     public abstract List<String> description();
 
-    public static MethodAnnotation create(ExecutableElement sourceMethod, Annotation annotation) {
+    public static MethodAnnotation create(
+            ExecutableElement sourceMethod,
+            Annotation annotation,
+            int numberOfParameters) {
         if (annotation instanceof Option) {
             return new OptionAnnotation(sourceMethod, (Option) annotation);
         }
@@ -45,7 +48,7 @@ public abstract class MethodAnnotation {
             return new ParameterAnnotation(sourceMethod, (Parameter) annotation);
         }
         if (annotation instanceof Parameters) {
-            return new ParametersAnnotation(sourceMethod, (Parameters) annotation);
+            return new ParametersAnnotation(sourceMethod, (Parameters) annotation, numberOfParameters);
         }
         throw new AssertionError("expecting one of " +
                 Annotations.methodLevelAnnotations() +

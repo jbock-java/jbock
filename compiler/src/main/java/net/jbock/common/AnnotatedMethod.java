@@ -1,5 +1,6 @@
 package net.jbock.common;
 
+import net.jbock.Parameter;
 import net.jbock.method.MethodAnnotation;
 
 import javax.lang.model.element.ExecutableElement;
@@ -19,11 +20,15 @@ public final class AnnotatedMethod {
         return new AnnotatedMethod(sourceMethod, annotation);
     }
 
+    public boolean isParameter() {
+        return annotation instanceof Parameter;
+    }
+
     public ExecutableElement sourceMethod() {
         return sourceMethod;
     }
 
-    public MethodAnnotation annotation() {
-        return MethodAnnotation.create(sourceMethod, annotation);
+    public MethodAnnotation annotation(int numberOfParameters) {
+        return MethodAnnotation.create(sourceMethod, annotation, numberOfParameters);
     }
 }

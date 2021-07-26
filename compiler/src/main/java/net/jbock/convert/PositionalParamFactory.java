@@ -28,8 +28,8 @@ public class PositionalParamFactory {
         this.sourceElement = sourceElement;
     }
 
-    public Either<ValidationFailure, Mapped<PositionalParameter>> createPositionalParam(int lastIndex) {
-        int position = sourceMethod.index().orElse(lastIndex);
+    public Either<ValidationFailure, Mapped<PositionalParameter>> createPositionalParam() {
+        int position = sourceMethod.index().orElseThrow();
         PositionalParameter positionalParameter = new PositionalParameter(sourceMethod, position);
         return Either.<String, PositionalParameter>right(positionalParameter)
                 .flatMap(converterFinder::findConverter)
