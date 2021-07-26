@@ -5,12 +5,19 @@ import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.common.Annotations;
 
+import javax.lang.model.element.ExecutableElement;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
 public abstract class MethodAnnotation {
+
+    private final ExecutableElement sourceMethod;
+
+    MethodAnnotation(ExecutableElement sourceMethod) {
+        this.sourceMethod = sourceMethod;
+    }
 
     public abstract Optional<String> descriptionKey();
 
@@ -30,18 +37,22 @@ public abstract class MethodAnnotation {
 
     public abstract List<String> description();
 
-    public static MethodAnnotation create(Annotation annotation) {
+    public static MethodAnnotation create(ExecutableElement sourceMethod, Annotation annotation) {
         if (annotation instanceof Option) {
-            return new OptionAnnotation((Option) annotation);
+            return new OptionAnnotation(sourceMethod, (Option) annotation);
         }
         if (annotation instanceof Parameter) {
-            return new ParameterAnnotation((Parameter) annotation);
+            return new ParameterAnnotation(sourceMethod, (Parameter) annotation);
         }
         if (annotation instanceof Parameters) {
-            return new ParametersAnnotation((Parameters) annotation);
+            return new ParametersAnnotation(sourceMethod, (Parameters) annotation);
         }
         throw new AssertionError("expecting one of " +
                 Annotations.methodLevelAnnotations() +
                 " but found: " + annotation);
+    }
+
+    public ExecutableElement sourceMethod() {
+        return sourceMethod;
     }
 }

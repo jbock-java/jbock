@@ -3,6 +3,7 @@ package net.jbock.method;
 import net.jbock.Option;
 import net.jbock.common.Descriptions;
 
+import javax.lang.model.element.ExecutableElement;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -11,7 +12,8 @@ final class OptionAnnotation extends MethodAnnotation {
 
     private final Option option;
 
-    OptionAnnotation(Option option) {
+    OptionAnnotation(ExecutableElement sourceMethod, Option option) {
+        super(sourceMethod);
         this.option = option;
     }
 

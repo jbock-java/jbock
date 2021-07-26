@@ -3,6 +3,7 @@ package net.jbock.parameter;
 import net.jbock.common.AnnotatedMethod;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
+import net.jbock.method.MethodAnnotation;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -16,15 +17,15 @@ import static net.jbock.common.Constants.ACCESS_MODIFIERS;
 
 public class SourceMethod {
 
-    private final AnnotatedMethod annotatedMethod;
+    private final MethodAnnotation methodAnnotation;
     private final EnumName enumName;
     private final List<Modifier> accessModifiers;
 
     private SourceMethod(
-            AnnotatedMethod annotatedMethod,
+            MethodAnnotation methodAnnotation,
             EnumName enumName,
             List<Modifier> accessModifiers) {
-        this.annotatedMethod = annotatedMethod;
+        this.methodAnnotation = methodAnnotation;
         this.enumName = enumName;
         this.accessModifiers = accessModifiers;
     }
@@ -33,51 +34,51 @@ public class SourceMethod {
         List<Modifier> accessModifiers = annotatedMethod.sourceMethod().getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
                 .collect(Collectors.toUnmodifiableList());
-        return new SourceMethod(annotatedMethod, enumName, accessModifiers);
+        return new SourceMethod(annotatedMethod.annotation(), enumName, accessModifiers);
     }
 
     public ExecutableElement method() {
-        return annotatedMethod.sourceMethod();
+        return methodAnnotation.sourceMethod();
     }
 
     public TypeMirror returnType() {
-        return annotatedMethod.sourceMethod().getReturnType();
+        return methodAnnotation.sourceMethod().getReturnType();
     }
 
     public boolean isPositional() {
-        return annotatedMethod.annotation().isPositional();
+        return methodAnnotation.isPositional();
     }
 
     public boolean isParameters() {
-        return annotatedMethod.annotation().isParameters();
+        return methodAnnotation.isParameters();
     }
 
     public boolean isParameter() {
-        return annotatedMethod.annotation().isParameter();
+        return methodAnnotation.isParameter();
     }
 
     public OptionalInt index() {
-        return annotatedMethod.annotation().index();
+        return methodAnnotation.index();
     }
 
     public Optional<String> descriptionKey() {
-        return annotatedMethod.annotation().descriptionKey();
+        return methodAnnotation.descriptionKey();
     }
 
     public ValidationFailure fail(String message) {
-        return new ValidationFailure(message, annotatedMethod.sourceMethod());
+        return new ValidationFailure(message, methodAnnotation.sourceMethod());
     }
 
     public List<String> names() {
-        return annotatedMethod.annotation().names();
+        return methodAnnotation.names();
     }
 
     public List<String> description() {
-        return annotatedMethod.annotation().description();
+        return methodAnnotation.description();
     }
 
     public Optional<String> paramLabel() {
-        return annotatedMethod.annotation().paramLabel();
+        return methodAnnotation.paramLabel();
     }
 
     public List<Modifier> accessModifiers() {

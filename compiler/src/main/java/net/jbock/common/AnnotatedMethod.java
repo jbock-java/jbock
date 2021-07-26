@@ -8,15 +8,15 @@ import java.lang.annotation.Annotation;
 public final class AnnotatedMethod {
 
     private final ExecutableElement sourceMethod;
-    private final MethodAnnotation annotation;
+    private final Annotation annotation;
 
-    private AnnotatedMethod(ExecutableElement sourceMethod, MethodAnnotation annotation) {
+    private AnnotatedMethod(ExecutableElement sourceMethod, Annotation annotation) {
         this.sourceMethod = sourceMethod;
         this.annotation = annotation;
     }
 
     public static AnnotatedMethod create(ExecutableElement sourceMethod, Annotation annotation) {
-        return new AnnotatedMethod(sourceMethod, MethodAnnotation.create(annotation));
+        return new AnnotatedMethod(sourceMethod, annotation);
     }
 
     public ExecutableElement sourceMethod() {
@@ -24,6 +24,6 @@ public final class AnnotatedMethod {
     }
 
     public MethodAnnotation annotation() {
-        return annotation;
+        return MethodAnnotation.create(sourceMethod, annotation);
     }
 }

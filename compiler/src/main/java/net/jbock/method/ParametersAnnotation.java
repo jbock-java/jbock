@@ -3,6 +3,7 @@ package net.jbock.method;
 import net.jbock.Parameters;
 import net.jbock.common.Descriptions;
 
+import javax.lang.model.element.ExecutableElement;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -11,7 +12,8 @@ final class ParametersAnnotation extends MethodAnnotation {
 
     private final Parameters parameters;
 
-    ParametersAnnotation(Parameters parameters) {
+    ParametersAnnotation(ExecutableElement sourceMethod, Parameters parameters) {
+        super(sourceMethod);
         this.parameters = parameters;
     }
 
