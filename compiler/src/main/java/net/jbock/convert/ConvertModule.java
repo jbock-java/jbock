@@ -2,8 +2,6 @@ package net.jbock.convert;
 
 import dagger.Module;
 import dagger.Provides;
-import net.jbock.common.Constants;
-import net.jbock.common.EnumName;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
@@ -11,16 +9,11 @@ import net.jbock.convert.matcher.ExactMatcher;
 import net.jbock.convert.matcher.ListMatcher;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.matcher.OptionalMatcher;
-import net.jbock.parameter.NamedOption;
-import net.jbock.parameter.PositionalParameter;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
-import net.jbock.validate.ParameterStyle;
 
 import javax.lang.model.util.Types;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Module
 public class ConvertModule {
@@ -86,11 +79,5 @@ public class ConvertModule {
     @Provides
     Util util(TypeTool tool) {
         return new Util(types, tool);
-    }
-
-    @ConvertScope
-    @Provides
-    ParameterStyle parameterStyle(SourceMethod sourceMethod) {
-        return sourceMethod.style();
     }
 }

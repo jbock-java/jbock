@@ -74,11 +74,11 @@ public class MethodsFactory {
 
     private AbstractMethods createAbstractMethods(List<SourceMethod> methods) {
         List<SourceMethod> params = methods.stream()
-                .filter(m -> m.style().isPositional())
+                .filter(SourceMethod::isPositional)
                 .sorted(POSITION_COMPARATOR)
                 .collect(Collectors.toUnmodifiableList());
         List<SourceMethod> options = methods.stream()
-                .filter(m -> !m.style().isPositional())
+                .filter(m -> !m.isPositional())
                 .collect(Collectors.toUnmodifiableList());
         return new AbstractMethods(params, options);
     }
@@ -99,7 +99,7 @@ public class MethodsFactory {
     private Optional<List<ValidationFailure>> validateDuplicateParametersAnnotation(
             List<SourceMethod> sourceMethods) {
         List<SourceMethod> parametersMethods = sourceMethods.stream()
-                .filter(m -> m.style() == ParameterStyle.PARAMETERS)
+                .filter(SourceMethod::isParameters)
                 .collect(Collectors.toUnmodifiableList());
         List<ValidationFailure> failures = new ArrayList<>();
         if (parametersMethods.size() >= 2) {

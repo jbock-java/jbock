@@ -5,12 +5,11 @@ import com.squareup.javapoet.ParameterSpec;
 import io.jbock.util.Either;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
-import net.jbock.convert.Mapped;
 import net.jbock.convert.ConvertScope;
+import net.jbock.convert.Mapped;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
-import net.jbock.validate.ParameterStyle;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
@@ -38,9 +37,8 @@ public class AutoConverterFinder extends MatchValidator {
             AutoConverters autoConverter,
             List<Matcher> matchers,
             SourceMethod sourceMethod,
-            ParameterStyle parameterStyle,
             Util util) {
-        super(parameterStyle);
+        super(sourceMethod);
         this.autoConverter = autoConverter;
         this.matchers = matchers;
         this.sourceMethod = sourceMethod;

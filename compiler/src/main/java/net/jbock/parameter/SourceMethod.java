@@ -3,7 +3,6 @@ package net.jbock.parameter;
 import net.jbock.common.AnnotatedMethod;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
-import net.jbock.validate.ParameterStyle;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -19,17 +18,14 @@ public class SourceMethod {
 
     private final AnnotatedMethod annotatedMethod;
     private final EnumName enumName;
-    private final ParameterStyle parameterStyle;
     private final List<Modifier> accessModifiers;
 
     private SourceMethod(
             AnnotatedMethod annotatedMethod,
             EnumName enumName,
-            ParameterStyle parameterStyle,
             List<Modifier> accessModifiers) {
         this.annotatedMethod = annotatedMethod;
         this.enumName = enumName;
-        this.parameterStyle = parameterStyle;
         this.accessModifiers = accessModifiers;
     }
 
@@ -37,8 +33,7 @@ public class SourceMethod {
         List<Modifier> accessModifiers = annotatedMethod.sourceMethod().getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
                 .collect(Collectors.toUnmodifiableList());
-        ParameterStyle parameterStyle = ParameterStyle.getStyle(annotatedMethod.sourceMethod());
-        return new SourceMethod(annotatedMethod, enumName, parameterStyle, accessModifiers);
+        return new SourceMethod(annotatedMethod, enumName, accessModifiers);
     }
 
     public ExecutableElement method() {
@@ -49,16 +44,24 @@ public class SourceMethod {
         return annotatedMethod.sourceMethod().getReturnType();
     }
 
-    public ParameterStyle style() {
-        return parameterStyle;
+    public boolean isPositional() {
+        return annotatedMethod.annotation().isPositional();
+    }
+
+    public boolean isParameters() {
+        return annotatedMethod.annotation().isParameters();
+    }
+
+    public boolean isParameter() {
+        return annotatedMethod.annotation().isParameter();
     }
 
     public OptionalInt index() {
-        return parameterStyle.index(annotatedMethod);
+        return annotatedMethod.annotation().index();
     }
 
     public Optional<String> descriptionKey() {
-        return parameterStyle.descriptionKey(annotatedMethod);
+        return annotatedMethod.annotation().descriptionKey();
     }
 
     public ValidationFailure fail(String message) {
@@ -66,15 +69,15 @@ public class SourceMethod {
     }
 
     public List<String> names() {
-        return parameterStyle.names(annotatedMethod);
+        return annotatedMethod.annotation().names();
     }
 
     public List<String> description() {
-        return parameterStyle.description(annotatedMethod);
+        return annotatedMethod.annotation().description();
     }
 
     public Optional<String> paramLabel() {
-        return parameterStyle.paramLabel(annotatedMethod);
+        return annotatedMethod.annotation().paramLabel();
     }
 
     public List<Modifier> accessModifiers() {

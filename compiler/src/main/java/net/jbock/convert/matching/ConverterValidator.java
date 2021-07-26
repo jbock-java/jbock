@@ -4,15 +4,14 @@ import com.squareup.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import net.jbock.Converter;
 import net.jbock.common.Util;
-import net.jbock.convert.Mapped;
 import net.jbock.convert.ConvertScope;
+import net.jbock.convert.Mapped;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.convert.reference.StringConverterType;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
-import net.jbock.validate.ParameterStyle;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -43,9 +42,8 @@ public class ConverterValidator extends MatchValidator {
             Util util,
             SourceMethod sourceMethod,
             SourceElement sourceElement,
-            ParameterStyle parameterStyle,
             Types types) {
-        super(parameterStyle);
+        super(sourceMethod);
         this.matchers = matchers;
         this.referenceTool = referenceTool;
         this.util = util;
