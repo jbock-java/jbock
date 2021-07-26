@@ -1,5 +1,7 @@
 package net.jbock.common;
 
+import io.jbock.util.Either;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -15,6 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static io.jbock.util.Either.left;
+import static io.jbock.util.Either.right;
 
 public class Util {
 
@@ -115,17 +120,24 @@ public class Util {
                 })).orElseGet(type::toString);
     }
 
-    /* Left-Optional
-     */
-    public Optional<String> checkAtLeastOneAnnotation(
+    public Either<String, AnnotatedMethod> checkExactlyOneAnnotation(
+            ExecutableElement element,
+            List<Class<? extends Annotation>> annotations) {
+        return checkAtLeastOneAnnotation(element, annotations)
+                .filter(a -> checkNoDuplicateAnnotations(element, annotations))
+                .map(a -> AnnotatedMethod.create(element, a));
+    }
+
+    private Either<String, Annotation> checkAtLeastOneAnnotation(
             Element element,
             List<Class<? extends Annotation>> annotations) {
         for (Class<? extends Annotation> annotation : annotations) {
-            if (element.getAnnotation(annotation) != null) {
-                return Optional.empty();
+            Annotation a = element.getAnnotation(annotation);
+            if (a != null) {
+                return right(a);
             }
         }
-        return Optional.of("add one of these annotations: " + annotations.stream()
+        return left("add one of these annotations: " + annotations.stream()
                 .map(ann -> "@" + ann.getSimpleName())
                 .collect(Collectors.joining(", ")));
     }

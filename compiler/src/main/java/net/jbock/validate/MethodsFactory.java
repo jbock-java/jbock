@@ -1,7 +1,9 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
+import io.jbock.util.Eithers;
 import net.jbock.Parameters;
+import net.jbock.common.AnnotatedMethod;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.parameter.SourceMethod;
@@ -48,7 +50,7 @@ public class MethodsFactory {
      */
     Either<List<ValidationFailure>, AbstractMethods> findAbstractMethods() {
         return abstractMethodsFinder.findAbstractMethods()
-                .filter(this::validateParameterMethods)
+                .flatMap(this::validateParameterMethods)
                 .filter(this::detectInheritanceCollision)
                 .map(this::createSourceMethods)
                 .filter(this::validateDuplicateParametersAnnotation)
@@ -59,17 +61,18 @@ public class MethodsFactory {
     /* Left-Optional
      */
     private Optional<List<ValidationFailure>> detectInheritanceCollision(
-            List<ExecutableElement> methods) {
+            List<AnnotatedMethod> methods) {
         Map<Name, List<ExecutableElement>> map = methods.stream()
+                .map(AnnotatedMethod::sourceMethod)
                 .collect(Collectors.groupingBy(ExecutableElement::getSimpleName));
         return methods.stream()
+                .map(AnnotatedMethod::sourceMethod)
                 .filter(method -> map.get(method.getSimpleName()).size() >= 2)
                 .map(method -> new ValidationFailure("inheritance collision", method))
                 .collect(toOptionalList());
     }
 
-    private AbstractMethods createAbstractMethods(
-            List<SourceMethod> methods) {
+    private AbstractMethods createAbstractMethods(List<SourceMethod> methods) {
         List<SourceMethod> params = methods.stream()
                 .filter(m -> m.style().isPositional())
                 .sorted(POSITION_COMPARATOR)
@@ -106,29 +109,23 @@ public class MethodsFactory {
         return optionalList(failures);
     }
 
-    /* Left-Optional
-     */
-    private Optional<List<ValidationFailure>> validateParameterMethods(
+    private Either<List<ValidationFailure>, List<AnnotatedMethod>> validateParameterMethods(
             List<ExecutableElement> sourceMethods) {
         return sourceMethods.stream()
                 .map(sourceMethodValidator::validateSourceMethod)
-                .flatMap(Optional::stream)
-                .collect(toOptionalList());
+                .collect(Eithers.toValidListAll());
     }
 
-    private List<SourceMethod> createSourceMethods(List<ExecutableElement> methods) {
-        Set<EnumName> enumNames = new HashSet<>();
+    private List<SourceMethod> createSourceMethods(List<AnnotatedMethod> methods) {
+        Set<EnumName> names = new HashSet<>();
         List<SourceMethod> result = new ArrayList<>();
-        for (ExecutableElement method : methods) {
-            EnumName resultName = EnumName.create(method.getSimpleName().toString());
-            for (int i = 0; i < 100 && enumNames.contains(resultName); i++) {
-                resultName = resultName.makeLonger();
+        for (AnnotatedMethod method : methods) {
+            EnumName name = EnumName.create(method.sourceMethod().getSimpleName().toString());
+            while (names.contains(name)) {
+                name = name.makeLonger();
             }
-            if (enumNames.contains(resultName)) {
-                throw new AssertionError("could not find a unique name: " + method.getSimpleName());
-            }
-            enumNames.add(resultName);
-            result.add(SourceMethod.create(method, resultName));
+            names.add(name);
+            result.add(SourceMethod.create(method, name));
         }
         return result;
     }

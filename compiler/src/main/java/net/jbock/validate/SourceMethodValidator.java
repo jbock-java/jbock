@@ -1,5 +1,7 @@
 package net.jbock.validate;
 
+import io.jbock.util.Either;
+import net.jbock.common.AnnotatedMethod;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 
@@ -28,14 +30,11 @@ public class SourceMethodValidator {
         this.util = util;
     }
 
-    /* Left-Optional
-     */
-    Optional<ValidationFailure> validateSourceMethod(ExecutableElement sourceMethod) {
+    Either<ValidationFailure, AnnotatedMethod> validateSourceMethod(ExecutableElement sourceMethod) {
         List<Class<? extends Annotation>> annotations = methodLevelAnnotations();
-        return util.checkAtLeastOneAnnotation(sourceMethod, annotations)
-                .or(() -> util.checkNoDuplicateAnnotations(sourceMethod, annotations))
-                .or(() -> checkAccessibleType(sourceMethod.getReturnType()))
-                .map(msg -> new ValidationFailure(msg, sourceMethod));
+        return util.checkExactlyOneAnnotation(sourceMethod, annotations)
+                .filter(a -> checkAccessibleType(sourceMethod.getReturnType()))
+                .mapLeft(msg -> new ValidationFailure(msg, sourceMethod));
     }
 
     /* Left-Optional

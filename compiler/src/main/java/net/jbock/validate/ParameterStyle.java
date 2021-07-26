@@ -3,6 +3,7 @@ package net.jbock.validate;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
+import net.jbock.common.AnnotatedMethod;
 import net.jbock.common.Descriptions;
 
 import javax.lang.model.element.ExecutableElement;
@@ -14,15 +15,14 @@ import java.util.OptionalInt;
 public enum ParameterStyle {
 
     OPTION(Option.class) {
-
         @Override
-        public Optional<String> descriptionKey(ExecutableElement method) {
-            return Descriptions.optionalString(get(method).descriptionKey());
+        public Optional<String> descriptionKey(AnnotatedMethod method) {
+            return Descriptions.optionalString(get(method.sourceMethod()).descriptionKey());
         }
 
         @Override
-        public Optional<String> paramLabel(ExecutableElement method) {
-            return Descriptions.optionalString(get(method).paramLabel());
+        public Optional<String> paramLabel(AnnotatedMethod method) {
+            return Descriptions.optionalString(get(method.sourceMethod()).paramLabel());
         }
 
         @Override
@@ -31,18 +31,18 @@ public enum ParameterStyle {
         }
 
         @Override
-        public OptionalInt index(ExecutableElement method) {
+        public OptionalInt index(AnnotatedMethod method) {
             return OptionalInt.empty();
         }
 
         @Override
-        public List<String> names(ExecutableElement method) {
-            return List.of(get(method).names());
+        public List<String> names(AnnotatedMethod method) {
+            return List.of(get(method.sourceMethod()).names());
         }
 
         @Override
-        public List<String> description(ExecutableElement method) {
-            return List.of(get(method).description());
+        public List<String> description(AnnotatedMethod method) {
+            return List.of(get(method.sourceMethod()).description());
         }
 
         private Option get(ExecutableElement method) {
@@ -51,15 +51,14 @@ public enum ParameterStyle {
     },
 
     PARAMETER(Parameter.class) {
-
         @Override
-        public Optional<String> descriptionKey(ExecutableElement method) {
-            return Descriptions.optionalString(get(method).descriptionKey());
+        public Optional<String> descriptionKey(AnnotatedMethod method) {
+            return Descriptions.optionalString(get(method.sourceMethod()).descriptionKey());
         }
 
         @Override
-        public Optional<String> paramLabel(ExecutableElement method) {
-            return Descriptions.optionalString(get(method).paramLabel());
+        public Optional<String> paramLabel(AnnotatedMethod method) {
+            return Descriptions.optionalString(get(method.sourceMethod()).paramLabel());
         }
 
         @Override
@@ -68,18 +67,18 @@ public enum ParameterStyle {
         }
 
         @Override
-        public OptionalInt index(ExecutableElement method) {
-            return OptionalInt.of(method.getAnnotation(Parameter.class).index());
+        public OptionalInt index(AnnotatedMethod method) {
+            return OptionalInt.of(get(method.sourceMethod()).index());
         }
 
         @Override
-        public List<String> names(ExecutableElement method) {
+        public List<String> names(AnnotatedMethod method) {
             return List.of();
         }
 
         @Override
-        public List<String> description(ExecutableElement method) {
-            return List.of(get(method).description());
+        public List<String> description(AnnotatedMethod method) {
+            return List.of(get(method.sourceMethod()).description());
         }
 
         private Parameter get(ExecutableElement method) {
@@ -88,15 +87,14 @@ public enum ParameterStyle {
     },
 
     PARAMETERS(Parameters.class) {
-
         @Override
-        public Optional<String> descriptionKey(ExecutableElement method) {
-            return Descriptions.optionalString(get(method).descriptionKey());
+        public Optional<String> descriptionKey(AnnotatedMethod method) {
+            return Descriptions.optionalString(get(method.sourceMethod()).descriptionKey());
         }
 
         @Override
-        public Optional<String> paramLabel(ExecutableElement method) {
-            return Descriptions.optionalString(get(method).paramLabel());
+        public Optional<String> paramLabel(AnnotatedMethod method) {
+            return Descriptions.optionalString(get(method.sourceMethod()).paramLabel());
         }
 
         @Override
@@ -105,18 +103,18 @@ public enum ParameterStyle {
         }
 
         @Override
-        public OptionalInt index(ExecutableElement method) {
+        public OptionalInt index(AnnotatedMethod method) {
             return OptionalInt.empty();
         }
 
         @Override
-        public List<String> names(ExecutableElement method) {
+        public List<String> names(AnnotatedMethod method) {
             return List.of();
         }
 
         @Override
-        public List<String> description(ExecutableElement method) {
-            return List.of(get(method).description());
+        public List<String> description(AnnotatedMethod method) {
+            return List.of(get(method.sourceMethod()).description());
         }
 
         private Parameters get(ExecutableElement method) {
@@ -139,15 +137,15 @@ public enum ParameterStyle {
         throw new IllegalArgumentException("no style: " + sourceMethod.getSimpleName());
     }
 
-    public abstract Optional<String> descriptionKey(ExecutableElement method);
+    public abstract Optional<String> descriptionKey(AnnotatedMethod method);
 
-    public abstract Optional<String> paramLabel(ExecutableElement method);
+    public abstract Optional<String> paramLabel(AnnotatedMethod method);
 
     public abstract boolean isPositional();
 
-    public abstract OptionalInt index(ExecutableElement method);
+    public abstract OptionalInt index(AnnotatedMethod method);
 
-    public abstract List<String> names(ExecutableElement method);
+    public abstract List<String> names(AnnotatedMethod method);
 
-    public abstract List<String> description(ExecutableElement method);
+    public abstract List<String> description(AnnotatedMethod method);
 }

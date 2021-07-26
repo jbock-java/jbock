@@ -1,5 +1,6 @@
 package net.jbock.parameter;
 
+import net.jbock.common.AnnotatedMethod;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.validate.ParameterStyle;
@@ -16,36 +17,36 @@ import static net.jbock.common.Constants.ACCESS_MODIFIERS;
 
 public class SourceMethod {
 
-    private final ExecutableElement sourceMethod;
+    private final AnnotatedMethod annotatedMethod;
     private final EnumName enumName;
     private final ParameterStyle parameterStyle;
     private final List<Modifier> accessModifiers;
 
     private SourceMethod(
-            ExecutableElement sourceMethod,
+            AnnotatedMethod annotatedMethod,
             EnumName enumName,
             ParameterStyle parameterStyle,
             List<Modifier> accessModifiers) {
-        this.sourceMethod = sourceMethod;
+        this.annotatedMethod = annotatedMethod;
         this.enumName = enumName;
         this.parameterStyle = parameterStyle;
         this.accessModifiers = accessModifiers;
     }
 
-    public static SourceMethod create(ExecutableElement sourceMethod, EnumName enumName) {
-        List<Modifier> accessModifiers = sourceMethod.getModifiers().stream()
+    public static SourceMethod create(AnnotatedMethod annotatedMethod, EnumName enumName) {
+        List<Modifier> accessModifiers = annotatedMethod.sourceMethod().getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
                 .collect(Collectors.toUnmodifiableList());
-        ParameterStyle parameterStyle = ParameterStyle.getStyle(sourceMethod);
-        return new SourceMethod(sourceMethod, enumName, parameterStyle, accessModifiers);
+        ParameterStyle parameterStyle = ParameterStyle.getStyle(annotatedMethod.sourceMethod());
+        return new SourceMethod(annotatedMethod, enumName, parameterStyle, accessModifiers);
     }
 
     public ExecutableElement method() {
-        return sourceMethod;
+        return annotatedMethod.sourceMethod();
     }
 
     public TypeMirror returnType() {
-        return sourceMethod.getReturnType();
+        return annotatedMethod.sourceMethod().getReturnType();
     }
 
     public ParameterStyle style() {
@@ -53,27 +54,27 @@ public class SourceMethod {
     }
 
     public OptionalInt index() {
-        return parameterStyle.index(sourceMethod);
+        return parameterStyle.index(annotatedMethod);
     }
 
     public Optional<String> descriptionKey() {
-        return parameterStyle.descriptionKey(sourceMethod);
+        return parameterStyle.descriptionKey(annotatedMethod);
     }
 
     public ValidationFailure fail(String message) {
-        return new ValidationFailure(message, sourceMethod);
+        return new ValidationFailure(message, annotatedMethod.sourceMethod());
     }
 
     public List<String> names() {
-        return parameterStyle.names(sourceMethod);
+        return parameterStyle.names(annotatedMethod);
     }
 
     public List<String> description() {
-        return parameterStyle.description(sourceMethod);
+        return parameterStyle.description(annotatedMethod);
     }
 
     public Optional<String> paramLabel() {
-        return parameterStyle.paramLabel(sourceMethod);
+        return parameterStyle.paramLabel(annotatedMethod);
     }
 
     public List<Modifier> accessModifiers() {
