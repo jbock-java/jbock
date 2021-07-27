@@ -2,8 +2,10 @@ package net.jbock.annotated;
 
 import net.jbock.Parameter;
 import net.jbock.common.Descriptions;
-import net.jbock.method.MethodAnnotation;
+import net.jbock.common.EnumName;
 import net.jbock.method.ParameterAnnotation;
+import net.jbock.source.SourceMethod;
+import net.jbock.source.SourceParameter;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.List;
@@ -49,8 +51,9 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     }
 
     @Override
-    public MethodAnnotation<?> annotation(int numberOfParameters) {
-        return new ParameterAnnotation(this);
+    public SourceMethod<?> sourceMethod(EnumName enumName, int numberOfParameters) {
+        ParameterAnnotation annotation = new ParameterAnnotation(this);
+        return new SourceParameter(annotation, enumName);
     }
 
     public int index() {

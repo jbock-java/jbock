@@ -3,7 +3,7 @@ package net.jbock.convert;
 import io.jbock.util.Either;
 import net.jbock.common.ValidationFailure;
 import net.jbock.parameter.NamedOption;
-import net.jbock.parameter.SourceMethod;
+import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;

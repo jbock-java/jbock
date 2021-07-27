@@ -3,6 +3,7 @@ package net.jbock.parameter;
 import com.squareup.javapoet.TypeName;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
+import net.jbock.source.SourceMethod;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;

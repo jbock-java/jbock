@@ -2,8 +2,10 @@ package net.jbock.annotated;
 
 import net.jbock.Option;
 import net.jbock.common.Descriptions;
-import net.jbock.method.MethodAnnotation;
+import net.jbock.common.EnumName;
 import net.jbock.method.OptionAnnotation;
+import net.jbock.source.SourceMethod;
+import net.jbock.source.SourceOption;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.List;
@@ -49,7 +51,8 @@ public final class AnnotatedOption extends AnnotatedMethod {
     }
 
     @Override
-    public MethodAnnotation<?> annotation(int numberOfParameters) {
-        return new OptionAnnotation(this);
+    public SourceMethod<?> sourceMethod(EnumName enumName, int numberOfParameters) {
+        OptionAnnotation annotation = new OptionAnnotation(this);
+        return new SourceOption(annotation, enumName);
     }
 }

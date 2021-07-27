@@ -1,4 +1,4 @@
-package net.jbock.parameter;
+package net.jbock.source;
 
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.EnumName;
@@ -11,34 +11,24 @@ import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static net.jbock.common.Constants.ACCESS_MODIFIERS;
 
-public class SourceMethod<M extends AnnotatedMethod> {
+public abstract class SourceMethod<M extends AnnotatedMethod> {
 
     private final MethodAnnotation<M> methodAnnotation;
     private final EnumName enumName;
     private final List<Modifier> accessModifiers;
 
-    private SourceMethod(
+    SourceMethod(
             MethodAnnotation<M> methodAnnotation,
-            EnumName enumName,
-            List<Modifier> accessModifiers) {
+            EnumName enumName) {
         this.methodAnnotation = methodAnnotation;
         this.enumName = enumName;
-        this.accessModifiers = accessModifiers;
-    }
-
-    public static SourceMethod<?> create(
-            AnnotatedMethod annotatedMethod,
-            EnumName enumName,
-            int numberOfParameters) {
-        List<Modifier> accessModifiers = annotatedMethod.method().getModifiers().stream()
+        this.accessModifiers = methodAnnotation.method().getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
-                .collect(Collectors.toUnmodifiableList());
-        MethodAnnotation<?> annotation = annotatedMethod.annotation(numberOfParameters);
-        return new SourceMethod<>(annotation, enumName, accessModifiers);
+                .collect(toList());
     }
 
     public ExecutableElement method() {

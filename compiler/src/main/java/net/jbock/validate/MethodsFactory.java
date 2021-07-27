@@ -7,7 +7,7 @@ import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
-import net.jbock.parameter.SourceMethod;
+import net.jbock.source.SourceMethod;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -133,7 +133,7 @@ public class MethodsFactory {
                 name = name.makeLonger();
             }
             names.add(name);
-            result.add(SourceMethod.create(method, name, numberOfParameters));
+            result.add(method.sourceMethod(name, numberOfParameters));
         }
         return result;
     }

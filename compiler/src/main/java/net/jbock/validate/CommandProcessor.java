@@ -1,13 +1,14 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.ConvertModule;
 import net.jbock.convert.DaggerConvertComponent;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
-import net.jbock.parameter.SourceMethod;
+import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ public class CommandProcessor {
     }
 
     private Either<List<ValidationFailure>, Items> createItems(
-            List<SourceMethod<?>> options,
+            List<SourceMethod<AnnotatedOption>> options,
             List<Mapped<PositionalParameter>> positionalParameters) {
         return options.stream()
                 .map(sourceMethod -> DaggerConvertComponent.builder()

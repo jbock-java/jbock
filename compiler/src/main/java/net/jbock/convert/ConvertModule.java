@@ -9,7 +9,6 @@ import net.jbock.convert.matcher.ExactMatcher;
 import net.jbock.convert.matcher.ListMatcher;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.matcher.OptionalMatcher;
-import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
 
 import javax.lang.model.util.Types;
@@ -17,8 +16,6 @@ import java.util.List;
 
 @Module
 public class ConvertModule {
-
-    private final AnnotationUtil annotationUtil = new AnnotationUtil();
 
     private final TypeTool tool;
     private final SourceElement sourceElement;

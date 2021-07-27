@@ -4,7 +4,7 @@ import net.jbock.convert.ConvertScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.model.Multiplicity;
 import net.jbock.parameter.AbstractItem;
-import net.jbock.parameter.SourceMethod;
+import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;

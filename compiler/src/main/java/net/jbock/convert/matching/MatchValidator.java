@@ -3,7 +3,7 @@ package net.jbock.convert.matching;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.model.Multiplicity;
-import net.jbock.parameter.SourceMethod;
+import net.jbock.source.SourceMethod;
 
 import java.util.Optional;
 
