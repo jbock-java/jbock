@@ -110,9 +110,6 @@ public class MethodsFactory {
     }
 
     private List<SourceMethod<?>> createSourceMethods(List<AnnotatedMethod> methods) {
-        int numberOfParameters = Math.toIntExact(methods.stream()
-                .filter(AnnotatedMethod::isParameter)
-                .count());
         Set<EnumName> names = new HashSet<>();
         List<SourceMethod<?>> result = new ArrayList<>();
         for (AnnotatedMethod method : methods) {
@@ -121,7 +118,7 @@ public class MethodsFactory {
                 name = name.makeLonger();
             }
             names.add(name);
-            result.add(method.sourceMethod(name, numberOfParameters));
+            result.add(method.sourceMethod(name));
         }
         return result;
     }

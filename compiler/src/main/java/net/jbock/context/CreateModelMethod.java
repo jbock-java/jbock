@@ -86,7 +86,7 @@ public class CreateModelMethod extends CachedMethod {
         } else if (c.multiplicity() != Multiplicity.OPTIONAL) {
             code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
         }
-        for (String line : c.item().description()) {
+        for (String line : c.item().annotatedMethod().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
@@ -101,7 +101,7 @@ public class CreateModelMethod extends CachedMethod {
         if (c.multiplicity() != Multiplicity.REQUIRED) {
             code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
         }
-        for (String line : c.item().description()) {
+        for (String line : c.item().annotatedMethod().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));

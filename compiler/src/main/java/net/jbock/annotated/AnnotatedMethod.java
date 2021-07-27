@@ -59,7 +59,7 @@ public abstract class AnnotatedMethod {
         return method;
     }
 
-    public abstract SourceMethod<?> sourceMethod(EnumName enumName, int numberOfParameters);
+    public abstract SourceMethod<?> sourceMethod(EnumName enumName);
 
     public final List<Modifier> accessModifiers() {
         return accessModifiers;

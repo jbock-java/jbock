@@ -55,7 +55,7 @@ public class Impl {
         SourceMethod<?> param = c.item();
         return MethodSpec.methodBuilder(param.methodName())
                 .returns(TypeName.get(param.returnType()))
-                .addModifiers(param.accessModifiers())
+                .addModifiers(param.annotatedMethod().accessModifiers())
                 .addStatement("return $N", c.asField())
                 .build();
     }

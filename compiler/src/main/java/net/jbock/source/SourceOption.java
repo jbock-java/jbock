@@ -12,21 +12,31 @@ public final class SourceOption extends SourceMethod<AnnotatedOption> {
 
     private final AnnotatedOption option;
     private final boolean hasUnixName;
+    private final String paramLabel;
 
-    public SourceOption(
+    private SourceOption(
             AnnotatedOption option,
             EnumName enumName,
-            boolean hasUnixName) {
+            boolean hasUnixName,
+            String paramLabel) {
         super(enumName);
         this.option = option;
         this.hasUnixName = hasUnixName;
+        this.paramLabel = paramLabel;
     }
 
     public static SourceOption create(
             AnnotatedOption option,
             EnumName enumName) {
         boolean hasUnixName = option.names().stream().anyMatch(s -> s.length() == 2);
-        return new SourceOption(option, enumName, hasUnixName);
+        return new SourceOption(option, enumName, hasUnixName, option.label().or(() -> option.names().stream()
+                .filter(name -> name.startsWith("--"))
+                .map(name -> name.substring(2))
+                .map(s -> s.toUpperCase(Locale.US))
+                .findFirst())
+                .orElseGet(() -> SnakeName.create(option.method().getSimpleName().toString())
+                        .snake('_')
+                        .toUpperCase(Locale.US)));
     }
 
     public List<String> names() {
@@ -55,12 +65,7 @@ public final class SourceOption extends SourceMethod<AnnotatedOption> {
 
     @Override
     public String paramLabel() {
-        return option.label().or(() -> names().stream()
-                .filter(name -> name.startsWith("--"))
-                .map(name -> name.substring(2))
-                .map(s -> s.toUpperCase(Locale.US))
-                .findFirst())
-                .orElseGet(() -> SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
+        return paramLabel;
     }
 
     @Override

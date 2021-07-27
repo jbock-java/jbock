@@ -49,8 +49,8 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     }
 
     @Override
-    public SourceMethod<?> sourceMethod(EnumName enumName, int numberOfParameters) {
-        return new SourceParameter(this, enumName);
+    public SourceMethod<?> sourceMethod(EnumName enumName) {
+        return SourceParameter.create(this, enumName);
     }
 
     public int index() {

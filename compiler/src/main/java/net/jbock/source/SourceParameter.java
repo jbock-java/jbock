@@ -10,12 +10,25 @@ import java.util.Optional;
 public final class SourceParameter extends SourceMethod<AnnotatedParameter> {
 
     private final AnnotatedParameter parameter;
+    private final String paramLabel;
 
-    public SourceParameter(
-            AnnotatedParameter methodAnnotation,
-            EnumName enumName) {
+    private SourceParameter(
+            AnnotatedParameter parameter,
+            EnumName enumName,
+            String paramLabel) {
         super(enumName);
-        this.parameter = methodAnnotation;
+        this.parameter = parameter;
+        this.paramLabel = paramLabel;
+    }
+
+    public static SourceParameter create(
+            AnnotatedParameter parameter,
+            EnumName enumName) {
+        String paramLabel = parameter.label()
+                .orElseGet(() -> SnakeName.create(parameter.method().getSimpleName().toString())
+                        .snake('_')
+                        .toUpperCase(Locale.US));
+        return new SourceParameter(parameter, enumName, paramLabel);
     }
 
     @Override
@@ -40,8 +53,7 @@ public final class SourceParameter extends SourceMethod<AnnotatedParameter> {
 
     @Override
     public String paramLabel() {
-        return parameter.label()
-                .orElseGet(() -> SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
+        return paramLabel;
     }
 
     @Override

@@ -74,7 +74,7 @@ public final class AnnotatedOption extends AnnotatedMethod {
     }
 
     @Override
-    public SourceMethod<?> sourceMethod(EnumName enumName, int numberOfParameters) {
+    public SourceMethod<?> sourceMethod(EnumName enumName) {
         return SourceOption.create(this, enumName);
     }
 }

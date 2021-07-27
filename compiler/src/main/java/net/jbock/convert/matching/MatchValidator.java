@@ -12,11 +12,11 @@ abstract class MatchValidator {
     /* Left-Optional
      */
     Optional<String> validateMatch(SourceMethod<?> sourceMethod, Match m) {
-        if (sourceMethod.isParameter()
+        if (sourceMethod.annotatedMethod().isParameter()
                 && m.multiplicity() == Multiplicity.REPEATABLE) {
             return Optional.of("use @" + Parameters.class.getSimpleName() + " here");
         }
-        if (sourceMethod.isParameters()
+        if (sourceMethod.annotatedMethod().isParameters()
                 && m.multiplicity() != Multiplicity.REPEATABLE) {
             return Optional.of("use @" + Parameter.class.getSimpleName() + " here");
         }
