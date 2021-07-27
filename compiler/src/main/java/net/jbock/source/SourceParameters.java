@@ -14,7 +14,8 @@ public final class SourceParameters extends SourceMethod<AnnotatedParameters> {
 
     private SourceParameters(
             AnnotatedParameters parameters,
-            EnumName enumName, String paramLabel) {
+            EnumName enumName,
+            String paramLabel) {
         super(enumName);
         this.parameters = parameters;
         this.paramLabel = paramLabel;
