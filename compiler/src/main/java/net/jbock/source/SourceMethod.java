@@ -19,49 +19,45 @@ public abstract class SourceMethod<M extends AnnotatedMethod> {
         this.enumName = enumName;
     }
 
-    public ExecutableElement method() {
+    public final ExecutableElement method() {
         return annotatedMethod().method();
     }
 
-    public TypeMirror returnType() {
+    public final TypeMirror returnType() {
         return annotatedMethod().method().getReturnType();
     }
 
-    public boolean isParameters() {
+    public final boolean isParameters() {
         return annotatedMethod().isParameters();
     }
 
-    public boolean isParameter() {
+    public final boolean isParameter() {
         return annotatedMethod().isParameter();
     }
 
     public abstract OptionalInt index();
 
-    public Optional<String> descriptionKey() {
+    public final Optional<String> descriptionKey() {
         return annotatedMethod().descriptionKey();
     }
 
-    public ValidationFailure fail(String message) {
-        return new ValidationFailure(message, annotatedMethod().method());
+    public final ValidationFailure fail(String message) {
+        return annotatedMethod().fail(message);
     }
 
-    public List<String> names() {
-        return annotatedMethod().names();
-    }
-
-    public List<String> description() {
+    public final List<String> description() {
         return annotatedMethod().description();
     }
 
-    public Optional<String> label() {
+    public final Optional<String> label() {
         return annotatedMethod().label();
     }
 
-    public List<Modifier> accessModifiers() {
+    public final List<Modifier> accessModifiers() {
         return annotatedMethod().accessModifiers();
     }
 
-    public EnumName enumName() {
+    public final EnumName enumName() {
         return enumName;
     }
 

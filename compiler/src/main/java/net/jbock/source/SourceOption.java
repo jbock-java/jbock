@@ -3,6 +3,7 @@ package net.jbock.source;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.EnumName;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -15,6 +16,10 @@ public final class SourceOption extends SourceMethod<AnnotatedOption> {
             EnumName enumName) {
         super(enumName);
         this.option = option;
+    }
+
+    public List<String> names() {
+        return annotatedMethod().names();
     }
 
     @Override

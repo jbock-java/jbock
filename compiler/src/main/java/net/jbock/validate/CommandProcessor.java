@@ -90,7 +90,7 @@ public class CommandProcessor {
     }
 
     private Either<ValidationFailure, SourceOption> checkOptionNames(SourceOption sourceMethod) {
-        if (sourceMethod.names().isEmpty()) {
+        if (sourceMethod.annotatedMethod().names().isEmpty()) {
             return left(sourceMethod.fail("define at least one option name"));
         }
         for (String name : sourceMethod.names()) {

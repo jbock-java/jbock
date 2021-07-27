@@ -5,6 +5,7 @@ import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.common.Annotations;
 import net.jbock.common.EnumName;
+import net.jbock.common.ValidationFailure;
 import net.jbock.source.SourceMethod;
 
 import javax.lang.model.element.ExecutableElement;
@@ -54,7 +55,7 @@ public abstract class AnnotatedMethod {
 
     public abstract List<String> description();
 
-    public ExecutableElement method() {
+    public final ExecutableElement method() {
         return method;
     }
 
@@ -62,5 +63,9 @@ public abstract class AnnotatedMethod {
 
     public final List<Modifier> accessModifiers() {
         return accessModifiers;
+    }
+
+    public final ValidationFailure fail(String message) {
+        return new ValidationFailure(message, method);
     }
 }
