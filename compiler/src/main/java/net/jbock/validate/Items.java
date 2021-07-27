@@ -15,11 +15,14 @@ import java.util.List;
 public class Items {
 
     private final List<Mapped<PositionalParameter>> positionalParams;
+    private final List<Mapped<PositionalParameter>> repeatablePositionalParameter;
     private final List<Mapped<NamedOption>> namedOptions;
 
     Items(List<Mapped<PositionalParameter>> positionalParams,
+          List<Mapped<PositionalParameter>> repeatablePositionalParameter,
           List<Mapped<NamedOption>> namedOptions) {
         this.positionalParams = positionalParams;
+        this.repeatablePositionalParameter = repeatablePositionalParameter;
         this.namedOptions = namedOptions;
     }
 
@@ -32,6 +35,7 @@ public class Items {
     public ContextModule contextModule(SourceElement sourceElement) {
         return new ContextModule(sourceElement,
                 positionalParams,
+                repeatablePositionalParameter,
                 namedOptions);
     }
 }

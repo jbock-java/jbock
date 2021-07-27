@@ -5,29 +5,23 @@ import net.jbock.parameter.PositionalParameter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 class PositionalParameters {
 
     private final List<Mapped<PositionalParameter>> regular; // (optional|required)
-    private final Optional<Mapped<PositionalParameter>> repeatable;
+    private final List<Mapped<PositionalParameter>> repeatable;
 
     private PositionalParameters(
             List<Mapped<PositionalParameter>> regular,
-            Optional<Mapped<PositionalParameter>> repeatable) {
+            List<Mapped<PositionalParameter>> repeatable) {
         this.regular = regular;
         this.repeatable = repeatable;
     }
 
-    static PositionalParameters create(List<Mapped<PositionalParameter>> all) {
-        List<Mapped<PositionalParameter>> regular = all.stream()
-                .filter(c -> !c.isRepeatable())
-                .collect(Collectors.toUnmodifiableList());
-        Optional<Mapped<PositionalParameter>> repeatable = all.stream()
-                .filter(Mapped::isRepeatable)
-                .findFirst();
-        return new PositionalParameters(regular, repeatable);
+    static PositionalParameters create(
+            List<Mapped<PositionalParameter>> regular,
+            List<Mapped<PositionalParameter>> repeatablePositionalParameter) {
+        return new PositionalParameters(regular, repeatablePositionalParameter);
     }
 
     List<Mapped<PositionalParameter>> regular() {
@@ -40,7 +34,7 @@ class PositionalParameters {
         }
         List<Mapped<PositionalParameter>> result = new ArrayList<>(regular.size() + 1);
         result.addAll(regular);
-        repeatable.ifPresent(result::add);
+        result.addAll(repeatable);
         return result;
     }
 
@@ -48,12 +42,12 @@ class PositionalParameters {
         return regular().size() + (anyRepeatable() ? 1 : 0);
     }
 
-    Optional<Mapped<PositionalParameter>> repeatable() {
+    List<Mapped<PositionalParameter>> repeatable() {
         return repeatable;
     }
 
     boolean anyRepeatable() {
-        return repeatable.isPresent();
+        return !repeatable.isEmpty();
     }
 
     boolean isEmpty() {

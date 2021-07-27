@@ -27,7 +27,6 @@ import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
 import static io.jbock.util.Eithers.toValidListAll;
 import static java.lang.Character.isWhitespace;
-import static net.jbock.common.Constants.concat;
 
 /**
  * This class is responsible for item validation.
@@ -68,14 +67,16 @@ public class CommandProcessor {
     private Either<List<ValidationFailure>, Items> createItems(AbstractMethods methods) {
         return createPositionalParams(methods)
                 .flatMap(positionalParameters -> createRepeatablePositionalParams(methods)
-                        .map(repeatablePositionalParameters -> concat(positionalParameters, repeatablePositionalParameters)))
-                .flatMap((List<Mapped<PositionalParameter>> positionalParameters) -> createItems(
-                        methods.namedOptions(), positionalParameters));
+                        .flatMap(repeatablePositionalParameters -> createItems(
+                                methods.namedOptions(),
+                                positionalParameters,
+                                repeatablePositionalParameters)));
     }
 
     private Either<List<ValidationFailure>, Items> createItems(
             List<SourceOption> options,
-            List<Mapped<PositionalParameter>> positionalParameters) {
+            List<Mapped<PositionalParameter>> positionalParameters,
+            List<Mapped<PositionalParameter>> repeatablePositionalParameters) {
         return options.stream()
                 .map(this::checkOptionNames)
                 .collect(toValidListAll())
@@ -86,7 +87,8 @@ public class CommandProcessor {
                                 .build()
                                 .namedOptionFactory().createNamedOption(sourceMethod))
                         .collect(toValidListAll()))
-                .flatMap(namedOptions -> paramsFactory.create(positionalParameters, namedOptions));
+                .flatMap(namedOptions -> paramsFactory.create(
+                        positionalParameters, repeatablePositionalParameters, namedOptions));
     }
 
     private Either<ValidationFailure, SourceOption> checkOptionNames(SourceOption sourceMethod) {

@@ -17,14 +17,17 @@ public class ContextModule {
 
     private final SourceElement sourceElement;
     private final List<Mapped<PositionalParameter>> positionalParams;
+    private final List<Mapped<PositionalParameter>> repeatablePositionalParameter;
     private final List<Mapped<NamedOption>> namedOptions;
 
     public ContextModule(
             SourceElement sourceElement,
             List<Mapped<PositionalParameter>> positionalParams,
+            List<Mapped<PositionalParameter>> repeatablePositionalParameter,
             List<Mapped<NamedOption>> namedOptions) {
         this.sourceElement = sourceElement;
         this.positionalParams = positionalParams;
+        this.repeatablePositionalParameter = repeatablePositionalParameter;
         this.namedOptions = namedOptions;
     }
 
@@ -37,7 +40,7 @@ public class ContextModule {
     @ContextScope
     @Provides
     PositionalParameters positionalParameters() {
-        return PositionalParameters.create(positionalParams);
+        return PositionalParameters.create(positionalParams, repeatablePositionalParameter);
     }
 
     @ContextScope

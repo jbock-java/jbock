@@ -64,7 +64,7 @@ public class BuildMethod extends CachedMethod {
             ParameterSpec p = c.asParam();
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionRegularParameter(c, i));
         }
-        positionalParameters.repeatable().ifPresent(c -> {
+        positionalParameters.repeatable().forEach(c -> {
             ParameterSpec p = c.asParam();
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionRepeatableParameter(c));
         });
@@ -92,9 +92,9 @@ public class BuildMethod extends CachedMethod {
         for (Mapped<PositionalParameter> c : positionalParameters.regular()) {
             code.add(CodeBlock.of("$N", c.asParam()));
         }
-        positionalParameters.repeatable()
+        positionalParameters.repeatable().stream()
                 .map(c -> CodeBlock.of("$N", c.asParam()))
-                .ifPresent(code::add);
+                .forEach(code::add);
         return contextUtil.joinByComma(code);
     }
 

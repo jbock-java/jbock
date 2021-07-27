@@ -30,10 +30,11 @@ public class ParamsFactory {
 
     Either<List<ValidationFailure>, Items> create(
             List<Mapped<PositionalParameter>> positionalParams,
+            List<Mapped<PositionalParameter>> repeatablePositionalParameter,
             List<Mapped<NamedOption>> namedOptions) {
         return optionalList(checkDuplicateDescriptionKeys(namedOptions, positionalParams))
                 .<Either<List<ValidationFailure>, Items>>map(Either::left)
-                .orElseGet(() -> right(new Items(positionalParams, namedOptions)));
+                .orElseGet(() -> right(new Items(positionalParams, repeatablePositionalParameter, namedOptions)));
     }
 
     // TODO Mapped is not needed, validate this earlier
