@@ -78,14 +78,16 @@ class PositionalTest {
                 "@Command(superCommand = true)",
                 "abstract class Arguments {",
                 "",
+                "  @Parameter(index = 0)",
+                "  abstract String p();",
+                "",
                 "  @Parameters",
                 "  abstract List<String> a();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("positional parameter may not be repeatable" +
-                        " when the superCommand attribute is set");
+                .withErrorContaining("@Parameters cannot be used when superCommand=true");
     }
 
     @Test
@@ -174,7 +176,7 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("negative positions are not allowed");
+                .withErrorContaining("invalid position: expecting 0 but found -1");
     }
 
     @Test
@@ -196,7 +198,7 @@ class PositionalTest {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
-                "  @Parameter(index = 1) abstract StringBuilder a();",
+                "  @Parameter(index = 0) abstract StringBuilder a();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())

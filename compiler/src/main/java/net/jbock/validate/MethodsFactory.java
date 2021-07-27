@@ -59,7 +59,6 @@ public class MethodsFactory {
                 .flatMap(this::validateParameterMethods)
                 .filter(this::detectInheritanceCollision)
                 .map(this::createSourceMethods)
-                .filter(this::validateDuplicateParametersAnnotation)
                 .map(this::createAbstractMethods)
                 .filter(methods -> optionalList(validateAtLeastOneParameterInSuperCommand(methods)));
     }
@@ -104,21 +103,6 @@ public class MethodsFactory {
         String message = "at least one positional parameter must be defined" +
                 " when the superCommand attribute is set";
         return List.of(sourceElement.fail(message));
-    }
-
-    /* Left-Optional
-     */
-    private Optional<List<ValidationFailure>> validateDuplicateParametersAnnotation(
-            List<SourceMethod<?>> sourceMethods) {
-        List<SourceMethod<?>> parametersMethods = sourceMethods.stream()
-                .filter(SourceMethod::isParameters)
-                .collect(Collectors.toUnmodifiableList());
-        List<ValidationFailure> failures = new ArrayList<>();
-        if (parametersMethods.size() >= 2) {
-            String message = "duplicate @" + Parameters.class.getSimpleName() + " annotation";
-            failures.add(sourceMethods.get(1).fail(message));
-        }
-        return optionalList(failures);
     }
 
     private Either<List<ValidationFailure>, List<AnnotatedMethod>> validateParameterMethods(

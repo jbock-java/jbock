@@ -531,7 +531,7 @@ class ProcessorTest {
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Parameter(index = 1)",
+                "  @Parameter(index = 0)",
                 "  abstract boolean hello();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))

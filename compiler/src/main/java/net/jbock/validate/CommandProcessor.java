@@ -1,13 +1,18 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
+import io.jbock.util.Eithers;
+import net.jbock.Parameters;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.ConvertModule;
 import net.jbock.convert.DaggerConvertComponent;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
+import net.jbock.processor.SourceElement;
 import net.jbock.source.SourceOption;
+import net.jbock.source.SourceParameter;
+import net.jbock.source.SourceParameters;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -16,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
 import static io.jbock.util.Eithers.toValidListAll;
@@ -31,15 +37,18 @@ public class CommandProcessor {
     private final ParamsFactory paramsFactory;
     private final MethodsFactory methodsFactory;
     private final ConvertModule convertModule;
+    private final SourceElement sourceElement;
 
     @Inject
     CommandProcessor(
             ParamsFactory paramsFactory,
             MethodsFactory methodsFactory,
-            ConvertModule convertModule) {
+            ConvertModule convertModule,
+            SourceElement sourceElement) {
         this.paramsFactory = paramsFactory;
         this.methodsFactory = methodsFactory;
         this.convertModule = convertModule;
+        this.sourceElement = sourceElement;
     }
 
     /**
@@ -88,39 +97,62 @@ public class CommandProcessor {
 
     private Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>> createPositionalParams(
             AbstractMethods methods) {
-        return methods.positionalParameters().stream()
-                .map(sourceMethod -> DaggerConvertComponent.builder()
-                        .module(convertModule)
-                        .build()
-                        .positionalParameterFactory()
-                        .createPositionalParam(sourceMethod))
-                .collect(toValidListAll())
-                .filter(this::validatePositions)
+        return validatePositions(methods.positionalParameters())
+                .flatMap(positionalParameters -> positionalParameters.stream()
+                        .map(sourceMethod -> DaggerConvertComponent.builder()
+                                .module(convertModule)
+                                .build()
+                                .positionalParameterFactory()
+                                .createPositionalParam(sourceMethod))
+                        .collect(toValidListAll()))
                 .filter(this::checkNoRequiredAfterOptional);
     }
 
     private Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>> createRepeatablePositionalParams(
             AbstractMethods methods) {
-        return methods.repeatablePositionalParameters().stream()
-                .map(sourceMethod -> DaggerConvertComponent.builder()
-                        .module(convertModule)
-                        .build()
-                        .positionalParameterFactory()
-                        .createRepeatablePositionalParam(sourceMethod))
-                .collect(toValidListAll())
-                .filter(this::validatePositions)
+        return validateDuplicateParametersAnnotation(methods.repeatablePositionalParameters())
+                .filter(this::validateNoRepeatableParameterInSuperCommand)
+                .flatMap(repeatablePositionalParameters -> repeatablePositionalParameters.stream()
+                        .map(sourceMethod -> DaggerConvertComponent.builder()
+                                .module(convertModule)
+                                .build()
+                                .positionalParameterFactory()
+                                .createRepeatablePositionalParam(sourceMethod))
+                        .collect(toValidListAll()))
                 .filter(this::checkNoRequiredAfterOptional);
     }
 
-    private Optional<List<ValidationFailure>> validatePositions(List<Mapped<PositionalParameter>> allPositionalParameters) {
+    private Either<List<ValidationFailure>, List<SourceParameter>> validatePositions(List<SourceParameter> allPositionalParameters) {
         List<ValidationFailure> failures = new ArrayList<>();
         for (int i = 0; i < allPositionalParameters.size(); i++) {
-            PositionalParameter item = allPositionalParameters.get(i).item();
-            if (item.position() != i) {
-                failures.add(item.fail("invalid position: expecting " + i));
+            SourceParameter item = allPositionalParameters.get(i);
+            int index = item.annotatedMethod().index();
+            if (index != i) {
+                failures.add(item.fail("invalid position: expecting " + i + " but found " + index));
             }
         }
-        return optionalList(failures);
+        return optionalList(failures)
+                .<Either<List<ValidationFailure>, List<SourceParameter>>>map(Either::left)
+                .orElseGet(() -> right(allPositionalParameters));
+    }
+
+    private Either<List<ValidationFailure>, List<SourceParameters>> validateDuplicateParametersAnnotation(List<SourceParameters> repeatablePositionalParameters) {
+        return repeatablePositionalParameters.stream()
+                .skip(1)
+                .map(param -> param.fail("duplicate @" + Parameters.class.getSimpleName() + " annotation"))
+                .collect(Eithers.toOptionalList())
+                .<Either<List<ValidationFailure>, List<SourceParameters>>>map(Either::left)
+                .orElseGet(() -> right(repeatablePositionalParameters));
+    }
+
+    private Optional<List<ValidationFailure>> validateNoRepeatableParameterInSuperCommand(List<SourceParameters> repeatablePositionalParameters) {
+        if (!sourceElement.isSuperCommand()) {
+            return Optional.empty();
+        }
+        return repeatablePositionalParameters.stream()
+                .map(param -> param.fail("@" + Parameters.class.getSimpleName() +
+                        " cannot be used when superCommand=true"))
+                .collect(Eithers.toOptionalList());
     }
 
     private Optional<List<ValidationFailure>> checkNoRequiredAfterOptional(List<Mapped<PositionalParameter>> allPositionalParameters) {
