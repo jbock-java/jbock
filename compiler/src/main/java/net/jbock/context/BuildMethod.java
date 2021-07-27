@@ -16,7 +16,6 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.EITHERS;
 import static net.jbock.common.Constants.OPTIONAL;
 import static net.jbock.common.Constants.STRING;
@@ -115,7 +114,7 @@ public class BuildMethod extends CachedMethod {
     private CodeBlock convertExpressionRegularParameter(Mapped<PositionalParameter> c, int i) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$T.ofNullable(this.$N[$L])", OPTIONAL, commonFields.params(),
-                c.item().position()));
+                c.item().index()));
         code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
                 .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
         code.addAll(tailExpressionParameter(c, i));

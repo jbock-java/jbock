@@ -11,12 +11,22 @@ import java.util.Optional;
 public final class SourceOption extends SourceMethod<AnnotatedOption> {
 
     private final AnnotatedOption option;
+    private final boolean hasUnixName;
 
     public SourceOption(
             AnnotatedOption option,
-            EnumName enumName) {
+            EnumName enumName,
+            boolean hasUnixName) {
         super(enumName);
         this.option = option;
+        this.hasUnixName = hasUnixName;
+    }
+
+    public static SourceOption create(
+            AnnotatedOption option,
+            EnumName enumName) {
+        boolean hasUnixName = option.names().stream().anyMatch(s -> s.length() == 2);
+        return new SourceOption(option, enumName, hasUnixName);
     }
 
     public List<String> names() {
@@ -44,12 +54,16 @@ public final class SourceOption extends SourceMethod<AnnotatedOption> {
     }
 
     @Override
-    public final String paramLabel() {
+    public String paramLabel() {
         return option.label().or(() -> names().stream()
                 .filter(name -> name.startsWith("--"))
                 .map(name -> name.substring(2))
                 .map(s -> s.toUpperCase(Locale.US))
                 .findFirst())
                 .orElseGet(() -> SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
+    }
+
+    public boolean hasUnixName() {
+        return hasUnixName;
     }
 }

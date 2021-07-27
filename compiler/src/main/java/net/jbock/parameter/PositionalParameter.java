@@ -15,7 +15,7 @@ public final class PositionalParameter extends AbstractItem {
         this.position = position;
     }
 
-    public int position() {
+    public int index() {
         return position;
     }
 }

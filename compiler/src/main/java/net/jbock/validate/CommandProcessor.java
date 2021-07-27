@@ -207,7 +207,7 @@ public class CommandProcessor {
                 .flatMap(firstOptional -> allPositionalParameters.stream()
                         .filter(Mapped::isRequired)
                         .map(Mapped::item)
-                        .filter(item -> item.position() > firstOptional.position())
+                        .filter(item -> item.index() > firstOptional.index())
                         .map(item -> item.fail("position of required parameter '" +
                                 item.sourceMethod().method().getSimpleName() +
                                 "' is greater than position of optional parameter '" +
