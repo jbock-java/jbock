@@ -1,10 +1,8 @@
 package net.jbock.parameter;
 
-import net.jbock.common.SnakeName;
 import net.jbock.source.SourceMethod;
 
 import java.util.List;
-import java.util.Locale;
 
 public final class NamedOption extends AbstractItem {
 
@@ -19,16 +17,6 @@ public final class NamedOption extends AbstractItem {
 
     public List<String> names() {
         return names;
-    }
-
-    @Override
-    public final String paramLabel() {
-        return sourceMethod().label().or(() -> names.stream()
-                .filter(name -> name.startsWith("--"))
-                .map(name -> name.substring(2))
-                .map(s -> s.toUpperCase(Locale.US))
-                .findFirst())
-                .orElseGet(() -> SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
     }
 
     public boolean hasUnixName() {

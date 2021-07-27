@@ -58,6 +58,10 @@ public abstract class SourceMethod<M extends AnnotatedMethod> {
         return enumName;
     }
 
+    public final String methodName() {
+        return annotatedMethod().method().getSimpleName().toString();
+    }
+
     public abstract M annotatedMethod();
 
     public abstract Optional<SourceOption> asAnnotatedOption();
@@ -65,4 +69,6 @@ public abstract class SourceMethod<M extends AnnotatedMethod> {
     public abstract Optional<SourceParameter> asAnnotatedParameter();
 
     public abstract Optional<SourceParameters> asAnnotatedParameters();
+
+    public abstract String paramLabel();
 }

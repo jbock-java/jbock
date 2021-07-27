@@ -116,7 +116,7 @@ public final class Mapped<P extends AbstractItem> {
     }
 
     public String paramLabel() {
-        return item.paramLabel();
+        return item.sourceMethod().paramLabel();
     }
 
     public FieldSpec asField() {

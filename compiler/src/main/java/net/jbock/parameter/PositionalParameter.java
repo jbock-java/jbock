@@ -1,9 +1,6 @@
 package net.jbock.parameter;
 
-import net.jbock.common.SnakeName;
 import net.jbock.source.SourceMethod;
-
-import java.util.Locale;
 
 public final class PositionalParameter extends AbstractItem {
 
@@ -16,12 +13,6 @@ public final class PositionalParameter extends AbstractItem {
             int position) {
         super(sourceMethod);
         this.position = position;
-    }
-
-    @Override
-    public final String paramLabel() {
-        return sourceMethod().label()
-                .orElseGet(() -> SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
     }
 
     public int position() {

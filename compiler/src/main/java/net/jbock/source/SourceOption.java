@@ -2,8 +2,10 @@ package net.jbock.source;
 
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.EnumName;
+import net.jbock.common.SnakeName;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public final class SourceOption extends SourceMethod<AnnotatedOption> {
@@ -18,7 +20,7 @@ public final class SourceOption extends SourceMethod<AnnotatedOption> {
     }
 
     public List<String> names() {
-        return annotatedMethod().names();
+        return option.names();
     }
 
     @Override
@@ -39,5 +41,15 @@ public final class SourceOption extends SourceMethod<AnnotatedOption> {
     @Override
     public Optional<SourceParameters> asAnnotatedParameters() {
         return Optional.empty();
+    }
+
+    @Override
+    public final String paramLabel() {
+        return option.label().or(() -> names().stream()
+                .filter(name -> name.startsWith("--"))
+                .map(name -> name.substring(2))
+                .map(s -> s.toUpperCase(Locale.US))
+                .findFirst())
+                .orElseGet(() -> SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
     }
 }

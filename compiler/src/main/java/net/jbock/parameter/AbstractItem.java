@@ -45,8 +45,6 @@ public abstract class AbstractItem {
         return sourceMethod.enumName();
     }
 
-    public abstract String paramLabel();
-
     public final SourceMethod<?> sourceMethod() {
         return sourceMethod;
     }

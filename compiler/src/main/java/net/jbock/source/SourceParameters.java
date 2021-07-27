@@ -2,7 +2,9 @@ package net.jbock.source;
 
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.EnumName;
+import net.jbock.common.SnakeName;
 
+import java.util.Locale;
 import java.util.Optional;
 
 public final class SourceParameters extends SourceMethod<AnnotatedParameters> {
@@ -41,5 +43,11 @@ public final class SourceParameters extends SourceMethod<AnnotatedParameters> {
     @Override
     public Optional<SourceParameters> asAnnotatedParameters() {
         return Optional.of(this);
+    }
+
+    @Override
+    public String paramLabel() {
+        return parameters.label()
+                .orElseGet(() -> SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
     }
 }
