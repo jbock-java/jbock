@@ -30,7 +30,7 @@ public class PositionalParamFactory {
 
     public Either<ValidationFailure, Mapped<PositionalParameter>> createRepeatablePositionalParam(
             SourceParameters sourceMethod) {
-        int position = sourceMethod.getIndex();
+        int position = sourceMethod.index();
         PositionalParameter positionalParameter = new PositionalParameter(sourceMethod, position);
         return Either.<String, PositionalParameter>right(positionalParameter)
                 .flatMap(converterFinder::findConverter)

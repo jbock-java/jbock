@@ -4,7 +4,6 @@ import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.EnumName;
 
 import java.util.Optional;
-import java.util.OptionalInt;
 
 public final class SourceParameters extends SourceMethod<AnnotatedParameters> {
 
@@ -20,12 +19,7 @@ public final class SourceParameters extends SourceMethod<AnnotatedParameters> {
         this.index = index;
     }
 
-    @Override
-    public OptionalInt index() {
-        return OptionalInt.of(index);
-    }
-
-    public int getIndex() {
+    public int index() {
         return index;
     }
 

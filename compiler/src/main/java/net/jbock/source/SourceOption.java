@@ -5,7 +5,6 @@ import net.jbock.common.EnumName;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 public final class SourceOption extends SourceMethod<AnnotatedOption> {
 
@@ -20,11 +19,6 @@ public final class SourceOption extends SourceMethod<AnnotatedOption> {
 
     public List<String> names() {
         return annotatedMethod().names();
-    }
-
-    @Override
-    public OptionalInt index() {
-        return OptionalInt.empty();
     }
 
     @Override

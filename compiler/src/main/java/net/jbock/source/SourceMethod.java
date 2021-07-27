@@ -9,7 +9,6 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 public abstract class SourceMethod<M extends AnnotatedMethod> {
 
@@ -34,8 +33,6 @@ public abstract class SourceMethod<M extends AnnotatedMethod> {
     public final boolean isParameter() {
         return annotatedMethod().isParameter();
     }
-
-    public abstract OptionalInt index();
 
     public final Optional<String> descriptionKey() {
         return annotatedMethod().descriptionKey();
