@@ -29,6 +29,11 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     }
 
     @Override
+    public boolean isParameters() {
+        return false;
+    }
+
+    @Override
     public Optional<String> descriptionKey() {
         return Descriptions.optionalString(parameter.descriptionKey());
     }
@@ -36,16 +41,6 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     @Override
     public Optional<String> label() {
         return Descriptions.optionalString(parameter.paramLabel());
-    }
-
-    @Override
-    public boolean isParameters() {
-        return false;
-    }
-
-    @Override
-    public List<String> names() {
-        return List.of();
     }
 
     @Override

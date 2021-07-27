@@ -8,23 +8,49 @@ import net.jbock.source.SourceOption;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class AnnotatedOption extends AnnotatedMethod {
 
-    private final Option option;
+    // visible for testing
+    static final Comparator<String> UNIX_NAMES_FIRST_COMPARATOR = Comparator
+            .comparing(String::length)
+            .thenComparing(String::toString);
 
-    AnnotatedOption(
+    private final Option option;
+    private final List<String> names;
+
+    private AnnotatedOption(
+            ExecutableElement method,
+            Option option,
+            List<Modifier> accessModifiers,
+            List<String> names) {
+        super(method, accessModifiers);
+        this.option = option;
+        this.names = names;
+    }
+
+    static AnnotatedOption create(
             ExecutableElement method,
             Option option,
             List<Modifier> accessModifiers) {
-        super(method, accessModifiers);
-        this.option = option;
+        List<String> names = Arrays.stream(option.names())
+                .sorted(UNIX_NAMES_FIRST_COMPARATOR)
+                .collect(Collectors.toList());
+        return new AnnotatedOption(method, option, accessModifiers, names);
     }
 
     @Override
     public boolean isParameter() {
+        return false;
+    }
+
+    @Override
+    public boolean isParameters() {
         return false;
     }
 
@@ -38,14 +64,8 @@ public final class AnnotatedOption extends AnnotatedMethod {
         return Descriptions.optionalString(option.paramLabel());
     }
 
-    @Override
-    public boolean isParameters() {
-        return false;
-    }
-
-    @Override
     public List<String> names() {
-        return List.of(option.names());
+        return names;
     }
 
     @Override

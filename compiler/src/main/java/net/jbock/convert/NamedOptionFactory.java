@@ -3,13 +3,12 @@ package net.jbock.convert;
 import io.jbock.util.Either;
 import net.jbock.common.ValidationFailure;
 import net.jbock.parameter.NamedOption;
-import net.jbock.source.SourceMethod;
+import net.jbock.source.SourceOption;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Types;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,11 +21,6 @@ import static net.jbock.convert.Mapped.createFlag;
 
 @ConvertScope
 public class NamedOptionFactory {
-
-    // visible for testing
-    static final Comparator<String> UNIX_NAMES_FIRST_COMPARATOR = Comparator
-            .comparing(String::length)
-            .thenComparing(String::toString);
 
     private final ConverterFinder converterFinder;
     private final Types types;
@@ -42,7 +36,7 @@ public class NamedOptionFactory {
         this.annotationUtil = annotationUtil;
     }
 
-    public Either<ValidationFailure, Mapped<NamedOption>> createNamedOption(SourceMethod<?> sourceMethod) {
+    public Either<ValidationFailure, Mapped<NamedOption>> createNamedOption(SourceOption sourceMethod) {
         Optional<TypeElement> converter = annotationUtil.getConverter(sourceMethod.method());
         return checkOptionNames(sourceMethod)
                 .map(names -> new NamedOption(names, sourceMethod))
@@ -55,7 +49,7 @@ public class NamedOptionFactory {
                 .mapLeft(sourceMethod::fail);
     }
 
-    private Either<String, List<String>> checkOptionNames(SourceMethod<?> sourceMethod) {
+    private Either<String, List<String>> checkOptionNames(SourceOption sourceMethod) {
         if (sourceMethod.names().isEmpty()) {
             return left("define at least one option name");
         }
@@ -70,7 +64,6 @@ public class NamedOptionFactory {
             }
             result.add(name);
         }
-        result.sort(UNIX_NAMES_FIRST_COMPARATOR);
         return right(result);
     }
 

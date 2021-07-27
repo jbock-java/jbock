@@ -31,7 +31,7 @@ public abstract class AnnotatedMethod {
                 .filter(ACCESS_MODIFIERS::contains)
                 .collect(toList());
         if (annotation instanceof Option) {
-            return new AnnotatedOption(sourceMethod, (Option) annotation, accessModifiers);
+            return AnnotatedOption.create(sourceMethod, (Option) annotation, accessModifiers);
         }
         if (annotation instanceof Parameter) {
             return new AnnotatedParameter(sourceMethod, (Parameter) annotation, accessModifiers);
@@ -41,22 +41,16 @@ public abstract class AnnotatedMethod {
         }
         throw new AssertionError("expecting one of " +
                 Annotations.methodLevelAnnotations() +
-                " but found: " + annotation);
+                " but found: " + annotation.getClass());
     }
 
     public abstract Optional<String> descriptionKey();
 
     public abstract Optional<String> label();
 
-    public final boolean isPositional() {
-        return isParameter() || isParameters();
-    }
-
-    public abstract boolean isParameters();
-
     public abstract boolean isParameter();
 
-    public abstract List<String> names();
+    public abstract boolean isParameters();
 
     public abstract List<String> description();
 
