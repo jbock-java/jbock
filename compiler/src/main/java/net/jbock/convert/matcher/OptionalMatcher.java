@@ -6,7 +6,7 @@ import net.jbock.common.TypeTool;
 import net.jbock.convert.ConvertScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.model.Multiplicity;
-import net.jbock.parameter.AbstractItem;
+import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
@@ -31,8 +31,8 @@ public class OptionalMatcher implements Matcher {
     }
 
     @Override
-    public Optional<Match> tryMatch(AbstractItem parameter) {
-        TypeMirror returnType = parameter.sourceMethod().returnType();
+    public Optional<Match> tryMatch(SourceMethod<?> parameter) {
+        TypeMirror returnType = parameter.returnType();
         return getOptionalPrimitive(returnType)
                 .or(() -> // base
                         elements.getTypeElement("java.util.Optional")

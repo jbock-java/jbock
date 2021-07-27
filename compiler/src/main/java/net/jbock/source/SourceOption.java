@@ -63,6 +63,7 @@ public final class SourceOption extends SourceMethod<AnnotatedOption> {
                 .orElseGet(() -> SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
     }
 
+    @Override
     public boolean hasUnixName() {
         return hasUnixName;
     }

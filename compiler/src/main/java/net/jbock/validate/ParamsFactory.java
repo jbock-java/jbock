@@ -1,12 +1,11 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
-import net.jbock.common.Constants;
+import net.jbock.annotated.AnnotatedOption;
+import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapped;
-import net.jbock.parameter.AbstractItem;
-import net.jbock.parameter.NamedOption;
-import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -17,6 +16,7 @@ import java.util.Set;
 
 import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.optionalList;
+import static net.jbock.common.Constants.concat;
 
 @ValidateScope
 public class ParamsFactory {
@@ -29,24 +29,25 @@ public class ParamsFactory {
     }
 
     Either<List<ValidationFailure>, Items> create(
-            List<Mapped<PositionalParameter>> positionalParams,
-            List<Mapped<PositionalParameter>> repeatablePositionalParameter,
-            List<Mapped<NamedOption>> namedOptions) {
-        return optionalList(checkDuplicateDescriptionKeys(namedOptions, positionalParams))
+            List<Mapped<AnnotatedParameter>> positionalParams,
+            List<Mapped<AnnotatedParameters>> repeatablePositionalParameter,
+            List<Mapped<AnnotatedOption>> namedOptions) {
+        return optionalList(checkDuplicateDescriptionKeys(namedOptions, positionalParams, repeatablePositionalParameter))
                 .<Either<List<ValidationFailure>, Items>>map(Either::left)
                 .orElseGet(() -> right(new Items(positionalParams, repeatablePositionalParameter, namedOptions)));
     }
 
     // TODO Mapped is not needed, validate this earlier
     private List<ValidationFailure> checkDuplicateDescriptionKeys(
-            List<Mapped<NamedOption>> namedOptions,
-            List<Mapped<PositionalParameter>> positionalParams) {
+            List<Mapped<AnnotatedOption>> namedOptions,
+            List<Mapped<AnnotatedParameter>> positionalParams,
+            List<Mapped<AnnotatedParameters>> repeatablePositionalParams) {
         List<ValidationFailure> failures = new ArrayList<>();
-        List<Mapped<? extends AbstractItem>> items =
-                Constants.concat(namedOptions, positionalParams);
+        List<Mapped<?>> items =
+                concat(concat(namedOptions, positionalParams), repeatablePositionalParams);
         Set<String> keys = new HashSet<>();
         sourceElement.descriptionKey().ifPresent(keys::add);
-        for (Mapped<? extends AbstractItem> c : items) {
+        for (Mapped<?> c : items) {
             c.item().descriptionKey().ifPresent(key -> {
                 if (!keys.add(key)) {
                     String message = "duplicate description key: " + key;

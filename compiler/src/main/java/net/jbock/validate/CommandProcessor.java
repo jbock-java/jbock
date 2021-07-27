@@ -3,11 +3,12 @@ package net.jbock.validate;
 import io.jbock.util.Either;
 import io.jbock.util.Eithers;
 import net.jbock.Parameters;
+import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.ConvertModule;
 import net.jbock.convert.DaggerConvertComponent;
 import net.jbock.convert.Mapped;
-import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
 import net.jbock.source.SourceOption;
 import net.jbock.source.SourceParameter;
@@ -75,8 +76,8 @@ public class CommandProcessor {
 
     private Either<List<ValidationFailure>, Items> createItems(
             List<SourceOption> options,
-            List<Mapped<PositionalParameter>> positionalParameters,
-            List<Mapped<PositionalParameter>> repeatablePositionalParameters) {
+            List<Mapped<AnnotatedParameter>> positionalParameters,
+            List<Mapped<AnnotatedParameters>> repeatablePositionalParameters) {
         return options.stream()
                 .map(this::checkOptionNames)
                 .collect(toValidListAll())
@@ -141,7 +142,7 @@ public class CommandProcessor {
                 .collect(toOptionalList());
     }
 
-    private Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>> createPositionalParams(
+    private Either<List<ValidationFailure>, List<Mapped<AnnotatedParameter>>> createPositionalParams(
             AbstractMethods methods) {
         return validatePositions(methods.positionalParameters())
                 .flatMap(positionalParameters -> positionalParameters.stream()
@@ -154,7 +155,7 @@ public class CommandProcessor {
                 .filter(this::checkNoRequiredAfterOptional);
     }
 
-    private Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>> createRepeatablePositionalParams(
+    private Either<List<ValidationFailure>, List<Mapped<AnnotatedParameters>>> createRepeatablePositionalParams(
             AbstractMethods methods) {
         return validateDuplicateParametersAnnotation(methods.repeatablePositionalParameters())
                 .filter(this::validateNoRepeatableParameterInSuperCommand)
@@ -164,8 +165,7 @@ public class CommandProcessor {
                                 .build()
                                 .positionalParameterFactory()
                                 .createRepeatablePositionalParam(sourceMethod))
-                        .collect(toValidListAll()))
-                .filter(this::checkNoRequiredAfterOptional);
+                        .collect(toValidListAll()));
     }
 
     private Either<List<ValidationFailure>, List<SourceParameter>> validatePositions(List<SourceParameter> allPositionalParameters) {
@@ -201,7 +201,8 @@ public class CommandProcessor {
                 .collect(Eithers.toOptionalList());
     }
 
-    private Optional<List<ValidationFailure>> checkNoRequiredAfterOptional(List<Mapped<PositionalParameter>> allPositionalParameters) {
+    private Optional<List<ValidationFailure>> checkNoRequiredAfterOptional(
+            List<Mapped<AnnotatedParameter>> allPositionalParameters) {
         return allPositionalParameters.stream()
                 .filter(Mapped::isOptional)
                 .findFirst()
@@ -209,11 +210,11 @@ public class CommandProcessor {
                 .flatMap(firstOptional -> allPositionalParameters.stream()
                         .filter(Mapped::isRequired)
                         .map(Mapped::item)
-                        .filter(item -> item.index() > firstOptional.index())
+                        .filter(item -> item.annotatedMethod().index() > firstOptional.annotatedMethod().index())
                         .map(item -> item.fail("position of required parameter '" +
-                                item.sourceMethod().method().getSimpleName() +
+                                item.annotatedMethod().method().getSimpleName() +
                                 "' is greater than position of optional parameter '" +
-                                firstOptional.sourceMethod().method().getSimpleName() + "'"))
+                                firstOptional.annotatedMethod().method().getSimpleName() + "'"))
                         .collect(toOptionalList()));
     }
 }

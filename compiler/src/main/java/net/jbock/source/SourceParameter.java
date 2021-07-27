@@ -43,4 +43,9 @@ public final class SourceParameter extends SourceMethod<AnnotatedParameter> {
         return parameter.label()
                 .orElseGet(() -> SnakeName.create(methodName()).snake('_').toUpperCase(Locale.US));
     }
+
+    @Override
+    public boolean hasUnixName() {
+        return false;
+    }
 }

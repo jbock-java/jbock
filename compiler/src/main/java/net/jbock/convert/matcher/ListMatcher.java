@@ -5,7 +5,7 @@ import net.jbock.common.TypeTool;
 import net.jbock.convert.ConvertScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.model.Multiplicity;
-import net.jbock.parameter.AbstractItem;
+import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
@@ -26,8 +26,8 @@ public class ListMatcher implements Matcher {
     }
 
     @Override
-    public Optional<Match> tryMatch(AbstractItem parameter) {
-        TypeMirror returnType = parameter.sourceMethod().returnType();
+    public Optional<Match> tryMatch(SourceMethod<?> parameter) {
+        TypeMirror returnType = parameter.returnType();
         return elements.getTypeElement("java.util.List")
                 .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
                         .map(typeArg -> Match.create(typeArg, Multiplicity.REPEATABLE)));

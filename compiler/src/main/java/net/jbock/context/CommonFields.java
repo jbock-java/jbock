@@ -5,7 +5,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.convert.Mapped;
-import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.HelpRequested;
 
@@ -64,7 +63,7 @@ class CommonFields {
                 .unindent().build());
         long mapSize = namedOptions.stream()
                 .map(Mapped::item)
-                .map(NamedOption::names)
+                .map(t -> t.annotatedMethod().names())
                 .map(List::size)
                 .mapToLong(i -> i)
                 .sum();

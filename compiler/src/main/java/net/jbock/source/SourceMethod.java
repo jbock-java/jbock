@@ -71,4 +71,6 @@ public abstract class SourceMethod<M extends AnnotatedMethod> {
     public abstract Optional<SourceParameters> asAnnotatedParameters();
 
     public abstract String paramLabel();
+
+    public abstract boolean hasUnixName();
 }

@@ -2,9 +2,10 @@ package net.jbock.context;
 
 import dagger.Module;
 import dagger.Provides;
+import net.jbock.annotated.AnnotatedOption;
+import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapped;
-import net.jbock.parameter.NamedOption;
-import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
 
 import java.util.List;
@@ -16,18 +17,18 @@ import java.util.List;
 public class ContextModule {
 
     private final SourceElement sourceElement;
-    private final List<Mapped<PositionalParameter>> positionalParams;
-    private final List<Mapped<PositionalParameter>> repeatablePositionalParameter;
-    private final List<Mapped<NamedOption>> namedOptions;
+    private final List<Mapped<AnnotatedParameter>> positionalParams;
+    private final List<Mapped<AnnotatedParameters>> repeatablePositionalParameters;
+    private final List<Mapped<AnnotatedOption>> namedOptions;
 
     public ContextModule(
             SourceElement sourceElement,
-            List<Mapped<PositionalParameter>> positionalParams,
-            List<Mapped<PositionalParameter>> repeatablePositionalParameter,
-            List<Mapped<NamedOption>> namedOptions) {
+            List<Mapped<AnnotatedParameter>> positionalParams,
+            List<Mapped<AnnotatedParameters>> repeatablePositionalParameters,
+            List<Mapped<AnnotatedOption>> namedOptions) {
         this.sourceElement = sourceElement;
         this.positionalParams = positionalParams;
-        this.repeatablePositionalParameter = repeatablePositionalParameter;
+        this.repeatablePositionalParameters = repeatablePositionalParameters;
         this.namedOptions = namedOptions;
     }
 
@@ -40,7 +41,7 @@ public class ContextModule {
     @ContextScope
     @Provides
     PositionalParameters positionalParameters() {
-        return PositionalParameters.create(positionalParams, repeatablePositionalParameter);
+        return PositionalParameters.create(positionalParams, repeatablePositionalParameters);
     }
 
     @ContextScope
@@ -52,7 +53,7 @@ public class ContextModule {
     @ContextScope
     @Provides
     AllItems allItems() {
-        return AllItems.create(positionalParams, namedOptions);
+        return AllItems.create(positionalParams, repeatablePositionalParameters, namedOptions);
     }
 
     @ContextScope

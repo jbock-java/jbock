@@ -1,8 +1,8 @@
 package net.jbock.convert;
 
 import io.jbock.util.Either;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
-import net.jbock.parameter.NamedOption;
 import net.jbock.source.SourceOption;
 
 import javax.inject.Inject;
@@ -31,12 +31,11 @@ public class NamedOptionFactory {
         this.annotationUtil = annotationUtil;
     }
 
-    public Either<ValidationFailure, Mapped<NamedOption>> createNamedOption(SourceOption sourceMethod) {
-        NamedOption namedOption = new NamedOption(sourceMethod.names(), sourceMethod);
+    public Either<ValidationFailure, Mapped<AnnotatedOption>> createNamedOption(SourceOption sourceMethod) {
         Optional<TypeElement> converter = annotationUtil.getConverter(sourceMethod.method());
         if (converter.isEmpty() && sourceMethod.returnType().getKind() == BOOLEAN) {
-            return right(createFlag(namedOption, types.getPrimitiveType(BOOLEAN)));
+            return right(createFlag(sourceMethod, types.getPrimitiveType(BOOLEAN)));
         }
-        return converterFinder.findConverter(namedOption).mapLeft(sourceMethod::fail);
+        return converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail);
     }
 }

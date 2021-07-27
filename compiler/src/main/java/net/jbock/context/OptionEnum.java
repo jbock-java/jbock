@@ -1,9 +1,9 @@
 package net.jbock.context;
 
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.EnumName;
 import net.jbock.convert.Mapped;
-import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -31,9 +31,9 @@ public class OptionEnum {
     }
 
     TypeSpec define() {
-        List<Mapped<NamedOption>> parameters = options.options();
+        List<Mapped<AnnotatedOption>> parameters = options.options();
         TypeSpec.Builder spec = TypeSpec.enumBuilder(sourceElement.optionEnumType());
-        for (Mapped<NamedOption> param : parameters) {
+        for (Mapped<AnnotatedOption> param : parameters) {
             EnumName enumName = param.enumName();
             String enumConstant = enumName.enumConstant();
             spec.addEnumConstant(enumConstant);

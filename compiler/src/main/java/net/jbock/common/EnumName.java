@@ -1,7 +1,6 @@
 package net.jbock.common;
 
 import java.util.Locale;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class EnumName {

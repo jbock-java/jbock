@@ -2,10 +2,11 @@ package net.jbock.context;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.convert.Mapped;
-import net.jbock.parameter.AbstractItem;
 import net.jbock.processor.SourceElement;
+import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 import java.util.stream.Collectors;
@@ -39,7 +40,7 @@ public class Impl {
         } else {
             spec.superclass(sourceElement.typeName());
         }
-        for (Mapped<? extends AbstractItem> c : context.items()) {
+        for (Mapped<?> c : context.items()) {
             spec.addField(c.asField());
         }
         return spec.addModifiers(PRIVATE, STATIC)
@@ -50,18 +51,18 @@ public class Impl {
                 .build();
     }
 
-    private MethodSpec parameterMethodOverride(Mapped<? extends AbstractItem> c) {
-        AbstractItem param = c.item();
+    private MethodSpec parameterMethodOverride(Mapped<?> c) {
+        SourceMethod<?> param = c.item();
         return MethodSpec.methodBuilder(param.methodName())
-                .returns(param.returnType())
-                .addModifiers(param.getAccessModifiers())
+                .returns(TypeName.get(param.returnType()))
+                .addModifiers(param.accessModifiers())
                 .addStatement("return $N", c.asField())
                 .build();
     }
 
     private MethodSpec implConstructor() {
         MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-        for (Mapped<? extends AbstractItem> c : context.items()) {
+        for (Mapped<?> c : context.items()) {
             FieldSpec field = c.asField();
             spec.addStatement("this.$N = $N", field, c.asParam());
             spec.addParameter(c.asParam());

@@ -8,7 +8,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.convert.Mapped;
 import net.jbock.convert.matching.MapExpr;
-import net.jbock.parameter.AbstractItem;
 import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
@@ -28,7 +27,7 @@ public class MultilineConverter {
         this.generatedTypes = generatedTypes;
     }
 
-    TypeSpec define(Mapped<? extends AbstractItem> item) {
+    TypeSpec define(Mapped<?> item) {
         MapExpr mapExpr = item.mapExpr();
         return TypeSpec.classBuilder(generatedTypes.multilineConverterType(item))
                 .addMethod(convertMethod(mapExpr))

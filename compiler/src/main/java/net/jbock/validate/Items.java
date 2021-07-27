@@ -1,9 +1,10 @@
 package net.jbock.validate;
 
+import net.jbock.annotated.AnnotatedOption;
+import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.context.ContextModule;
 import net.jbock.convert.Mapped;
-import net.jbock.parameter.NamedOption;
-import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
 
 import java.util.List;
@@ -14,15 +15,15 @@ import java.util.List;
  */
 public class Items {
 
-    private final List<Mapped<PositionalParameter>> positionalParams;
-    private final List<Mapped<PositionalParameter>> repeatablePositionalParameter;
-    private final List<Mapped<NamedOption>> namedOptions;
+    private final List<Mapped<AnnotatedParameter>> positionalParams;
+    private final List<Mapped<AnnotatedParameters>> repeatablePositionalParameters;
+    private final List<Mapped<AnnotatedOption>> namedOptions;
 
-    Items(List<Mapped<PositionalParameter>> positionalParams,
-          List<Mapped<PositionalParameter>> repeatablePositionalParameter,
-          List<Mapped<NamedOption>> namedOptions) {
+    Items(List<Mapped<AnnotatedParameter>> positionalParams,
+          List<Mapped<AnnotatedParameters>> repeatablePositionalParameters,
+          List<Mapped<AnnotatedOption>> namedOptions) {
         this.positionalParams = positionalParams;
-        this.repeatablePositionalParameter = repeatablePositionalParameter;
+        this.repeatablePositionalParameters = repeatablePositionalParameters;
         this.namedOptions = namedOptions;
     }
 
@@ -35,7 +36,7 @@ public class Items {
     public ContextModule contextModule(SourceElement sourceElement) {
         return new ContextModule(sourceElement,
                 positionalParams,
-                repeatablePositionalParameter,
+                repeatablePositionalParameters,
                 namedOptions);
     }
 }

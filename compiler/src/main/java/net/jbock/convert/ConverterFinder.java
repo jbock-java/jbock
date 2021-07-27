@@ -2,9 +2,10 @@ package net.jbock.convert;
 
 import dagger.Lazy;
 import io.jbock.util.Either;
+import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.convert.matching.AutoConverterFinder;
 import net.jbock.convert.matching.ConverterValidator;
-import net.jbock.parameter.AbstractItem;
+import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 
@@ -25,8 +26,8 @@ public class ConverterFinder {
         this.annotationUtil = annotationUtil;
     }
 
-    public <P extends AbstractItem> Either<String, Mapped<P>> findConverter(P parameter) {
-        return annotationUtil.getConverter(parameter.sourceMethod().method())
+    public <M extends AnnotatedMethod> Either<String, Mapped<M>> findConverter(SourceMethod<M> parameter) {
+        return annotationUtil.getConverter(parameter.method())
                 .map(converter -> converterValidator.get().validate(parameter, converter))
                 .orElseGet(() -> autoConverterFinder.get().findConverter(parameter));
     }

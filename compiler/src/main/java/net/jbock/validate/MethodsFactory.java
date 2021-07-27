@@ -2,11 +2,8 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import io.jbock.util.Eithers;
-import net.jbock.Parameters;
 import net.jbock.annotated.AnnotatedMethod;
-import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;

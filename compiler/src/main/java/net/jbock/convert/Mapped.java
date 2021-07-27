@@ -4,12 +4,12 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.EnumName;
 import net.jbock.convert.matching.MapExpr;
 import net.jbock.model.Multiplicity;
-import net.jbock.parameter.AbstractItem;
-import net.jbock.parameter.NamedOption;
-import net.jbock.parameter.PositionalParameter;
+import net.jbock.source.SourceMethod;
 import net.jbock.util.StringConverter;
 
 import javax.lang.model.type.PrimitiveType;
@@ -19,14 +19,14 @@ import java.util.function.Function;
 /**
  * An item with additional information about type conversion.
  *
- * @param <P> the type of item: either {@link NamedOption} or {@link PositionalParameter}
+ * @param <M> the type of item
  */
-public final class Mapped<P extends AbstractItem> {
+public final class Mapped<M extends AnnotatedMethod> {
 
     private final MapExpr mapExpr;
     private final Optional<CodeBlock> extractExpr;
     private final Multiplicity multiplicity;
-    private final P item;
+    private final SourceMethod<M> item;
     private final ParameterSpec asParameterSpec;
     private final FieldSpec asFieldSpec;
     private final boolean modeFlag;
@@ -37,7 +37,7 @@ public final class Mapped<P extends AbstractItem> {
             Multiplicity multiplicity,
             ParameterSpec asParameterSpec,
             FieldSpec asFieldSpec,
-            P item,
+            SourceMethod<M> item,
             boolean modeFlag) {
         this.asParameterSpec = asParameterSpec;
         this.mapExpr = mapExpr;
@@ -48,12 +48,12 @@ public final class Mapped<P extends AbstractItem> {
         this.modeFlag = modeFlag;
     }
 
-    public static <P extends AbstractItem> Mapped<P> create(
+    public static <M extends AnnotatedMethod> Mapped<M> create(
             MapExpr mapExpr,
             Optional<CodeBlock> extractExpr,
             Multiplicity multiplicity,
-            P parameter) {
-        TypeName fieldType = parameter.returnType();
+            SourceMethod<M> parameter) {
+        TypeName fieldType = TypeName.get(parameter.returnType());
         String fieldName = parameter.enumName().original();
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
@@ -61,7 +61,7 @@ public final class Mapped<P extends AbstractItem> {
                 asFieldSpec, parameter, false);
     }
 
-    public static Mapped<NamedOption> createFlag(NamedOption namedOption, PrimitiveType booleanType) {
+    public static Mapped<AnnotatedOption> createFlag(SourceMethod<AnnotatedOption> namedOption, PrimitiveType booleanType) {
         CodeBlock code = CodeBlock.of("$T.create($T.identity())", StringConverter.class, Function.class);
         TypeName fieldType = TypeName.BOOLEAN;
         String fieldName = namedOption.enumName().original();
@@ -111,12 +111,12 @@ public final class Mapped<P extends AbstractItem> {
         return modeFlag;
     }
 
-    public P item() {
+    public SourceMethod<M> item() {
         return item;
     }
 
     public String paramLabel() {
-        return item.sourceMethod().paramLabel();
+        return item.paramLabel();
     }
 
     public FieldSpec asField() {

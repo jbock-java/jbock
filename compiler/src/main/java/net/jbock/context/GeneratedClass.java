@@ -2,7 +2,6 @@ package net.jbock.context;
 
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.convert.Mapped;
-import net.jbock.parameter.AbstractItem;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -74,7 +73,7 @@ public final class GeneratedClass {
         }
         spec.addType(impl.define());
 
-        for (Mapped<? extends AbstractItem> item : allItems.items()) {
+        for (Mapped<?> item : allItems.items()) {
             if (item.mapExpr().multiline()) {
                 spec.addType(multilineConverter.define(item));
             }

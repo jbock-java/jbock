@@ -3,12 +3,13 @@ package net.jbock.convert.matching;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import io.jbock.util.Either;
+import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.convert.ConvertScope;
 import net.jbock.convert.Mapped;
 import net.jbock.convert.matcher.Matcher;
-import net.jbock.parameter.AbstractItem;
+import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
@@ -40,20 +41,20 @@ public class AutoConverterFinder extends MatchValidator {
         this.util = util;
     }
 
-    public <P extends AbstractItem> Either<String, Mapped<P>> findConverter(P parameter) {
+    public <M extends AnnotatedMethod> Either<String, Mapped<M>> findConverter(SourceMethod<M> parameter) {
         for (Matcher matcher : matchers) {
             Optional<Match> match = matcher.tryMatch(parameter);
             if (match.isPresent()) {
                 Match m = match.orElseThrow();
-                return validateMatch(parameter.sourceMethod(), m)
-                        .<Either<String, Mapped<P>>>map(Either::left)
+                return validateMatch(parameter, m)
+                        .<Either<String, Mapped<M>>>map(Either::left)
                         .orElseGet(() -> findConverter(m, parameter));
             }
         }
-        return left(noMatchError(parameter.sourceMethod().returnType()));
+        return left(noMatchError(parameter.returnType()));
     }
 
-    private <P extends AbstractItem> Either<String, Mapped<P>> findConverter(Match match, P parameter) {
+    private <M extends AnnotatedMethod> Either<String, Mapped<M>> findConverter(Match match, SourceMethod<M> parameter) {
         return autoConverter.findAutoConverter(match.baseType())
                 .flatMapLeft(this::enumConverter)
                 .map(mapExpr -> match.toConvertedParameter(mapExpr, parameter));

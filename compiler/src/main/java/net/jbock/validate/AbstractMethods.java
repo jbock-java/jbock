@@ -1,9 +1,5 @@
 package net.jbock.validate;
 
-import net.jbock.annotated.AnnotatedOption;
-import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.annotated.AnnotatedParameters;
-import net.jbock.source.SourceMethod;
 import net.jbock.source.SourceOption;
 import net.jbock.source.SourceParameter;
 import net.jbock.source.SourceParameters;

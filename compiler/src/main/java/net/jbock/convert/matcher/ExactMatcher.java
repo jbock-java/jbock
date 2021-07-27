@@ -3,7 +3,6 @@ package net.jbock.convert.matcher;
 import net.jbock.convert.ConvertScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.model.Multiplicity;
-import net.jbock.parameter.AbstractItem;
 import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
@@ -25,8 +24,8 @@ public class ExactMatcher implements Matcher {
     }
 
     @Override
-    public Optional<Match> tryMatch(AbstractItem parameter) {
-        Match match = Match.create(boxedReturnType(parameter.sourceMethod()), Multiplicity.REQUIRED);
+    public Optional<Match> tryMatch(SourceMethod<?> parameter) {
+        Match match = Match.create(boxedReturnType(parameter), Multiplicity.REQUIRED);
         return Optional.of(match);
     }
 

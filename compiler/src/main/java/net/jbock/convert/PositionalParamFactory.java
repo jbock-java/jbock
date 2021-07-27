@@ -2,8 +2,8 @@ package net.jbock.convert;
 
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.ValidationFailure;
-import net.jbock.parameter.PositionalParameter;
 import net.jbock.source.SourceMethod;
 import net.jbock.source.SourceParameters;
 
@@ -19,20 +19,16 @@ public class PositionalParamFactory {
         this.converterFinder = converterFinder;
     }
 
-    public Either<ValidationFailure, Mapped<PositionalParameter>> createPositionalParam(
+    public Either<ValidationFailure, Mapped<AnnotatedParameter>> createPositionalParam(
             SourceMethod<AnnotatedParameter> sourceMethod) {
-        int position = sourceMethod.annotatedMethod().index();
-        PositionalParameter positionalParameter = new PositionalParameter(sourceMethod, position);
-        return Either.<String, PositionalParameter>right(positionalParameter)
+        return Either.<String, SourceMethod<AnnotatedParameter>>right(sourceMethod)
                 .flatMap(converterFinder::findConverter)
                 .mapLeft(sourceMethod::fail);
     }
 
-    public Either<ValidationFailure, Mapped<PositionalParameter>> createRepeatablePositionalParam(
+    public Either<ValidationFailure, Mapped<AnnotatedParameters>> createRepeatablePositionalParam(
             SourceParameters sourceMethod) {
-        int position = sourceMethod.index();
-        PositionalParameter positionalParameter = new PositionalParameter(sourceMethod, position);
-        return Either.<String, PositionalParameter>right(positionalParameter)
+        return Either.<String, SourceMethod<AnnotatedParameters>>right(sourceMethod)
                 .flatMap(converterFinder::findConverter)
                 .mapLeft(sourceMethod::fail);
     }

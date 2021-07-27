@@ -3,14 +3,15 @@ package net.jbock.convert.matching;
 import com.squareup.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import net.jbock.Converter;
+import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.Util;
 import net.jbock.convert.ConvertScope;
 import net.jbock.convert.Mapped;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.convert.reference.StringConverterType;
-import net.jbock.parameter.AbstractItem;
 import net.jbock.processor.SourceElement;
+import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -47,8 +48,8 @@ public class ConverterValidator extends MatchValidator {
         this.types = types;
     }
 
-    public <P extends AbstractItem> Either<String, Mapped<P>> validate(
-            P parameter,
+    public <M extends AnnotatedMethod> Either<String, Mapped<M>> validate(
+            SourceMethod<M> parameter,
             TypeElement converter) {
         return util.commonTypeChecks(converter)
                 .or(() -> checkNotAbstract(converter))
@@ -59,9 +60,9 @@ public class ConverterValidator extends MatchValidator {
                 .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
     }
 
-    private <P extends AbstractItem> Either<String, Mapped<P>> tryAllMatchers(
+    private <M extends AnnotatedMethod> Either<String, Mapped<M>> tryAllMatchers(
             StringConverterType functionType,
-            P parameter,
+            SourceMethod<M> parameter,
             TypeElement converter) {
         List<Match> matches = new ArrayList<>();
         for (Matcher matcher : matchers) {
@@ -70,7 +71,7 @@ public class ConverterValidator extends MatchValidator {
             match = match.filter(m -> isValidMatch(m, functionType));
             if (match.isPresent()) {
                 Match m = match.orElseThrow();
-                return validateMatch(parameter.sourceMethod(), m)
+                return validateMatch(parameter, m)
                         .<Either<String, CodeBlock>>map(Either::left)
                         .orElseGet(() -> Either.right(getMapExpr(functionType, converter)))
                         .map(code -> new MapExpr(code, m.baseType(), false))
@@ -80,7 +81,7 @@ public class ConverterValidator extends MatchValidator {
         TypeMirror typeForErrorMessage = matches.stream()
                 .max(Comparator.comparing(Match::multiplicity))
                 .map(Match::baseType)
-                .orElse(parameter.sourceMethod().returnType());
+                .orElse(parameter.returnType());
         return left(noMatchError(typeForErrorMessage));
     }
 

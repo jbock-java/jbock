@@ -4,8 +4,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapped;
-import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -75,9 +75,9 @@ public class StatefulParser {
 
     private MethodSpec privateConstructor() {
         CodeBlock.Builder code = CodeBlock.builder();
-        for (Mapped<NamedOption> namedOption : namedOptions.options()) {
+        for (Mapped<AnnotatedOption> namedOption : namedOptions.options()) {
             String enumConstant = namedOption.enumName().enumConstant();
-            for (String dashedName : namedOption.item().names()) {
+            for (String dashedName : namedOption.item().annotatedMethod().names()) {
                 code.addStatement("$N.put($S, $T.$L)",
                         commonFields.optionNames(), dashedName, sourceElement.optionEnumType(),
                         enumConstant);
@@ -91,7 +91,7 @@ public class StatefulParser {
                 .build();
     }
 
-    private ClassName optionParserType(Mapped<NamedOption> param) {
+    private ClassName optionParserType(Mapped<AnnotatedOption> param) {
         if (param.isRepeatable()) {
             return generatedTypes.repeatableOptionParserType();
         }

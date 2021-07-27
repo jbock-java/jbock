@@ -3,9 +3,10 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.annotated.AnnotatedOption;
+import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapped;
-import net.jbock.parameter.NamedOption;
-import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ExConvert;
 import net.jbock.util.ExMissingItem;
@@ -52,15 +53,15 @@ public class BuildMethod extends CachedMethod {
     MethodSpec define() {
         CodeBlock constructorArguments = getConstructorArguments();
         MethodSpec.Builder spec = MethodSpec.methodBuilder("build");
-        List<Mapped<NamedOption>> options = namedOptions.options();
+        List<Mapped<AnnotatedOption>> options = namedOptions.options();
         for (int i = 0; i < options.size(); i++) {
-            Mapped<NamedOption> c = options.get(i);
+            Mapped<AnnotatedOption> c = options.get(i);
             ParameterSpec p = c.asParam();
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionOption(c, i));
         }
-        List<Mapped<PositionalParameter>> regular = positionalParameters.regular();
+        List<Mapped<AnnotatedParameter>> regular = positionalParameters.regular();
         for (int i = 0, regularSize = regular.size(); i < regularSize; i++) {
-            Mapped<PositionalParameter> c = regular.get(i);
+            Mapped<AnnotatedParameter> c = regular.get(i);
             ParameterSpec p = c.asParam();
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionRegularParameter(c, i));
         }
@@ -86,10 +87,10 @@ public class BuildMethod extends CachedMethod {
 
     private CodeBlock getConstructorArguments() {
         List<CodeBlock> code = new ArrayList<>();
-        for (Mapped<NamedOption> c : namedOptions.options()) {
+        for (Mapped<AnnotatedOption> c : namedOptions.options()) {
             code.add(CodeBlock.of("$N", c.asParam()));
         }
-        for (Mapped<PositionalParameter> c : positionalParameters.regular()) {
+        for (Mapped<AnnotatedParameter> c : positionalParameters.regular()) {
             code.add(CodeBlock.of("$N", c.asParam()));
         }
         positionalParameters.repeatable().stream()
@@ -98,7 +99,7 @@ public class BuildMethod extends CachedMethod {
         return contextUtil.joinByComma(code);
     }
 
-    private CodeBlock convertExpressionOption(Mapped<NamedOption> c, int i) {
+    private CodeBlock convertExpressionOption(Mapped<AnnotatedOption> c, int i) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("this.$N.get($T.$N).stream()", commonFields.optionParsers(),
                 sourceElement.optionEnumType(), c.enumName().enumConstant()));
@@ -111,10 +112,10 @@ public class BuildMethod extends CachedMethod {
         return contextUtil.joinByNewline(code);
     }
 
-    private CodeBlock convertExpressionRegularParameter(Mapped<PositionalParameter> c, int i) {
+    private CodeBlock convertExpressionRegularParameter(Mapped<AnnotatedParameter> c, int i) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$T.ofNullable(this.$N[$L])", OPTIONAL, commonFields.params(),
-                c.item().index()));
+                c.item().annotatedMethod().index()));
         code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
                 .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
         code.addAll(tailExpressionParameter(c, i));
@@ -122,7 +123,7 @@ public class BuildMethod extends CachedMethod {
         return contextUtil.joinByNewline(code);
     }
 
-    private CodeBlock convertExpressionRepeatableParameter(Mapped<PositionalParameter> c) {
+    private CodeBlock convertExpressionRepeatableParameter(Mapped<AnnotatedParameters> c) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
         code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
@@ -132,7 +133,7 @@ public class BuildMethod extends CachedMethod {
         return contextUtil.joinByNewline(code);
     }
 
-    private List<CodeBlock> tailExpressionOption(Mapped<NamedOption> c, int i) {
+    private List<CodeBlock> tailExpressionOption(Mapped<AnnotatedOption> c, int i) {
         if (c.isFlag()) {
             return List.of(CodeBlock.of(".findAny().isPresent()"));
         }
@@ -157,7 +158,7 @@ public class BuildMethod extends CachedMethod {
         }
     }
 
-    private List<CodeBlock> tailExpressionParameter(Mapped<PositionalParameter> c, int i) {
+    private List<CodeBlock> tailExpressionParameter(Mapped<AnnotatedParameter> c, int i) {
         switch (c.multiplicity()) {
             case REQUIRED:
                 return List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",

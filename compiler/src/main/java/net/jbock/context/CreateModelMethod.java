@@ -3,13 +3,12 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapped;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Multiplicity;
 import net.jbock.model.Option;
 import net.jbock.model.Parameter;
-import net.jbock.parameter.NamedOption;
-import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ParseRequest;
 
@@ -57,10 +56,10 @@ public class CreateModelMethod extends CachedMethod {
         if (namedOptions.unixClusteringSupported()) {
             code.add(CodeBlock.of(".withUnixClustering($L)", true));
         }
-        for (Mapped<NamedOption> c : namedOptions.options()) {
+        for (Mapped<AnnotatedOption> c : namedOptions.options()) {
             code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
         }
-        for (Mapped<PositionalParameter> c : positionalParameters.parameters()) {
+        for (Mapped<?> c : positionalParameters.parameters()) {
             code.add(CodeBlock.of(".addParameter($L)", parameterBlock(c)));
         }
         code.add(CodeBlock.of(".build()"));
@@ -72,9 +71,9 @@ public class CreateModelMethod extends CachedMethod {
                 .build();
     }
 
-    private CodeBlock optionBlock(Mapped<NamedOption> c) {
+    private CodeBlock optionBlock(Mapped<AnnotatedOption> c) {
         List<CodeBlock> names = new ArrayList<>();
-        for (String name : c.item().names()) {
+        for (String name : c.item().annotatedMethod().names()) {
             names.add(CodeBlock.of("$S", name));
         }
         List<CodeBlock> code = new ArrayList<>();
@@ -94,7 +93,7 @@ public class CreateModelMethod extends CachedMethod {
         return contextUtil.joinByNewline(code);
     }
 
-    private CodeBlock parameterBlock(Mapped<PositionalParameter> c) {
+    private CodeBlock parameterBlock(Mapped<?> c) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$T.builder()", Parameter.class));
         code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
