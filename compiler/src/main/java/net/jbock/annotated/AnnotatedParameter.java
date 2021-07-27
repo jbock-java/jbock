@@ -3,11 +3,11 @@ package net.jbock.annotated;
 import net.jbock.Parameter;
 import net.jbock.common.Descriptions;
 import net.jbock.common.EnumName;
-import net.jbock.method.ParameterAnnotation;
 import net.jbock.source.SourceMethod;
 import net.jbock.source.SourceParameter;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,8 +15,11 @@ public final class AnnotatedParameter extends AnnotatedMethod {
 
     private final Parameter parameter;
 
-    AnnotatedParameter(ExecutableElement method, Parameter parameter) {
-        super(method);
+    AnnotatedParameter(
+            ExecutableElement method,
+            Parameter parameter,
+            List<Modifier> accessModifiers) {
+        super(method, accessModifiers);
         this.parameter = parameter;
     }
 
@@ -52,8 +55,7 @@ public final class AnnotatedParameter extends AnnotatedMethod {
 
     @Override
     public SourceMethod<?> sourceMethod(EnumName enumName, int numberOfParameters) {
-        ParameterAnnotation annotation = new ParameterAnnotation(this);
-        return new SourceParameter(annotation, enumName);
+        return new SourceParameter(this, enumName);
     }
 
     public int index() {

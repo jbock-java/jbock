@@ -8,27 +8,36 @@ import net.jbock.common.EnumName;
 import net.jbock.source.SourceMethod;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.stream.Collectors.toList;
+import static net.jbock.common.Constants.ACCESS_MODIFIERS;
+
 public abstract class AnnotatedMethod {
 
     private final ExecutableElement method;
+    private final List<Modifier> accessModifiers;
 
-    AnnotatedMethod(ExecutableElement method) {
+    AnnotatedMethod(ExecutableElement method, List<Modifier> accessModifiers) {
         this.method = method;
+        this.accessModifiers = accessModifiers;
     }
 
     public static AnnotatedMethod create(ExecutableElement sourceMethod, Annotation annotation) {
+        List<Modifier> accessModifiers = sourceMethod.getModifiers().stream()
+                .filter(ACCESS_MODIFIERS::contains)
+                .collect(toList());
         if (annotation instanceof Option) {
-            return new AnnotatedOption(sourceMethod, (Option) annotation);
+            return new AnnotatedOption(sourceMethod, (Option) annotation, accessModifiers);
         }
         if (annotation instanceof Parameter) {
-            return new AnnotatedParameter(sourceMethod, (Parameter) annotation);
+            return new AnnotatedParameter(sourceMethod, (Parameter) annotation, accessModifiers);
         }
         if (annotation instanceof Parameters) {
-            return new AnnotatedParameters(sourceMethod, (Parameters) annotation);
+            return new AnnotatedParameters(sourceMethod, (Parameters) annotation, accessModifiers);
         }
         throw new AssertionError("expecting one of " +
                 Annotations.methodLevelAnnotations() +
@@ -56,4 +65,8 @@ public abstract class AnnotatedMethod {
     }
 
     public abstract SourceMethod<?> sourceMethod(EnumName enumName, int numberOfParameters);
+
+    public final List<Modifier> accessModifiers() {
+        return accessModifiers;
+    }
 }

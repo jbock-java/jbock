@@ -3,7 +3,6 @@ package net.jbock.source;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
-import net.jbock.method.MethodAnnotation;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -12,78 +11,63 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-import static java.util.stream.Collectors.toList;
-import static net.jbock.common.Constants.ACCESS_MODIFIERS;
-
 public abstract class SourceMethod<M extends AnnotatedMethod> {
 
-    private final MethodAnnotation<M> methodAnnotation;
     private final EnumName enumName;
-    private final List<Modifier> accessModifiers;
 
-    SourceMethod(
-            MethodAnnotation<M> methodAnnotation,
-            EnumName enumName) {
-        this.methodAnnotation = methodAnnotation;
+    SourceMethod(EnumName enumName) {
         this.enumName = enumName;
-        this.accessModifiers = methodAnnotation.method().getModifiers().stream()
-                .filter(ACCESS_MODIFIERS::contains)
-                .collect(toList());
     }
 
     public ExecutableElement method() {
-        return methodAnnotation.method();
+        return annotatedMethod().method();
     }
 
     public TypeMirror returnType() {
-        return methodAnnotation.method().getReturnType();
+        return annotatedMethod().method().getReturnType();
     }
 
     public boolean isPositional() {
-        return methodAnnotation.isPositional();
+        return annotatedMethod().isPositional();
     }
 
     public boolean isParameters() {
-        return methodAnnotation.isParameters();
+        return annotatedMethod().isParameters();
     }
 
     public boolean isParameter() {
-        return methodAnnotation.isParameter();
+        return annotatedMethod().isParameter();
     }
 
-    public OptionalInt index() {
-        return methodAnnotation.index();
-    }
+    public abstract OptionalInt index();
 
     public Optional<String> descriptionKey() {
-        return methodAnnotation.descriptionKey();
+        return annotatedMethod().descriptionKey();
     }
 
     public ValidationFailure fail(String message) {
-        return new ValidationFailure(message, methodAnnotation.method());
+        return new ValidationFailure(message, annotatedMethod().method());
     }
 
     public List<String> names() {
-        return methodAnnotation.names();
+        return annotatedMethod().names();
     }
 
     public List<String> description() {
-        return methodAnnotation.description();
+        return annotatedMethod().description();
     }
 
     public Optional<String> label() {
-        return methodAnnotation.label();
+        return annotatedMethod().label();
     }
 
     public List<Modifier> accessModifiers() {
-        return accessModifiers;
+        return annotatedMethod().accessModifiers();
     }
 
     public EnumName enumName() {
         return enumName;
     }
 
-    public MethodAnnotation<M> methodAnnotation() {
-        return methodAnnotation;
-    }
+    public abstract M annotatedMethod();
 }

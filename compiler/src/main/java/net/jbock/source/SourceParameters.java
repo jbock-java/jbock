@@ -2,13 +2,30 @@ package net.jbock.source;
 
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.EnumName;
-import net.jbock.method.ParametersAnnotation;
+
+import java.util.OptionalInt;
 
 public final class SourceParameters extends SourceMethod<AnnotatedParameters> {
 
+    private final int index;
+    private final AnnotatedParameters parameters;
+
     public SourceParameters(
-            ParametersAnnotation methodAnnotation,
+            int index,
+            AnnotatedParameters parameters,
             EnumName enumName) {
-        super(methodAnnotation, enumName);
+        super(enumName);
+        this.parameters = parameters;
+        this.index = index;
+    }
+
+    @Override
+    public OptionalInt index() {
+        return OptionalInt.of(index);
+    }
+
+    @Override
+    public AnnotatedParameters annotatedMethod() {
+        return parameters;
     }
 }

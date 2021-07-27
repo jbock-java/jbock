@@ -80,7 +80,7 @@ public class MethodsFactory {
                 .sorted(POSITION_COMPARATOR)
                 .collect(Collectors.toList());
         List<SourceMethod<AnnotatedOption>> options = methods.stream()
-                .flatMap(m -> (m.methodAnnotation().annotatedMethod() instanceof AnnotatedOption)
+                .flatMap(m -> (m.annotatedMethod() instanceof AnnotatedOption)
                         // is there a better way to filter, than this cast?
                         ? Stream.of((SourceMethod<AnnotatedOption>) m) :
                         Stream.empty())

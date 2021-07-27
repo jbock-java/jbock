@@ -3,11 +3,11 @@ package net.jbock.annotated;
 import net.jbock.Option;
 import net.jbock.common.Descriptions;
 import net.jbock.common.EnumName;
-import net.jbock.method.OptionAnnotation;
 import net.jbock.source.SourceMethod;
 import net.jbock.source.SourceOption;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,8 +15,11 @@ public final class AnnotatedOption extends AnnotatedMethod {
 
     private final Option option;
 
-    AnnotatedOption(ExecutableElement method, Option option) {
-        super(method);
+    AnnotatedOption(
+            ExecutableElement method,
+            Option option,
+            List<Modifier> accessModifiers) {
+        super(method, accessModifiers);
         this.option = option;
     }
 
@@ -52,7 +55,6 @@ public final class AnnotatedOption extends AnnotatedMethod {
 
     @Override
     public SourceMethod<?> sourceMethod(EnumName enumName, int numberOfParameters) {
-        OptionAnnotation annotation = new OptionAnnotation(this);
-        return new SourceOption(annotation, enumName);
+        return new SourceOption(this, enumName);
     }
 }
