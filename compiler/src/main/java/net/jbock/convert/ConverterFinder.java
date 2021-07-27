@@ -7,8 +7,6 @@ import net.jbock.convert.matching.ConverterValidator;
 import net.jbock.parameter.AbstractItem;
 
 import javax.inject.Inject;
-import javax.lang.model.element.TypeElement;
-import java.util.Optional;
 
 @ConvertScope
 public class ConverterFinder {

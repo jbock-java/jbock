@@ -7,7 +7,6 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.convert.ConvertModule;
 import net.jbock.convert.DaggerConvertComponent;
 import net.jbock.convert.Mapped;
-import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
 import net.jbock.source.SourceOption;
@@ -18,13 +17,16 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
 import static io.jbock.util.Eithers.toValidListAll;
+import static java.lang.Character.isWhitespace;
 import static net.jbock.common.Constants.concat;
 
 /**
@@ -75,19 +77,61 @@ public class CommandProcessor {
             List<SourceOption> options,
             List<Mapped<PositionalParameter>> positionalParameters) {
         return options.stream()
-                .map(sourceMethod -> DaggerConvertComponent.builder()
-                        .module(convertModule)
-                        .build()
-                        .namedOptionFactory().createNamedOption(sourceMethod))
+                .map(this::checkOptionNames)
                 .collect(toValidListAll())
                 .filter(this::validateUniqueOptionNames)
+                .flatMap(sourceOptions -> sourceOptions.stream()
+                        .map(sourceMethod -> DaggerConvertComponent.builder()
+                                .module(convertModule)
+                                .build()
+                                .namedOptionFactory().createNamedOption(sourceMethod))
+                        .collect(toValidListAll()))
                 .flatMap(namedOptions -> paramsFactory.create(positionalParameters, namedOptions));
     }
 
-    private Optional<List<ValidationFailure>> validateUniqueOptionNames(List<Mapped<NamedOption>> allOptions) {
+    private Either<ValidationFailure, SourceOption> checkOptionNames(SourceOption sourceMethod) {
+        if (sourceMethod.names().isEmpty()) {
+            return left(sourceMethod.fail("define at least one option name"));
+        }
+        for (String name : sourceMethod.names()) {
+            Optional<String> check = checkName(name);
+            if (check.isPresent()) {
+                return left(sourceMethod.fail(check.orElseThrow()));
+            }
+        }
+        return right(sourceMethod);
+    }
+
+    /* Left-Optional
+     */
+    private Optional<String> checkName(String name) {
+        if (Objects.toString(name, "").length() <= 1 || "--".equals(name)) {
+            return Optional.of("invalid name: " + name);
+        }
+        if (!name.startsWith("-")) {
+            return Optional.of("the name must start with a dash character: " + name);
+        }
+        if (name.startsWith("---")) {
+            return Optional.of("the name must start with one or two dashes, not three:" + name);
+        }
+        if (!name.startsWith("--") && name.length() > 2) {
+            return Optional.of("single-dash names must be single-character names: " + name);
+        }
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            if (isWhitespace(c)) {
+                return Optional.of("the name contains whitespace characters: " + name);
+            }
+            if (c == '=') {
+                return Optional.of("the name contains '=': " + name);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<List<ValidationFailure>> validateUniqueOptionNames(List<SourceOption> allOptions) {
         Set<String> allNames = new HashSet<>();
         return allOptions.stream()
-                .map(Mapped::item)
                 .flatMap(item -> item.names().stream()
                         .filter(name -> !allNames.add(name))
                         .map(name -> "duplicate option name: " + name)
