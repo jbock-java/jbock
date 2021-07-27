@@ -1,14 +1,13 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
-import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.ConvertModule;
 import net.jbock.convert.DaggerConvertComponent;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
-import net.jbock.source.SourceMethod;
+import net.jbock.source.SourceOption;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ import java.util.Set;
 import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
 import static io.jbock.util.Eithers.toValidListAll;
+import static net.jbock.common.Constants.concat;
 
 /**
  * This class is responsible for item validation.
@@ -56,12 +56,14 @@ public class CommandProcessor {
 
     private Either<List<ValidationFailure>, Items> createItems(AbstractMethods methods) {
         return createPositionalParams(methods)
-                .flatMap(positionalParameters -> createItems(
+                .flatMap(positionalParameters -> createRepeatablePositionalParams(methods)
+                        .map(repeatablePositionalParameters -> concat(positionalParameters, repeatablePositionalParameters)))
+                .flatMap((List<Mapped<PositionalParameter>> positionalParameters) -> createItems(
                         methods.namedOptions(), positionalParameters));
     }
 
     private Either<List<ValidationFailure>, Items> createItems(
-            List<SourceMethod<AnnotatedOption>> options,
+            List<SourceOption> options,
             List<Mapped<PositionalParameter>> positionalParameters) {
         return options.stream()
                 .map(sourceMethod -> DaggerConvertComponent.builder()
@@ -92,6 +94,19 @@ public class CommandProcessor {
                         .build()
                         .positionalParameterFactory()
                         .createPositionalParam(sourceMethod))
+                .collect(toValidListAll())
+                .filter(this::validatePositions)
+                .filter(this::checkNoRequiredAfterOptional);
+    }
+
+    private Either<List<ValidationFailure>, List<Mapped<PositionalParameter>>> createRepeatablePositionalParams(
+            AbstractMethods methods) {
+        return methods.repeatablePositionalParameters().stream()
+                .map(sourceMethod -> DaggerConvertComponent.builder()
+                        .module(convertModule)
+                        .build()
+                        .positionalParameterFactory()
+                        .createRepeatablePositionalParam(sourceMethod))
                 .collect(toValidListAll())
                 .filter(this::validatePositions)
                 .filter(this::checkNoRequiredAfterOptional);

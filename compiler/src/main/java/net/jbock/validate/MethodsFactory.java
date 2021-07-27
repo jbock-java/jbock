@@ -5,10 +5,15 @@ import io.jbock.util.Eithers;
 import net.jbock.Parameters;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.annotated.AnnotatedOption;
+import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
-import net.jbock.source.SourceMethod;
 import net.jbock.processor.SourceElement;
+import net.jbock.source.SourceMethod;
+import net.jbock.source.SourceOption;
+import net.jbock.source.SourceParameter;
+import net.jbock.source.SourceParameters;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
@@ -21,7 +26,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
@@ -30,8 +34,8 @@ import static io.jbock.util.Eithers.toOptionalList;
 public class MethodsFactory {
 
     // sort order that puts @Parameters last
-    private static final Comparator<SourceMethod<?>> POSITION_COMPARATOR =
-            Comparator.comparingInt(m -> m.index().orElse(Integer.MAX_VALUE));
+    private static final Comparator<SourceMethod<AnnotatedParameter>> POSITION_COMPARATOR =
+            Comparator.comparingInt(m -> m.annotatedMethod().index());
 
     private final SourceElement sourceElement;
     private final SourceMethodValidator sourceMethodValidator;
@@ -75,17 +79,20 @@ public class MethodsFactory {
     }
 
     private AbstractMethods createAbstractMethods(List<SourceMethod<?>> methods) {
-        List<SourceMethod<?>> params = methods.stream()
-                .filter(SourceMethod::isPositional)
+        List<SourceParameter> params = methods.stream()
+                .map(SourceMethod::asAnnotatedParameter)
+                .flatMap(Optional::stream)
                 .sorted(POSITION_COMPARATOR)
                 .collect(Collectors.toList());
-        List<SourceMethod<AnnotatedOption>> options = methods.stream()
-                .flatMap(m -> (m.annotatedMethod() instanceof AnnotatedOption)
-                        // is there a better way to filter, than this cast?
-                        ? Stream.of((SourceMethod<AnnotatedOption>) m) :
-                        Stream.empty())
+        List<SourceParameters> repeatableParams = methods.stream()
+                .map(SourceMethod::asAnnotatedParameters)
+                .flatMap(Optional::stream)
                 .collect(Collectors.toList());
-        return new AbstractMethods(params, options);
+        List<SourceOption> options = methods.stream()
+                .map(SourceMethod::asAnnotatedOption)
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
+        return new AbstractMethods(params, repeatableParams, options);
     }
 
     private List<ValidationFailure> validateAtLeastOneParameterInSuperCommand(

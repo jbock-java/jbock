@@ -27,10 +27,6 @@ public abstract class SourceMethod<M extends AnnotatedMethod> {
         return annotatedMethod().method().getReturnType();
     }
 
-    public boolean isPositional() {
-        return annotatedMethod().isPositional();
-    }
-
     public boolean isParameters() {
         return annotatedMethod().isParameters();
     }
@@ -70,4 +66,10 @@ public abstract class SourceMethod<M extends AnnotatedMethod> {
     }
 
     public abstract M annotatedMethod();
+
+    public abstract Optional<SourceOption> asAnnotatedOption();
+
+    public abstract Optional<SourceParameter> asAnnotatedParameter();
+
+    public abstract Optional<SourceParameters> asAnnotatedParameters();
 }
