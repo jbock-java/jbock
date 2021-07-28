@@ -1,4 +1,4 @@
-package net.jbock.convert;
+package net.jbock.annotated;
 
 import com.google.auto.common.AnnotationMirrors;
 import com.google.auto.common.MoreTypes;
@@ -6,7 +6,6 @@ import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 
-import javax.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.AnnotationValueVisitor;
@@ -20,8 +19,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 
-@ConvertScope
-public class AnnotationUtil {
+class AnnotationUtil {
 
     private static final String CONVERTER_ATTRIBUTE = "converter";
 
@@ -44,11 +42,7 @@ public class AnnotationUtil {
         }
     };
 
-    @Inject
-    AnnotationUtil() {
-    }
-
-    Optional<TypeElement> getConverter(ExecutableElement sourceMethod) {
+    Optional<TypeElement> getConverterAttribute(ExecutableElement sourceMethod) {
         return getAnnotationMirror(sourceMethod)
                 .map(AnnotationUtil::getAnnotationValue)
                 .flatMap(GET_TYPE::visit)

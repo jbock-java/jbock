@@ -8,6 +8,7 @@ import net.jbock.source.SourceOption;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -26,22 +27,24 @@ public final class AnnotatedOption extends AnnotatedMethod {
 
     private AnnotatedOption(
             ExecutableElement method,
+            Optional<TypeElement> converter,
             Option option,
             List<Modifier> accessModifiers,
             List<String> names) {
-        super(method, accessModifiers);
+        super(method, accessModifiers, converter);
         this.option = option;
         this.names = names;
     }
 
     static AnnotatedOption create(
             ExecutableElement method,
+            Optional<TypeElement> converter,
             Option option,
             List<Modifier> accessModifiers) {
         List<String> names = Arrays.stream(option.names())
                 .sorted(UNIX_NAMES_FIRST_COMPARATOR)
                 .collect(Collectors.toList());
-        return new AnnotatedOption(method, option, accessModifiers, names);
+        return new AnnotatedOption(method, converter, option, accessModifiers, names);
     }
 
     @Override

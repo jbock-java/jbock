@@ -8,26 +8,28 @@ import net.jbock.convert.matching.ConverterValidator;
 import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
+import javax.lang.model.util.Types;
+
+import static io.jbock.util.Either.right;
+import static javax.lang.model.type.TypeKind.BOOLEAN;
+import static net.jbock.convert.Mapped.createFlag;
 
 @ConvertScope
 public class ConverterFinder {
 
     private final Lazy<AutoConverterFinder> autoConverterFinder;
     private final Lazy<ConverterValidator> converterValidator;
-    private final AnnotationUtil annotationUtil;
 
     @Inject
     ConverterFinder(
             Lazy<AutoConverterFinder> autoConverterFinder,
-            Lazy<ConverterValidator> converterValidator,
-            AnnotationUtil annotationUtil) {
+            Lazy<ConverterValidator> converterValidator) {
         this.autoConverterFinder = autoConverterFinder;
         this.converterValidator = converterValidator;
-        this.annotationUtil = annotationUtil;
     }
 
     public <M extends AnnotatedMethod> Either<String, Mapped<M>> findConverter(SourceMethod<M> parameter) {
-        return annotationUtil.getConverter(parameter.method())
+        return parameter.annotatedMethod().converter()
                 .map(converter -> converterValidator.get().validate(parameter, converter))
                 .orElseGet(() -> autoConverterFinder.get().findConverter(parameter));
     }

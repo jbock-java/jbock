@@ -19,20 +19,17 @@ public class NamedOptionFactory {
 
     private final ConverterFinder converterFinder;
     private final Types types;
-    private final AnnotationUtil annotationUtil;
 
     @Inject
     NamedOptionFactory(
             ConverterFinder converterFinder,
-            Types types,
-            AnnotationUtil annotationUtil) {
+            Types types) {
         this.converterFinder = converterFinder;
         this.types = types;
-        this.annotationUtil = annotationUtil;
     }
 
     public Either<ValidationFailure, Mapped<AnnotatedOption>> createNamedOption(SourceOption sourceMethod) {
-        Optional<TypeElement> converter = annotationUtil.getConverter(sourceMethod.method());
+        Optional<TypeElement> converter = sourceMethod.annotatedMethod().converter();
         if (converter.isEmpty() && sourceMethod.returnType().getKind() == BOOLEAN) {
             return right(createFlag(sourceMethod, types.getPrimitiveType(BOOLEAN)));
         }

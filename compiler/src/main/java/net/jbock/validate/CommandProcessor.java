@@ -7,6 +7,7 @@ import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.ConvertModule;
+import net.jbock.convert.ConverterFinder;
 import net.jbock.convert.DaggerConvertComponent;
 import net.jbock.convert.Mapped;
 import net.jbock.processor.SourceElement;
@@ -40,17 +41,20 @@ public class CommandProcessor {
     private final MethodsFactory methodsFactory;
     private final ConvertModule convertModule;
     private final SourceElement sourceElement;
+    private final ConverterFinder converterFinder;
 
     @Inject
     CommandProcessor(
             ParamsFactory paramsFactory,
             MethodsFactory methodsFactory,
             ConvertModule convertModule,
-            SourceElement sourceElement) {
+            SourceElement sourceElement,
+            ConverterFinder converterFinder) {
         this.paramsFactory = paramsFactory;
         this.methodsFactory = methodsFactory;
         this.convertModule = convertModule;
         this.sourceElement = sourceElement;
+        this.converterFinder = converterFinder;
     }
 
     /**
@@ -164,7 +168,7 @@ public class CommandProcessor {
                                 .module(convertModule)
                                 .build()
                                 .positionalParameterFactory()
-                                .createRepeatablePositionalParam(sourceMethod))
+                                .createPositionalParam(sourceMethod))
                         .collect(toValidListAll()));
     }
 

@@ -8,6 +8,7 @@ import net.jbock.source.SourceParameters;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,9 +18,10 @@ public final class AnnotatedParameters extends AnnotatedMethod {
 
     AnnotatedParameters(
             ExecutableElement method,
+            Optional<TypeElement> converter,
             Parameters parameters,
             List<Modifier> accessModifiers) {
-        super(method, accessModifiers);
+        super(method, accessModifiers, converter);
         this.parameters = parameters;
     }
 
