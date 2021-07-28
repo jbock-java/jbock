@@ -35,13 +35,13 @@ public class MethodsFactory {
             Comparator.comparingInt(m -> m.annotatedMethod().index());
 
     private final SourceElement sourceElement;
-    private final SourceMethodValidator sourceMethodValidator;
+    private final AnnotatedMethodValidator sourceMethodValidator;
     private final AbstractMethodsFinder abstractMethodsFinder;
 
     @Inject
     MethodsFactory(
             SourceElement sourceElement,
-            SourceMethodValidator sourceMethodValidator,
+            AnnotatedMethodValidator sourceMethodValidator,
             AbstractMethodsFinder abstractMethodsFinder) {
         this.sourceElement = sourceElement;
         this.sourceMethodValidator = sourceMethodValidator;
@@ -105,7 +105,7 @@ public class MethodsFactory {
     private Either<List<ValidationFailure>, List<AnnotatedMethod>> validateParameterMethods(
             List<ExecutableElement> sourceMethods) {
         return sourceMethods.stream()
-                .map(sourceMethodValidator::validateSourceMethod)
+                .map(sourceMethodValidator::validateAnnotatedMethod)
                 .collect(Eithers.toValidListAll());
     }
 

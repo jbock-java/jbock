@@ -21,16 +21,16 @@ import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
 @ValidateScope
-public class SourceMethodValidator {
+public class AnnotatedMethodValidator {
 
     private final Util util;
 
     @Inject
-    SourceMethodValidator(Util util) {
+    AnnotatedMethodValidator(Util util) {
         this.util = util;
     }
 
-    Either<ValidationFailure, AnnotatedMethod> validateSourceMethod(ExecutableElement sourceMethod) {
+    Either<ValidationFailure, AnnotatedMethod> validateAnnotatedMethod(ExecutableElement sourceMethod) {
         List<Class<? extends Annotation>> annotations = methodLevelAnnotations();
         return util.checkExactlyOneAnnotation(sourceMethod, annotations)
                 .filter(a -> checkAccessibleType(sourceMethod.getReturnType()))
