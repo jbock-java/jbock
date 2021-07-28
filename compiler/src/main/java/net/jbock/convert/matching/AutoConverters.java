@@ -5,8 +5,8 @@ import com.squareup.javapoet.ParameterSpec;
 import io.jbock.util.Either;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
-import net.jbock.convert.ConvertScope;
 import net.jbock.util.StringConverter;
+import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
@@ -27,7 +27,7 @@ import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 import static net.jbock.common.Constants.STRING;
 
-@ConvertScope
+@ValidateScope
 public class AutoConverters {
 
     private static final String NEW = "new";

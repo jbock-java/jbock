@@ -5,13 +5,13 @@ import io.jbock.util.Either;
 import net.jbock.Converter;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.Util;
-import net.jbock.convert.ConvertScope;
 import net.jbock.convert.Mapped;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.convert.reference.StringConverterType;
 import net.jbock.processor.SourceElement;
 import net.jbock.source.SourceMethod;
+import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -25,7 +25,7 @@ import java.util.Optional;
 import static io.jbock.util.Either.left;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
-@ConvertScope
+@ValidateScope
 public class ConverterValidator extends MatchValidator {
 
     private final List<Matcher> matchers;

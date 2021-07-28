@@ -3,12 +3,11 @@ package net.jbock.validate;
 import io.jbock.util.Either;
 import io.jbock.util.Eithers;
 import net.jbock.Parameters;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.ConvertModule;
 import net.jbock.convert.ConverterFinder;
-import net.jbock.convert.DaggerConvertComponent;
 import net.jbock.convert.Mapped;
 import net.jbock.processor.SourceElement;
 import net.jbock.source.SourceOption;
@@ -16,6 +15,8 @@ import net.jbock.source.SourceParameter;
 import net.jbock.source.SourceParameters;
 
 import javax.inject.Inject;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +30,8 @@ import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
 import static io.jbock.util.Eithers.toValidListAll;
 import static java.lang.Character.isWhitespace;
+import static javax.lang.model.type.TypeKind.BOOLEAN;
+import static net.jbock.convert.Mapped.createFlag;
 
 /**
  * This class is responsible for item validation.
@@ -39,22 +42,22 @@ public class CommandProcessor {
 
     private final ParamsFactory paramsFactory;
     private final MethodsFactory methodsFactory;
-    private final ConvertModule convertModule;
     private final SourceElement sourceElement;
     private final ConverterFinder converterFinder;
+    private final Types types;
 
     @Inject
     CommandProcessor(
             ParamsFactory paramsFactory,
             MethodsFactory methodsFactory,
-            ConvertModule convertModule,
             SourceElement sourceElement,
-            ConverterFinder converterFinder) {
+            ConverterFinder converterFinder,
+            Types types) {
         this.paramsFactory = paramsFactory;
         this.methodsFactory = methodsFactory;
-        this.convertModule = convertModule;
         this.sourceElement = sourceElement;
         this.converterFinder = converterFinder;
+        this.types = types;
     }
 
     /**
@@ -87,13 +90,25 @@ public class CommandProcessor {
                 .collect(toValidListAll())
                 .filter(this::validateUniqueOptionNames)
                 .flatMap(sourceOptions -> sourceOptions.stream()
-                        .map(sourceMethod -> DaggerConvertComponent.builder()
-                                .module(convertModule)
-                                .build()
-                                .namedOptionFactory().createNamedOption(sourceMethod))
+                        .map(sourceMethod -> checkFlag(sourceMethod)
+                                .<Either<ValidationFailure, Mapped<AnnotatedOption>>>map(Either::right)
+                                .orElseGet(() -> converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail)))
                         .collect(toValidListAll()))
                 .flatMap(namedOptions -> paramsFactory.create(
                         positionalParameters, repeatablePositionalParameters, namedOptions));
+    }
+
+    /* Right-Optional
+     */
+    private Optional<Mapped<AnnotatedOption>> checkFlag(SourceOption sourceMethod) {
+        if (sourceMethod.annotatedMethod().converter().isPresent()) {
+            return Optional.empty();
+        }
+        if (sourceMethod.returnType().getKind() != BOOLEAN) {
+            return Optional.empty();
+        }
+        PrimitiveType primitiveBoolean = types.getPrimitiveType(BOOLEAN);
+        return Optional.of(createFlag(sourceMethod, primitiveBoolean));
     }
 
     private Either<ValidationFailure, SourceOption> checkOptionNames(SourceOption sourceMethod) {
@@ -136,6 +151,8 @@ public class CommandProcessor {
         return Optional.empty();
     }
 
+    /* Left-Optional
+     */
     private Optional<List<ValidationFailure>> validateUniqueOptionNames(List<SourceOption> allOptions) {
         Set<String> allNames = new HashSet<>();
         return allOptions.stream()
@@ -150,11 +167,7 @@ public class CommandProcessor {
             AbstractMethods methods) {
         return validatePositions(methods.positionalParameters())
                 .flatMap(positionalParameters -> positionalParameters.stream()
-                        .map(sourceMethod -> DaggerConvertComponent.builder()
-                                .module(convertModule)
-                                .build()
-                                .positionalParameterFactory()
-                                .createPositionalParam(sourceMethod))
+                        .map(sourceMethod -> converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail))
                         .collect(toValidListAll()))
                 .filter(this::checkNoRequiredAfterOptional);
     }
@@ -164,11 +177,7 @@ public class CommandProcessor {
         return validateDuplicateParametersAnnotation(methods.repeatablePositionalParameters())
                 .filter(this::validateNoRepeatableParameterInSuperCommand)
                 .flatMap(repeatablePositionalParameters -> repeatablePositionalParameters.stream()
-                        .map(sourceMethod -> DaggerConvertComponent.builder()
-                                .module(convertModule)
-                                .build()
-                                .positionalParameterFactory()
-                                .createPositionalParam(sourceMethod))
+                        .map(sourceMethod -> converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail))
                         .collect(toValidListAll()));
     }
 
@@ -195,6 +204,8 @@ public class CommandProcessor {
                 .orElseGet(() -> right(repeatablePositionalParameters));
     }
 
+    /* Left-Optional
+     */
     private Optional<List<ValidationFailure>> validateNoRepeatableParameterInSuperCommand(List<SourceParameters> repeatablePositionalParameters) {
         if (!sourceElement.isSuperCommand()) {
             return Optional.empty();
@@ -205,6 +216,8 @@ public class CommandProcessor {
                 .collect(Eithers.toOptionalList());
     }
 
+    /* Left-Optional
+     */
     private Optional<List<ValidationFailure>> checkNoRequiredAfterOptional(
             List<Mapped<AnnotatedParameter>> allPositionalParameters) {
         return allPositionalParameters.stream()

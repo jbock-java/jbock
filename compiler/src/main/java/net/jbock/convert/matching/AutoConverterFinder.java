@@ -6,10 +6,10 @@ import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
-import net.jbock.convert.ConvertScope;
 import net.jbock.convert.Mapped;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.source.SourceMethod;
+import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import static io.jbock.util.Either.left;
 import static net.jbock.common.Constants.STRING;
 
-@ConvertScope
+@ValidateScope
 public class AutoConverterFinder extends MatchValidator {
 
     private final AutoConverters autoConverter;

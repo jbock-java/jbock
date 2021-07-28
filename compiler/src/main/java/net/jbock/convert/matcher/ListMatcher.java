@@ -2,16 +2,16 @@ package net.jbock.convert.matcher;
 
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
-import net.jbock.convert.ConvertScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.model.Multiplicity;
 import net.jbock.source.SourceMethod;
+import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 
-@ConvertScope
+@ValidateScope
 public class ListMatcher implements Matcher {
 
     private final SafeElements elements;

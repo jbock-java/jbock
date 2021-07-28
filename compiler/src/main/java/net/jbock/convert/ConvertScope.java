@@ -18,7 +18,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * @see ContextModule
  */
-@Scope
-@Retention(RUNTIME)
 public @interface ConvertScope {
 }
