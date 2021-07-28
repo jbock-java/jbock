@@ -16,10 +16,6 @@ public abstract class SourceMethod<M extends AnnotatedMethod> {
         this.enumName = enumName;
     }
 
-    public final ExecutableElement method() {
-        return annotatedMethod().method();
-    }
-
     public final TypeMirror returnType() {
         return annotatedMethod().method().getReturnType();
     }
@@ -49,6 +45,4 @@ public abstract class SourceMethod<M extends AnnotatedMethod> {
     public abstract Optional<SourceParameters> asAnnotatedParameters();
 
     public abstract String paramLabel();
-
-    public abstract boolean hasUnixName();
 }

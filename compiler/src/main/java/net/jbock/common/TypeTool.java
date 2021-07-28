@@ -14,44 +14,39 @@ import java.util.Optional;
 
 public class TypeTool {
 
-    public static final TypeVisitor<Optional<DeclaredType>, Void> AS_DECLARED =
-            new SimpleTypeVisitor9<>() {
-                @Override
-                public Optional<DeclaredType> visitDeclared(DeclaredType declaredType, Void nothing) {
-                    return Optional.of(declaredType);
-                }
+    private abstract static class OptionalTypeVisitor<E> extends SimpleTypeVisitor9<Optional<E>, Void> {
 
-                @Override
-                protected Optional<DeclaredType> defaultAction(TypeMirror e, Void nothing) {
-                    return Optional.empty();
-                }
-            };
+        @Override
+        protected final Optional<E> defaultAction(TypeMirror e, Void nothing) {
+            return Optional.empty();
+        }
+    }
 
-    public static final TypeVisitor<Optional<PrimitiveType>, Void> AS_PRIMITIVE =
-            new SimpleTypeVisitor9<>() {
-                @Override
-                public Optional<PrimitiveType> visitPrimitive(PrimitiveType primitiveType, Void nothing) {
-                    return Optional.of(primitiveType);
-                }
+    public static final TypeVisitor<Optional<DeclaredType>, Void> AS_DECLARED = new OptionalTypeVisitor<>() {
+        @Override
+        public Optional<DeclaredType> visitDeclared(DeclaredType declaredType, Void nothing) {
+            return Optional.of(declaredType);
+        }
+    };
 
-                @Override
-                protected Optional<PrimitiveType> defaultAction(TypeMirror e, Void nothing) {
-                    return Optional.empty();
-                }
-            };
+    public static final TypeVisitor<Optional<PrimitiveType>, Void> AS_PRIMITIVE = new OptionalTypeVisitor<>() {
+        @Override
+        public Optional<PrimitiveType> visitPrimitive(PrimitiveType primitiveType, Void nothing) {
+            return Optional.of(primitiveType);
+        }
+    };
 
-    public static final ElementVisitor<Optional<TypeElement>, Void> AS_TYPE_ELEMENT =
-            new SimpleElementVisitor9<>() {
-                @Override
-                public Optional<TypeElement> visitType(TypeElement typeElement, Void nothing) {
-                    return Optional.of(typeElement);
-                }
+    public static final ElementVisitor<Optional<TypeElement>, Void> AS_TYPE_ELEMENT = new SimpleElementVisitor9<>() {
+        @Override
+        public Optional<TypeElement> visitType(TypeElement typeElement, Void nothing) {
+            return Optional.of(typeElement);
+        }
 
-                @Override
-                protected Optional<TypeElement> defaultAction(Element e, Void nothing) {
-                    return Optional.empty();
-                }
-            };
+        @Override
+        protected Optional<TypeElement> defaultAction(Element e, Void nothing) {
+            return Optional.empty();
+        }
+    };
 
     private final Types types;
 

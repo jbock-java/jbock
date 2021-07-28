@@ -157,7 +157,7 @@ public class BuildMethod extends CachedMethod {
                         CodeBlock.of(".collect($T.toValidList())", EITHERS),
                         orElseThrowConverterError(ItemType.OPTION, i));
             default:
-                throw new IllegalArgumentException("unexpected multiplicity: " + c.multiplicity());
+                throw new AssertionError("all cases covered: " + c.multiplicity());
         }
     }
 

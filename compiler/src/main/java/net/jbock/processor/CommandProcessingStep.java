@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSetMultimap;
 import io.jbock.util.Either;
 import net.jbock.Command;
 import net.jbock.common.Annotations;
-import net.jbock.common.OperationMode;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
@@ -44,7 +43,6 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     private final Messager messager;
     private final Util util;
     private final Filer filer;
-    private final OperationMode operationMode;
     private final Types types;
     private final SafeElements elements;
     private final SourceFileGenerator sourceFileGenerator;
@@ -55,7 +53,6 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             Messager messager,
             Util util,
             Filer filer,
-            OperationMode operationMode,
             Types types,
             SafeElements elements,
             SourceFileGenerator sourceFileGenerator) {
@@ -63,7 +60,6 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         this.messager = messager;
         this.util = util;
         this.filer = filer;
-        this.operationMode = operationMode;
         this.types = types;
         this.elements = elements;
         this.sourceFileGenerator = sourceFileGenerator;
@@ -94,7 +90,6 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
                 .util(util)
                 .filer(filer)
                 .messager(messager)
-                .operationMode(operationMode)
                 .module(new ValidateModule(types, elements))
                 .create();
         component.processor().generate()

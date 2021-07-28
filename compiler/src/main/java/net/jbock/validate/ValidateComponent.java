@@ -2,7 +2,6 @@ package net.jbock.validate;
 
 import dagger.BindsInstance;
 import dagger.Component;
-import net.jbock.common.OperationMode;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.processor.SourceElement;
@@ -33,9 +32,6 @@ public interface ValidateComponent {
 
         @BindsInstance
         Builder messager(Messager messager);
-
-        @BindsInstance
-        Builder operationMode(OperationMode operationMode);
 
         Builder module(ValidateModule module);
 

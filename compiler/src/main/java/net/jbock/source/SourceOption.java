@@ -67,9 +67,4 @@ public final class SourceOption extends SourceMethod<AnnotatedOption> {
     public String paramLabel() {
         return paramLabel;
     }
-
-    @Override
-    public boolean hasUnixName() {
-        return hasUnixName;
-    }
 }

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
+import static net.jbock.common.Annotations.methodLevelAnnotations;
 import static net.jbock.common.Constants.ACCESS_MODIFIERS;
 
 public abstract class AnnotatedMethod {
@@ -50,9 +51,8 @@ public abstract class AnnotatedMethod {
         if (annotation instanceof Parameters) {
             return new AnnotatedParameters(sourceMethod, converter, (Parameters) annotation, accessModifiers);
         }
-        throw new AssertionError("expecting one of " +
-                Annotations.methodLevelAnnotations() +
-                " but found: " + annotation.getClass());
+        throw new AssertionError("expecting one of " + methodLevelAnnotations()
+                + " but found: " + annotation.getClass());
     }
 
     public final ExecutableElement method() {

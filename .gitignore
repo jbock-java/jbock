@@ -5,3 +5,6 @@ build
 /dependency-reduced-pom.xml
 .gradle
 /gradlew.bat
+/core/out
+/compiler/out
+/examples/out

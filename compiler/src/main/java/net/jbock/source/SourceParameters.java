@@ -55,9 +55,4 @@ public final class SourceParameters extends SourceMethod<AnnotatedParameters> {
     public String paramLabel() {
         return paramLabel;
     }
-
-    @Override
-    public boolean hasUnixName() {
-        return false;
-    }
 }

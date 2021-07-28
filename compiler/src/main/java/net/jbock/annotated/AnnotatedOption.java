@@ -24,16 +24,20 @@ public final class AnnotatedOption extends AnnotatedMethod {
 
     private final Option option;
     private final List<String> names;
+    private final boolean hasUnixName;
+
 
     private AnnotatedOption(
             ExecutableElement method,
             Optional<TypeElement> converter,
             Option option,
             List<Modifier> accessModifiers,
-            List<String> names) {
+            List<String> names,
+            boolean hasUnixName) {
         super(method, accessModifiers, converter);
         this.option = option;
         this.names = names;
+        this.hasUnixName = hasUnixName;
     }
 
     static AnnotatedOption create(
@@ -44,7 +48,8 @@ public final class AnnotatedOption extends AnnotatedMethod {
         List<String> names = Arrays.stream(option.names())
                 .sorted(UNIX_NAMES_FIRST_COMPARATOR)
                 .collect(Collectors.toList());
-        return new AnnotatedOption(method, converter, option, accessModifiers, names);
+        boolean hasUnixName = names.stream().anyMatch(s -> s.length() == 2);
+        return new AnnotatedOption(method, converter, option, accessModifiers, names, hasUnixName);
     }
 
     @Override
@@ -69,6 +74,10 @@ public final class AnnotatedOption extends AnnotatedMethod {
 
     public List<String> names() {
         return names;
+    }
+
+    public boolean hasUnixName() {
+        return hasUnixName;
     }
 
     @Override

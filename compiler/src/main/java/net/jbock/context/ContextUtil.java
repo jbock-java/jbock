@@ -8,6 +8,7 @@ import net.jbock.util.ExToken;
 import javax.inject.Inject;
 import java.util.List;
 
+@ContextScope
 public class ContextUtil {
 
     @Inject

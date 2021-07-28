@@ -29,7 +29,8 @@ class AnnotationUtil {
             Option.class)
             .map(Class::getCanonicalName).collect(toSet());
 
-    private static final AnnotationValueVisitor<Optional<TypeMirror>, Void> GET_TYPE = new SimpleAnnotationValueVisitor9<>() {
+    // visible for testing
+    static final AnnotationValueVisitor<Optional<TypeMirror>, Void> GET_TYPE = new SimpleAnnotationValueVisitor9<>() {
 
         @Override
         public Optional<TypeMirror> visitType(TypeMirror mirror, Void nothing) {
@@ -67,6 +68,6 @@ class AnnotationUtil {
     }
 
     private static boolean isNotVoid(TypeElement typeElement) {
-        return !Void.class.getCanonicalName().equals(typeElement.getQualifiedName().toString());
+        return !"java.lang.Void".equals(typeElement.getQualifiedName().toString());
     }
 }

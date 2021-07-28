@@ -3,7 +3,6 @@ package net.jbock.processor;
 import com.google.common.base.Preconditions;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.common.OperationMode;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -18,16 +17,11 @@ public class SourceFileGenerator {
 
     private final Filer filer;
     private final Messager messager;
-    private final OperationMode operationMode;
 
     @Inject
-    SourceFileGenerator(
-            Filer filer,
-            Messager messager,
-            OperationMode operationMode) {
+    SourceFileGenerator(Filer filer, Messager messager) {
         this.filer = filer;
         this.messager = messager;
-        this.operationMode = operationMode;
     }
 
     void write(SourceElement sourceElement, TypeSpec typeSpec) {
@@ -38,11 +32,6 @@ public class SourceFileGenerator {
                 .build();
         try {
             javaFile.writeTo(filer);
-            if (operationMode.isTest()) {
-                System.out.println("Printing generated code in OperationMode TEST");
-                System.out.flush();
-                javaFile.writeTo(System.err);
-            }
         } catch (IOException e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));

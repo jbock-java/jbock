@@ -107,7 +107,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("single-dash names must be single-character names: -xx");
+                .withErrorContaining("single-dash name must be single-character: -xx");
     }
 
     @Test
@@ -313,7 +313,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("name contains whitespace characters");
+                .withErrorContaining("invalid name: whitespace characters: --a ");
     }
 
     @Test
@@ -384,6 +384,22 @@ class ProcessorTest {
     }
 
     @Test
+    void clustering() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Option(names = \"-a\")",
+                "  abstract boolean a();",
+                "  @Option(names = \"-b\")",
+                "  abstract boolean b();",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .compilesWithoutError();
+    }
+
+    @Test
     void reallyWeirdMethodName() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
@@ -426,6 +442,51 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .compilesWithoutError();
+    }
+
+    @Test
+    void badNameNoDash() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Option(names = \"ouch\")",
+                "  abstract boolean f();",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("invalid name: must start with a dash character: ouch");
+    }
+
+    @Test
+    void badNameThreeDashes() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Option(names = \"---ouch\")",
+                "  abstract boolean f();",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("invalid name: cannot start with three dashes: ---ouch");
+    }
+
+    @Test
+    void badNameEqualsSign() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Option(names = \"--e=mc2\")",
+                "  abstract boolean f();",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("invalid name: invalid character '=': --e=mc2");
     }
 
     @Test
@@ -629,7 +690,6 @@ class ProcessorTest {
                 .withErrorContaining("inaccessible type: List<Foo>");
     }
 
-
     @Test
     void invalidNesting() {
         JavaFileObject javaFile = fromSource(
@@ -645,6 +705,22 @@ class ProcessorTest {
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("class cannot be private");
+    }
+
+    @Test
+    void invalidNestingInaccessible() {
+        JavaFileObject javaFile = fromSource(
+                "class Arguments {",
+                "  class Foo {}",
+                "  @Command",
+                "  abstract static class Bar {",
+                "    @Option(names = \"--x\") abstract Foo a();",
+                "  }",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("inaccessible type: Foo");
     }
 
     static JavaFileObject fromSource(String... lines) {
