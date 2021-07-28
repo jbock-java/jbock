@@ -168,8 +168,7 @@ public class StatefulParseMethod {
 
     private CodeBlock.Builder initVariables() {
         CodeBlock.Builder code = CodeBlock.builder();
-        if ((!positionalParameters.isEmpty() || !repeatablePositionalParameters.isEmpty()) &&
-                !(!repeatablePositionalParameters.isEmpty() && positionalParameters.isEmpty())) {
+        if (!positionalParameters.isEmpty()) {
             code.addStatement("$T $N = $L", position.type, position, 0);
         }
         if (!sourceElement.isSuperCommand()) {
