@@ -2,8 +2,6 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedOption;
-import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.ConverterFinder;
 import net.jbock.convert.Mapped;
@@ -38,19 +36,16 @@ public class SourceOptionValidator {
         this.types = types;
     }
 
-    Either<List<ValidationFailure>, Items> wrapOptions(
-            List<SourceOption> options,
-            List<Mapped<AnnotatedParameter>> positionalParameters,
-            List<Mapped<AnnotatedParameters>> repeatablePositionalParameters) {
-        return options.stream()
+    Either<List<ValidationFailure>, ContextBuilder> wrapOptions(
+            ContextBuilder.Step3 step) {
+        return step.namedOptions().stream()
                 .map(this::checkOptionNames)
                 .collect(toValidListAll())
                 .filter(this::validateUniqueOptionNames)
                 .flatMap(sourceOptions -> sourceOptions.stream()
                         .map(this::wrapOption)
                         .collect(toValidListAll()))
-                .map(namedOptions -> new Items(
-                        positionalParameters, repeatablePositionalParameters, namedOptions));
+                .map(step::accept);
     }
 
     private Either<ValidationFailure, Mapped<AnnotatedOption>> wrapOption(SourceOption sourceMethod) {

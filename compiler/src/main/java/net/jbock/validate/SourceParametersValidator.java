@@ -2,10 +2,8 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import net.jbock.Parameters;
-import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.ConverterFinder;
-import net.jbock.convert.Mapped;
 import net.jbock.processor.SourceElement;
 import net.jbock.source.SourceParameters;
 
@@ -31,13 +29,14 @@ public class SourceParametersValidator {
         this.sourceElement = sourceElement;
     }
 
-    Either<List<ValidationFailure>, List<Mapped<AnnotatedParameters>>> wrapRepeatablePositionalParams(
-            AbstractMethods methods) {
+    Either<List<ValidationFailure>, ContextBuilder.Step3> wrapRepeatablePositionalParams(
+            ContextBuilder.Step2 methods) {
         return validateDuplicateParametersAnnotation(methods.repeatablePositionalParameters())
                 .filter(this::validateNoRepeatableParameterInSuperCommand)
                 .flatMap(repeatablePositionalParameters -> repeatablePositionalParameters.stream()
                         .map(sourceMethod -> converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail))
-                        .collect(toValidListAll()));
+                        .collect(toValidListAll()))
+                .map(methods::accept);
     }
 
     private Either<List<ValidationFailure>, List<SourceParameters>> validateDuplicateParametersAnnotation(List<SourceParameters> repeatablePositionalParameters) {

@@ -27,13 +27,14 @@ public class SourceParameterValidator {
         this.converterFinder = converterFinder;
     }
 
-    Either<List<ValidationFailure>, List<Mapped<AnnotatedParameter>>> wrapPositionalParams(
-            AbstractMethods methods) {
-        return validatePositions(methods.positionalParameters())
+    Either<List<ValidationFailure>, ContextBuilder.Step2> wrapPositionalParams(
+            ContextBuilder.Step1 step) {
+        return validatePositions(step.positionalParameters())
                 .flatMap(positionalParameters -> positionalParameters.stream()
                         .map(sourceMethod -> converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail))
                         .collect(toValidListAll()))
-                .filter(this::checkNoRequiredAfterOptional);
+                .filter(this::checkNoRequiredAfterOptional)
+                .map(step::accept);
     }
 
     private Either<List<ValidationFailure>, List<SourceParameter>> validatePositions(List<SourceParameter> allPositionalParameters) {

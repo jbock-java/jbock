@@ -17,7 +17,7 @@ import static net.jbock.common.Constants.concat;
 
 /**
  * This class is responsible for item validation.
- * If validation succeeds, an {@link Items} instance is created.
+ * If validation succeeds, a {@link ContextBuilder} instance is created.
  */
 @ValidateScope
 public class CommandProcessor {
@@ -42,24 +42,13 @@ public class CommandProcessor {
         this.parametersValidator = parametersValidator;
     }
 
-    /**
-     * Performs validation and creates an instance of {@link Items},
-     * if validation succeeds.
-     *
-     * @return either a list of validation failures, or an instance of
-     *         {@code Items}
-     */
-    public Either<List<ValidationFailure>, Items> generate() {
+    public Either<List<ValidationFailure>, ContextBuilder> generate() {
         return methodsFactory.findAbstractMethods()
                 .filter(this::checkDuplicateDescriptionKeys)
-                .flatMap(this::createItems);
-    }
-
-    private Either<List<ValidationFailure>, Items> createItems(AbstractMethods methods) {
-        return parameterValidator.wrapPositionalParams(methods)
-                .flatMap(positionalParameters -> parametersValidator.wrapRepeatablePositionalParams(methods)
-                        .flatMap(repeatablePositionalParameters ->
-                                optionValidator.wrapOptions(methods.namedOptions(), positionalParameters, repeatablePositionalParameters)));
+                .map(ContextBuilder::builder)
+                .flatMap(parameterValidator::wrapPositionalParams)
+                .flatMap(parametersValidator::wrapRepeatablePositionalParams)
+                .flatMap(optionValidator::wrapOptions);
     }
 
     /* Left-Optional
