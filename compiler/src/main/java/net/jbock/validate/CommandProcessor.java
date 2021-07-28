@@ -73,31 +73,31 @@ public class CommandProcessor {
     }
 
     private Either<List<ValidationFailure>, Items> createItems(AbstractMethods methods) {
-        return createPositionalParams(methods)
-                .flatMap(positionalParameters -> createRepeatablePositionalParams(methods)
-                        .flatMap(repeatablePositionalParameters -> createItems(
-                                methods.namedOptions(),
-                                positionalParameters,
-                                repeatablePositionalParameters)));
+        return wrapPositionalParams(methods)
+                .flatMap(positionalParameters -> wrapRepeatablePositionalParams(methods)
+                        .flatMap(repeatablePositionalParameters -> methods.namedOptions().stream()
+                                .map(this::checkOptionNames)
+                                .collect(toValidListAll())
+                                .filter(this::validateUniqueOptionNames)
+                                .flatMap(this::wrapOptions)
+                                .map(namedOptions -> new Items(
+                                        positionalParameters, repeatablePositionalParameters, namedOptions))));
     }
 
-    private Either<List<ValidationFailure>, Items> createItems(
-            List<SourceOption> options,
-            List<Mapped<AnnotatedParameter>> positionalParameters,
-            List<Mapped<AnnotatedParameters>> repeatablePositionalParameters) {
-        return options.stream()
-                .map(this::checkOptionNames)
-                .collect(toValidListAll())
-                .filter(this::validateUniqueOptionNames)
-                .flatMap(sourceOptions -> sourceOptions.stream()
-                        .map(sourceMethod -> checkFlag(sourceMethod)
-                                .<Either<ValidationFailure, Mapped<AnnotatedOption>>>map(Either::right)
-                                .orElseGet(() -> converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail)))
-                        .collect(toValidListAll()))
-                .map(namedOptions -> new Items(
-                        positionalParameters, repeatablePositionalParameters, namedOptions));
+    private Either<List<ValidationFailure>, List<Mapped<AnnotatedOption>>> wrapOptions(List<SourceOption> sourceOptions) {
+        return sourceOptions.stream()
+                .map(this::wrapOption)
+                .collect(toValidListAll());
     }
 
+    private Either<ValidationFailure, Mapped<AnnotatedOption>> wrapOption(SourceOption sourceMethod) {
+        return checkFlag(sourceMethod)
+                .<Either<ValidationFailure, Mapped<AnnotatedOption>>>map(Either::right)
+                .orElseGet(() -> converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail));
+    }
+
+    /* Left-Optional
+     */
     private Optional<List<ValidationFailure>> checkDuplicateDescriptionKeys(AbstractMethods methods) {
         List<ValidationFailure> failures = new ArrayList<>();
         List<SourceMethod<?>> items =
@@ -181,7 +181,7 @@ public class CommandProcessor {
                 .collect(toOptionalList());
     }
 
-    private Either<List<ValidationFailure>, List<Mapped<AnnotatedParameter>>> createPositionalParams(
+    private Either<List<ValidationFailure>, List<Mapped<AnnotatedParameter>>> wrapPositionalParams(
             AbstractMethods methods) {
         return validatePositions(methods.positionalParameters())
                 .flatMap(positionalParameters -> positionalParameters.stream()
@@ -190,7 +190,7 @@ public class CommandProcessor {
                 .filter(this::checkNoRequiredAfterOptional);
     }
 
-    private Either<List<ValidationFailure>, List<Mapped<AnnotatedParameters>>> createRepeatablePositionalParams(
+    private Either<List<ValidationFailure>, List<Mapped<AnnotatedParameters>>> wrapRepeatablePositionalParams(
             AbstractMethods methods) {
         return validateDuplicateParametersAnnotation(methods.repeatablePositionalParameters())
                 .filter(this::validateNoRepeatableParameterInSuperCommand)
