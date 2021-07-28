@@ -10,6 +10,7 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.convert.ConverterFinder;
 import net.jbock.convert.Mapped;
 import net.jbock.processor.SourceElement;
+import net.jbock.source.SourceMethod;
 import net.jbock.source.SourceOption;
 import net.jbock.source.SourceParameter;
 import net.jbock.source.SourceParameters;
@@ -31,6 +32,7 @@ import static io.jbock.util.Eithers.toOptionalList;
 import static io.jbock.util.Eithers.toValidListAll;
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
+import static net.jbock.common.Constants.concat;
 import static net.jbock.convert.Mapped.createFlag;
 
 /**
@@ -40,7 +42,6 @@ import static net.jbock.convert.Mapped.createFlag;
 @ValidateScope
 public class CommandProcessor {
 
-    private final ParamsFactory paramsFactory;
     private final MethodsFactory methodsFactory;
     private final SourceElement sourceElement;
     private final ConverterFinder converterFinder;
@@ -48,12 +49,10 @@ public class CommandProcessor {
 
     @Inject
     CommandProcessor(
-            ParamsFactory paramsFactory,
             MethodsFactory methodsFactory,
             SourceElement sourceElement,
             ConverterFinder converterFinder,
             Types types) {
-        this.paramsFactory = paramsFactory;
         this.methodsFactory = methodsFactory;
         this.sourceElement = sourceElement;
         this.converterFinder = converterFinder;
@@ -69,6 +68,7 @@ public class CommandProcessor {
      */
     public Either<List<ValidationFailure>, Items> generate() {
         return methodsFactory.findAbstractMethods()
+                .filter(this::checkDuplicateDescriptionKeys)
                 .flatMap(this::createItems);
     }
 
@@ -94,9 +94,27 @@ public class CommandProcessor {
                                 .<Either<ValidationFailure, Mapped<AnnotatedOption>>>map(Either::right)
                                 .orElseGet(() -> converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail)))
                         .collect(toValidListAll()))
-                .flatMap(namedOptions -> paramsFactory.create(
+                .map(namedOptions -> new Items(
                         positionalParameters, repeatablePositionalParameters, namedOptions));
     }
+
+    private Optional<List<ValidationFailure>> checkDuplicateDescriptionKeys(AbstractMethods methods) {
+        List<ValidationFailure> failures = new ArrayList<>();
+        List<SourceMethod<?>> items =
+                concat(concat(methods.namedOptions(), methods.positionalParameters()), methods.repeatablePositionalParameters());
+        Set<String> keys = new HashSet<>();
+        sourceElement.descriptionKey().ifPresent(keys::add);
+        for (SourceMethod<?> m : items) {
+            m.descriptionKey().ifPresent(key -> {
+                if (!keys.add(key)) {
+                    String message = "duplicate description key: " + key;
+                    failures.add(m.fail(message));
+                }
+            });
+        }
+        return optionalList(failures);
+    }
+
 
     /* Right-Optional
      */
