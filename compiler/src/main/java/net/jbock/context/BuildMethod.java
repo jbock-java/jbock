@@ -28,7 +28,8 @@ public class BuildMethod extends CachedMethod {
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
     private final NamedOptions namedOptions;
-    private final PositionalParameters positionalParameters;
+    private final List<Mapped<AnnotatedParameter>> positionalParameters;
+    private final List<Mapped<AnnotatedParameters>> repeatablePositionalParameters;
     private final CommonFields commonFields;
     private final ContextUtil contextUtil;
     private final ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
@@ -38,13 +39,15 @@ public class BuildMethod extends CachedMethod {
             GeneratedTypes generatedTypes,
             SourceElement sourceElement,
             NamedOptions namedOptions,
-            PositionalParameters positionalParameters,
+            List<Mapped<AnnotatedParameter>> positionalParameters,
+            List<Mapped<AnnotatedParameters>> repeatablePositionalParameters,
             CommonFields commonFields,
             ContextUtil contextUtil) {
         this.generatedTypes = generatedTypes;
         this.sourceElement = sourceElement;
         this.namedOptions = namedOptions;
         this.positionalParameters = positionalParameters;
+        this.repeatablePositionalParameters = repeatablePositionalParameters;
         this.commonFields = commonFields;
         this.contextUtil = contextUtil;
     }
@@ -59,13 +62,13 @@ public class BuildMethod extends CachedMethod {
             ParameterSpec p = c.asParam();
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionOption(c, i));
         }
-        List<Mapped<AnnotatedParameter>> regular = positionalParameters.regular();
+        List<Mapped<AnnotatedParameter>> regular = positionalParameters;
         for (int i = 0, regularSize = regular.size(); i < regularSize; i++) {
             Mapped<AnnotatedParameter> c = regular.get(i);
             ParameterSpec p = c.asParam();
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionRegularParameter(c, i));
         }
-        positionalParameters.repeatable().forEach(c -> {
+        repeatablePositionalParameters.forEach(c -> {
             ParameterSpec p = c.asParam();
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionRepeatableParameter(c));
         });
@@ -90,10 +93,10 @@ public class BuildMethod extends CachedMethod {
         for (Mapped<AnnotatedOption> c : namedOptions.options()) {
             code.add(CodeBlock.of("$N", c.asParam()));
         }
-        for (Mapped<AnnotatedParameter> c : positionalParameters.regular()) {
+        for (Mapped<AnnotatedParameter> c : positionalParameters) {
             code.add(CodeBlock.of("$N", c.asParam()));
         }
-        positionalParameters.repeatable().stream()
+        repeatablePositionalParameters.stream()
                 .map(c -> CodeBlock.of("$N", c.asParam()))
                 .forEach(code::add);
         return contextUtil.joinByComma(code);
@@ -129,7 +132,7 @@ public class BuildMethod extends CachedMethod {
         code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
                 .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
         code.add(CodeBlock.of(".collect($T.toValidList())", EITHERS));
-        code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.regular().size()));
+        code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.size()));
         return contextUtil.joinByNewline(code);
     }
 

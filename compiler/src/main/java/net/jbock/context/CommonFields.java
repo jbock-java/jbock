@@ -4,6 +4,7 @@ import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.convert.Mapped;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.HelpRequested;
@@ -53,7 +54,7 @@ class CommonFields {
     static CommonFields create(
             GeneratedTypes generatedTypes,
             SourceElement sourceElement,
-            PositionalParameters positionalParameters,
+            List<Mapped<AnnotatedParameter>> positionalParameters,
             NamedOptions namedOptions) {
         ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
         CodeBlock.Builder code = CodeBlock.builder();
@@ -71,7 +72,7 @@ class CommonFields {
                 .initializer("new $T<>($L)", HashMap.class, mapSize)
                 .build();
         FieldSpec paramParsers = FieldSpec.builder(ArrayTypeName.of(STRING), "params")
-                .initializer("new $T[$L]", STRING, positionalParameters.regular().size())
+                .initializer("new $T[$L]", STRING, positionalParameters.size())
                 .build();
         FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionEnumType(), generatedTypes.optionParserType()), "optionParsers")
                 .initializer("new $T<>($T.class)", EnumMap.class, sourceElement.optionEnumType())

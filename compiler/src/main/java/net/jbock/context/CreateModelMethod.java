@@ -4,6 +4,8 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.annotated.AnnotatedOption;
+import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapped;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Multiplicity;
@@ -18,6 +20,7 @@ import java.util.List;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static javax.lang.model.element.Modifier.PRIVATE;
+import static net.jbock.common.Constants.concat;
 
 @ContextScope
 public class CreateModelMethod extends CachedMethod {
@@ -25,18 +28,21 @@ public class CreateModelMethod extends CachedMethod {
     private final ContextUtil contextUtil;
     private final SourceElement sourceElement;
     private final NamedOptions namedOptions;
-    private final PositionalParameters positionalParameters;
+    private final List<Mapped<AnnotatedParameter>> positionalParameters;
+    private final List<Mapped<AnnotatedParameters>> repeatablePositionalParameters;
 
     @Inject
     CreateModelMethod(
             ContextUtil contextUtil,
             SourceElement sourceElement,
             NamedOptions namedOptions,
-            PositionalParameters positionalParameters) {
+            List<Mapped<AnnotatedParameter>> positionalParameters,
+            List<Mapped<AnnotatedParameters>> repeatablePositionalParameters) {
         this.contextUtil = contextUtil;
         this.sourceElement = sourceElement;
         this.namedOptions = namedOptions;
         this.positionalParameters = positionalParameters;
+        this.repeatablePositionalParameters = repeatablePositionalParameters;
     }
 
     @Override
@@ -59,7 +65,7 @@ public class CreateModelMethod extends CachedMethod {
         for (Mapped<AnnotatedOption> c : namedOptions.options()) {
             code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
         }
-        for (Mapped<?> c : positionalParameters.parameters()) {
+        for (Mapped<?> c : concat(positionalParameters, repeatablePositionalParameters)) {
             code.add(CodeBlock.of(".addParameter($L)", parameterBlock(c)));
         }
         code.add(CodeBlock.of(".build()"));

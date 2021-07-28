@@ -6,6 +6,7 @@ import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
+import java.util.List;
 
 /**
  * Generates the *Parser class.
@@ -20,11 +21,11 @@ public final class GeneratedClass {
     private final StatefulParser statefulParser;
     private final SourceElement sourceElement;
     private final NamedOptions namedOptions;
-    private final AllItems allItems;
     private final ParseOrExitMethod parseOrExitMethod;
     private final GeneratedAnnotation generatedAnnotation;
     private final CreateModelMethod createModelMethod;
     private final MultilineConverter multilineConverter;
+    private final List<Mapped<?>> everything;
 
     @Inject
     GeneratedClass(
@@ -35,11 +36,11 @@ public final class GeneratedClass {
             OptionEnum optionEnum,
             StatefulParser statefulParser,
             NamedOptions namedOptions,
-            AllItems allItems,
             ParseOrExitMethod parseOrExitMethod,
             GeneratedAnnotation generatedAnnotation,
             CreateModelMethod createModelMethod,
-            MultilineConverter multilineConverter) {
+            MultilineConverter multilineConverter,
+            List<Mapped<?>> everything) {
         this.parseMethod = parseMethod;
         this.sourceElement = sourceElement;
         this.impl = impl;
@@ -47,11 +48,11 @@ public final class GeneratedClass {
         this.optionEnum = optionEnum;
         this.statefulParser = statefulParser;
         this.namedOptions = namedOptions;
-        this.allItems = allItems;
         this.parseOrExitMethod = parseOrExitMethod;
         this.generatedAnnotation = generatedAnnotation;
         this.createModelMethod = createModelMethod;
         this.multilineConverter = multilineConverter;
+        this.everything = everything;
     }
 
     /**
@@ -73,7 +74,7 @@ public final class GeneratedClass {
         }
         spec.addType(impl.define());
 
-        for (Mapped<?> item : allItems.items()) {
+        for (Mapped<?> item : everything) {
             if (item.mapExpr().multiline()) {
                 spec.addType(multilineConverter.define(item));
             }

@@ -3,11 +3,15 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
+import net.jbock.convert.Mapped;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
 import javax.inject.Inject;
+import java.util.List;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
@@ -25,7 +29,8 @@ public class StatefulParseMethod {
     private final ParameterSpec position = builder(INT, "position").build();
     private final ParameterSpec endOfOptionParsing = builder(BOOLEAN, "endOfOptionParsing").build();
     private final NamedOptions namedOptions;
-    private final PositionalParameters positionalParameters;
+    private final List<Mapped<AnnotatedParameter>> positionalParameters;
+    private final List<Mapped<AnnotatedParameters>> repeatablePositionalParameters;
     private final CommonFields commonFields;
     private final SourceElement sourceElement;
     private final TryParseOptionMethod tryParseOptionMethod;
@@ -34,13 +39,15 @@ public class StatefulParseMethod {
     StatefulParseMethod(
             GeneratedTypes generatedTypes,
             NamedOptions namedOptions,
-            PositionalParameters positionalParameters,
+            List<Mapped<AnnotatedParameter>> positionalParameters,
+            List<Mapped<AnnotatedParameters>> repeatablePositionalParameters,
             CommonFields commonFields,
             SourceElement sourceElement,
             TryParseOptionMethod tryParseOptionMethod) {
         this.generatedTypes = generatedTypes;
         this.namedOptions = namedOptions;
         this.positionalParameters = positionalParameters;
+        this.repeatablePositionalParameters = repeatablePositionalParameters;
         this.commonFields = commonFields;
         this.sourceElement = sourceElement;
         this.tryParseOptionMethod = tryParseOptionMethod;
@@ -67,7 +74,7 @@ public class StatefulParseMethod {
         code.beginControlFlow("while ($N.hasNext())", it)
                 .addStatement("$T $N = $N.next()", STRING, token, it);
 
-        code.beginControlFlow("if ($N == $L)", position, positionalParameters.size())
+        code.beginControlFlow("if ($N == $L)", position, (positionalParameters.size() + repeatablePositionalParameters.size()))
                 .addStatement("$N.add($N)", commonFields.rest(), token)
                 .addStatement("continue")
                 .endControlFlow();
@@ -109,20 +116,20 @@ public class StatefulParseMethod {
                 .addStatement(throwInvalidOptionStatement(ErrTokenType.INVALID_OPTION))
                 .unindent();
 
-        if (positionalParameters.isEmpty()) {
+        if (positionalParameters.isEmpty() && repeatablePositionalParameters.isEmpty()) {
             code.addStatement(throwInvalidOptionStatement(ErrTokenType.EXCESS_PARAM));
-        } else if (!positionalParameters.anyRepeatable()) {
+        } else if (repeatablePositionalParameters.isEmpty()) {
             code.add("if ($N == $L)\n", position, positionalParameters.size()).indent()
                     .addStatement(throwInvalidOptionStatement(ErrTokenType.EXCESS_PARAM))
                     .unindent();
         }
 
-        if (!positionalParameters.isEmpty()) {
-            if (positionalParameters.anyRepeatable()) {
-                if (positionalParameters.size() == 1) {
+        if (!positionalParameters.isEmpty() || !repeatablePositionalParameters.isEmpty()) {
+            if (!repeatablePositionalParameters.isEmpty()) {
+                if ((positionalParameters.size() + repeatablePositionalParameters.size()) == 1) {
                     code.addStatement("$N.add($N)", commonFields.rest(), token);
                 } else {
-                    code.add("if ($N < $L)\n", position, positionalParameters.size() - 1).indent()
+                    code.add("if ($N < $L)\n", position, (positionalParameters.size() + repeatablePositionalParameters.size()) - 1).indent()
                             .addStatement("$N[$N++] = $N", commonFields.params(),
                                     position, token)
                             .unindent()
@@ -161,7 +168,8 @@ public class StatefulParseMethod {
 
     private CodeBlock.Builder initVariables() {
         CodeBlock.Builder code = CodeBlock.builder();
-        if (!positionalParameters.isEmpty() && !(positionalParameters.anyRepeatable() && positionalParameters.size() == 1)) {
+        if ((!positionalParameters.isEmpty() || !repeatablePositionalParameters.isEmpty()) &&
+                !(!repeatablePositionalParameters.isEmpty() && positionalParameters.isEmpty())) {
             code.addStatement("$T $N = $L", position.type, position, 0);
         }
         if (!sourceElement.isSuperCommand()) {

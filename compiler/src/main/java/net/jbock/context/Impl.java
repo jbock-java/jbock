@@ -9,6 +9,7 @@ import net.jbock.processor.SourceElement;
 import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -22,15 +23,17 @@ import static javax.lang.model.element.Modifier.STATIC;
 @ContextScope
 public class Impl {
 
-    private final AllItems context;
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
+    private final List<Mapped<?>> everything;
 
     @Inject
-    Impl(AllItems context, GeneratedTypes generatedTypes, SourceElement sourceElement) {
-        this.context = context;
+    Impl(GeneratedTypes generatedTypes,
+         SourceElement sourceElement,
+         List<Mapped<?>> everything) {
         this.generatedTypes = generatedTypes;
         this.sourceElement = sourceElement;
+        this.everything = everything;
     }
 
     TypeSpec define() {
@@ -40,12 +43,12 @@ public class Impl {
         } else {
             spec.superclass(sourceElement.typeName());
         }
-        for (Mapped<?> c : context.items()) {
+        for (Mapped<?> c : everything) {
             spec.addField(c.asField());
         }
         return spec.addModifiers(PRIVATE, STATIC)
                 .addMethod(implConstructor())
-                .addMethods(context.items().stream()
+                .addMethods(everything.stream()
                         .map(this::parameterMethodOverride)
                         .collect(Collectors.toUnmodifiableList()))
                 .build();
@@ -62,7 +65,7 @@ public class Impl {
 
     private MethodSpec implConstructor() {
         MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-        for (Mapped<?> c : context.items()) {
+        for (Mapped<?> c : everything) {
             FieldSpec field = c.asField();
             spec.addStatement("this.$N = $N", field, c.asParam());
             spec.addParameter(c.asParam());

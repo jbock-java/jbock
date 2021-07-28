@@ -5,10 +5,14 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.annotated.AnnotatedOption;
+import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapped;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
+
+import java.util.List;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -23,7 +27,8 @@ public class StatefulParser {
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
     private final NamedOptions namedOptions;
-    private final PositionalParameters positionalParameters;
+    private final List<Mapped<AnnotatedParameter>> positionalParameters;
+    private final List<Mapped<AnnotatedParameters>> repeatablePositionalParameters;
     private final CommonFields commonFields;
     private final BuildMethod buildMethod;
     private final TryParseOptionMethod tryParseOptionMethod;
@@ -35,7 +40,8 @@ public class StatefulParser {
             StatefulParseMethod statefulParseMethod,
             SourceElement sourceElement,
             NamedOptions namedOptions,
-            PositionalParameters positionalParameters,
+            List<Mapped<AnnotatedParameter>> positionalParameters,
+            List<Mapped<AnnotatedParameters>> repeatablePositionalParameters,
             CommonFields commonFields,
             BuildMethod buildMethod,
             TryParseOptionMethod tryParseOptionMethod,
@@ -45,6 +51,7 @@ public class StatefulParser {
         this.sourceElement = sourceElement;
         this.namedOptions = namedOptions;
         this.positionalParameters = positionalParameters;
+        this.repeatablePositionalParameters = repeatablePositionalParameters;
         this.commonFields = commonFields;
         this.buildMethod = buildMethod;
         this.tryParseOptionMethod = tryParseOptionMethod;
@@ -63,10 +70,10 @@ public class StatefulParser {
             spec.addField(commonFields.optionNames());
             spec.addField(commonFields.optionParsers());
         }
-        if (!positionalParameters.regular().isEmpty()) {
+        if (!positionalParameters.isEmpty()) {
             spec.addField(commonFields.params());
         }
-        if (positionalParameters.anyRepeatable() || sourceElement.isSuperCommand()) {
+        if (!repeatablePositionalParameters.isEmpty() || sourceElement.isSuperCommand()) {
             spec.addField(commonFields.rest());
         }
         spec.addMethod(buildMethod.get());

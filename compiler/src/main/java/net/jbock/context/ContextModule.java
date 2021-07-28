@@ -10,6 +10,8 @@ import net.jbock.processor.SourceElement;
 
 import java.util.List;
 
+import static net.jbock.common.Constants.concat;
+
 /**
  * @see ContextScope
  */
@@ -40,8 +42,14 @@ public class ContextModule {
 
     @ContextScope
     @Provides
-    PositionalParameters positionalParameters() {
-        return PositionalParameters.create(positionalParams, repeatablePositionalParameters);
+    List<Mapped<AnnotatedParameters>> repeatablePositionalParameters() {
+        return repeatablePositionalParameters;
+    }
+
+    @ContextScope
+    @Provides
+    List<Mapped<AnnotatedParameter>> positionalParameters() {
+        return positionalParams;
     }
 
     @ContextScope
@@ -52,8 +60,8 @@ public class ContextModule {
 
     @ContextScope
     @Provides
-    AllItems allItems() {
-        return AllItems.create(positionalParams, repeatablePositionalParameters, namedOptions);
+    List<Mapped<?>> everything() {
+        return concat(concat(namedOptions, positionalParams), repeatablePositionalParameters);
     }
 
     @ContextScope
@@ -61,12 +69,11 @@ public class ContextModule {
     CommonFields commonFields(
             GeneratedTypes generatedTypes,
             SourceElement sourceElement,
-            PositionalParameters positionalParameters,
             NamedOptions namedOptions) {
         return CommonFields.create(
                 generatedTypes,
                 sourceElement,
-                positionalParameters,
+                positionalParams,
                 namedOptions);
     }
 }
