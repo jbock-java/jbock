@@ -30,16 +30,17 @@ public class SourceParametersValidator {
     }
 
     Either<List<ValidationFailure>, ContextBuilder.Step3> wrapRepeatablePositionalParams(
-            ContextBuilder.Step2 methods) {
-        return validateDuplicateParametersAnnotation(methods.repeatablePositionalParameters())
+            ContextBuilder.Step2 step) {
+        return validateDuplicateParametersAnnotation(step.repeatablePositionalParameters())
                 .filter(this::validateNoRepeatableParameterInSuperCommand)
                 .flatMap(repeatablePositionalParameters -> repeatablePositionalParameters.stream()
                         .map(sourceMethod -> converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail))
                         .collect(toValidListAll()))
-                .map(methods::accept);
+                .map(step::accept);
     }
 
-    private Either<List<ValidationFailure>, List<SourceParameters>> validateDuplicateParametersAnnotation(List<SourceParameters> repeatablePositionalParameters) {
+    private Either<List<ValidationFailure>, List<SourceParameters>> validateDuplicateParametersAnnotation(
+            List<SourceParameters> repeatablePositionalParameters) {
         return repeatablePositionalParameters.stream()
                 .skip(1)
                 .map(param -> param.fail("duplicate @" + Parameters.class.getSimpleName() + " annotation"))
@@ -50,7 +51,8 @@ public class SourceParametersValidator {
 
     /* Left-Optional
      */
-    private Optional<List<ValidationFailure>> validateNoRepeatableParameterInSuperCommand(List<SourceParameters> repeatablePositionalParameters) {
+    private Optional<List<ValidationFailure>> validateNoRepeatableParameterInSuperCommand(
+            List<SourceParameters> repeatablePositionalParameters) {
         if (!sourceElement.isSuperCommand()) {
             return Optional.empty();
         }

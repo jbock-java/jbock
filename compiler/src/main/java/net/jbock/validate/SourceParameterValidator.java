@@ -31,13 +31,15 @@ public class SourceParameterValidator {
             ContextBuilder.Step1 step) {
         return validatePositions(step.positionalParameters())
                 .flatMap(positionalParameters -> positionalParameters.stream()
-                        .map(sourceMethod -> converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail))
+                        .map(sourceMethod -> converterFinder.findConverter(sourceMethod)
+                                .mapLeft(sourceMethod::fail))
                         .collect(toValidListAll()))
                 .filter(this::checkNoRequiredAfterOptional)
                 .map(step::accept);
     }
 
-    private Either<List<ValidationFailure>, List<SourceParameter>> validatePositions(List<SourceParameter> allPositionalParameters) {
+    private Either<List<ValidationFailure>, List<SourceParameter>> validatePositions(
+            List<SourceParameter> allPositionalParameters) {
         List<ValidationFailure> failures = new ArrayList<>();
         for (int i = 0; i < allPositionalParameters.size(); i++) {
             SourceParameter item = allPositionalParameters.get(i);
