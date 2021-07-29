@@ -3,7 +3,7 @@ package net.jbock.context;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.processor.JbockProcessor;
 import net.jbock.processor.SourceElement;
 
@@ -28,7 +28,7 @@ public final class GeneratedClass {
     private final ParseOrExitMethod parseOrExitMethod;
     private final CreateModelMethod createModelMethod;
     private final MultilineConverter multilineConverter;
-    private final List<Mapped<?>> everything;
+    private final List<Mapping<?>> everything;
 
     @Inject
     GeneratedClass(
@@ -42,7 +42,7 @@ public final class GeneratedClass {
             ParseOrExitMethod parseOrExitMethod,
             CreateModelMethod createModelMethod,
             MultilineConverter multilineConverter,
-            List<Mapped<?>> everything) {
+            List<Mapping<?>> everything) {
         this.parseMethod = parseMethod;
         this.sourceElement = sourceElement;
         this.impl = impl;
@@ -75,7 +75,7 @@ public final class GeneratedClass {
         }
         spec.addType(impl.define());
 
-        for (Mapped<?> item : everything) {
+        for (Mapping<?> item : everything) {
             if (item.mapExpr().multiline()) {
                 spec.addType(multilineConverter.define(item));
             }

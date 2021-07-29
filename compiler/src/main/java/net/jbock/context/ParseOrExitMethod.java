@@ -4,7 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.contrib.StandardErrorHandler;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ParseRequest;
 
@@ -22,14 +22,14 @@ public class ParseOrExitMethod {
     private final SourceElement sourceElement;
     private final GeneratedTypes generatedTypes;
     private final ParseMethod parseMethod;
-    private final List<Mapped<?>> everything;
+    private final List<Mapping<?>> everything;
 
     @Inject
     ParseOrExitMethod(
             SourceElement sourceElement,
             GeneratedTypes generatedTypes,
             ParseMethod parseMethod,
-            List<Mapped<?>> everything) {
+            List<Mapping<?>> everything) {
         this.sourceElement = sourceElement;
         this.generatedTypes = generatedTypes;
         this.parseMethod = parseMethod;
@@ -45,7 +45,7 @@ public class ParseOrExitMethod {
 
         CodeBlock.Builder code = CodeBlock.builder();
         code.add("$1T $2N = $1T.standardBuilder($3N)\n", ParseRequest.class, request, args).indent();
-        if (everything.stream().anyMatch(Mapped::isRequired)) {
+        if (everything.stream().anyMatch(Mapping::isRequired)) {
             code.add(".withHelpRequested($1N.length == 0 || $2S.equals($1N[0]))\n", args, "--help");
         } else {
             code.add(".withHelpRequested($1N.length > 0 && $2S.equals($1N[0]))\n", args, "--help");

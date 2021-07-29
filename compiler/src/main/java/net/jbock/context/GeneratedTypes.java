@@ -3,7 +3,7 @@ package net.jbock.context;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.NotSuccess;
 import net.jbock.util.SuperResult;
@@ -63,7 +63,7 @@ public class GeneratedTypes {
         return generatedClass.nestedClass(sourceElement.element().getSimpleName() + "Impl");
     }
 
-    ClassName multilineConverterType(Mapped<?> item) {
+    ClassName multilineConverterType(Mapping<?> item) {
         String name = item.enumName().original();
         String capitalized = Character.toUpperCase(name.charAt(0)) + name.substring(1);
         return generatedClass.nestedClass(capitalized + "Converter");

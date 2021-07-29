@@ -1,6 +1,5 @@
 package net.jbock.processor;
 
-import dagger.BindsInstance;
 import dagger.Component;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -18,12 +17,9 @@ interface ProcessorComponent {
 
     CommandProcessingStep commandProcessingStep();
 
-    @Component.Builder
-    interface Builder {
+    @Component.Factory
+    interface Factory {
 
-        @BindsInstance
-        Builder processingEnv(ProcessingEnvironment processingEnvironment);
-
-        ProcessorComponent build();
+        ProcessorComponent create(ProcessorModule module);
     }
 }

@@ -17,9 +17,8 @@ public final class JbockProcessor extends BasicAnnotationProcessor {
 
     @Override
     protected Iterable<? extends Step> steps() {
-        ProcessorComponent component = DaggerProcessorComponent.builder()
-                .processingEnv(processingEnv)
-                .build();
+        ProcessorComponent component = DaggerProcessorComponent.factory()
+                .create(new ProcessorModule(processingEnv));
         return List.of(component.commandProcessingStep(),
                 component.converterProcessingStep(),
                 component.parameterMethodProcessingStep());

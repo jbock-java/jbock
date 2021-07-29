@@ -3,8 +3,8 @@ package net.jbock.validate;
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.ConverterFinder;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.MappingFinder;
+import net.jbock.convert.Mapping;
 import net.jbock.source.SourceParameter;
 
 import javax.inject.Inject;
@@ -20,10 +20,10 @@ import static io.jbock.util.Eithers.toValidListAll;
 @ValidateScope
 public class SourceParameterValidator {
 
-    private final ConverterFinder converterFinder;
+    private final MappingFinder converterFinder;
 
     @Inject
-    SourceParameterValidator(ConverterFinder converterFinder) {
+    SourceParameterValidator(MappingFinder converterFinder) {
         this.converterFinder = converterFinder;
     }
 
@@ -31,7 +31,7 @@ public class SourceParameterValidator {
             ContextBuilder.Step1 step) {
         return validatePositions(step.positionalParameters())
                 .flatMap(positionalParameters -> positionalParameters.stream()
-                        .map(sourceMethod -> converterFinder.findConverter(sourceMethod)
+                        .map(sourceMethod -> converterFinder.findMapping(sourceMethod)
                                 .mapLeft(sourceMethod::fail))
                         .collect(toValidListAll()))
                 .filter(this::checkNoRequiredAfterOptional)
@@ -56,14 +56,14 @@ public class SourceParameterValidator {
     /* Left-Optional
      */
     private Optional<List<ValidationFailure>> checkNoRequiredAfterOptional(
-            List<Mapped<AnnotatedParameter>> allPositionalParameters) {
+            List<Mapping<AnnotatedParameter>> allPositionalParameters) {
         return allPositionalParameters.stream()
-                .filter(Mapped::isOptional)
+                .filter(Mapping::isOptional)
                 .findFirst()
-                .map(Mapped::item)
+                .map(Mapping::item)
                 .flatMap(firstOptional -> allPositionalParameters.stream()
-                        .filter(Mapped::isRequired)
-                        .map(Mapped::item)
+                        .filter(Mapping::isRequired)
+                        .map(Mapping::item)
                         .filter(item -> item.annotatedMethod().index() > firstOptional.annotatedMethod().index())
                         .map(item -> item.fail("position of required parameter '" +
                                 item.annotatedMethod().method().getSimpleName() +

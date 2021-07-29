@@ -3,8 +3,8 @@ package net.jbock.validate;
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.ConverterFinder;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.MappingFinder;
+import net.jbock.convert.Mapping;
 import net.jbock.source.SourceOption;
 
 import javax.inject.Inject;
@@ -22,16 +22,16 @@ import static io.jbock.util.Eithers.toOptionalList;
 import static io.jbock.util.Eithers.toValidListAll;
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
-import static net.jbock.convert.Mapped.createFlag;
+import static net.jbock.convert.Mapping.createFlag;
 
 @ValidateScope
 public class SourceOptionValidator {
 
-    private final ConverterFinder converterFinder;
+    private final MappingFinder converterFinder;
     private final Types types;
 
     @Inject
-    SourceOptionValidator(ConverterFinder converterFinder, Types types) {
+    SourceOptionValidator(MappingFinder converterFinder, Types types) {
         this.converterFinder = converterFinder;
         this.types = types;
     }
@@ -48,15 +48,15 @@ public class SourceOptionValidator {
                 .map(step::accept);
     }
 
-    private Either<ValidationFailure, Mapped<AnnotatedOption>> wrapOption(SourceOption sourceMethod) {
+    private Either<ValidationFailure, Mapping<AnnotatedOption>> wrapOption(SourceOption sourceMethod) {
         return checkFlag(sourceMethod)
-                .<Either<ValidationFailure, Mapped<AnnotatedOption>>>map(Either::right)
-                .orElseGet(() -> converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail));
+                .<Either<ValidationFailure, Mapping<AnnotatedOption>>>map(Either::right)
+                .orElseGet(() -> converterFinder.findMapping(sourceMethod).mapLeft(sourceMethod::fail));
     }
 
     /* Right-Optional
      */
-    private Optional<Mapped<AnnotatedOption>> checkFlag(SourceOption sourceMethod) {
+    private Optional<Mapping<AnnotatedOption>> checkFlag(SourceOption sourceMethod) {
         if (sourceMethod.annotatedMethod().converter().isPresent()) {
             return Optional.empty();
         }

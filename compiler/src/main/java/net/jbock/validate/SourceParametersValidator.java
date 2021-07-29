@@ -3,7 +3,7 @@ package net.jbock.validate;
 import io.jbock.util.Either;
 import net.jbock.Parameters;
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.ConverterFinder;
+import net.jbock.convert.MappingFinder;
 import net.jbock.processor.SourceElement;
 import net.jbock.source.SourceParameters;
 
@@ -18,12 +18,12 @@ import static io.jbock.util.Eithers.toValidListAll;
 @ValidateScope
 public class SourceParametersValidator {
 
-    private final ConverterFinder converterFinder;
+    private final MappingFinder converterFinder;
     private final SourceElement sourceElement;
 
     @Inject
     SourceParametersValidator(
-            ConverterFinder converterFinder,
+            MappingFinder converterFinder,
             SourceElement sourceElement) {
         this.converterFinder = converterFinder;
         this.sourceElement = sourceElement;
@@ -34,7 +34,7 @@ public class SourceParametersValidator {
         return validateDuplicateParametersAnnotation(step.repeatablePositionalParameters())
                 .filter(this::validateNoRepeatableParameterInSuperCommand)
                 .flatMap(repeatablePositionalParameters -> repeatablePositionalParameters.stream()
-                        .map(sourceMethod -> converterFinder.findConverter(sourceMethod).mapLeft(sourceMethod::fail))
+                        .map(sourceMethod -> converterFinder.findMapping(sourceMethod).mapLeft(sourceMethod::fail))
                         .collect(toValidListAll()))
                 .map(step::accept);
     }

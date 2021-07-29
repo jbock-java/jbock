@@ -13,11 +13,11 @@ enum OptionalPrimitive {
     DOUBLE(OptionalDouble.class, Double.class);
 
     private final Class<?> type;
-    private final String wrappedObjectType;
+    private final String numberType;
 
-    OptionalPrimitive(Class<?> type, Class<? extends Number> wrappedObjectType) {
+    OptionalPrimitive(Class<?> type, Class<? extends Number> numberType) {
         this.type = type;
-        this.wrappedObjectType = wrappedObjectType.getCanonicalName();
+        this.numberType = numberType.getCanonicalName();
     }
 
     CodeBlock extractExpr() {
@@ -28,7 +28,7 @@ enum OptionalPrimitive {
         return type.getCanonicalName();
     }
 
-    public String wrappedObjectType() {
-        return wrappedObjectType;
+    public String numberType() {
+        return numberType;
     }
 }

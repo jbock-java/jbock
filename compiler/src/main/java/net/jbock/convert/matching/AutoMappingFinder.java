@@ -6,9 +6,10 @@ import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.source.SourceMethod;
+import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
@@ -25,15 +26,15 @@ import static io.jbock.util.Either.left;
 import static net.jbock.common.Constants.STRING;
 
 @ValidateScope
-public class AutoConverterFinder extends MatchValidator {
+public class AutoMappingFinder extends MatchValidator {
 
-    private final AutoConverters autoConverter;
+    private final AutoMappings autoConverter;
     private final List<Matcher> matchers;
     private final Util util;
 
     @Inject
-    AutoConverterFinder(
-            AutoConverters autoConverter,
+    AutoMappingFinder(
+            AutoMappings autoConverter,
             List<Matcher> matchers,
             Util util) {
         this.autoConverter = autoConverter;
@@ -41,27 +42,30 @@ public class AutoConverterFinder extends MatchValidator {
         this.util = util;
     }
 
-    public <M extends AnnotatedMethod> Either<String, Mapped<M>> findConverter(SourceMethod<M> parameter) {
+    public <M extends AnnotatedMethod> Either<String, Mapping<M>> findMapping(SourceMethod<M> parameter) {
         for (Matcher matcher : matchers) {
             Optional<Match> match = matcher.tryMatch(parameter);
             if (match.isPresent()) {
                 Match m = match.orElseThrow();
                 return validateMatch(parameter, m)
-                        .<Either<String, Mapped<M>>>map(Either::left)
-                        .orElseGet(() -> findConverter(m, parameter));
+                        .<Either<String, Mapping<M>>>map(Either::left)
+                        .orElseGet(() -> findMapping(m, parameter));
             }
         }
         return left(noMatchError(parameter.returnType()));
     }
 
-    private <M extends AnnotatedMethod> Either<String, Mapped<M>> findConverter(Match match, SourceMethod<M> parameter) {
-        return autoConverter.findAutoConverter(match.baseType())
-                .flatMapLeft(this::enumConverter)
-                .map(mapExpr -> match.toConvertedParameter(mapExpr, parameter));
+    private <M extends AnnotatedMethod> Either<String, Mapping<M>> findMapping(Match match, SourceMethod<M> parameter) {
+        return autoConverter.findAutoMapping(match.baseType())
+                .flatMapLeft(this::findEnumMapping)
+                .map(mapExpr -> match.toMapping(mapExpr, parameter));
     }
 
-    private Either<String, MapExpr> enumConverter(TypeMirror baseType) {
-        return asEnumType(baseType)
+    private Either<String, MapExpr> findEnumMapping(TypeMirror baseType) {
+        return TypeTool.AS_DECLARED.visit(baseType)
+                .map(DeclaredType::asElement)
+                .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
+                .filter(element -> element.getKind() == ElementKind.ENUM)
                 .map(TypeElement::asType)
                 .<Either<String, TypeMirror>>map(Either::right)
                 .orElseGet(() -> left(noMatchError(baseType)))
@@ -92,14 +96,9 @@ public class AutoConverterFinder extends MatchValidator {
         return code.build();
     }
 
-    private Optional<TypeElement> asEnumType(TypeMirror type) {
-        return TypeTool.AS_DECLARED.visit(type)
-                .map(DeclaredType::asElement)
-                .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
-                .filter(element -> element.getKind() == ElementKind.ENUM);
-    }
-
     private String noMatchError(TypeMirror type) {
-        return "define a converter that implements StringConverter<" + util.typeToString(type) + ">";
+        return "define a converter that implements " +
+                StringConverter.class.getSimpleName() +
+                "<" + util.typeToString(type) + ">";
     }
 }

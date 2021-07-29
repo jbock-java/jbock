@@ -4,7 +4,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.source.SourceMethod;
 
@@ -25,12 +25,12 @@ public class Impl {
 
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
-    private final List<Mapped<?>> everything;
+    private final List<Mapping<?>> everything;
 
     @Inject
     Impl(GeneratedTypes generatedTypes,
          SourceElement sourceElement,
-         List<Mapped<?>> everything) {
+         List<Mapping<?>> everything) {
         this.generatedTypes = generatedTypes;
         this.sourceElement = sourceElement;
         this.everything = everything;
@@ -43,7 +43,7 @@ public class Impl {
         } else {
             spec.superclass(sourceElement.typeName());
         }
-        for (Mapped<?> c : everything) {
+        for (Mapping<?> c : everything) {
             spec.addField(c.asField());
         }
         return spec.addModifiers(PRIVATE, STATIC)
@@ -54,7 +54,7 @@ public class Impl {
                 .build();
     }
 
-    private MethodSpec parameterMethodOverride(Mapped<?> c) {
+    private MethodSpec parameterMethodOverride(Mapping<?> c) {
         SourceMethod<?> param = c.item();
         return MethodSpec.methodBuilder(param.methodName())
                 .returns(TypeName.get(param.returnType()))
@@ -65,7 +65,7 @@ public class Impl {
 
     private MethodSpec implConstructor() {
         MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-        for (Mapped<?> c : everything) {
+        for (Mapping<?> c : everything) {
             FieldSpec field = c.asField();
             spec.addStatement("this.$N = $N", field, c.asParam());
             spec.addParameter(c.asParam());

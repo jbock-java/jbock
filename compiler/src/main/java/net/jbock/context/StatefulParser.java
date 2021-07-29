@@ -7,7 +7,7 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -27,8 +27,8 @@ public class StatefulParser {
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
     private final NamedOptions namedOptions;
-    private final List<Mapped<AnnotatedParameter>> positionalParameters;
-    private final List<Mapped<AnnotatedParameters>> repeatablePositionalParameters;
+    private final List<Mapping<AnnotatedParameter>> positionalParameters;
+    private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
     private final CommonFields commonFields;
     private final BuildMethod buildMethod;
     private final TryParseOptionMethod tryParseOptionMethod;
@@ -40,8 +40,8 @@ public class StatefulParser {
             StatefulParseMethod statefulParseMethod,
             SourceElement sourceElement,
             NamedOptions namedOptions,
-            List<Mapped<AnnotatedParameter>> positionalParameters,
-            List<Mapped<AnnotatedParameters>> repeatablePositionalParameters,
+            List<Mapping<AnnotatedParameter>> positionalParameters,
+            List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
             CommonFields commonFields,
             BuildMethod buildMethod,
             TryParseOptionMethod tryParseOptionMethod,
@@ -82,7 +82,7 @@ public class StatefulParser {
 
     private MethodSpec privateConstructor() {
         CodeBlock.Builder code = CodeBlock.builder();
-        for (Mapped<AnnotatedOption> namedOption : namedOptions.options()) {
+        for (Mapping<AnnotatedOption> namedOption : namedOptions.options()) {
             String enumConstant = namedOption.enumName().enumConstant();
             for (String dashedName : namedOption.item().annotatedMethod().names()) {
                 code.addStatement("$N.put($S, $T.$L)",
@@ -98,7 +98,7 @@ public class StatefulParser {
                 .build();
     }
 
-    private ClassName optionParserType(Mapped<AnnotatedOption> param) {
+    private ClassName optionParserType(Mapping<AnnotatedOption> param) {
         if (param.isRepeatable()) {
             return generatedTypes.repeatableOptionParserType();
         }

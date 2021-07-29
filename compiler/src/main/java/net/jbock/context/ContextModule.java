@@ -5,7 +5,7 @@ import dagger.Provides;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 
 import java.util.List;
@@ -19,15 +19,15 @@ import static net.jbock.common.Constants.concat;
 public class ContextModule {
 
     private final SourceElement sourceElement;
-    private final List<Mapped<AnnotatedParameter>> positionalParams;
-    private final List<Mapped<AnnotatedParameters>> repeatablePositionalParameters;
-    private final List<Mapped<AnnotatedOption>> namedOptions;
+    private final List<Mapping<AnnotatedParameter>> positionalParams;
+    private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
+    private final List<Mapping<AnnotatedOption>> namedOptions;
 
     public ContextModule(
             SourceElement sourceElement,
-            List<Mapped<AnnotatedParameter>> positionalParams,
-            List<Mapped<AnnotatedParameters>> repeatablePositionalParameters,
-            List<Mapped<AnnotatedOption>> namedOptions) {
+            List<Mapping<AnnotatedParameter>> positionalParams,
+            List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
+            List<Mapping<AnnotatedOption>> namedOptions) {
         this.sourceElement = sourceElement;
         this.positionalParams = positionalParams;
         this.repeatablePositionalParameters = repeatablePositionalParameters;
@@ -42,13 +42,13 @@ public class ContextModule {
 
     @ContextScope
     @Provides
-    List<Mapped<AnnotatedParameters>> repeatablePositionalParameters() {
+    List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
         return repeatablePositionalParameters;
     }
 
     @ContextScope
     @Provides
-    List<Mapped<AnnotatedParameter>> positionalParameters() {
+    List<Mapping<AnnotatedParameter>> positionalParameters() {
         return positionalParams;
     }
 
@@ -60,7 +60,7 @@ public class ContextModule {
 
     @ContextScope
     @Provides
-    List<Mapped<?>> everything() {
+    List<Mapping<?>> everything() {
         return concat(concat(namedOptions, positionalParams), repeatablePositionalParameters);
     }
 

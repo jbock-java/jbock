@@ -17,38 +17,38 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * An item with additional information about type conversion.
+ * An annotated method with additional information about type conversion.
  *
  * @param <M> the type of item
  */
-public final class Mapped<M extends AnnotatedMethod> {
+public final class Mapping<M extends AnnotatedMethod> {
 
     private final MapExpr mapExpr;
     private final Optional<CodeBlock> extractExpr;
     private final Multiplicity multiplicity;
-    private final SourceMethod<M> item;
+    private final SourceMethod<M> sourceMethod;
     private final ParameterSpec asParameterSpec;
     private final FieldSpec asFieldSpec;
     private final boolean modeFlag;
 
-    private Mapped(
+    private Mapping(
             MapExpr mapExpr,
             Optional<CodeBlock> extractExpr,
             Multiplicity multiplicity,
             ParameterSpec asParameterSpec,
             FieldSpec asFieldSpec,
-            SourceMethod<M> item,
+            SourceMethod<M> sourceMethod,
             boolean modeFlag) {
         this.asParameterSpec = asParameterSpec;
         this.mapExpr = mapExpr;
         this.extractExpr = extractExpr;
         this.multiplicity = multiplicity;
         this.asFieldSpec = asFieldSpec;
-        this.item = item;
+        this.sourceMethod = sourceMethod;
         this.modeFlag = modeFlag;
     }
 
-    public static <M extends AnnotatedMethod> Mapped<M> create(
+    public static <M extends AnnotatedMethod> Mapping<M> create(
             MapExpr mapExpr,
             Optional<CodeBlock> extractExpr,
             Multiplicity multiplicity,
@@ -57,18 +57,18 @@ public final class Mapped<M extends AnnotatedMethod> {
         String fieldName = parameter.enumName().original();
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
-        return new Mapped<>(mapExpr, extractExpr, multiplicity, asParameterSpec,
+        return new Mapping<>(mapExpr, extractExpr, multiplicity, asParameterSpec,
                 asFieldSpec, parameter, false);
     }
 
-    public static Mapped<AnnotatedOption> createFlag(SourceMethod<AnnotatedOption> namedOption, PrimitiveType booleanType) {
+    public static Mapping<AnnotatedOption> createFlag(SourceMethod<AnnotatedOption> namedOption, PrimitiveType booleanType) {
         CodeBlock code = CodeBlock.of("$T.create($T.identity())", StringConverter.class, Function.class);
         TypeName fieldType = TypeName.BOOLEAN;
         String fieldName = namedOption.enumName().original();
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
         MapExpr mapExpr = new MapExpr(code, booleanType, false);
-        return new Mapped<>(mapExpr, Optional.empty(), Multiplicity.OPTIONAL, asParameterSpec,
+        return new Mapping<>(mapExpr, Optional.empty(), Multiplicity.OPTIONAL, asParameterSpec,
                 asFieldSpec, namedOption, true);
     }
 
@@ -92,7 +92,7 @@ public final class Mapped<M extends AnnotatedMethod> {
     }
 
     public EnumName enumName() {
-        return item.enumName();
+        return sourceMethod.enumName();
     }
 
     public boolean isRequired() {
@@ -112,11 +112,11 @@ public final class Mapped<M extends AnnotatedMethod> {
     }
 
     public SourceMethod<M> item() {
-        return item;
+        return sourceMethod;
     }
 
     public String paramLabel() {
-        return item.paramLabel();
+        return sourceMethod.paramLabel();
     }
 
     public FieldSpec asField() {

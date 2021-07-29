@@ -6,7 +6,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.convert.matching.MapExpr;
 import net.jbock.util.StringConverter;
 
@@ -27,7 +27,7 @@ public class MultilineConverter {
         this.generatedTypes = generatedTypes;
     }
 
-    TypeSpec define(Mapped<?> item) {
+    TypeSpec define(Mapping<?> item) {
         MapExpr mapExpr = item.mapExpr();
         return TypeSpec.classBuilder(generatedTypes.multilineConverterType(item))
                 .addMethod(convertMethod(mapExpr))

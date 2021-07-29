@@ -6,7 +6,7 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Multiplicity;
 import net.jbock.model.Option;
@@ -28,16 +28,16 @@ public class CreateModelMethod extends CachedMethod {
     private final ContextUtil contextUtil;
     private final SourceElement sourceElement;
     private final NamedOptions namedOptions;
-    private final List<Mapped<AnnotatedParameter>> positionalParameters;
-    private final List<Mapped<AnnotatedParameters>> repeatablePositionalParameters;
+    private final List<Mapping<AnnotatedParameter>> positionalParameters;
+    private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
 
     @Inject
     CreateModelMethod(
             ContextUtil contextUtil,
             SourceElement sourceElement,
             NamedOptions namedOptions,
-            List<Mapped<AnnotatedParameter>> positionalParameters,
-            List<Mapped<AnnotatedParameters>> repeatablePositionalParameters) {
+            List<Mapping<AnnotatedParameter>> positionalParameters,
+            List<Mapping<AnnotatedParameters>> repeatablePositionalParameters) {
         this.contextUtil = contextUtil;
         this.sourceElement = sourceElement;
         this.namedOptions = namedOptions;
@@ -62,10 +62,10 @@ public class CreateModelMethod extends CachedMethod {
         if (namedOptions.unixClusteringSupported()) {
             code.add(CodeBlock.of(".withUnixClustering($L)", true));
         }
-        for (Mapped<AnnotatedOption> c : namedOptions.options()) {
+        for (Mapping<AnnotatedOption> c : namedOptions.options()) {
             code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
         }
-        for (Mapped<?> c : concat(positionalParameters, repeatablePositionalParameters)) {
+        for (Mapping<?> c : concat(positionalParameters, repeatablePositionalParameters)) {
             code.add(CodeBlock.of(".addParameter($L)", parameterBlock(c)));
         }
         code.add(CodeBlock.of(".build()"));
@@ -77,7 +77,7 @@ public class CreateModelMethod extends CachedMethod {
                 .build();
     }
 
-    private CodeBlock optionBlock(Mapped<AnnotatedOption> c) {
+    private CodeBlock optionBlock(Mapping<AnnotatedOption> c) {
         List<CodeBlock> names = new ArrayList<>();
         for (String name : c.item().annotatedMethod().names()) {
             names.add(CodeBlock.of("$S", name));
@@ -99,7 +99,7 @@ public class CreateModelMethod extends CachedMethod {
         return contextUtil.joinByNewline(code);
     }
 
-    private CodeBlock parameterBlock(Mapped<?> c) {
+    private CodeBlock parameterBlock(Mapping<?> c) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$T.builder()", Parameter.class));
         code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));

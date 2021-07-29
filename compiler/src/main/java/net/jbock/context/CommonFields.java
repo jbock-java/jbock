@@ -5,7 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.HelpRequested;
 
@@ -54,7 +54,7 @@ class CommonFields {
     static CommonFields create(
             GeneratedTypes generatedTypes,
             SourceElement sourceElement,
-            List<Mapped<AnnotatedParameter>> positionalParameters,
+            List<Mapping<AnnotatedParameter>> positionalParameters,
             NamedOptions namedOptions) {
         ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
         CodeBlock.Builder code = CodeBlock.builder();
@@ -63,7 +63,7 @@ class CommonFields {
                 .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, HelpRequested.class)
                 .unindent().build());
         long mapSize = namedOptions.stream()
-                .map(Mapped::item)
+                .map(Mapping::item)
                 .map(t -> t.annotatedMethod().names())
                 .map(List::size)
                 .mapToLong(i -> i)

@@ -86,10 +86,6 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     private void processSourceElement(SourceElement sourceElement) {
         ValidateComponent component = DaggerValidateComponent.builder()
                 .sourceElement(sourceElement)
-                .tool(tool)
-                .util(util)
-                .filer(filer)
-                .messager(messager)
                 .module(new ValidateModule(types, elements))
                 .create();
         component.processor().generate()

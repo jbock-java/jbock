@@ -3,6 +3,8 @@ package net.jbock.validate;
 import dagger.Module;
 import dagger.Provides;
 import net.jbock.common.SafeElements;
+import net.jbock.common.TypeTool;
+import net.jbock.common.Util;
 import net.jbock.convert.matcher.ExactMatcher;
 import net.jbock.convert.matcher.ListMatcher;
 import net.jbock.convert.matcher.Matcher;
@@ -38,6 +40,18 @@ public class ValidateModule {
             ListMatcher listMatcher,
             ExactMatcher exactMatcher) {
         return List.of(optionalMatcher, listMatcher, exactMatcher);
+    }
+
+    @ValidateScope
+    @Provides
+    TypeTool tool() {
+        return new TypeTool(elements, types);
+    }
+
+    @ValidateScope
+    @Provides
+    Util util(TypeTool tool) {
+        return new Util(types, tool);
     }
 
     @ValidateScope

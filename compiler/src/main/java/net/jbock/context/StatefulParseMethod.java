@@ -5,7 +5,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
@@ -29,8 +29,8 @@ public class StatefulParseMethod {
     private final ParameterSpec position = builder(INT, "position").build();
     private final ParameterSpec endOfOptionParsing = builder(BOOLEAN, "endOfOptionParsing").build();
     private final NamedOptions namedOptions;
-    private final List<Mapped<AnnotatedParameter>> positionalParameters;
-    private final List<Mapped<AnnotatedParameters>> repeatablePositionalParameters;
+    private final List<Mapping<AnnotatedParameter>> positionalParameters;
+    private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
     private final CommonFields commonFields;
     private final SourceElement sourceElement;
     private final TryParseOptionMethod tryParseOptionMethod;
@@ -39,8 +39,8 @@ public class StatefulParseMethod {
     StatefulParseMethod(
             GeneratedTypes generatedTypes,
             NamedOptions namedOptions,
-            List<Mapped<AnnotatedParameter>> positionalParameters,
-            List<Mapped<AnnotatedParameters>> repeatablePositionalParameters,
+            List<Mapping<AnnotatedParameter>> positionalParameters,
+            List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
             CommonFields commonFields,
             SourceElement sourceElement,
             TryParseOptionMethod tryParseOptionMethod) {

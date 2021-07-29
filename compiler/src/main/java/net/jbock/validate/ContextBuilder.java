@@ -4,7 +4,7 @@ import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.context.ContextModule;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.source.SourceOption;
 import net.jbock.source.SourceParameter;
@@ -18,9 +18,9 @@ import java.util.List;
 public final class ContextBuilder {
 
     private final Step3 step3;
-    private final List<Mapped<AnnotatedOption>> namedOptions;
+    private final List<Mapping<AnnotatedOption>> namedOptions;
 
-    private ContextBuilder(Step3 step3, List<Mapped<AnnotatedOption>> namedOptions) {
+    private ContextBuilder(Step3 step3, List<Mapping<AnnotatedOption>> namedOptions) {
         this.step3 = step3;
         this.namedOptions = namedOptions;
     }
@@ -36,7 +36,7 @@ public final class ContextBuilder {
             this.abstractMethods = abstractMethods;
         }
 
-        Step2 accept(List<Mapped<AnnotatedParameter>> positionalParameters) {
+        Step2 accept(List<Mapping<AnnotatedParameter>> positionalParameters) {
             return new Step2(this, positionalParameters);
         }
 
@@ -47,9 +47,9 @@ public final class ContextBuilder {
 
     static final class Step2 {
         private final Step1 step1;
-        private final List<Mapped<AnnotatedParameter>> positionalParameters;
+        private final List<Mapping<AnnotatedParameter>> positionalParameters;
 
-        private Step2(Step1 step1, List<Mapped<AnnotatedParameter>> positionalParameters) {
+        private Step2(Step1 step1, List<Mapping<AnnotatedParameter>> positionalParameters) {
             this.step1 = step1;
             this.positionalParameters = positionalParameters;
         }
@@ -58,16 +58,16 @@ public final class ContextBuilder {
             return step1.abstractMethods.repeatablePositionalParameters();
         }
 
-        Step3 accept(List<Mapped<AnnotatedParameters>> repeatablePositionalParameters) {
+        Step3 accept(List<Mapping<AnnotatedParameters>> repeatablePositionalParameters) {
             return new Step3(this, repeatablePositionalParameters);
         }
     }
 
     static final class Step3 {
         private final Step2 step2;
-        private final List<Mapped<AnnotatedParameters>> repeatablePositionalParameters;
+        private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
 
-        private Step3(Step2 step2, List<Mapped<AnnotatedParameters>> repeatablePositionalParameters) {
+        private Step3(Step2 step2, List<Mapping<AnnotatedParameters>> repeatablePositionalParameters) {
             this.step2 = step2;
             this.repeatablePositionalParameters = repeatablePositionalParameters;
         }
@@ -76,7 +76,7 @@ public final class ContextBuilder {
             return step2.step1.abstractMethods.namedOptions();
         }
 
-        ContextBuilder accept(List<Mapped<AnnotatedOption>> namedOptions) {
+        ContextBuilder accept(List<Mapping<AnnotatedOption>> namedOptions) {
             return new ContextBuilder(this, namedOptions);
         }
     }

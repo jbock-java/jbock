@@ -15,41 +15,47 @@ import javax.lang.model.util.Types;
  * @see ProcessorScope
  */
 @Module
-public interface ProcessorModule {
+public class ProcessorModule {
+
+    private final ProcessingEnvironment processingEnvironment;
+
+    ProcessorModule(ProcessingEnvironment processingEnvironment) {
+        this.processingEnvironment = processingEnvironment;
+    }
 
     @ProcessorScope
     @Provides
-    static Messager messager(ProcessingEnvironment processingEnvironment) {
+    Messager messager() {
         return processingEnvironment.getMessager();
     }
 
     @ProcessorScope
     @Provides
-    static Filer filer(ProcessingEnvironment processingEnvironment) {
+    Filer filer() {
         return processingEnvironment.getFiler();
     }
 
     @ProcessorScope
     @Provides
-    static SafeElements elements(ProcessingEnvironment processingEnvironment) {
+    SafeElements elements() {
         return new SafeElements(processingEnvironment.getElementUtils());
     }
 
     @ProcessorScope
     @Provides
-    static Types types(ProcessingEnvironment processingEnvironment) {
+    Types types() {
         return processingEnvironment.getTypeUtils();
     }
 
     @ProcessorScope
     @Provides
-    static TypeTool tool(SafeElements elements, ProcessingEnvironment processingEnv) {
-        return new TypeTool(elements, processingEnv.getTypeUtils());
+    TypeTool tool(SafeElements elements) {
+        return new TypeTool(elements, processingEnvironment.getTypeUtils());
     }
 
     @ProcessorScope
     @Provides
-    static Util util(Types types, TypeTool tool) {
+    Util util(Types types, TypeTool tool) {
         return new Util(types, tool);
     }
 }

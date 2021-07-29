@@ -29,7 +29,7 @@ public class ListMatcher implements Matcher {
     public Optional<Match> tryMatch(SourceMethod<?> parameter) {
         TypeMirror returnType = parameter.returnType();
         return elements.getTypeElement("java.util.List")
-                .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
+                .flatMap(utilList -> tool.getSingleTypeArgument(returnType, utilList)
                         .map(typeArg -> Match.create(typeArg, Multiplicity.REPEATABLE)));
     }
 }

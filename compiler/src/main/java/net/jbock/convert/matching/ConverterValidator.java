@@ -5,12 +5,13 @@ import io.jbock.util.Either;
 import net.jbock.Converter;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.Util;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.convert.reference.StringConverterType;
 import net.jbock.processor.SourceElement;
 import net.jbock.source.SourceMethod;
+import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
@@ -48,7 +49,7 @@ public class ConverterValidator extends MatchValidator {
         this.types = types;
     }
 
-    public <M extends AnnotatedMethod> Either<String, Mapped<M>> validate(
+    public <M extends AnnotatedMethod> Either<String, Mapping<M>> findMapping(
             SourceMethod<M> parameter,
             TypeElement converter) {
         return util.commonTypeChecks(converter)
@@ -60,7 +61,7 @@ public class ConverterValidator extends MatchValidator {
                 .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
     }
 
-    private <M extends AnnotatedMethod> Either<String, Mapped<M>> tryAllMatchers(
+    private <M extends AnnotatedMethod> Either<String, Mapping<M>> tryAllMatchers(
             StringConverterType functionType,
             SourceMethod<M> parameter,
             TypeElement converter) {
@@ -75,7 +76,7 @@ public class ConverterValidator extends MatchValidator {
                         .<Either<String, CodeBlock>>map(Either::left)
                         .orElseGet(() -> Either.right(getMapExpr(functionType, converter)))
                         .map(code -> new MapExpr(code, m.baseType(), false))
-                        .map(mapExpr -> m.toConvertedParameter(mapExpr, parameter));
+                        .map(mapExpr -> m.toMapping(mapExpr, parameter));
             }
         }
         TypeMirror typeForErrorMessage = matches.stream()
@@ -85,6 +86,8 @@ public class ConverterValidator extends MatchValidator {
         return left(noMatchError(typeForErrorMessage));
     }
 
+    /* Left-Optional
+     */
     private Optional<String> checkConverterAnnotationPresent(TypeElement converter) {
         Converter converterAnnotation = converter.getAnnotation(Converter.class);
         boolean nestedMapper = util.getEnclosingElements(converter).contains(sourceElement.element());
@@ -95,6 +98,8 @@ public class ConverterValidator extends MatchValidator {
         return Optional.empty();
     }
 
+    /* Left-Optional
+     */
     private Optional<String> checkNotAbstract(TypeElement converter) {
         if (converter.getModifiers().contains(ABSTRACT)) {
             return Optional.of("converter class may not be abstract");
@@ -102,6 +107,8 @@ public class ConverterValidator extends MatchValidator {
         return Optional.empty();
     }
 
+    /* Left-Optional
+     */
     private Optional<String> checkNoTypevars(TypeElement converter) {
         if (!converter.getTypeParameters().isEmpty()) {
             return Optional.of("type parameters are not allowed in converter class declaration");
@@ -121,6 +128,8 @@ public class ConverterValidator extends MatchValidator {
     }
 
     private String noMatchError(TypeMirror type) {
-        return "converter should extend StringConverter<" + util.typeToString(type) + ">";
+        return "converter should extend " +
+                StringConverter.class.getSimpleName() +
+                "<" + util.typeToString(type) + ">";
     }
 }

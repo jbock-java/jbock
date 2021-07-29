@@ -28,7 +28,7 @@ import static io.jbock.util.Either.right;
 import static net.jbock.common.Constants.STRING;
 
 @ValidateScope
-public class AutoConverters {
+public class AutoMappings {
 
     private static final String NEW = "new";
     private static final String CREATE = "create";
@@ -41,13 +41,13 @@ public class AutoConverters {
     private final List<Entry<String, MapExpr>> converters;
 
     @Inject
-    AutoConverters(TypeTool tool, SafeElements elements) {
+    AutoMappings(TypeTool tool, SafeElements elements) {
         this.tool = tool;
         this.elements = elements;
         this.converters = autoConverters();
     }
 
-    Either<TypeMirror, MapExpr> findAutoConverter(TypeMirror baseType) {
+    Either<TypeMirror, MapExpr> findAutoMapping(TypeMirror baseType) {
         for (Entry<String, MapExpr> converter : converters) {
             if (tool.isSameType(baseType, converter.getKey())) {
                 return right(converter.getValue());

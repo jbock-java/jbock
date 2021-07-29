@@ -9,7 +9,7 @@ public interface ContextComponent {
     GeneratedClass generatedClass();
 
     @Component.Factory
-    interface Builder {
+    interface Factory {
 
         ContextComponent create(ContextModule module);
     }

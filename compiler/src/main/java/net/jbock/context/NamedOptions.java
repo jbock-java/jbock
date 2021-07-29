@@ -2,7 +2,7 @@ package net.jbock.context;
 
 import com.squareup.javapoet.TypeName;
 import net.jbock.annotated.AnnotatedOption;
-import net.jbock.convert.Mapped;
+import net.jbock.convert.Mapping;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,14 +13,14 @@ import static net.jbock.common.Constants.STRING;
 
 public class NamedOptions {
 
-    private final List<Mapped<AnnotatedOption>> options;
+    private final List<Mapping<AnnotatedOption>> options;
     private final boolean anyRepeatable;
     private final boolean anyRegular; // any (optional|required) ?
     private final boolean anyFlags;
     private final boolean unixClusteringSupported;
 
     private NamedOptions(
-            List<Mapped<AnnotatedOption>> options,
+            List<Mapping<AnnotatedOption>> options,
             boolean anyRepeatable,
             boolean anyRegular,
             boolean anyFlags,
@@ -32,19 +32,19 @@ public class NamedOptions {
         this.unixClusteringSupported = unixClusteringSupported;
     }
 
-    static NamedOptions create(List<Mapped<AnnotatedOption>> options, boolean unixClustering) {
-        boolean anyRepeatable = options.stream().anyMatch(Mapped::isRepeatable);
+    static NamedOptions create(List<Mapping<AnnotatedOption>> options, boolean unixClustering) {
+        boolean anyRepeatable = options.stream().anyMatch(Mapping::isRepeatable);
         boolean anyRegular = options.stream().anyMatch(option -> option.isOptional() || option.isRequired());
-        boolean anyFlags = options.stream().anyMatch(Mapped::isFlag);
+        boolean anyFlags = options.stream().anyMatch(Mapping::isFlag);
         return new NamedOptions(options, anyRepeatable, anyRegular, anyFlags,
                 unixClustering && hasEnoughUnixNames(options));
     }
 
-    private static boolean hasEnoughUnixNames(List<Mapped<AnnotatedOption>> options) {
-        List<Mapped<AnnotatedOption>> unixOptions = options.stream()
+    private static boolean hasEnoughUnixNames(List<Mapping<AnnotatedOption>> options) {
+        List<Mapping<AnnotatedOption>> unixOptions = options.stream()
                 .filter(option -> option.item().annotatedMethod().hasUnixName())
                 .collect(Collectors.toList());
-        return unixOptions.size() >= 2 && unixOptions.stream().anyMatch(Mapped::isFlag);
+        return unixOptions.size() >= 2 && unixOptions.stream().anyMatch(Mapping::isFlag);
     }
 
     boolean anyRepeatable() {
@@ -59,7 +59,7 @@ public class NamedOptions {
         return anyFlags;
     }
 
-    List<Mapped<AnnotatedOption>> options() {
+    List<Mapping<AnnotatedOption>> options() {
         return options;
     }
 
@@ -67,7 +67,7 @@ public class NamedOptions {
         return options.isEmpty();
     }
 
-    Stream<Mapped<AnnotatedOption>> stream() {
+    Stream<Mapping<AnnotatedOption>> stream() {
         return options.stream();
     }
 
