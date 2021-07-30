@@ -65,7 +65,7 @@ public class AutoMappings {
                 Match<M> match = matchFinder.findMatch(parameter);
                 CodeBlock code = converter.getValue().code;
                 boolean multiline = converter.getValue().multiline;
-                return right(MapExpr.create(code, match, multiline));
+                return right(Mapping.create(code, match, multiline));
             }
         }
         return left(baseType);

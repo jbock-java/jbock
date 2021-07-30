@@ -5,7 +5,6 @@ import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
-import net.jbock.convert.matching.MapExpr;
 import net.jbock.convert.matching.Match;
 import net.jbock.source.SourceOption;
 
@@ -69,7 +68,7 @@ public class SourceOptionValidator {
         }
         PrimitiveType bool = types.getPrimitiveType(BOOLEAN);
         Match<AnnotatedOption> match = Match.create(bool, OPTIONAL, sourceOption);
-        return Optional.of(MapExpr.createFlag(match));
+        return Optional.of(Mapping.createFlag(match));
     }
 
     private Either<ValidationFailure, SourceOption> checkOptionNames(SourceOption sourceMethod) {

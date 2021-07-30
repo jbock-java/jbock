@@ -64,7 +64,7 @@ public class AutoMappingFinder extends MatchValidator {
                 .map(enumType -> {
                     Match<M> match = matchFinder.findMatch(parameter);
                     CodeBlock code = enumConvertBlock(enumType);
-                    return MapExpr.create(code, match, true);
+                    return Mapping.create(code, match, true);
                 });
     }
 

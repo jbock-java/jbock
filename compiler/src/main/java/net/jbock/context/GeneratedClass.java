@@ -76,7 +76,7 @@ public final class GeneratedClass {
         spec.addType(impl.define());
 
         for (Mapping<?> item : everything) {
-            if (item.mapExpr().multiline()) {
+            if (item.multiline()) {
                 spec.addType(multilineConverter.define(item));
             }
         }

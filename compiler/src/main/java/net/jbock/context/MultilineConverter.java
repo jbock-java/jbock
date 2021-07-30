@@ -7,7 +7,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.convert.Mapping;
-import net.jbock.convert.matching.MapExpr;
 import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
@@ -27,24 +26,23 @@ public class MultilineConverter {
         this.generatedTypes = generatedTypes;
     }
 
-    TypeSpec define(Mapping<?> item) {
-        MapExpr mapExpr = item.mapExpr();
-        return TypeSpec.classBuilder(generatedTypes.multilineConverterType(item))
-                .addMethod(convertMethod(mapExpr))
+    TypeSpec define(Mapping<?> m) {
+        return TypeSpec.classBuilder(generatedTypes.multilineConverterType(m))
+                .addMethod(convertMethod(m))
                 .superclass(ParameterizedTypeName.get(
                         ClassName.get(StringConverter.class),
-                        TypeName.get(mapExpr.type())))
+                        TypeName.get(m.baseType())))
                 .addModifiers(PRIVATE, STATIC)
                 .build();
     }
 
-    private MethodSpec convertMethod(MapExpr mapExpr) {
+    private MethodSpec convertMethod(Mapping<?> m) {
         MethodSpec.Builder spec = MethodSpec.methodBuilder("convert");
         spec.addAnnotation(Override.class);
-        spec.addCode(mapExpr.code());
+        spec.addCode(m.mapExpr());
         spec.addParameter(ParameterSpec.builder(STRING, "token").build());
         spec.addModifiers(PROTECTED);
-        spec.returns(TypeName.get(mapExpr.type()));
+        spec.returns(TypeName.get(m.baseType()));
         return spec.build();
     }
 }
