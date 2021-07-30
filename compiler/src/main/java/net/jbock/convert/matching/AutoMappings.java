@@ -5,6 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
+import net.jbock.convert.Mapping;
 import net.jbock.source.SourceMethod;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
@@ -58,7 +59,7 @@ public class AutoMappings {
         this.converters = autoConverters();
     }
 
-    <M extends AnnotatedMethod> Either<TypeMirror, MapExpr<M>> findAutoMapping(SourceMethod<M> parameter, TypeMirror baseType) {
+    <M extends AnnotatedMethod> Either<TypeMirror, Mapping<M>> findAutoMapping(SourceMethod<M> parameter, TypeMirror baseType) {
         for (Entry<String, MultilineCodeBlock> converter : converters) {
             if (tool.isSameType(baseType, converter.getKey())) {
                 Match<M> match = matchFinder.findMatch(parameter);

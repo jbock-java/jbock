@@ -48,11 +48,10 @@ public class AutoMappingFinder extends MatchValidator {
             SourceMethod<M> parameter,
             Match<M> match) {
         return autoConverter.findAutoMapping(parameter, match.baseType())
-                .flatMapLeft(baseType -> findEnumMapping(parameter, baseType))
-                .map(MapExpr::toMapping);
+                .flatMapLeft(baseType -> findEnumMapping(parameter, baseType));
     }
 
-    private <M extends AnnotatedMethod> Either<String, MapExpr<M>> findEnumMapping(
+    private <M extends AnnotatedMethod> Either<String, Mapping<M>> findEnumMapping(
             SourceMethod<M> parameter,
             TypeMirror baseType) {
         return TypeTool.AS_DECLARED.visit(baseType)

@@ -5,15 +5,14 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.annotated.AnnotatedMethod;
-import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.EnumName;
 import net.jbock.convert.matching.MapExpr;
-import net.jbock.convert.matching.Match;
 import net.jbock.model.Multiplicity;
 import net.jbock.source.SourceMethod;
 
-import javax.lang.model.type.PrimitiveType;
 import java.util.Optional;
+
+import static net.jbock.model.Multiplicity.OPTIONAL;
 
 /**
  * An annotated method with additional information about type conversion.
@@ -46,20 +45,7 @@ public final class Mapping<M extends AnnotatedMethod> {
         String fieldName = parameter.enumName().original();
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
-        return new Mapping<>(mapExpr, extractExpr, asParameterSpec,
-                asFieldSpec);
-    }
-
-    public static Mapping<AnnotatedOption> createFlag(
-            SourceMethod<AnnotatedOption> namedOption,
-            PrimitiveType booleanType) {
-        TypeName fieldType = TypeName.BOOLEAN;
-        String fieldName = namedOption.enumName().original();
-        FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
-        ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
-        Match<AnnotatedOption> match = Match.create(booleanType, Multiplicity.OPTIONAL, namedOption);
-        MapExpr<AnnotatedOption> mapExpr = MapExpr.createFlag(match);
-        return new Mapping<>(mapExpr, Optional.empty(), asParameterSpec, asFieldSpec);
+        return new Mapping<>(mapExpr, extractExpr, asParameterSpec, asFieldSpec);
     }
 
     public Optional<CodeBlock> simpleMapExpr() {
@@ -94,7 +80,7 @@ public final class Mapping<M extends AnnotatedMethod> {
     }
 
     public boolean isOptional() {
-        return multiplicity() == Multiplicity.OPTIONAL;
+        return multiplicity() == OPTIONAL;
     }
 
     public boolean isFlag() {

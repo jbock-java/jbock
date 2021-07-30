@@ -2,6 +2,7 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
 import net.jbock.source.SourceMethod;
 import net.jbock.util.StringConverter;
@@ -27,16 +28,16 @@ public class MapExpr<M extends AnnotatedMethod> {
         this.modeFlag = modeFlag;
     }
 
-    public static <M extends AnnotatedMethod> MapExpr<M> create(
+    public static <M extends AnnotatedMethod> Mapping<M> create(
             CodeBlock code,
             Match<M> match,
             boolean multiline) {
-        return new MapExpr<>(code, match, multiline, false);
+        return new MapExpr<>(code, match, multiline, false).toMapping();
     }
 
-    public static <M extends AnnotatedMethod> MapExpr<M> createFlag(Match<M> match) {
+    public static Mapping<AnnotatedOption> createFlag(Match<AnnotatedOption> match) {
         CodeBlock code = CodeBlock.of("$T.create($T.identity())", StringConverter.class, Function.class);
-        return new MapExpr<>(code, match, false, true);
+        return new MapExpr<>(code, match, false, true).toMapping();
     }
 
     public CodeBlock code() {
@@ -63,7 +64,7 @@ public class MapExpr<M extends AnnotatedMethod> {
         return modeFlag;
     }
 
-    public Mapping<M> toMapping() {
+    private Mapping<M> toMapping() {
         return Mapping.create(this, match.extractExpr(), match.sourceMethod());
     }
 }

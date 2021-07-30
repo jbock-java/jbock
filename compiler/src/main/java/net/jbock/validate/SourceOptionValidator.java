@@ -5,6 +5,8 @@ import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
+import net.jbock.convert.matching.MapExpr;
+import net.jbock.convert.matching.Match;
 import net.jbock.source.SourceOption;
 
 import javax.inject.Inject;
@@ -22,7 +24,7 @@ import static io.jbock.util.Eithers.toOptionalList;
 import static io.jbock.util.Eithers.toValidListAll;
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
-import static net.jbock.convert.Mapping.createFlag;
+import static net.jbock.model.Multiplicity.OPTIONAL;
 
 @ValidateScope
 public class SourceOptionValidator {
@@ -58,15 +60,16 @@ public class SourceOptionValidator {
 
     /* Right-Optional
      */
-    private Optional<Mapping<AnnotatedOption>> checkFlag(SourceOption sourceMethod) {
-        if (sourceMethod.annotatedMethod().converter().isPresent()) {
+    private Optional<Mapping<AnnotatedOption>> checkFlag(SourceOption sourceOption) {
+        if (sourceOption.annotatedMethod().converter().isPresent()) {
             return Optional.empty();
         }
-        if (sourceMethod.returnType().getKind() != BOOLEAN) {
+        if (sourceOption.returnType().getKind() != BOOLEAN) {
             return Optional.empty();
         }
-        PrimitiveType primitiveBoolean = types.getPrimitiveType(BOOLEAN);
-        return Optional.of(createFlag(sourceMethod, primitiveBoolean));
+        PrimitiveType bool = types.getPrimitiveType(BOOLEAN);
+        Match<AnnotatedOption> match = Match.create(bool, OPTIONAL, sourceOption);
+        return Optional.of(MapExpr.createFlag(match));
     }
 
     private Either<ValidationFailure, SourceOption> checkOptionNames(SourceOption sourceMethod) {
