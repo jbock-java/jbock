@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import javax.tools.JavaFileObject;
 
 import static com.google.common.truth.Truth.assertAbout;
+import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static net.jbock.processor.ProcessorTest.fromSource;
 
@@ -34,19 +36,21 @@ class ConverterTest {
     }
 
     @Test
-    void converterDoesNotImplementFunction() {
+    void doesNotExtendStringConverter() {
+        JavaFileObject converter = forSourceLines(
+                "something.MapMap",
+                "package something;",
+                "@net.jbock.Converter",
+                "public class MapMap {}");
         JavaFileObject javaFile = fromSource(
-                "@Converter",
-                "class MapMap {}",
-                "",
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Option(names = \"--x\", converter = MapMap.class)",
+                "  @Option(names = \"--x\", converter = something.MapMap.class)",
                 "  abstract String foo();",
                 "",
                 "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
+        assertAbout(javaSources()).that(asList(converter, javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("converter must extend StringConverter<X> or implement Supplier<StringConverter<X>>");
@@ -54,23 +58,46 @@ class ConverterTest {
 
     @Test
     void missingConverterAnnotation() {
+        JavaFileObject converter = forSourceLines(
+                "something.MapMap",
+                "package something;",
+                "public class MapMap extends net.jbock.util.StringConverter<String> {",
+                "  public String convert(String token) { return null; }",
+                "}");
         JavaFileObject javaFile = fromSource(
-                "class MapMap implements Function<String, String> {",
-                "  public String apply(String s) { return null; }",
-                "}",
-                "",
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Option(names = \"--x\", converter = MapMap.class)",
+                "  @Option(names = \"--x\", converter = something.MapMap.class)",
                 "  abstract String foo();",
-                "",
                 "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
+        assertAbout(javaSources()).that(asList(converter, javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("converter must be an inner class of the command class, " +
                         "or carry the @Converter annotation");
+    }
+
+    @Test
+    void abstractConverter() {
+        JavaFileObject converter = forSourceLines(
+                "something.MapMap",
+                "package something;",
+                "@net.jbock.Converter",
+                "public abstract class MapMap extends net.jbock.util.StringConverter<String> {",
+                "  public String convert(String token) { return null; }",
+                "}");
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Option(names = \"--x\", converter = something.MapMap.class)",
+                "  abstract String foo();",
+                "}");
+        assertAbout(javaSources()).that(asList(converter, javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("converter class may not be abstract");
     }
 
     @Test
@@ -337,7 +364,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("converter should extend StringConverter<Integer>");
+                .withErrorContaining("invalid converter class: should extend StringConverter<Integer>");
     }
 
     @Test
@@ -357,7 +384,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("converter should extend StringConverter<Integer>");
+                .withErrorContaining("invalid converter class: should extend StringConverter<Integer>");
     }
 
     @Test
@@ -377,7 +404,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("converter should extend StringConverter<Integer>");
+                .withErrorContaining("invalid converter class: should extend StringConverter<Integer>");
     }
 
     @Test
@@ -571,7 +598,8 @@ class ConverterTest {
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
-                .compilesWithoutError();
+                .failsToCompile()
+                .withErrorContaining("invalid converter class: should extend StringConverter<Integer>");
     }
 
     @Test
@@ -590,7 +618,8 @@ class ConverterTest {
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
-                .compilesWithoutError();
+                .failsToCompile()
+                .withErrorContaining("invalid converter class: should extend StringConverter<Integer>");
     }
 
     @Test

@@ -8,6 +8,7 @@ import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.EnumName;
 import net.jbock.convert.matching.MapExpr;
+import net.jbock.convert.matching.Match;
 import net.jbock.model.Multiplicity;
 import net.jbock.source.SourceMethod;
 import net.jbock.util.StringConverter;
@@ -61,13 +62,16 @@ public final class Mapping<M extends AnnotatedMethod> {
                 asFieldSpec, parameter, false);
     }
 
-    public static Mapping<AnnotatedOption> createFlag(SourceMethod<AnnotatedOption> namedOption, PrimitiveType booleanType) {
+    public static Mapping<AnnotatedOption> createFlag(
+            SourceMethod<AnnotatedOption> namedOption,
+            PrimitiveType booleanType) {
         CodeBlock code = CodeBlock.of("$T.create($T.identity())", StringConverter.class, Function.class);
         TypeName fieldType = TypeName.BOOLEAN;
         String fieldName = namedOption.enumName().original();
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
-        MapExpr mapExpr = new MapExpr(code, booleanType, false);
+        Match match = Match.create(booleanType, Multiplicity.OPTIONAL);
+        MapExpr mapExpr = new MapExpr(code, match, false);
         return new Mapping<>(mapExpr, Optional.empty(), Multiplicity.OPTIONAL, asParameterSpec,
                 asFieldSpec, namedOption, true);
     }

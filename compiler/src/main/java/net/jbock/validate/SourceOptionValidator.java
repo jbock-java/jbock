@@ -3,8 +3,8 @@ package net.jbock.validate;
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.MappingFinder;
 import net.jbock.convert.Mapping;
+import net.jbock.convert.MappingFinder;
 import net.jbock.source.SourceOption;
 
 import javax.inject.Inject;
@@ -31,7 +31,9 @@ public class SourceOptionValidator {
     private final Types types;
 
     @Inject
-    SourceOptionValidator(MappingFinder converterFinder, Types types) {
+    SourceOptionValidator(
+            MappingFinder converterFinder,
+            Types types) {
         this.converterFinder = converterFinder;
         this.types = types;
     }

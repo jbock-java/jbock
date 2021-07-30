@@ -3,8 +3,8 @@ package net.jbock.convert.matching;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import io.jbock.util.Either;
-import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
+import net.jbock.source.SourceMethod;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
@@ -37,42 +37,52 @@ public class AutoMappings {
     private static final String PARSE = "parse";
 
     private final TypeTool tool;
-    private final SafeElements elements;
-    private final List<Entry<String, MapExpr>> converters;
+    private final List<Entry<String, MultilineCodeBlock>> converters;
+    private final MatchFinder matchFinder;
+
+    private static class MultilineCodeBlock {
+        private final CodeBlock code;
+        private final boolean multiline;
+
+        private MultilineCodeBlock(CodeBlock code, boolean multiline) {
+            this.code = code;
+            this.multiline = multiline;
+        }
+    }
 
     @Inject
-    AutoMappings(TypeTool tool, SafeElements elements) {
+    AutoMappings(TypeTool tool, MatchFinder matchFinder) {
         this.tool = tool;
-        this.elements = elements;
+        this.matchFinder = matchFinder;
         this.converters = autoConverters();
     }
 
-    Either<TypeMirror, MapExpr> findAutoMapping(TypeMirror baseType) {
-        for (Entry<String, MapExpr> converter : converters) {
+    Either<TypeMirror, MapExpr> findAutoMapping(SourceMethod<?> parameter, TypeMirror baseType) {
+        for (Entry<String, MultilineCodeBlock> converter : converters) {
             if (tool.isSameType(baseType, converter.getKey())) {
-                return right(converter.getValue());
+                Match match = matchFinder.findMatch(parameter);
+                CodeBlock code = converter.getValue().code;
+                boolean multiline = converter.getValue().multiline;
+                return right(new MapExpr(code, match, multiline));
             }
         }
         return left(baseType);
     }
 
-    private Entry<String, MapExpr> create(Class<?> autoType, String methodName) {
+    private Entry<String, MultilineCodeBlock> create(Class<?> autoType, String methodName) {
         return create(autoType, CodeBlock.of("$T::" + methodName, autoType));
     }
 
-    private Entry<String, MapExpr> create(Class<?> autoType, CodeBlock mapExpr) {
+    private Entry<String, MultilineCodeBlock> create(Class<?> autoType, CodeBlock mapExpr) {
         return create(autoType, CodeBlock.of("$T.create($L)", StringConverter.class, mapExpr), false);
     }
 
-    private Entry<String, MapExpr> create(Class<?> autoType, CodeBlock code, boolean multiline) {
+    private Entry<String, MultilineCodeBlock> create(Class<?> autoType, CodeBlock code, boolean multiline) {
         String canonicalName = autoType.getCanonicalName();
-        TypeMirror type = elements.getTypeElement(canonicalName)
-                .orElseThrow(() -> new RuntimeException("no typeElement: " + canonicalName))
-                .asType();
-        return new SimpleImmutableEntry<>(canonicalName, new MapExpr(code, type, multiline));
+        return new SimpleImmutableEntry<>(canonicalName, new MultilineCodeBlock(code, multiline));
     }
 
-    private List<Entry<String, MapExpr>> autoConverters() {
+    private List<Entry<String, MultilineCodeBlock>> autoConverters() {
         return List.of(
                 create(String.class, CodeBlock.of("$T.identity()", Function.class)),
                 create(Integer.class, VALUE_OF),

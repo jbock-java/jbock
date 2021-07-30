@@ -6,7 +6,6 @@ import net.jbock.Converter;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.Util;
 import net.jbock.convert.Mapping;
-import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.convert.reference.StringConverterType;
 import net.jbock.processor.SourceElement;
@@ -16,37 +15,32 @@ import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 
-import static io.jbock.util.Either.left;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
 @ValidateScope
 public class ConverterValidator extends MatchValidator {
 
-    private final List<Matcher> matchers;
     private final ReferenceTool referenceTool;
     private final Util util;
     private final SourceElement sourceElement;
     private final Types types;
+    private final MatchFinder matchFinder;
 
     @Inject
     ConverterValidator(
-            List<Matcher> matchers,
             ReferenceTool referenceTool,
             Util util,
             SourceElement sourceElement,
-            Types types) {
-        this.matchers = matchers;
+            Types types,
+            MatchFinder matchFinder) {
         this.referenceTool = referenceTool;
         this.util = util;
         this.sourceElement = sourceElement;
         this.types = types;
+        this.matchFinder = matchFinder;
     }
 
     public <M extends AnnotatedMethod> Either<String, Mapping<M>> findMapping(
@@ -65,25 +59,10 @@ public class ConverterValidator extends MatchValidator {
             StringConverterType functionType,
             SourceMethod<M> parameter,
             TypeElement converter) {
-        List<Match> matches = new ArrayList<>();
-        for (Matcher matcher : matchers) {
-            Optional<Match> match = matcher.tryMatch(parameter);
-            match.ifPresent(matches::add);
-            match = match.filter(m -> isValidMatch(m, functionType));
-            if (match.isPresent()) {
-                Match m = match.orElseThrow();
-                return validateMatch(parameter, m)
-                        .<Either<String, CodeBlock>>map(Either::left)
-                        .orElseGet(() -> Either.right(getMapExpr(functionType, converter)))
-                        .map(code -> new MapExpr(code, m.baseType(), false))
-                        .map(mapExpr -> m.toMapping(mapExpr, parameter));
-            }
-        }
-        TypeMirror typeForErrorMessage = matches.stream()
-                .max(Comparator.comparing(Match::multiplicity))
-                .map(Match::baseType)
-                .orElse(parameter.returnType());
-        return left(noMatchError(typeForErrorMessage));
+        return validateMatch(parameter, matchFinder.findMatch(parameter))
+                .filter(match -> isValidMatch(match, functionType))
+                .map(match -> new MapExpr(getMapExpr(functionType, converter), match, false))
+                .map(mapExpr -> mapExpr.toMapping(parameter));
     }
 
     /* Left-Optional
@@ -123,13 +102,12 @@ public class ConverterValidator extends MatchValidator {
         return CodeBlock.of("new $T()", converter.asType());
     }
 
-    private boolean isValidMatch(Match match, StringConverterType functionType) {
-        return types.isSameType(functionType.outputType(), match.baseType());
-    }
-
-    private String noMatchError(TypeMirror type) {
-        return "converter should extend " +
-                StringConverter.class.getSimpleName() +
-                "<" + util.typeToString(type) + ">";
+    private Optional<String> isValidMatch(Match match, StringConverterType functionType) {
+        if (!types.isSameType(functionType.outputType(), match.baseType())) {
+            return Optional.of("invalid converter class: should extend " +
+                    StringConverter.class.getSimpleName() +
+                    "<" + util.typeToString(match.baseType()) + ">");
+        }
+        return Optional.empty();
     }
 }
