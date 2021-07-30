@@ -3,8 +3,8 @@ package net.jbock.validate;
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.MappingFinder;
 import net.jbock.convert.Mapping;
+import net.jbock.convert.MappingFinder;
 import net.jbock.source.SourceParameter;
 
 import javax.inject.Inject;
@@ -60,10 +60,10 @@ public class SourceParameterValidator {
         return allPositionalParameters.stream()
                 .filter(Mapping::isOptional)
                 .findFirst()
-                .map(Mapping::item)
+                .map(Mapping::sourceMethod)
                 .flatMap(firstOptional -> allPositionalParameters.stream()
                         .filter(Mapping::isRequired)
-                        .map(Mapping::item)
+                        .map(Mapping::sourceMethod)
                         .filter(item -> item.annotatedMethod().index() > firstOptional.annotatedMethod().index())
                         .map(item -> item.fail("position of required parameter '" +
                                 item.annotatedMethod().method().getSimpleName() +

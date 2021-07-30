@@ -1,5 +1,6 @@
 package net.jbock.convert.matcher;
 
+import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.convert.matching.Match;
 import net.jbock.source.SourceMethod;
 
@@ -7,5 +8,5 @@ import java.util.Optional;
 
 public interface Matcher {
 
-    Optional<Match> tryMatch(SourceMethod<?> parameter);
+    <M extends AnnotatedMethod> Optional<Match<M>> tryMatch(SourceMethod<M> parameter);
 }

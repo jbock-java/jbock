@@ -7,13 +7,13 @@ import net.jbock.source.SourceMethod;
 
 import javax.lang.model.type.TypeMirror;
 
-public class MapExpr {
+public class MapExpr<M extends AnnotatedMethod> {
 
     private final CodeBlock code;
-    private final Match match;
+    private final Match<M> match;
     private final boolean multiline;
 
-    public MapExpr(CodeBlock code, Match match, boolean multiline) {
+    public MapExpr(CodeBlock code, Match<M> match, boolean multiline) {
         this.code = code;
         this.match = match;
         this.multiline = multiline;
@@ -31,7 +31,11 @@ public class MapExpr {
         return multiline;
     }
 
-    public <M extends AnnotatedMethod> Mapping<M> toMapping(SourceMethod<M> parameter) {
-        return Mapping.create(this, match.extractExpr(), match.multiplicity(), parameter);
+    public SourceMethod<M> sourceMethod() {
+        return match.sourceMethod();
+    }
+
+    public Mapping<M> toMapping() {
+        return Mapping.create(this, match.extractExpr(), match.multiplicity(), match.sourceMethod());
     }
 }

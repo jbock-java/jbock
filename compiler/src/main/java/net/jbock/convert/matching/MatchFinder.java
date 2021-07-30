@@ -10,6 +10,7 @@ import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.util.List;
 import java.util.Optional;
@@ -33,16 +34,17 @@ public class MatchFinder {
         this.types = types;
     }
 
-    public <M extends AnnotatedMethod> Match findMatch(SourceMethod<M> parameter) {
+    public <M extends AnnotatedMethod> Match<M> findMatch(SourceMethod<M> parameter) {
         for (Matcher matcher : List.of(optionalMatcher, listMatcher)) {
-            Optional<Match> match = matcher.tryMatch(parameter);
+            Optional<Match<M>> match = matcher.tryMatch(parameter);
             if (match.isPresent()) {
                 return match.orElseThrow();
             }
         }
-        return Match.create(AS_PRIMITIVE.visit(parameter.returnType())
+        TypeMirror baseType = AS_PRIMITIVE.visit(parameter.returnType())
                 .map(types::boxedClass)
                 .map(TypeElement::asType)
-                .orElse(parameter.returnType()), Multiplicity.REQUIRED);
+                .orElse(parameter.returnType());
+        return Match.create(baseType, Multiplicity.REQUIRED, parameter);
     }
 }

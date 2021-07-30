@@ -88,7 +88,7 @@ public final class GeneratedClass {
                 .addAnnotation(generatedAnnotation()).build();
     }
 
-     private AnnotationSpec generatedAnnotation() {
+    private AnnotationSpec generatedAnnotation() {
         return AnnotationSpec.builder(Generated.class)
                 .addMember("value", CodeBlock.of("$S", JbockProcessor.class.getCanonicalName()))
                 .addMember("comments", CodeBlock.of("$S", "https://github.com/jbock-java"))

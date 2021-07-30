@@ -55,7 +55,7 @@ public class Impl {
     }
 
     private MethodSpec parameterMethodOverride(Mapping<?> c) {
-        SourceMethod<?> param = c.item();
+        SourceMethod<?> param = c.sourceMethod();
         return MethodSpec.methodBuilder(param.methodName())
                 .returns(TypeName.get(param.returnType()))
                 .addModifiers(param.annotatedMethod().accessModifiers())

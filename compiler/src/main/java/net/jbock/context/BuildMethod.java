@@ -118,7 +118,7 @@ public class BuildMethod extends CachedMethod {
     private CodeBlock convertExpressionRegularParameter(Mapping<AnnotatedParameter> c, int i) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$T.ofNullable(this.$N[$L])", OPTIONAL, commonFields.params(),
-                c.item().annotatedMethod().index()));
+                c.sourceMethod().annotatedMethod().index()));
         code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
                 .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
         code.addAll(tailExpressionParameter(c, i));

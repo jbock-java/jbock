@@ -79,20 +79,20 @@ public class CreateModelMethod extends CachedMethod {
 
     private CodeBlock optionBlock(Mapping<AnnotatedOption> c) {
         List<CodeBlock> names = new ArrayList<>();
-        for (String name : c.item().annotatedMethod().names()) {
+        for (String name : c.sourceMethod().annotatedMethod().names()) {
             names.add(CodeBlock.of("$S", name));
         }
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$T.builder()", Option.class));
         code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
-        c.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
+        c.sourceMethod().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
         code.add(CodeBlock.of(".withNames($T.of($L))", List.class, contextUtil.joinByComma(names)));
         if (c.isFlag()) {
             code.add(CodeBlock.of(".withModeFlag()"));
         } else if (c.multiplicity() != Multiplicity.OPTIONAL) {
             code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
         }
-        for (String line : c.item().annotatedMethod().description()) {
+        for (String line : c.sourceMethod().annotatedMethod().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
@@ -103,11 +103,11 @@ public class CreateModelMethod extends CachedMethod {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$T.builder()", Parameter.class));
         code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
-        c.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
+        c.sourceMethod().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
         if (c.multiplicity() != Multiplicity.REQUIRED) {
             code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
         }
-        for (String line : c.item().annotatedMethod().description()) {
+        for (String line : c.sourceMethod().annotatedMethod().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));

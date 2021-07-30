@@ -61,8 +61,8 @@ public class ConverterValidator extends MatchValidator {
             TypeElement converter) {
         return validateMatch(parameter, matchFinder.findMatch(parameter))
                 .filter(match -> isValidMatch(match, functionType))
-                .map(match -> new MapExpr(getMapExpr(functionType, converter), match, false))
-                .map(mapExpr -> mapExpr.toMapping(parameter));
+                .map(match -> new MapExpr<>(getMapExpr(functionType, converter), match, false))
+                .map(MapExpr::toMapping);
     }
 
     /* Left-Optional
@@ -102,7 +102,7 @@ public class ConverterValidator extends MatchValidator {
         return CodeBlock.of("new $T()", converter.asType());
     }
 
-    private Optional<String> isValidMatch(Match match, StringConverterType functionType) {
+    private <M extends AnnotatedMethod> Optional<String> isValidMatch(Match<M> match, StringConverterType functionType) {
         if (!types.isSameType(functionType.outputType(), match.baseType())) {
             return Optional.of("invalid converter class: should extend " +
                     StringConverter.class.getSimpleName() +

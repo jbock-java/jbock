@@ -1,5 +1,6 @@
 package net.jbock.convert.matcher;
 
+import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.matching.Match;
@@ -26,10 +27,10 @@ public class ListMatcher implements Matcher {
     }
 
     @Override
-    public Optional<Match> tryMatch(SourceMethod<?> parameter) {
+    public <M extends AnnotatedMethod> Optional<Match<M>> tryMatch(SourceMethod<M> parameter) {
         TypeMirror returnType = parameter.returnType();
         return elements.getTypeElement("java.util.List")
                 .flatMap(utilList -> tool.getSingleTypeArgument(returnType, utilList)
-                        .map(typeArg -> Match.create(typeArg, Multiplicity.REPEATABLE)));
+                        .map(typeArg -> Match.create(typeArg, Multiplicity.REPEATABLE, parameter)));
     }
 }

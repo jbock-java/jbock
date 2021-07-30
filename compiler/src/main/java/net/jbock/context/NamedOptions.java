@@ -42,7 +42,7 @@ public class NamedOptions {
 
     private static boolean hasEnoughUnixNames(List<Mapping<AnnotatedOption>> options) {
         List<Mapping<AnnotatedOption>> unixOptions = options.stream()
-                .filter(option -> option.item().annotatedMethod().hasUnixName())
+                .filter(option -> option.sourceMethod().annotatedMethod().hasUnixName())
                 .collect(Collectors.toList());
         return unixOptions.size() >= 2 && unixOptions.stream().anyMatch(Mapping::isFlag);
     }

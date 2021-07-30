@@ -24,33 +24,30 @@ import java.util.function.Function;
  */
 public final class Mapping<M extends AnnotatedMethod> {
 
-    private final MapExpr mapExpr;
+    private final MapExpr<M> mapExpr;
     private final Optional<CodeBlock> extractExpr;
     private final Multiplicity multiplicity;
-    private final SourceMethod<M> sourceMethod;
     private final ParameterSpec asParameterSpec;
     private final FieldSpec asFieldSpec;
     private final boolean modeFlag;
 
     private Mapping(
-            MapExpr mapExpr,
+            MapExpr<M> mapExpr,
             Optional<CodeBlock> extractExpr,
             Multiplicity multiplicity,
             ParameterSpec asParameterSpec,
             FieldSpec asFieldSpec,
-            SourceMethod<M> sourceMethod,
             boolean modeFlag) {
         this.asParameterSpec = asParameterSpec;
         this.mapExpr = mapExpr;
         this.extractExpr = extractExpr;
         this.multiplicity = multiplicity;
         this.asFieldSpec = asFieldSpec;
-        this.sourceMethod = sourceMethod;
         this.modeFlag = modeFlag;
     }
 
     public static <M extends AnnotatedMethod> Mapping<M> create(
-            MapExpr mapExpr,
+            MapExpr<M> mapExpr,
             Optional<CodeBlock> extractExpr,
             Multiplicity multiplicity,
             SourceMethod<M> parameter) {
@@ -59,7 +56,7 @@ public final class Mapping<M extends AnnotatedMethod> {
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
         return new Mapping<>(mapExpr, extractExpr, multiplicity, asParameterSpec,
-                asFieldSpec, parameter, false);
+                asFieldSpec, false);
     }
 
     public static Mapping<AnnotatedOption> createFlag(
@@ -70,10 +67,10 @@ public final class Mapping<M extends AnnotatedMethod> {
         String fieldName = namedOption.enumName().original();
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
-        Match match = Match.create(booleanType, Multiplicity.OPTIONAL);
-        MapExpr mapExpr = new MapExpr(code, match, false);
+        Match<AnnotatedOption> match = Match.create(booleanType, Multiplicity.OPTIONAL, namedOption);
+        MapExpr<AnnotatedOption> mapExpr = new MapExpr<>(code, match, false);
         return new Mapping<>(mapExpr, Optional.empty(), Multiplicity.OPTIONAL, asParameterSpec,
-                asFieldSpec, namedOption, true);
+                asFieldSpec, true);
     }
 
     public Optional<CodeBlock> simpleMapExpr() {
@@ -91,12 +88,12 @@ public final class Mapping<M extends AnnotatedMethod> {
         return multiplicity;
     }
 
-    public MapExpr mapExpr() {
+    public MapExpr<M> mapExpr() {
         return mapExpr;
     }
 
     public EnumName enumName() {
-        return sourceMethod.enumName();
+        return sourceMethod().enumName();
     }
 
     public boolean isRequired() {
@@ -115,12 +112,12 @@ public final class Mapping<M extends AnnotatedMethod> {
         return modeFlag;
     }
 
-    public SourceMethod<M> item() {
-        return sourceMethod;
+    public SourceMethod<M> sourceMethod() {
+        return mapExpr.sourceMethod();
     }
 
     public String paramLabel() {
-        return sourceMethod.paramLabel();
+        return sourceMethod().paramLabel();
     }
 
     public FieldSpec asField() {

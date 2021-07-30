@@ -2,8 +2,6 @@ package net.jbock.processor;
 
 import dagger.Component;
 
-import javax.annotation.processing.ProcessingEnvironment;
-
 /**
  * @see ProcessorScope
  */

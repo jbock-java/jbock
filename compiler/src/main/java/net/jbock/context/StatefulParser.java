@@ -11,7 +11,6 @@ import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
-
 import java.util.List;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -84,7 +83,7 @@ public class StatefulParser {
         CodeBlock.Builder code = CodeBlock.builder();
         for (Mapping<AnnotatedOption> namedOption : namedOptions.options()) {
             String enumConstant = namedOption.enumName().enumConstant();
-            for (String dashedName : namedOption.item().annotatedMethod().names()) {
+            for (String dashedName : namedOption.sourceMethod().annotatedMethod().names()) {
                 code.addStatement("$N.put($S, $T.$L)",
                         commonFields.optionNames(), dashedName, sourceElement.optionEnumType(),
                         enumConstant);

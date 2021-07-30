@@ -63,7 +63,7 @@ class CommonFields {
                 .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, HelpRequested.class)
                 .unindent().build());
         long mapSize = namedOptions.stream()
-                .map(Mapping::item)
+                .map(Mapping::sourceMethod)
                 .map(t -> t.annotatedMethod().names())
                 .map(List::size)
                 .mapToLong(i -> i)

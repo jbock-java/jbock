@@ -3,7 +3,6 @@ package net.jbock.annotated;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
-import net.jbock.common.Annotations;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.source.SourceMethod;

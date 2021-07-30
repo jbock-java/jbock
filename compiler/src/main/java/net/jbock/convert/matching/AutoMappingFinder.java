@@ -44,13 +44,17 @@ public class AutoMappingFinder extends MatchValidator {
                 .flatMap(m -> findMapping(parameter, m));
     }
 
-    private <M extends AnnotatedMethod> Either<String, Mapping<M>> findMapping(SourceMethod<M> parameter, Match match) {
+    private <M extends AnnotatedMethod> Either<String, Mapping<M>> findMapping(
+            SourceMethod<M> parameter,
+            Match<M> match) {
         return autoConverter.findAutoMapping(parameter, match.baseType())
                 .flatMapLeft(baseType -> findEnumMapping(parameter, baseType))
-                .map(mapExpr -> mapExpr.toMapping(parameter));
+                .map(MapExpr::toMapping);
     }
 
-    private Either<String, MapExpr> findEnumMapping(SourceMethod<?> parameter, TypeMirror baseType) {
+    private <M extends AnnotatedMethod> Either<String, MapExpr<M>> findEnumMapping(
+            SourceMethod<M> parameter,
+            TypeMirror baseType) {
         return TypeTool.AS_DECLARED.visit(baseType)
                 .map(DeclaredType::asElement)
                 .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
@@ -59,9 +63,9 @@ public class AutoMappingFinder extends MatchValidator {
                 .<Either<String, TypeMirror>>map(Either::right)
                 .orElseGet(() -> left(noMatchError(baseType)))
                 .map(enumType -> {
-                    Match match = matchFinder.findMatch(parameter);
+                    Match<M> match = matchFinder.findMatch(parameter);
                     CodeBlock code = enumConvertBlock(enumType);
-                    return new MapExpr(code, match, true);
+                    return new MapExpr<>(code, match, true);
                 });
     }
 

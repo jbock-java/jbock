@@ -1,6 +1,7 @@
 package net.jbock.convert.matcher;
 
 import com.squareup.javapoet.CodeBlock;
+import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.matching.Match;
@@ -33,28 +34,28 @@ public class OptionalMatcher implements Matcher {
     }
 
     @Override
-    public Optional<Match> tryMatch(SourceMethod<?> parameter) {
+    public <M extends AnnotatedMethod> Optional<Match<M>> tryMatch(SourceMethod<M> parameter) {
         TypeMirror returnType = parameter.returnType();
-        return getOptionalPrimitive(returnType)
+        return getOptionalPrimitive(parameter, returnType)
                 .or(() -> // base
                         elements.getTypeElement("java.util.Optional")
                                 .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
-                                        .map(typeArg -> Match.create(typeArg, OPTIONAL))))
+                                        .map(typeArg -> Match.create(typeArg, OPTIONAL, parameter))))
                 .or(() -> // vavr
                         elements.getTypeElement("io.vavr.control.Option")
                                 .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
                                         .map(typeArg -> Match.create(typeArg, OPTIONAL,
-                                                CodeBlock.of(".map($1T::of).orElse($1T.none())", types.erasure(el.asType()))))));
+                                                CodeBlock.of(".map($1T::of).orElse($1T.none())", types.erasure(el.asType())), parameter))));
     }
 
-    private Optional<Match> getOptionalPrimitive(TypeMirror type) {
+    private <M extends AnnotatedMethod> Optional<Match<M>> getOptionalPrimitive(SourceMethod<M> parameter, TypeMirror type) {
         for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
             if (tool.isSameType(type, optionalPrimitive.type())) {
                 CodeBlock extractExpr = optionalPrimitive.extractExpr();
                 return elements.getTypeElement(optionalPrimitive.numberType())
                         .map(TypeElement::asType)
                         .flatMap(numberType ->
-                                Optional.of(Match.create(numberType, OPTIONAL, extractExpr)));
+                                Optional.of(Match.create(numberType, OPTIONAL, extractExpr, parameter)));
             }
         }
         return Optional.empty();
