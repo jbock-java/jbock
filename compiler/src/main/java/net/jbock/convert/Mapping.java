@@ -26,7 +26,6 @@ public final class Mapping<M extends AnnotatedMethod> {
 
     private final MapExpr<M> mapExpr;
     private final Optional<CodeBlock> extractExpr;
-    private final Multiplicity multiplicity;
     private final ParameterSpec asParameterSpec;
     private final FieldSpec asFieldSpec;
     private final boolean modeFlag;
@@ -34,14 +33,12 @@ public final class Mapping<M extends AnnotatedMethod> {
     private Mapping(
             MapExpr<M> mapExpr,
             Optional<CodeBlock> extractExpr,
-            Multiplicity multiplicity,
             ParameterSpec asParameterSpec,
             FieldSpec asFieldSpec,
             boolean modeFlag) {
         this.asParameterSpec = asParameterSpec;
         this.mapExpr = mapExpr;
         this.extractExpr = extractExpr;
-        this.multiplicity = multiplicity;
         this.asFieldSpec = asFieldSpec;
         this.modeFlag = modeFlag;
     }
@@ -49,13 +46,12 @@ public final class Mapping<M extends AnnotatedMethod> {
     public static <M extends AnnotatedMethod> Mapping<M> create(
             MapExpr<M> mapExpr,
             Optional<CodeBlock> extractExpr,
-            Multiplicity multiplicity,
             SourceMethod<M> parameter) {
         TypeName fieldType = TypeName.get(parameter.returnType());
         String fieldName = parameter.enumName().original();
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
-        return new Mapping<>(mapExpr, extractExpr, multiplicity, asParameterSpec,
+        return new Mapping<>(mapExpr, extractExpr, asParameterSpec,
                 asFieldSpec, false);
     }
 
@@ -69,7 +65,7 @@ public final class Mapping<M extends AnnotatedMethod> {
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
         Match<AnnotatedOption> match = Match.create(booleanType, Multiplicity.OPTIONAL, namedOption);
         MapExpr<AnnotatedOption> mapExpr = new MapExpr<>(code, match, false);
-        return new Mapping<>(mapExpr, Optional.empty(), Multiplicity.OPTIONAL, asParameterSpec,
+        return new Mapping<>(mapExpr, Optional.empty(), asParameterSpec,
                 asFieldSpec, true);
     }
 
@@ -85,7 +81,7 @@ public final class Mapping<M extends AnnotatedMethod> {
     }
 
     public Multiplicity multiplicity() {
-        return multiplicity;
+        return mapExpr.match().multiplicity();
     }
 
     public MapExpr<M> mapExpr() {
@@ -97,15 +93,15 @@ public final class Mapping<M extends AnnotatedMethod> {
     }
 
     public boolean isRequired() {
-        return multiplicity == Multiplicity.REQUIRED;
+        return multiplicity() == Multiplicity.REQUIRED;
     }
 
     public boolean isRepeatable() {
-        return multiplicity == Multiplicity.REPEATABLE;
+        return multiplicity() == Multiplicity.REPEATABLE;
     }
 
     public boolean isOptional() {
-        return multiplicity == Multiplicity.OPTIONAL;
+        return multiplicity() == Multiplicity.OPTIONAL;
     }
 
     public boolean isFlag() {

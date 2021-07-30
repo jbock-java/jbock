@@ -35,7 +35,11 @@ public class MapExpr<M extends AnnotatedMethod> {
         return match.sourceMethod();
     }
 
+    public Match<M> match() {
+        return match;
+    }
+
     public Mapping<M> toMapping() {
-        return Mapping.create(this, match.extractExpr(), match.multiplicity(), match.sourceMethod());
+        return Mapping.create(this, match.extractExpr(), match.sourceMethod());
     }
 }
