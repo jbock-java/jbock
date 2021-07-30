@@ -60,5 +60,4 @@ public class Match<M extends AnnotatedMethod> {
     public Optional<CodeBlock> extractExpr() {
         return extractExpr;
     }
-
 }

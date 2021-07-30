@@ -21,16 +21,17 @@ import java.util.stream.Collectors;
 
 import static io.jbock.util.Either.left;
 import static net.jbock.common.Constants.STRING;
+import static net.jbock.convert.matching.ValidatorUtil.validateMatch;
 
 @ValidateScope
-public class AutoMappingFinder extends MatchValidator {
+public class AutoValidator {
 
     private final AutoMappings autoConverter;
     private final Util util;
     private final MatchFinder matchFinder;
 
     @Inject
-    AutoMappingFinder(
+    AutoValidator(
             AutoMappings autoConverter,
             Util util,
             MatchFinder matchFinder) {

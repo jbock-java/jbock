@@ -19,9 +19,10 @@ import javax.lang.model.util.Types;
 import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
+import static net.jbock.convert.matching.ValidatorUtil.validateMatch;
 
 @ValidateScope
-public class ConverterValidator extends MatchValidator {
+public class ConverterValidator {
 
     private final ReferenceTool referenceTool;
     private final Util util;

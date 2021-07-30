@@ -10,9 +10,12 @@ import net.jbock.source.SourceMethod;
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 
-abstract class MatchValidator {
+final class ValidatorUtil {
 
-    <M extends AnnotatedMethod> Either<String, Match<M>> validateMatch(
+    private ValidatorUtil() {
+    }
+
+    static <M extends AnnotatedMethod> Either<String, Match<M>> validateMatch(
             SourceMethod<?> sourceMethod,
             Match<M> m) {
         if (sourceMethod.annotatedMethod().isParameter()
