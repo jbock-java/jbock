@@ -61,7 +61,7 @@ public class ConverterValidator extends MatchValidator {
             TypeElement converter) {
         return validateMatch(parameter, matchFinder.findMatch(parameter))
                 .filter(match -> isValidMatch(match, functionType))
-                .map(match -> new MapExpr<>(getMapExpr(functionType, converter), match, false))
+                .map(match -> MapExpr.create(getMapExpr(functionType, converter), match, false))
                 .map(MapExpr::toMapping);
     }
 

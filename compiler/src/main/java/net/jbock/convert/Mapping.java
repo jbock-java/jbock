@@ -11,11 +11,9 @@ import net.jbock.convert.matching.MapExpr;
 import net.jbock.convert.matching.Match;
 import net.jbock.model.Multiplicity;
 import net.jbock.source.SourceMethod;
-import net.jbock.util.StringConverter;
 
 import javax.lang.model.type.PrimitiveType;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * An annotated method with additional information about type conversion.
@@ -28,19 +26,16 @@ public final class Mapping<M extends AnnotatedMethod> {
     private final Optional<CodeBlock> extractExpr;
     private final ParameterSpec asParameterSpec;
     private final FieldSpec asFieldSpec;
-    private final boolean modeFlag;
 
     private Mapping(
             MapExpr<M> mapExpr,
             Optional<CodeBlock> extractExpr,
             ParameterSpec asParameterSpec,
-            FieldSpec asFieldSpec,
-            boolean modeFlag) {
+            FieldSpec asFieldSpec) {
         this.asParameterSpec = asParameterSpec;
         this.mapExpr = mapExpr;
         this.extractExpr = extractExpr;
         this.asFieldSpec = asFieldSpec;
-        this.modeFlag = modeFlag;
     }
 
     public static <M extends AnnotatedMethod> Mapping<M> create(
@@ -52,21 +47,19 @@ public final class Mapping<M extends AnnotatedMethod> {
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
         return new Mapping<>(mapExpr, extractExpr, asParameterSpec,
-                asFieldSpec, false);
+                asFieldSpec);
     }
 
     public static Mapping<AnnotatedOption> createFlag(
             SourceMethod<AnnotatedOption> namedOption,
             PrimitiveType booleanType) {
-        CodeBlock code = CodeBlock.of("$T.create($T.identity())", StringConverter.class, Function.class);
         TypeName fieldType = TypeName.BOOLEAN;
         String fieldName = namedOption.enumName().original();
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
         Match<AnnotatedOption> match = Match.create(booleanType, Multiplicity.OPTIONAL, namedOption);
-        MapExpr<AnnotatedOption> mapExpr = new MapExpr<>(code, match, false);
-        return new Mapping<>(mapExpr, Optional.empty(), asParameterSpec,
-                asFieldSpec, true);
+        MapExpr<AnnotatedOption> mapExpr = MapExpr.createFlag(match);
+        return new Mapping<>(mapExpr, Optional.empty(), asParameterSpec, asFieldSpec);
     }
 
     public Optional<CodeBlock> simpleMapExpr() {
@@ -105,7 +98,7 @@ public final class Mapping<M extends AnnotatedMethod> {
     }
 
     public boolean isFlag() {
-        return modeFlag;
+        return mapExpr.modeFlag();
     }
 
     public SourceMethod<M> sourceMethod() {

@@ -4,19 +4,39 @@ import com.squareup.javapoet.CodeBlock;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.convert.Mapping;
 import net.jbock.source.SourceMethod;
+import net.jbock.util.StringConverter;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.function.Function;
 
 public class MapExpr<M extends AnnotatedMethod> {
 
     private final CodeBlock code;
     private final Match<M> match;
     private final boolean multiline;
+    private final boolean modeFlag;
 
-    public MapExpr(CodeBlock code, Match<M> match, boolean multiline) {
+    public MapExpr(
+            CodeBlock code,
+            Match<M> match,
+            boolean multiline,
+            boolean modeFlag) {
         this.code = code;
         this.match = match;
         this.multiline = multiline;
+        this.modeFlag = modeFlag;
+    }
+
+    public static <M extends AnnotatedMethod> MapExpr<M> create(
+            CodeBlock code,
+            Match<M> match,
+            boolean multiline) {
+        return new MapExpr<>(code, match, multiline, false);
+    }
+
+    public static <M extends AnnotatedMethod> MapExpr<M> createFlag(Match<M> match) {
+        CodeBlock code = CodeBlock.of("$T.create($T.identity())", StringConverter.class, Function.class);
+        return new MapExpr<>(code, match, false, true);
     }
 
     public CodeBlock code() {
@@ -37,6 +57,10 @@ public class MapExpr<M extends AnnotatedMethod> {
 
     public Match<M> match() {
         return match;
+    }
+
+    public boolean modeFlag() {
+        return modeFlag;
     }
 
     public Mapping<M> toMapping() {
