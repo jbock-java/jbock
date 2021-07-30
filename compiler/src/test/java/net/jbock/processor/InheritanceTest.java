@@ -133,29 +133,6 @@ class InheritanceTest {
     }
 
     @Test
-    void signatureMismatchType() {
-        JavaFileObject javaFile = fromSource(
-                "abstract class A {",
-                "",
-                "  abstract String inheritedMethod(int a);",
-                "}",
-                "abstract class B extends A {",
-                "",
-                "  String inheritedMethod(String a) { return null; }",
-                "}",
-                "@Command(superCommand = true)",
-                "abstract class C extends B {",
-                "",
-                "  @Parameter(index = 0)",
-                "  abstract String param();",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("add one of these annotations: @Option, @Parameter, @Parameters");
-    }
-
-    @Test
     void parentParent() {
         JavaFileObject javaFile = fromSource(
                 "interface ParentParent {",
