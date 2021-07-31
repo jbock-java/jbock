@@ -6,6 +6,7 @@ import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
+import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.source.SourceMethod;
 import net.jbock.validate.ValidateScope;
@@ -38,29 +39,30 @@ public class AutoValidator {
         this.matchFinder = matchFinder;
     }
 
-    public <M extends AnnotatedMethod> Either<String, Mapping<M>> findMapping(SourceMethod<M> parameter) {
-        return matchFinder.findMatch(parameter)
-                .flatMap(m -> findMapping(parameter, m));
+    public <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findMapping(
+            SourceMethod<M> sourceMethod) {
+        return matchFinder.findMatch(sourceMethod)
+                .flatMap(m -> findMapping(sourceMethod, m));
     }
 
-    private <M extends AnnotatedMethod> Either<String, Mapping<M>> findMapping(
-            SourceMethod<M> parameter,
-            Match<M> match) {
-        return autoConverter.findAutoMapping(parameter, match.baseType())
-                .flatMapLeft(message -> findEnumMapping(parameter, match.baseType()));
+    private <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findMapping(
+            SourceMethod<M> sourceMethod,
+            ValidMatch<M> match) {
+        return autoConverter.findAutoMapping(sourceMethod, match.baseType())
+                .flatMapLeft(message -> findEnumMapping(sourceMethod, match.baseType()));
     }
 
-    private <M extends AnnotatedMethod> Either<String, Mapping<M>> findEnumMapping(
-            SourceMethod<M> parameter,
+    private <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findEnumMapping(
+            SourceMethod<M> sourceMethod,
             TypeMirror baseType) {
         return TypeTool.AS_DECLARED.visit(baseType)
                 .map(DeclaredType::asElement)
                 .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
                 .filter(element -> element.getKind() == ElementKind.ENUM)
                 .map(TypeElement::asType)
-                .<Either<String, TypeMirror>>map(Either::right)
-                .orElseGet(() -> left(util.noMatchError(baseType)))
-                .flatMap(enumType -> matchFinder.findMatch(parameter)
+                .<Either<ValidationFailure, TypeMirror>>map(Either::right)
+                .orElseGet(() -> left(sourceMethod.fail(util.noMatchError(baseType))))
+                .flatMap(enumType -> matchFinder.findMatch(sourceMethod)
                         .map(match -> {
                             CodeBlock code = enumConvertBlock(enumType);
                             return Mapping.create(code, match, true);

@@ -1,21 +1,22 @@
 package net.jbock.validate;
 
+import com.squareup.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
-import net.jbock.convert.matching.Match;
+import net.jbock.convert.matching.MatchFinder;
 import net.jbock.source.SourceOption;
+import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.util.Types;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
@@ -23,20 +24,19 @@ import static io.jbock.util.Eithers.toOptionalList;
 import static io.jbock.util.Eithers.toValidListAll;
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
-import static net.jbock.model.Multiplicity.OPTIONAL;
 
 @ValidateScope
 public class SourceOptionValidator {
 
     private final MappingFinder converterFinder;
-    private final Types types;
+    private final MatchFinder matchFinder;
 
     @Inject
     SourceOptionValidator(
             MappingFinder converterFinder,
-            Types types) {
+            MatchFinder matchFinder) {
         this.converterFinder = converterFinder;
-        this.types = types;
+        this.matchFinder = matchFinder;
     }
 
     Either<List<ValidationFailure>, ContextBuilder> wrapOptions(
@@ -51,38 +51,38 @@ public class SourceOptionValidator {
                 .map(step::accept);
     }
 
-    private Either<ValidationFailure, Mapping<AnnotatedOption>> wrapOption(SourceOption sourceMethod) {
+    private Either<ValidationFailure, Mapping<AnnotatedOption>> wrapOption(
+            SourceOption sourceMethod) {
         return checkFlag(sourceMethod)
-                .<Either<ValidationFailure, Mapping<AnnotatedOption>>>map(Either::right)
-                .orElseGet(() -> converterFinder.findMapping(sourceMethod).mapLeft(sourceMethod::fail));
+                .orElseGet(() -> converterFinder.findMapping(sourceMethod));
     }
 
-    /* Right-Optional
-     */
-    private Optional<Mapping<AnnotatedOption>> checkFlag(SourceOption sourceOption) {
+    private Optional<Either<ValidationFailure, Mapping<AnnotatedOption>>> checkFlag(
+            SourceOption sourceOption) {
         if (sourceOption.annotatedMethod().converter().isPresent()) {
             return Optional.empty();
         }
         if (sourceOption.returnType().getKind() != BOOLEAN) {
             return Optional.empty();
         }
-        PrimitiveType bool = types.getPrimitiveType(BOOLEAN);
-        Match<AnnotatedOption> match = Match.create(bool, OPTIONAL, sourceOption);
-        return Optional.of(Mapping.createFlag(match));
+        CodeBlock code = CodeBlock.of("$T.create($T.identity())",
+                StringConverter.class, Function.class);
+        return Optional.of(matchFinder.findFlagMatch(sourceOption).map(m -> Mapping.createFlag(code, m)));
     }
 
-    private Either<ValidationFailure, SourceOption> checkOptionNames(SourceOption sourceMethod) {
-        if (sourceMethod.annotatedMethod().names().isEmpty()) {
-            return left(sourceMethod.fail("define at least one option name"));
+    private Either<ValidationFailure, SourceOption> checkOptionNames(
+            SourceOption sourceOption) {
+        if (sourceOption.annotatedMethod().names().isEmpty()) {
+            return left(sourceOption.fail("define at least one option name"));
         }
-        for (String name : sourceMethod.names()) {
+        for (String name : sourceOption.names()) {
             Optional<String> check = checkName(name);
             if (check.isPresent()) {
-                return left(sourceMethod.fail(check.map(s -> "invalid name: " + s)
+                return left(sourceOption.fail(check.map(s -> "invalid name: " + s)
                         .orElseThrow()));
             }
         }
-        return right(sourceMethod);
+        return right(sourceOption);
     }
 
     /* Left-Optional
@@ -114,7 +114,8 @@ public class SourceOptionValidator {
 
     /* Left-Optional
      */
-    private Optional<List<ValidationFailure>> validateUniqueOptionNames(List<SourceOption> allOptions) {
+    private Optional<List<ValidationFailure>> validateUniqueOptionNames(
+            List<SourceOption> allOptions) {
         Set<String> allNames = new HashSet<>();
         return allOptions.stream()
                 .flatMap(item -> item.names().stream()

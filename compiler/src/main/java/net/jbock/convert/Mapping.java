@@ -5,16 +5,13 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.annotated.AnnotatedMethod;
-import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.EnumName;
-import net.jbock.convert.matching.Match;
+import net.jbock.convert.matching.ValidMatch;
 import net.jbock.model.Multiplicity;
 import net.jbock.source.SourceMethod;
-import net.jbock.util.StringConverter;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
@@ -26,7 +23,7 @@ import static net.jbock.model.Multiplicity.OPTIONAL;
 public final class Mapping<M extends AnnotatedMethod> {
 
     private final CodeBlock mapExpr;
-    private final Match<M> match;
+    private final ValidMatch<M> match;
     private final boolean multiline;
     private final boolean modeFlag;
     private final ParameterSpec asParameterSpec;
@@ -34,7 +31,7 @@ public final class Mapping<M extends AnnotatedMethod> {
 
     private Mapping(
             CodeBlock mapExpr,
-            Match<M> match,
+            ValidMatch<M> match,
             boolean multiline,
             boolean modeFlag,
             ParameterSpec asParameterSpec,
@@ -49,19 +46,20 @@ public final class Mapping<M extends AnnotatedMethod> {
 
     public static <M extends AnnotatedMethod> Mapping<M> create(
             CodeBlock code,
-            Match<M> match,
+            ValidMatch<M> match,
             boolean multiline) {
         return Mapping.create(code, match, multiline, false);
     }
 
-    public static Mapping<AnnotatedOption> createFlag(Match<AnnotatedOption> match) {
-        CodeBlock code = CodeBlock.of("$T.create($T.identity())", StringConverter.class, Function.class);
+    public static <M extends AnnotatedMethod> Mapping<M> createFlag(
+            CodeBlock code,
+            ValidMatch<M> match) {
         return Mapping.create(code, match, false, true);
     }
 
     private static <M extends AnnotatedMethod> Mapping<M> create(
             CodeBlock mapExpr,
-            Match<M> match,
+            ValidMatch<M> match,
             boolean multiline,
             boolean modeFlag) {
         TypeName fieldType = TypeName.get(match.sourceMethod().returnType());

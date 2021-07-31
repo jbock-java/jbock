@@ -34,7 +34,7 @@ public class SourceParametersValidator {
         return validateDuplicateParametersAnnotation(step.repeatablePositionalParameters())
                 .filter(this::validateNoRepeatableParameterInSuperCommand)
                 .flatMap(repeatablePositionalParameters -> repeatablePositionalParameters.stream()
-                        .map(sourceMethod -> converterFinder.findMapping(sourceMethod).mapLeft(sourceMethod::fail))
+                        .map(converterFinder::findMapping)
                         .collect(toValidListAll()))
                 .map(step::accept);
     }

@@ -12,6 +12,10 @@ public class ValidationFailure {
         this.about = about;
     }
 
+    public ValidationFailure prepend(String prefix) {
+        return new ValidationFailure(prefix + message, about);
+    }
+
     public Element about() {
         return about;
     }

@@ -45,19 +45,19 @@ public class Match<M extends AnnotatedMethod> {
         return new Match<>(baseType, multiplicity, Optional.empty(), sourceMethod);
     }
 
-    public TypeMirror baseType() {
+    TypeMirror baseType() {
         return baseType;
     }
 
-    public Multiplicity multiplicity() {
+    Multiplicity multiplicity() {
         return multiplicity;
     }
 
-    public SourceMethod<M> sourceMethod() {
+    SourceMethod<M> sourceMethod() {
         return sourceMethod;
     }
 
-    public Optional<CodeBlock> extractExpr() {
+    Optional<CodeBlock> extractExpr() {
         return extractExpr;
     }
 }

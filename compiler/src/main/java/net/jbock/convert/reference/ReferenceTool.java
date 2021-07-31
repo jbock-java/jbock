@@ -1,7 +1,10 @@
 package net.jbock.convert.reference;
 
 import io.jbock.util.Either;
+import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
+import net.jbock.common.ValidationFailure;
+import net.jbock.source.SourceMethod;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
@@ -26,36 +29,43 @@ public class ReferenceTool {
         this.tool = tool;
     }
 
-    public Either<String, StringConverterType> getReferencedType(TypeElement converter) {
+    public <M extends AnnotatedMethod> Either<ValidationFailure, StringConverterType> getReferencedType(
+            SourceMethod<M> sourceMethod,
+            TypeElement converter) {
         Optional<DeclaredType> supplier = checkSupplier(converter);
         Optional<DeclaredType> stringConverter = checkStringConverter(converter);
         if (supplier.isPresent() && stringConverter.isPresent()) {
-            return left(errorConverterType() + " but not both");
+            return left(sourceMethod.fail(errorConverterType() + " but not both"));
         }
-        return supplier.map(this::handleSupplier)
-                .or(() -> stringConverter.map(c -> handleStringConverter(c, false)))
-                .orElseGet(() -> left(errorConverterType()));
+        return supplier.map(declaredType -> handleSupplier(sourceMethod, declaredType))
+                .or(() -> stringConverter.map(stringConverterType ->
+                        handleStringConverter(sourceMethod, stringConverterType, false)))
+                .orElseGet(() -> left(sourceMethod.fail(errorConverterType())));
     }
 
-    private Either<String, StringConverterType> handleSupplier(DeclaredType declaredType) {
+    private <M extends AnnotatedMethod> Either<ValidationFailure, StringConverterType> handleSupplier(
+            SourceMethod<M> sourceMethod,
+            DeclaredType declaredType) {
         if (declaredType.getTypeArguments().size() != 1) {
-            return left(converterRawType());
+            return left(sourceMethod.fail(converterRawType()));
         }
         TypeMirror typeArgument = declaredType.getTypeArguments().get(0);
         return AS_DECLARED.visit(typeArgument)
                 .filter(suppliedFunction -> tool.isSameErasure(suppliedFunction,
                         StringConverter.class))
-                .<Either<String, DeclaredType>>map(Either::right)
-                .orElseGet(() -> left(errorConverterType()))
-                .flatMap(suppliedType -> handleStringConverter(suppliedType, true));
+                .<Either<ValidationFailure, DeclaredType>>map(Either::right)
+                .orElseGet(() -> left(sourceMethod.fail(errorConverterType())))
+                .flatMap(suppliedType -> handleStringConverter(sourceMethod, suppliedType, true));
     }
 
-    private Either<String, StringConverterType> handleStringConverter(
-            DeclaredType stringConverter, boolean isSupplier) {
-        if (stringConverter.getTypeArguments().size() != 1) {
-            return left(converterRawType());
+    private <M extends AnnotatedMethod> Either<ValidationFailure, StringConverterType> handleStringConverter(
+            SourceMethod<M> parameter,
+            DeclaredType stringConverterType,
+            boolean isSupplier) {
+        if (stringConverterType.getTypeArguments().size() != 1) {
+            return left(parameter.fail(converterRawType()));
         }
-        TypeMirror typeArgument = stringConverter.getTypeArguments().get(0);
+        TypeMirror typeArgument = stringConverterType.getTypeArguments().get(0);
         return right(new StringConverterType(typeArgument, isSupplier));
     }
 

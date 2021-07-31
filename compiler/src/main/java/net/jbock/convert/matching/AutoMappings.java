@@ -6,6 +6,7 @@ import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
+import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.source.SourceMethod;
 import net.jbock.util.StringConverter;
@@ -64,11 +65,12 @@ public class AutoMappings {
         this.converters = autoConverters();
     }
 
-    <M extends AnnotatedMethod> Either<String, Mapping<M>> findAutoMapping(
-            SourceMethod<M> parameter, TypeMirror baseType) {
+    <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findAutoMapping(
+            SourceMethod<M> sourceMethod,
+            TypeMirror baseType) {
         for (Entry<String, MultilineCodeBlock> converter : converters) {
             if (tool.isSameType(baseType, converter.getKey())) {
-                return matchFinder.findMatch(parameter)
+                return matchFinder.findMatch(sourceMethod)
                         .map(match -> {
                             CodeBlock code = converter.getValue().code;
                             boolean multiline = converter.getValue().multiline;
@@ -76,7 +78,7 @@ public class AutoMappings {
                         });
             }
         }
-        return left(util.noMatchError(baseType));
+        return left(sourceMethod.fail(util.noMatchError(baseType)));
     }
 
     private Entry<String, MultilineCodeBlock> create(Class<?> autoType, String methodName) {
@@ -87,7 +89,10 @@ public class AutoMappings {
         return create(autoType, CodeBlock.of("$T.create($L)", StringConverter.class, mapExpr), false);
     }
 
-    private Entry<String, MultilineCodeBlock> create(Class<?> autoType, CodeBlock code, boolean multiline) {
+    private Entry<String, MultilineCodeBlock> create(
+            Class<?> autoType,
+            CodeBlock code,
+            boolean multiline) {
         String canonicalName = autoType.getCanonicalName();
         return new SimpleImmutableEntry<>(canonicalName, new MultilineCodeBlock(code, multiline));
     }

@@ -3,6 +3,7 @@ package net.jbock.convert;
 import dagger.Lazy;
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.common.ValidationFailure;
 import net.jbock.convert.matching.AutoValidator;
 import net.jbock.convert.matching.ConverterValidator;
 import net.jbock.source.SourceMethod;
@@ -24,9 +25,10 @@ public class MappingFinder {
         this.converterValidator = converterValidator;
     }
 
-    public <M extends AnnotatedMethod> Either<String, Mapping<M>> findMapping(SourceMethod<M> parameter) {
-        return parameter.annotatedMethod().converter()
-                .map(converter -> converterValidator.get().findMapping(parameter, converter))
-                .orElseGet(() -> autoConverterFinder.get().findMapping(parameter));
+    public <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findMapping(
+            SourceMethod<M> sourceMethod) {
+        return sourceMethod.annotatedMethod().converter()
+                .map(converter -> converterValidator.get().findMapping(sourceMethod, converter))
+                .orElseGet(() -> autoConverterFinder.get().findMapping(sourceMethod));
     }
 }

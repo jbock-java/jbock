@@ -31,8 +31,7 @@ public class SourceParameterValidator {
             ContextBuilder.Step1 step) {
         return validatePositions(step.positionalParameters())
                 .flatMap(positionalParameters -> positionalParameters.stream()
-                        .map(sourceMethod -> converterFinder.findMapping(sourceMethod)
-                                .mapLeft(sourceMethod::fail))
+                        .map(converterFinder::findMapping)
                         .collect(toValidListAll()))
                 .filter(this::checkNoRequiredAfterOptional)
                 .map(step::accept);
@@ -42,10 +41,10 @@ public class SourceParameterValidator {
             List<SourceParameter> allPositionalParameters) {
         List<ValidationFailure> failures = new ArrayList<>();
         for (int i = 0; i < allPositionalParameters.size(); i++) {
-            SourceParameter item = allPositionalParameters.get(i);
-            int index = item.annotatedMethod().index();
+            SourceParameter sourceParameter = allPositionalParameters.get(i);
+            int index = sourceParameter.annotatedMethod().index();
             if (index != i) {
-                failures.add(item.fail("invalid position: expecting " + i + " but found " + index));
+                failures.add(sourceParameter.fail("invalid position: expecting " + i + " but found " + index));
             }
         }
         return optionalList(failures)
@@ -64,7 +63,8 @@ public class SourceParameterValidator {
                 .flatMap(firstOptional -> allPositionalParameters.stream()
                         .filter(Mapping::isRequired)
                         .map(Mapping::sourceMethod)
-                        .filter(item -> item.annotatedMethod().index() > firstOptional.annotatedMethod().index())
+                        .filter(sourceMethod -> sourceMethod.annotatedMethod().index()
+                                > firstOptional.annotatedMethod().index())
                         .map(item -> item.fail("position of required parameter '" +
                                 item.annotatedMethod().method().getSimpleName() +
                                 "' is greater than position of optional parameter '" +
