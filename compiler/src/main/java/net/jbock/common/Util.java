@@ -81,11 +81,10 @@ public class Util {
         if (tool.isSameType(mirror, RuntimeException.class)) {
             return true;
         }
-        Optional<TypeElement> el = TypeTool.AS_TYPE_ELEMENT.visit(types.asElement(mirror));
-        if (el.isEmpty()) {
-            return false;
-        }
-        return extendsRuntimeException(el.orElseThrow().getSuperclass());
+        return TypeTool.AS_TYPE_ELEMENT.visit(types.asElement(mirror))
+                .map(TypeElement::getSuperclass)
+                .filter(this::extendsRuntimeException)
+                .isPresent();
     }
 
     public List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
