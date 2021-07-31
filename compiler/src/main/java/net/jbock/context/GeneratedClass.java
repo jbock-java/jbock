@@ -3,6 +3,7 @@ package net.jbock.context;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.JbockProcessor;
 import net.jbock.processor.SourceElement;
@@ -24,7 +25,7 @@ public final class GeneratedClass {
     private final OptionEnum optionEnum;
     private final StatefulParser statefulParser;
     private final SourceElement sourceElement;
-    private final NamedOptions namedOptions;
+    private final List<Mapping<AnnotatedOption>> namedOptions;
     private final ParseOrExitMethod parseOrExitMethod;
     private final CreateModelMethod createModelMethod;
     private final MultilineConverter multilineConverter;
@@ -38,7 +39,7 @@ public final class GeneratedClass {
             OptionParser optionParser,
             OptionEnum optionEnum,
             StatefulParser statefulParser,
-            NamedOptions namedOptions,
+            List<Mapping<AnnotatedOption>> namedOptions,
             ParseOrExitMethod parseOrExitMethod,
             CreateModelMethod createModelMethod,
             MultilineConverter multilineConverter,

@@ -6,26 +6,22 @@ import net.jbock.convert.Mapping;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.squareup.javapoet.TypeName.VOID;
 import static net.jbock.common.Constants.STRING;
 
 public class NamedOptions {
 
-    private final List<Mapping<AnnotatedOption>> options;
     private final boolean anyRepeatable;
     private final boolean anyRegular; // any (optional|required) ?
     private final boolean anyFlags;
     private final boolean unixClusteringSupported;
 
     private NamedOptions(
-            List<Mapping<AnnotatedOption>> options,
             boolean anyRepeatable,
             boolean anyRegular,
             boolean anyFlags,
             boolean unixClusteringSupported) {
-        this.options = options;
         this.anyRepeatable = anyRepeatable;
         this.anyRegular = anyRegular;
         this.anyFlags = anyFlags;
@@ -36,7 +32,7 @@ public class NamedOptions {
         boolean anyRepeatable = options.stream().anyMatch(Mapping::isRepeatable);
         boolean anyRegular = options.stream().anyMatch(option -> option.isOptional() || option.isRequired());
         boolean anyFlags = options.stream().anyMatch(Mapping::isFlag);
-        return new NamedOptions(options, anyRepeatable, anyRegular, anyFlags,
+        return new NamedOptions(anyRepeatable, anyRegular, anyFlags,
                 unixClustering && hasEnoughUnixNames(options));
     }
 
@@ -57,18 +53,6 @@ public class NamedOptions {
 
     boolean anyFlags() {
         return anyFlags;
-    }
-
-    List<Mapping<AnnotatedOption>> options() {
-        return options;
-    }
-
-    boolean isEmpty() {
-        return options.isEmpty();
-    }
-
-    Stream<Mapping<AnnotatedOption>> stream() {
-        return options.stream();
     }
 
     boolean unixClusteringSupported() {

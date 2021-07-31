@@ -47,9 +47,6 @@ public final class OptionParser {
     }
 
     List<TypeSpec> define() {
-        if (namedOptions.isEmpty()) {
-            return List.of();
-        }
         List<TypeSpec> result = new ArrayList<>();
         result.add(defineAbstractOptionParser());
         if (namedOptions.anyFlags()) {

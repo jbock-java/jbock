@@ -27,7 +27,8 @@ public class CreateModelMethod extends CachedMethod {
 
     private final ContextUtil contextUtil;
     private final SourceElement sourceElement;
-    private final NamedOptions namedOptions;
+    private final List<Mapping<AnnotatedOption>> namedOptions;
+    private final NamedOptions options;
     private final List<Mapping<AnnotatedParameter>> positionalParameters;
     private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
 
@@ -35,12 +36,14 @@ public class CreateModelMethod extends CachedMethod {
     CreateModelMethod(
             ContextUtil contextUtil,
             SourceElement sourceElement,
-            NamedOptions namedOptions,
+            List<Mapping<AnnotatedOption>> namedOptions,
+            NamedOptions options,
             List<Mapping<AnnotatedParameter>> positionalParameters,
             List<Mapping<AnnotatedParameters>> repeatablePositionalParameters) {
         this.contextUtil = contextUtil;
         this.sourceElement = sourceElement;
         this.namedOptions = namedOptions;
+        this.options = options;
         this.positionalParameters = positionalParameters;
         this.repeatablePositionalParameters = repeatablePositionalParameters;
     }
@@ -59,10 +62,10 @@ public class CreateModelMethod extends CachedMethod {
         if (sourceElement.isSuperCommand()) {
             code.add(CodeBlock.of(".withSuperCommand($L)", true));
         }
-        if (namedOptions.unixClusteringSupported()) {
+        if (options.unixClusteringSupported()) {
             code.add(CodeBlock.of(".withUnixClustering($L)", true));
         }
-        for (Mapping<AnnotatedOption> c : namedOptions.options()) {
+        for (Mapping<AnnotatedOption> c : namedOptions) {
             code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
         }
         for (Mapping<?> c : concat(positionalParameters, repeatablePositionalParameters)) {

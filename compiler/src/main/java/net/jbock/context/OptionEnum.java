@@ -19,22 +19,21 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 @ContextScope
 public class OptionEnum {
 
-    private final NamedOptions options;
+    private final List<Mapping<AnnotatedOption>> options;
     private final SourceElement sourceElement;
 
     @Inject
     OptionEnum(
-            NamedOptions options,
+            List<Mapping<AnnotatedOption>> options,
             SourceElement sourceElement) {
         this.options = options;
         this.sourceElement = sourceElement;
     }
 
     TypeSpec define() {
-        List<Mapping<AnnotatedOption>> parameters = options.options();
         TypeSpec.Builder spec = TypeSpec.enumBuilder(sourceElement.optionEnumType());
-        for (Mapping<AnnotatedOption> param : parameters) {
-            EnumName enumName = param.enumName();
+        for (Mapping<AnnotatedOption> option : options) {
+            EnumName enumName = option.enumName();
             String enumConstant = enumName.enumConstant();
             spec.addEnumConstant(enumConstant);
         }

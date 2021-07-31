@@ -4,6 +4,7 @@ import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
@@ -55,7 +56,7 @@ class CommonFields {
             GeneratedTypes generatedTypes,
             SourceElement sourceElement,
             List<Mapping<AnnotatedParameter>> positionalParameters,
-            NamedOptions namedOptions) {
+            List<Mapping<AnnotatedOption>> namedOptions) {
         ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
         CodeBlock.Builder code = CodeBlock.builder();
         code.add(CodeBlock.builder()

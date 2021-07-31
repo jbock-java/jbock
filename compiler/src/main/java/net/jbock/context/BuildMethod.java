@@ -27,7 +27,7 @@ public class BuildMethod extends CachedMethod {
 
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
-    private final NamedOptions namedOptions;
+    private final List<Mapping<AnnotatedOption>> namedOptions;
     private final List<Mapping<AnnotatedParameter>> positionalParameters;
     private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
     private final CommonFields commonFields;
@@ -38,7 +38,7 @@ public class BuildMethod extends CachedMethod {
     BuildMethod(
             GeneratedTypes generatedTypes,
             SourceElement sourceElement,
-            NamedOptions namedOptions,
+            List<Mapping<AnnotatedOption>> namedOptions,
             List<Mapping<AnnotatedParameter>> positionalParameters,
             List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
             CommonFields commonFields,
@@ -56,7 +56,7 @@ public class BuildMethod extends CachedMethod {
     MethodSpec define() {
         CodeBlock constructorArguments = getConstructorArguments();
         MethodSpec.Builder spec = MethodSpec.methodBuilder("build");
-        List<Mapping<AnnotatedOption>> options = namedOptions.options();
+        List<Mapping<AnnotatedOption>> options = namedOptions;
         for (int i = 0; i < options.size(); i++) {
             Mapping<AnnotatedOption> c = options.get(i);
             ParameterSpec p = c.asParam();
@@ -90,7 +90,7 @@ public class BuildMethod extends CachedMethod {
 
     private CodeBlock getConstructorArguments() {
         List<CodeBlock> code = new ArrayList<>();
-        for (Mapping<AnnotatedOption> c : namedOptions.options()) {
+        for (Mapping<AnnotatedOption> c : namedOptions) {
             code.add(CodeBlock.of("$N", c.asParam()));
         }
         for (Mapping<AnnotatedParameter> c : positionalParameters) {

@@ -54,6 +54,12 @@ public class ContextModule {
 
     @ContextScope
     @Provides
+    List<Mapping<AnnotatedOption>> getNamedOptions() {
+        return namedOptions;
+    }
+
+    @ContextScope
+    @Provides
     NamedOptions namedOptions(SourceElement sourceElement) {
         return NamedOptions.create(namedOptions, sourceElement.unixClustering());
     }
@@ -68,8 +74,7 @@ public class ContextModule {
     @Provides
     CommonFields commonFields(
             GeneratedTypes generatedTypes,
-            SourceElement sourceElement,
-            NamedOptions namedOptions) {
+            SourceElement sourceElement) {
         return CommonFields.create(
                 generatedTypes,
                 sourceElement,

@@ -25,7 +25,7 @@ public class StatefulParser {
     private final StatefulParseMethod statefulParseMethod;
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
-    private final NamedOptions namedOptions;
+    private final List<Mapping<AnnotatedOption>> namedOptions;
     private final List<Mapping<AnnotatedParameter>> positionalParameters;
     private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
     private final CommonFields commonFields;
@@ -38,7 +38,7 @@ public class StatefulParser {
             GeneratedTypes generatedTypes,
             StatefulParseMethod statefulParseMethod,
             SourceElement sourceElement,
-            NamedOptions namedOptions,
+            List<Mapping<AnnotatedOption>> namedOptions,
             List<Mapping<AnnotatedParameter>> positionalParameters,
             List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
             CommonFields commonFields,
@@ -81,7 +81,7 @@ public class StatefulParser {
 
     private MethodSpec privateConstructor() {
         CodeBlock.Builder code = CodeBlock.builder();
-        for (Mapping<AnnotatedOption> namedOption : namedOptions.options()) {
+        for (Mapping<AnnotatedOption> namedOption : namedOptions) {
             String enumConstant = namedOption.enumName().enumConstant();
             for (String dashedName : namedOption.sourceMethod().annotatedMethod().names()) {
                 code.addStatement("$N.put($S, $T.$L)",

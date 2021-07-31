@@ -23,25 +23,29 @@ public class SourceElement {
     private final String programName;
     private final ClassName generatedClass;
     private final ClassName optionEnumType;
+    private final Command command;
 
     private SourceElement(
             TypeElement sourceElement,
             List<Modifier> accessModifiers,
             String programName,
             ClassName generatedClass,
-            ClassName optionEnumType) {
+            ClassName optionEnumType,
+            Command command) {
         this.sourceElement = sourceElement;
         this.accessModifiers = accessModifiers;
         this.programName = programName;
         this.generatedClass = generatedClass;
         this.optionEnumType = optionEnumType;
+        this.command = command;
     }
 
     static SourceElement create(TypeElement typeElement) {
         List<Modifier> accessModifiers = typeElement.getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
                 .collect(Collectors.toUnmodifiableList());
-        String programName = programName(typeElement)
+        Command command = typeElement.getAnnotation(Command.class);
+        String programName = Descriptions.optionalString(command.name())
                 .orElseGet(() -> SnakeName.create(typeElement.getSimpleName().toString()).snake('-'));
         String generatedClassName = String.join("_", ClassName.get(typeElement).simpleNames()) + "Parser";
         ClassName generatedClass = ClassName.get(typeElement)
@@ -49,7 +53,7 @@ public class SourceElement {
                 .peerClass(generatedClassName);
         ClassName optionEnumType = generatedClass.nestedClass("Opt");
         return new SourceElement(typeElement, accessModifiers,
-                programName, generatedClass, optionEnumType);
+                programName, generatedClass, optionEnumType, command);
     }
 
     public TypeElement element() {
@@ -65,7 +69,7 @@ public class SourceElement {
     }
 
     public boolean isSuperCommand() {
-        return get().superCommand();
+        return command.superCommand();
     }
 
     public List<Modifier> accessModifiers() {
@@ -84,32 +88,23 @@ public class SourceElement {
         return sourceElement.getKind() == ElementKind.INTERFACE;
     }
 
-    private static Optional<String> programName(TypeElement sourceElement) {
-        Command command = sourceElement.getAnnotation(Command.class);
-        return Descriptions.optionalString(command.name());
-    }
-
     public String programName() {
         return programName;
     }
 
     public Optional<String> descriptionKey() {
-        return Descriptions.optionalString(get().descriptionKey());
+        return Descriptions.optionalString(command.descriptionKey());
     }
 
     public List<String> description() {
-        return List.of(get().description());
+        return List.of(command.description());
     }
 
     public boolean unixClustering() {
-        return get().unixClustering();
+        return command.unixClustering();
     }
 
     public boolean generateParseOrExitMethod() {
-        return get().generateParseOrExitMethod();
-    }
-
-    private Command get() {
-        return sourceElement.getAnnotation(Command.class);
+        return command.generateParseOrExitMethod();
     }
 }

@@ -407,6 +407,8 @@ class ProcessorTest {
                 "  abstract boolean a();",
                 "  @Option(names = \"-b\")",
                 "  abstract boolean b();",
+                "  @Option(names = \"-c\")",
+                "  abstract List<String> c();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
@@ -428,7 +430,7 @@ class ProcessorTest {
     }
 
     @Test
-    void reallyStrangeMethodName() {
+    void veryStrangeMethodName() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
