@@ -6,7 +6,6 @@ import io.jbock.util.Either;
 import net.jbock.Command;
 import net.jbock.common.Annotations;
 import net.jbock.common.SafeElements;
-import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.context.ContextComponent;
@@ -16,7 +15,6 @@ import net.jbock.validate.DaggerValidateComponent;
 import net.jbock.validate.ValidateComponent;
 import net.jbock.validate.ValidateModule;
 
-import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
@@ -39,27 +37,21 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 @ProcessorScope
 public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
-    private final TypeTool tool;
     private final Messager messager;
     private final Util util;
-    private final Filer filer;
     private final Types types;
     private final SafeElements elements;
     private final SourceFileGenerator sourceFileGenerator;
 
     @Inject
     CommandProcessingStep(
-            TypeTool tool,
             Messager messager,
             Util util,
-            Filer filer,
             Types types,
             SafeElements elements,
             SourceFileGenerator sourceFileGenerator) {
-        this.tool = tool;
         this.messager = messager;
         this.util = util;
-        this.filer = filer;
         this.types = types;
         this.elements = elements;
         this.sourceFileGenerator = sourceFileGenerator;

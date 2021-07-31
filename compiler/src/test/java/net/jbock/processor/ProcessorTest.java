@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -729,15 +728,12 @@ class ProcessorTest {
     }
 
     static List<String> withImports(String... lines) {
-        List<String> header = Arrays.asList(
+        List<String> header = List.of(
                 "package test;",
                 "",
                 "import java.util.List;",
-                "import java.util.Set;",
                 "import java.util.Optional;",
-                "import java.util.function.Function;",
                 "import java.util.function.Supplier;",
-                "import java.util.stream.Collector;",
                 "",
                 "import net.jbock.util.StringConverter;",
                 "import net.jbock.Command;",

@@ -3,10 +3,10 @@ package net.jbock.processor;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
+import java.util.List;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static net.jbock.processor.ProcessorTest.fromSource;
 
@@ -61,7 +61,7 @@ class InheritanceTest {
                 "  @Parameter(index = 0)",
                 "  abstract String param();",
                 "}");
-        assertAbout(javaSources()).that(asList(a, b, c))
+        assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
                 .compilesWithoutError();
     }
@@ -84,7 +84,7 @@ class InheritanceTest {
                 "  @Parameter(index = 0)",
                 "  abstract String param();",
                 "}");
-        assertAbout(javaSources()).that(asList(a, b))
+        assertAbout(javaSources()).that(List.of(a, b))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("annotated method is overridden");
@@ -108,7 +108,7 @@ class InheritanceTest {
                 "  @Parameter(index = 0)",
                 "  abstract String param();",
                 "}");
-        assertAbout(javaSources()).that(asList(a, b))
+        assertAbout(javaSources()).that(List.of(a, b))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("annotated method is overridden");
@@ -131,7 +131,7 @@ class InheritanceTest {
                 "  @Parameter(index = 0)",
                 "  abstract String param();",
                 "}");
-        assertAbout(javaSources()).that(asList(a, b, c))
+        assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("add one of these annotations: @Option, @Parameter, @Parameters");
@@ -139,23 +139,25 @@ class InheritanceTest {
 
     @Test
     void annotatedMethodOverriddenInSuperclass() {
-        JavaFileObject javaFile = fromSource(
+        JavaFileObject a = fromSource(
                 "abstract class A {",
                 "",
                 "  @Parameter(index = 1)",
                 "  abstract String inheritedMethod();",
-                "}",
+                "}");
+        JavaFileObject b = fromSource(
                 "abstract class B extends A {",
                 "",
                 "  String inheritedMethod() { return null; }",
-                "}",
+                "}");
+        JavaFileObject c = fromSource(
                 "@Command(superCommand = true)",
                 "abstract class C extends B {",
                 "",
                 "  @Parameter(index = 0)",
                 "  abstract String param();",
                 "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
+        assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("annotated method is overridden");
@@ -163,23 +165,25 @@ class InheritanceTest {
 
     @Test
     void annotatedMethodOverriddenInSuperclassAbstract() {
-        JavaFileObject javaFile = fromSource(
+        JavaFileObject a = fromSource(
                 "abstract class A {",
                 "",
                 "  @Parameter(index = 1)",
                 "  abstract String inheritedMethod();",
-                "}",
+                "}");
+        JavaFileObject b = fromSource(
                 "abstract class B extends A {",
                 "",
                 "  abstract String inheritedMethod();",
-                "}",
+                "}");
+        JavaFileObject c = fromSource(
                 "@Command(superCommand = true)",
                 "abstract class C extends B {",
                 "",
                 "  @Parameter(index = 0)",
                 "  abstract String param();",
                 "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
+        assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("annotated method is overridden");
@@ -187,21 +191,23 @@ class InheritanceTest {
 
     @Test
     void parentParent() {
-        JavaFileObject javaFile = fromSource(
+        JavaFileObject parentParent = fromSource(
                 "interface ParentParent {",
                 "",
                 "  @Parameter(index = 0)",
                 "  String source();",
-                "}",
+                "}");
+        JavaFileObject parent = fromSource(
                 "interface Parent extends ParentParent {",
-                "}",
+                "}");
+        JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class C implements Parent, ParentParent {",
                 "",
                 "  @Parameter(index = 1)",
                 "  abstract String dest();",
                 "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
+        assertAbout(javaSources()).that(List.of(parentParent, parent, javaFile))
                 .processedWith(Processor.testInstance())
                 .compilesWithoutError();
     }
@@ -221,7 +227,7 @@ class InheritanceTest {
                 "  @Option(names = \"-a\")",
                 "  abstract String param();",
                 "}");
-        assertAbout(javaSources()).that(asList(a, b))
+        assertAbout(javaSources()).that(List.of(a, b))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("annotated method is overridden");
@@ -245,7 +251,7 @@ class InheritanceTest {
                 "@Command",
                 "abstract class C implements B {",
                 "}");
-        assertAbout(javaSources()).that(asList(a, b, c))
+        assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("annotated method is overridden");
@@ -253,17 +259,16 @@ class InheritanceTest {
 
     @Test
     void inheritedInterface() {
-        JavaFileObject javaFile = fromSource(
-                "interface I {}",
-                "abstract class A implements I {}",
-                "",
+        JavaFileObject i = fromSource("interface I {}");
+        JavaFileObject a = fromSource("abstract class A implements I {}");
+        JavaFileObject b = fromSource(
                 "@Command(superCommand = true)",
                 "abstract class B extends A {",
                 "",
                 "  @Parameter(index = 0)",
                 "  abstract String param();",
                 "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
+        assertAbout(javaSources()).that(List.of(i, a, b))
                 .processedWith(Processor.testInstance())
                 .compilesWithoutError();
     }
