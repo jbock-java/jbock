@@ -5,6 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
+import net.jbock.common.Util;
 import net.jbock.convert.Mapping;
 import net.jbock.source.SourceMethod;
 import net.jbock.util.StringConverter;
@@ -26,7 +27,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static io.jbock.util.Either.left;
-import static io.jbock.util.Either.right;
 import static net.jbock.common.Constants.STRING;
 
 @ValidateScope
@@ -39,6 +39,7 @@ public class AutoMappings {
     private static final String PARSE = "parse";
 
     private final TypeTool tool;
+    private final Util util;
     private final List<Entry<String, MultilineCodeBlock>> converters;
     private final MatchFinder matchFinder;
 
@@ -53,22 +54,29 @@ public class AutoMappings {
     }
 
     @Inject
-    AutoMappings(TypeTool tool, MatchFinder matchFinder) {
+    AutoMappings(
+            TypeTool tool,
+            Util util,
+            MatchFinder matchFinder) {
         this.tool = tool;
+        this.util = util;
         this.matchFinder = matchFinder;
         this.converters = autoConverters();
     }
 
-    <M extends AnnotatedMethod> Either<TypeMirror, Mapping<M>> findAutoMapping(SourceMethod<M> parameter, TypeMirror baseType) {
+    <M extends AnnotatedMethod> Either<String, Mapping<M>> findAutoMapping(
+            SourceMethod<M> parameter, TypeMirror baseType) {
         for (Entry<String, MultilineCodeBlock> converter : converters) {
             if (tool.isSameType(baseType, converter.getKey())) {
-                Match<M> match = matchFinder.findMatch(parameter);
-                CodeBlock code = converter.getValue().code;
-                boolean multiline = converter.getValue().multiline;
-                return right(Mapping.create(code, match, multiline));
+                return matchFinder.findMatch(parameter)
+                        .map(match -> {
+                            CodeBlock code = converter.getValue().code;
+                            boolean multiline = converter.getValue().multiline;
+                            return Mapping.create(code, match, multiline);
+                        });
             }
         }
-        return left(baseType);
+        return left(util.noMatchError(baseType));
     }
 
     private Entry<String, MultilineCodeBlock> create(Class<?> autoType, String methodName) {

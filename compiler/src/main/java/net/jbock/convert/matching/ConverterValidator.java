@@ -19,7 +19,6 @@ import javax.lang.model.util.Types;
 import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
-import static net.jbock.convert.matching.ValidatorUtil.validateMatch;
 
 @ValidateScope
 public class ConverterValidator {
@@ -53,6 +52,7 @@ public class ConverterValidator {
                 .or(() -> checkConverterAnnotationPresent(converter))
                 .<Either<String, StringConverterType>>map(Either::left)
                 .orElseGet(() -> referenceTool.getReferencedType(converter))
+                .mapLeft(message -> "invalid converter class: " + message)
                 .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
     }
 
@@ -60,7 +60,7 @@ public class ConverterValidator {
             StringConverterType functionType,
             SourceMethod<M> parameter,
             TypeElement converter) {
-        return validateMatch(parameter, matchFinder.findMatch(parameter))
+        return matchFinder.findMatch(parameter)
                 .filter(match -> isValidMatch(match, functionType))
                 .map(match -> Mapping.create(getMapExpr(functionType, converter), match, false));
     }

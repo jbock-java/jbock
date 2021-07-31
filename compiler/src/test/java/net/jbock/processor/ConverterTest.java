@@ -33,7 +33,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(List.of(converter, javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("converter must extend StringConverter<X> or implement Supplier<StringConverter<X>> but not both");
+                .withErrorContaining("invalid converter class: converter must extend StringConverter<X> or implement Supplier<StringConverter<X>> but not both");
     }
 
     @Test
@@ -54,7 +54,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(List.of(converter, javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("converter must extend StringConverter<X> or implement Supplier<StringConverter<X>>");
+                .withErrorContaining("invalid converter class: converter must extend StringConverter<X> or implement Supplier<StringConverter<X>>");
     }
 
     @Test
@@ -75,7 +75,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(List.of(converter, javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("converter must be an inner class of the command class, " +
+                .withErrorContaining("invalid converter class: converter must be an inner class of the command class, " +
                         "or carry the @Converter annotation");
     }
 
@@ -98,7 +98,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(List.of(converter, javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("converter class may not be abstract");
+                .withErrorContaining("invalid converter class: converter class may not be abstract");
     }
 
     @Test
@@ -174,7 +174,43 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("use @Parameter here");
+                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");
+    }
+
+    @Test
+    void parametersInvalidNotListEnum() {
+        JavaFileObject myEnum = fromSource("enum MyEnum { A }");
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Parameters",
+                "  abstract MyEnum something();",
+                "}");
+        assertAbout(javaSources()).that(List.of(myEnum, javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");    }
+
+    @Test
+    void parametersInvalidNotListEnumConverter() {
+        JavaFileObject myEnum = fromSource("enum MyEnum { A }");
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Parameters(converter = MyConverter.class)",
+                "  abstract MyEnum something();",
+                "",
+                "  @Converter",
+                "  static class MyConverter extends StringConverter<MyEnum> {",
+                "    public MyEnum convert(String token) { return null; }",
+                "  }",
+                "}");
+        assertAbout(javaSources()).that(List.of(myEnum, javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");
     }
 
     @Test
@@ -194,7 +230,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("use @Parameter here");
+                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");
     }
 
     @Test
@@ -214,7 +250,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("use @Parameters here");
+                .withErrorContaining("method 'something' returns a list-based type, so it must be annotated with @Option or @Parameters");
     }
 
     @Test
@@ -227,14 +263,14 @@ class ConverterTest {
                 "  abstract String a();",
                 "",
                 "  @Converter",
-                "  static class BoundMapper<E extends Integer> implements Supplier<Function<E, E>> {",
-                "    public Function<E, E> get() { return null; }",
+                "  static class BoundMapper<E extends Integer> implements Supplier<StringConverter<E>> {",
+                "    public StringConverter<E> get() { return null; }",
                 "  }",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("converter");
+                .withErrorContaining("type parameters are not allowed in converter class declaration");
     }
 
     @Test
@@ -269,17 +305,17 @@ class ConverterTest {
                 "  abstract Integer number();",
                 "",
                 "  @Converter",
-                "  static class MapMap implements Supplier<Function<String, Integer>> {",
+                "  static class MapMap implements Supplier<StringConverter<Integer>> {",
                 "",
                 "    private MapMap() {}",
                 "",
-                "    public Function<String, Integer> get() { return null; }",
+                "    public StringConverter<Integer> get() { return null; }",
                 "  }",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("constructor");
+                .withErrorContaining("invalid converter class: default constructor not found");
     }
 
     @Test
@@ -292,17 +328,17 @@ class ConverterTest {
                 "  abstract Integer number();",
                 "",
                 "  @Converter",
-                "  static class MapMap implements Supplier<Function<String, Integer>> {",
+                "  static class MapMap implements Supplier<StringConverter<Integer>> {",
                 "",
                 "    MapMap(int i) {}",
                 "",
-                "    public Function<String, Integer> get() { return null; }",
+                "    public StringConverter<Integer> get() { return null; }",
                 "  }",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("default constructor not found");
+                .withErrorContaining("invalid converter class: default constructor not found");
     }
 
     @Test
@@ -315,17 +351,17 @@ class ConverterTest {
                 "  abstract Integer number();",
                 "",
                 "  @Converter",
-                "  static class MapMap implements Supplier<Function<String, Integer>> {",
+                "  static class MapMap implements Supplier<StringConverter<Integer>> {",
                 "",
                 "    MapMap() throws java.io.IOException {}",
                 "",
-                "    public Function<String, Integer> get() { return null; }",
+                "    public StringConverter<Integer> get() { return null; }",
                 "  }",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("default constructor not found");
+                .withErrorContaining("invalid converter class: default constructor not found");
     }
 
     @Test
@@ -338,8 +374,8 @@ class ConverterTest {
                 "  abstract Integer number();",
                 "",
                 "  @Converter",
-                "  class MapMap implements Supplier<Function<String, Integer>> {",
-                "    public Function<String, Integer> get() { return null; }",
+                "  class MapMap implements Supplier<StringConverter<Integer>> {",
+                "    public StringConverter<Integer> get() { return null; }",
                 "  }",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
@@ -649,11 +685,11 @@ class ConverterTest {
                 "abstract class Arguments {",
                 "",
                 "  @Option(names = \"--x\", converter = MapMap.class)",
-                "  abstract List<Set<Integer>> sets();",
+                "  abstract List<java.util.Set<Integer>> sets();",
                 "",
                 "  @Converter",
-                "  static class MapMap implements Supplier<StringConverter<Set<Integer>>> {",
-                "    public StringConverter<Set<Integer>> get() { return null; }",
+                "  static class MapMap implements Supplier<StringConverter<java.util.Set<Integer>>> {",
+                "    public StringConverter<java.util.Set<Integer>> get() { return null; }",
                 "  }",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))

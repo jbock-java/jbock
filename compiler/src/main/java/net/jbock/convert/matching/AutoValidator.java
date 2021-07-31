@@ -8,7 +8,6 @@ import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.convert.Mapping;
 import net.jbock.source.SourceMethod;
-import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
@@ -21,7 +20,6 @@ import java.util.stream.Collectors;
 
 import static io.jbock.util.Either.left;
 import static net.jbock.common.Constants.STRING;
-import static net.jbock.convert.matching.ValidatorUtil.validateMatch;
 
 @ValidateScope
 public class AutoValidator {
@@ -41,7 +39,7 @@ public class AutoValidator {
     }
 
     public <M extends AnnotatedMethod> Either<String, Mapping<M>> findMapping(SourceMethod<M> parameter) {
-        return validateMatch(parameter, matchFinder.findMatch(parameter))
+        return matchFinder.findMatch(parameter)
                 .flatMap(m -> findMapping(parameter, m));
     }
 
@@ -49,7 +47,7 @@ public class AutoValidator {
             SourceMethod<M> parameter,
             Match<M> match) {
         return autoConverter.findAutoMapping(parameter, match.baseType())
-                .flatMapLeft(baseType -> findEnumMapping(parameter, baseType));
+                .flatMapLeft(message -> findEnumMapping(parameter, match.baseType()));
     }
 
     private <M extends AnnotatedMethod> Either<String, Mapping<M>> findEnumMapping(
@@ -61,12 +59,12 @@ public class AutoValidator {
                 .filter(element -> element.getKind() == ElementKind.ENUM)
                 .map(TypeElement::asType)
                 .<Either<String, TypeMirror>>map(Either::right)
-                .orElseGet(() -> left(noMatchError(baseType)))
-                .map(enumType -> {
-                    Match<M> match = matchFinder.findMatch(parameter);
-                    CodeBlock code = enumConvertBlock(enumType);
-                    return Mapping.create(code, match, true);
-                });
+                .orElseGet(() -> left(util.noMatchError(baseType)))
+                .flatMap(enumType -> matchFinder.findMatch(parameter)
+                        .map(match -> {
+                            CodeBlock code = enumConvertBlock(enumType);
+                            return Mapping.create(code, match, true);
+                        }));
     }
 
     private CodeBlock enumConvertBlock(TypeMirror enumType) {
@@ -88,11 +86,5 @@ public class AutoValidator {
                 .unindent()
                 .add("}\n");
         return code.build();
-    }
-
-    private String noMatchError(TypeMirror type) {
-        return "define a converter that implements " +
-                StringConverter.class.getSimpleName() +
-                "<" + util.typeToString(type) + ">";
     }
 }

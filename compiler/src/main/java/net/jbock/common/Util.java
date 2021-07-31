@@ -2,6 +2,7 @@ package net.jbock.common;
 
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.util.StringConverter;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -156,5 +157,11 @@ public class Util {
                     " or @" + present.get(1).getSimpleName() + " but not both");
         }
         return Optional.empty();
+    }
+
+    public String noMatchError(TypeMirror type) {
+        return "define a converter that implements " +
+                StringConverter.class.getSimpleName() +
+                "<" + typeToString(type) + ">";
     }
 }

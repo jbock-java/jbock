@@ -308,7 +308,7 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("use @Parameter here");
+                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");
     }
 
     @Test
@@ -323,7 +323,7 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("use @Parameter here");
+                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");
     }
 
     @Test
@@ -338,6 +338,6 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("use @Parameters here");
+                .withErrorContaining("method 'something' returns a list-based type, so it must be annotated with @Option or @Parameters");
     }
 }
