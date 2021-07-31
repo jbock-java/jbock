@@ -21,7 +21,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.jbock.util.Either.right;
-import static io.jbock.util.Eithers.toOptionalList;
+import static io.jbock.util.Eithers.optionalList;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.INTERFACE;
@@ -41,13 +43,16 @@ public class AbstractMethodsFinder {
     }
 
     Either<List<ValidationFailure>, List<ExecutableElement>> findAbstractMethods() {
-        Map<Boolean, List<ExecutableElement>> partitions = findMethodsIn(sourceElement.element().asType()).stream()
+        List<ExecutableElement> methodsIn = findMethodsIn(sourceElement.element().asType());
+        Map<Boolean, List<ExecutableElement>> partitions = methodsIn.stream()
                 .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
-        Set<Name> nonAbstractNames = partitions.get(false)
-                .stream()
+        Set<Name> nonAbstractNames = partitions.get(false).stream()
                 .map(ExecutableElement::getSimpleName)
                 .collect(Collectors.toSet());
-        return findRelevantAbstractMethods(partitions.get(true), nonAbstractNames);
+        Map<Name, Integer> allAbstractGrouped = partitions.get(true).stream()
+                .collect(groupingBy(ExecutableElement::getSimpleName,
+                        collectingAndThen(Collectors.toList(), List::size)));
+        return findRelevantAbstractMethods(partitions.get(true), allAbstractGrouped, nonAbstractNames);
     }
 
     private List<ExecutableElement> findMethodsIn(TypeMirror mirror) {
@@ -101,7 +106,7 @@ public class AbstractMethodsFinder {
 
     /**
      * Returns a Right-Either containing those abstract methods which
-     * are not overridden by a non-abstract method.
+     * are not overridden.
      * If one of the annotated methods is overridden, a Left either is returned.
      *
      * @param allAbstract the set of all abstract methods in the source elements hierarchy
@@ -109,15 +114,19 @@ public class AbstractMethodsFinder {
      */
     private Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantAbstractMethods(
             List<ExecutableElement> allAbstract,
+            Map<Name, Integer> allAbstractNameCount,
             Set<Name> nonAbstractNames) {
-        Map<Boolean, List<ExecutableElement>> partition = allAbstract.stream()
-                .collect(partitioningBy(m -> nonAbstractNames.contains(m.getSimpleName())));
-        return partition.get(true).stream()
+        List<ValidationFailure> failures = allAbstract.stream()
                 .filter(this::hasAnnotation)
+                .filter(m -> allAbstractNameCount.getOrDefault(m.getSimpleName(), 0) >= 2
+                        || nonAbstractNames.contains(m.getSimpleName()))
                 .map(m -> new ValidationFailure("annotated method is overridden", m))
-                .collect(toOptionalList())
+                .collect(toList());
+        return optionalList(failures)
                 .<Either<List<ValidationFailure>, List<ExecutableElement>>>map(Either::left)
-                .orElseGet(() -> right(partition.get(false)));
+                .orElseGet(() -> right(allAbstract.stream()
+                        .filter(m -> !nonAbstractNames.contains(m.getSimpleName()))
+                        .collect(toList())));
     }
 
     private boolean hasAnnotation(ExecutableElement overridden) {

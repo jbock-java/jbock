@@ -14,18 +14,15 @@ import net.jbock.source.SourceParameters;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Name;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.jbock.util.Eithers.optionalList;
-import static io.jbock.util.Eithers.toOptionalList;
 
 @ValidateScope
 public class MethodsFactory {
@@ -54,24 +51,9 @@ public class MethodsFactory {
     Either<List<ValidationFailure>, AbstractMethods> findAbstractMethods() {
         return abstractMethodsFinder.findAbstractMethods()
                 .flatMap(this::validateParameterMethods)
-                .filter(this::detectInheritanceCollision)
                 .map(this::createSourceMethods)
                 .map(this::createAbstractMethods)
                 .filter(methods -> optionalList(validateAtLeastOneParameterInSuperCommand(methods)));
-    }
-
-    /* Left-Optional
-     */
-    private Optional<List<ValidationFailure>> detectInheritanceCollision(
-            List<AnnotatedMethod> methods) {
-        Map<Name, List<ExecutableElement>> map = methods.stream()
-                .map(AnnotatedMethod::method)
-                .collect(Collectors.groupingBy(ExecutableElement::getSimpleName));
-        return methods.stream()
-                .map(AnnotatedMethod::method)
-                .filter(method -> map.get(method.getSimpleName()).size() >= 2)
-                .map(method -> new ValidationFailure("inheritance collision", method))
-                .collect(toOptionalList());
     }
 
     private AbstractMethods createAbstractMethods(List<SourceMethod<?>> methods) {
