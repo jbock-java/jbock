@@ -3,7 +3,6 @@ package net.jbock.processor;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
-
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertAbout;

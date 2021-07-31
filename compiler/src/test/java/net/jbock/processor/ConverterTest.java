@@ -3,7 +3,6 @@ package net.jbock.processor;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
-
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertAbout;
@@ -190,7 +189,8 @@ class ConverterTest {
         assertAbout(javaSources()).that(List.of(myEnum, javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");    }
+                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");
+    }
 
     @Test
     void parametersInvalidNotListEnumConverter() {

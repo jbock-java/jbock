@@ -6,6 +6,8 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.util.Optional;
 
 import static net.jbock.common.TypeTool.AS_DECLARED;
@@ -21,8 +23,7 @@ class TypeToolTest {
     @Test
     void testToType() {
         EvaluatingProcessor.source().run((elements, types) -> {
-            DeclaredType map = TypeExpr.prepare(elements, types).parse(
-                    "java.util.Map<java.util.List<java.lang.String>, java.lang.String>");
+            DeclaredType map = inputType(elements, types);
             assertEquals(types.erasure(elements.getTypeElement("java.util.Map").asType()), types.erasure(map));
             assertEquals(2, map.getTypeArguments().size());
             TypeMirror key = map.getTypeArguments().get(0);
@@ -41,6 +42,14 @@ class TypeToolTest {
                     value,
                     types);
         });
+    }
+
+    private DeclaredType inputType(Elements elements, Types types) {
+        TypeElement map = elements.getTypeElement("java.util.Map");
+        TypeElement list = elements.getTypeElement("java.util.List");
+        TypeElement string = elements.getTypeElement("java.lang.String");
+        DeclaredType listOfString = types.getDeclaredType(list, string.asType());
+        return types.getDeclaredType(map, listOfString, string.asType());
     }
 
     @Test
