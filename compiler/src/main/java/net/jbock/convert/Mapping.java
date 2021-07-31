@@ -113,7 +113,7 @@ public final class Mapping<M extends AnnotatedMethod> {
         return multiplicity() == OPTIONAL;
     }
 
-    public boolean isFlag() {
+    public boolean modeFlag() {
         return modeFlag;
     }
 

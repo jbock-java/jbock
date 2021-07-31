@@ -2,6 +2,8 @@ package net.jbock.processor;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
 import io.jbock.util.Either;
 import net.jbock.Command;
 import net.jbock.common.Annotations;
@@ -11,8 +13,8 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.context.ContextComponent;
 import net.jbock.context.DaggerContextComponent;
 import net.jbock.context.GeneratedClass;
+import net.jbock.validate.CommandProcessor;
 import net.jbock.validate.DaggerValidateComponent;
-import net.jbock.validate.ValidateComponent;
 import net.jbock.validate.ValidateModule;
 
 import javax.annotation.processing.Messager;
@@ -26,6 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 /**
@@ -76,18 +79,28 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     }
 
     private void processSourceElement(SourceElement sourceElement) {
-        ValidateComponent component = DaggerValidateComponent.builder()
+        CommandProcessor processor = DaggerValidateComponent.builder()
                 .sourceElement(sourceElement)
                 .module(new ValidateModule(types, elements))
-                .create();
-        component.processor().generate()
+                .create()
+                .processor();
+        processor.generate()
                 .map(items -> items.contextModule(sourceElement))
                 .map(module -> DaggerContextComponent.factory().create(module))
                 .map(ContextComponent::generatedClass)
                 .map(GeneratedClass::define)
                 .ifLeftOrElse(
                         this::printFailures,
-                        type -> sourceFileGenerator.write(sourceElement, type));
+                        typeSpec -> writeSpec(sourceElement, typeSpec));
+    }
+
+    private void writeSpec(SourceElement sourceElement, TypeSpec typeSpec) {
+        checkArgument(typeSpec.originatingElements.size() == 1);
+        String packageName = sourceElement.generatedClass().packageName();
+        JavaFile javaFile = JavaFile.builder(packageName, typeSpec)
+                .skipJavaLangImports(true)
+                .build();
+        sourceFileGenerator.write(sourceElement, javaFile);
     }
 
     private Either<List<ValidationFailure>, SourceElement> validateSourceElement(

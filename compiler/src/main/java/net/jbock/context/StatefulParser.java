@@ -101,7 +101,7 @@ public class StatefulParser {
         if (param.isRepeatable()) {
             return generatedTypes.repeatableOptionParserType();
         }
-        if (param.isFlag()) {
+        if (param.modeFlag()) {
             return generatedTypes.flagParserType();
         }
         return generatedTypes.regularOptionParserType();

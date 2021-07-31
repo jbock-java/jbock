@@ -1,8 +1,6 @@
 package net.jbock.processor;
 
-import com.google.common.base.Preconditions;
 import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -24,12 +22,7 @@ public class SourceFileGenerator {
         this.messager = messager;
     }
 
-    void write(SourceElement sourceElement, TypeSpec typeSpec) {
-        Preconditions.checkArgument(typeSpec.originatingElements.size() == 1);
-        String packageName = sourceElement.generatedClass().packageName();
-        JavaFile javaFile = JavaFile.builder(packageName, typeSpec)
-                .skipJavaLangImports(true)
-                .build();
+    void write(SourceElement sourceElement, JavaFile javaFile) {
         try {
             javaFile.writeTo(filer);
         } catch (IOException e) {

@@ -31,7 +31,7 @@ public class NamedOptions {
     static NamedOptions create(List<Mapping<AnnotatedOption>> options, boolean unixClustering) {
         boolean anyRepeatable = options.stream().anyMatch(Mapping::isRepeatable);
         boolean anyRegular = options.stream().anyMatch(option -> option.isOptional() || option.isRequired());
-        boolean anyFlags = options.stream().anyMatch(Mapping::isFlag);
+        boolean anyFlags = options.stream().anyMatch(Mapping::modeFlag);
         return new NamedOptions(anyRepeatable, anyRegular, anyFlags,
                 unixClustering && hasEnoughUnixNames(options));
     }
@@ -40,7 +40,7 @@ public class NamedOptions {
         List<Mapping<AnnotatedOption>> unixOptions = options.stream()
                 .filter(option -> option.sourceMethod().annotatedMethod().hasUnixName())
                 .collect(Collectors.toList());
-        return unixOptions.size() >= 2 && unixOptions.stream().anyMatch(Mapping::isFlag);
+        return unixOptions.size() >= 2 && unixOptions.stream().anyMatch(Mapping::modeFlag);
     }
 
     boolean anyRepeatable() {

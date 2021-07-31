@@ -6,7 +6,9 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
+import net.jbock.common.Constants;
 import net.jbock.convert.Mapping;
+import net.jbock.model.Multiplicity;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ExConvert;
 import net.jbock.util.ExMissingItem;
@@ -17,10 +19,11 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static net.jbock.common.Constants.EITHERS;
-import static net.jbock.common.Constants.OPTIONAL;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
+import static net.jbock.model.Multiplicity.OPTIONAL;
 
 @ContextScope
 public class BuildMethod extends CachedMethod {
@@ -56,21 +59,19 @@ public class BuildMethod extends CachedMethod {
     MethodSpec define() {
         CodeBlock constructorArguments = getConstructorArguments();
         MethodSpec.Builder spec = MethodSpec.methodBuilder("build");
-        List<Mapping<AnnotatedOption>> options = namedOptions;
-        for (int i = 0; i < options.size(); i++) {
-            Mapping<AnnotatedOption> c = options.get(i);
-            ParameterSpec p = c.asParam();
-            spec.addStatement("$T $N = $L", p.type, p, convertExpressionOption(c, i));
+        for (int i = 0; i < namedOptions.size(); i++) {
+            Mapping<AnnotatedOption> m = namedOptions.get(i);
+            ParameterSpec p = m.asParam();
+            spec.addStatement("$T $N = $L", p.type, p, convertExpressionOption(m, i));
         }
-        List<Mapping<AnnotatedParameter>> regular = positionalParameters;
-        for (int i = 0, regularSize = regular.size(); i < regularSize; i++) {
-            Mapping<AnnotatedParameter> c = regular.get(i);
-            ParameterSpec p = c.asParam();
-            spec.addStatement("$T $N = $L", p.type, p, convertExpressionRegularParameter(c, i));
+        for (int i = 0; i < positionalParameters.size(); i++) {
+            Mapping<AnnotatedParameter> m = positionalParameters.get(i);
+            ParameterSpec p = m.asParam();
+            spec.addStatement("$T $N = $L", p.type, p, convertExpressionRegularParameter(m, i));
         }
-        repeatablePositionalParameters.forEach(c -> {
-            ParameterSpec p = c.asParam();
-            spec.addStatement("$T $N = $L", p.type, p, convertExpressionRepeatableParameter(c));
+        repeatablePositionalParameters.forEach(m -> {
+            ParameterSpec p = m.asParam();
+            spec.addStatement("$T $N = $L", p.type, p, convertExpressionRepeatableParameter(m));
         });
         generatedTypes.superResultType().ifPresentOrElse(parseResultWithRestType -> {
                     ParameterSpec result = ParameterSpec.builder(sourceElement.typeName(), "result").build();
@@ -97,50 +98,50 @@ public class BuildMethod extends CachedMethod {
             code.add(CodeBlock.of("$N", c.asParam()));
         }
         repeatablePositionalParameters.stream()
-                .map(c -> CodeBlock.of("$N", c.asParam()))
+                .map(m -> CodeBlock.of("$N", m.asParam()))
                 .forEach(code::add);
         return contextUtil.joinByComma(code);
     }
 
-    private CodeBlock convertExpressionOption(Mapping<AnnotatedOption> c, int i) {
+    private CodeBlock convertExpressionOption(Mapping<AnnotatedOption> m, int i) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("this.$N.get($T.$N).stream()", commonFields.optionParsers(),
-                sourceElement.optionEnumType(), c.enumName().enumConstant()));
-        if (!c.isFlag()) {
-            code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
-                    .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
+                sourceElement.optionEnumType(), m.enumName().enumConstant()));
+        if (!m.modeFlag()) {
+            code.add(CodeBlock.of(".map($L)", m.simpleMapExpr()
+                    .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(m)))));
         }
-        code.addAll(tailExpressionOption(c, i));
-        c.extractExpr().ifPresent(code::add);
+        code.addAll(tailExpressionOption(m, i));
+        m.extractExpr().ifPresent(code::add);
         return contextUtil.joinByNewline(code);
     }
 
-    private CodeBlock convertExpressionRegularParameter(Mapping<AnnotatedParameter> c, int i) {
+    private CodeBlock convertExpressionRegularParameter(Mapping<AnnotatedParameter> m, int i) {
         List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$T.ofNullable(this.$N[$L])", OPTIONAL, commonFields.params(),
-                c.sourceMethod().annotatedMethod().index()));
-        code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
-                .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
-        code.addAll(tailExpressionParameter(c, i));
-        c.extractExpr().ifPresent(code::add);
+        code.add(CodeBlock.of("$T.ofNullable(this.$N[$L])", Constants.OPTIONAL, commonFields.params(),
+                m.sourceMethod().annotatedMethod().index()));
+        code.add(CodeBlock.of(".map($L)", m.simpleMapExpr()
+                .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(m)))));
+        code.addAll(tailExpressionParameter(m, i));
+        m.extractExpr().ifPresent(code::add);
         return contextUtil.joinByNewline(code);
     }
 
-    private CodeBlock convertExpressionRepeatableParameter(Mapping<AnnotatedParameters> c) {
+    private CodeBlock convertExpressionRepeatableParameter(Mapping<AnnotatedParameters> m) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
-        code.add(CodeBlock.of(".map($L)", c.simpleMapExpr()
-                .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(c)))));
+        code.add(CodeBlock.of(".map($L)", m.simpleMapExpr()
+                .orElseGet(() -> CodeBlock.of("new $T()", generatedTypes.multilineConverterType(m)))));
         code.add(CodeBlock.of(".collect($T.toValidList())", EITHERS));
         code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.size()));
         return contextUtil.joinByNewline(code);
     }
 
-    private List<CodeBlock> tailExpressionOption(Mapping<AnnotatedOption> c, int i) {
-        if (c.isFlag()) {
+    private List<CodeBlock> tailExpressionOption(Mapping<AnnotatedOption> m, int i) {
+        if (m.modeFlag()) {
             return List.of(CodeBlock.of(".findAny().isPresent()"));
         }
-        switch (c.multiplicity()) {
+        switch (m.multiplicity()) {
             case REQUIRED:
                 return List.of(
                         CodeBlock.of(".findAny()"),
@@ -152,30 +153,27 @@ public class BuildMethod extends CachedMethod {
                         CodeBlock.of(".collect($T.toValidList())", EITHERS),
                         orElseThrowConverterError(ItemType.OPTION, i),
                         CodeBlock.of(".stream().findAny()"));
-            case REPEATABLE:
+            default: {
+                checkArgument(m.multiplicity() == Multiplicity.REPEATABLE);
                 return List.of(
                         CodeBlock.of(".collect($T.toValidList())", EITHERS),
                         orElseThrowConverterError(ItemType.OPTION, i));
-            default:
-                throw new AssertionError("all cases covered: " + c.multiplicity());
+            }
         }
     }
 
-    private List<CodeBlock> tailExpressionParameter(Mapping<AnnotatedParameter> c, int i) {
-        switch (c.multiplicity()) {
-            case REQUIRED:
-                return List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
-                        ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
-                        orElseThrowConverterError(ItemType.PARAMETER, i));
-            case OPTIONAL:
-                return List.of(
-                        CodeBlock.of(".stream()"),
-                        CodeBlock.of(".collect($T.toValidList())", EITHERS),
-                        orElseThrowConverterError(ItemType.PARAMETER, i),
-                        CodeBlock.of(".stream().findAny()"));
-            default:
-                throw new IllegalArgumentException("unexpected multiplicity: " + c.multiplicity());
+    private List<CodeBlock> tailExpressionParameter(Mapping<AnnotatedParameter> m, int i) {
+        if (m.multiplicity() == Multiplicity.REQUIRED) {
+            return List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
+                    ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
+                    orElseThrowConverterError(ItemType.PARAMETER, i));
         }
+        checkArgument(m.multiplicity() == OPTIONAL);
+        return List.of(
+                CodeBlock.of(".stream()"),
+                CodeBlock.of(".collect($T.toValidList())", EITHERS),
+                orElseThrowConverterError(ItemType.PARAMETER, i),
+                CodeBlock.of(".stream().findAny()"));
     }
 
     private CodeBlock orElseThrowConverterError(ItemType itemType, int i) {
