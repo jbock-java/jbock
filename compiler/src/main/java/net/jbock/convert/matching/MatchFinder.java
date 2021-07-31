@@ -5,7 +5,6 @@ import net.jbock.Option;
 import net.jbock.Parameters;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.convert.matcher.ListMatcher;
-import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.matcher.OptionalMatcher;
 import net.jbock.model.Multiplicity;
 import net.jbock.source.SourceMethod;
@@ -44,20 +43,20 @@ public class MatchFinder {
     }
 
     private <M extends AnnotatedMethod> Match<M> findMatchInternal(SourceMethod<M> parameter) {
-        for (Matcher matcher : List.of(optionalMatcher, listMatcher)) {
-            Optional<Match<M>> match = matcher.tryMatch(parameter);
-            if (match.isPresent()) {
-                return match.orElseThrow();
-            }
-        }
-        TypeMirror baseType = AS_PRIMITIVE.visit(parameter.returnType())
-                .map(types::boxedClass)
-                .map(TypeElement::asType)
-                .orElse(parameter.returnType());
-        return Match.create(baseType, Multiplicity.REQUIRED, parameter);
+        return List.of(optionalMatcher, listMatcher).stream()
+                .map(matcher -> matcher.tryMatch(parameter))
+                .flatMap(Optional::stream)
+                .findFirst()
+                .orElseGet(() -> {
+                    TypeMirror baseType = AS_PRIMITIVE.visit(parameter.returnType())
+                            .map(types::boxedClass)
+                            .map(TypeElement::asType)
+                            .orElse(parameter.returnType());
+                    return Match.create(baseType, Multiplicity.REQUIRED, parameter);
+                });
     }
 
-    private <M extends AnnotatedMethod> Either<String, Match<M>> validateMatch(
+    private static  <M extends AnnotatedMethod> Either<String, Match<M>> validateMatch(
             SourceMethod<?> sourceMethod,
             Match<M> m) {
         if (sourceMethod.annotatedMethod().isParameter()
