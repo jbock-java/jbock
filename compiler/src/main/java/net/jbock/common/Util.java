@@ -5,7 +5,6 @@ import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.util.StringConverter;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
@@ -16,6 +15,7 @@ import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -88,22 +88,14 @@ public class Util {
     }
 
     public List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
-        List<TypeElement> result = new ArrayList<>();
-        TypeElement current = sourceElement;
-        result.add(current);
-        while (current.getNestingKind() == NestingKind.MEMBER) {
-            Element enclosingElement = current.getEnclosingElement();
-            if (enclosingElement.getKind() != ElementKind.CLASS) {
-                return result;
-            }
-            Optional<TypeElement> opt = TypeTool.AS_TYPE_ELEMENT.visit(enclosingElement);
-            if (opt.isEmpty()) {
-                return result;
-            }
-            current = opt.orElseThrow();
-            result.add(current);
+        LinkedList<TypeElement> result = new LinkedList<>();
+        result.add(sourceElement);
+        while (result.getLast().getNestingKind() == NestingKind.MEMBER) {
+            Element enclosingElement = result.getLast().getEnclosingElement();
+            TypeTool.AS_TYPE_ELEMENT.visit(enclosingElement)
+                    .ifPresent(result::add);
         }
-        return result;
+        return new ArrayList<>(result);
     }
 
     public String typeToString(TypeMirror type) {

@@ -289,6 +289,21 @@ class ProcessorTest {
     }
 
     @Test
+    void voidType() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Option(names = \"--x\")",
+                "  abstract void a();",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("method may not return VOID");
+    }
+
+    @Test
     void commandInterface() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
