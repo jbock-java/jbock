@@ -18,7 +18,8 @@ import static net.jbock.model.Multiplicity.OPTIONAL;
 /**
  * An annotated method with additional information about type conversion.
  *
- * @param <M> the type of item
+ * @param <M> one of three types of annotated methods:
+ *           named option, positional parameter, or repeatable positional parameter
  */
 public final class Mapping<M extends AnnotatedMethod> {
 

@@ -31,5 +31,4 @@ public final class ValidMatch<M extends AnnotatedMethod> {
     public Optional<CodeBlock> extractExpr() {
         return match.extractExpr();
     }
-
 }
