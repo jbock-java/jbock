@@ -4,7 +4,6 @@ import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.EnumName;
 import net.jbock.common.SnakeName;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -34,10 +33,6 @@ public final class SourceOption extends SourceMethod<AnnotatedOption> {
                         .snake('_')
                         .toUpperCase(Locale.US));
         return new SourceOption(option, enumName, paramLabel);
-    }
-
-    public List<String> names() {
-        return option.names();
     }
 
     @Override

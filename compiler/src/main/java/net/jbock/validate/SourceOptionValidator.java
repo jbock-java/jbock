@@ -75,7 +75,7 @@ public class SourceOptionValidator {
         if (sourceOption.annotatedMethod().names().isEmpty()) {
             return left(sourceOption.fail("define at least one option name"));
         }
-        for (String name : sourceOption.names()) {
+        for (String name : sourceOption.annotatedMethod().names()) {
             Optional<String> check = checkName(name);
             if (check.isPresent()) {
                 return left(sourceOption.fail(check.map(s -> "invalid name: " + s)
@@ -118,7 +118,7 @@ public class SourceOptionValidator {
             List<SourceOption> allOptions) {
         Set<String> allNames = new HashSet<>();
         return allOptions.stream()
-                .flatMap(item -> item.names().stream()
+                .flatMap(item -> item.annotatedMethod().names().stream()
                         .filter(name -> !allNames.add(name))
                         .map(name -> "duplicate option name: " + name)
                         .map(item::fail))
