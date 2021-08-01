@@ -9,15 +9,13 @@ import java.util.Optional;
 
 public final class SourceOption extends SourceMethod<AnnotatedOption> {
 
-    private final AnnotatedOption option;
     private final String paramLabel;
 
     private SourceOption(
             AnnotatedOption option,
             EnumName enumName,
             String paramLabel) {
-        super(enumName);
-        this.option = option;
+        super(option, enumName);
         this.paramLabel = paramLabel;
     }
 
@@ -33,11 +31,6 @@ public final class SourceOption extends SourceMethod<AnnotatedOption> {
                         .snake('_')
                         .toUpperCase(Locale.US));
         return new SourceOption(option, enumName, paramLabel);
-    }
-
-    @Override
-    public AnnotatedOption annotatedMethod() {
-        return option;
     }
 
     @Override

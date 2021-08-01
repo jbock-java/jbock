@@ -15,9 +15,11 @@ import java.util.Optional;
 public abstract class SourceMethod<M extends AnnotatedMethod> {
 
     private final EnumName enumName;
+    private final M annotatedMethod;
 
-    SourceMethod(EnumName enumName) {
+    SourceMethod(M annotatedMethod, EnumName enumName) {
         this.enumName = enumName;
+        this.annotatedMethod = annotatedMethod;
     }
 
     public final TypeMirror returnType() {
@@ -40,7 +42,9 @@ public abstract class SourceMethod<M extends AnnotatedMethod> {
         return annotatedMethod().method().getSimpleName().toString();
     }
 
-    public abstract M annotatedMethod();
+    public final M annotatedMethod() {
+        return annotatedMethod;
+    }
 
     public abstract Optional<SourceOption> asAnnotatedOption();
 

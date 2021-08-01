@@ -9,15 +9,13 @@ import java.util.Optional;
 
 public final class SourceParameter extends SourceMethod<AnnotatedParameter> {
 
-    private final AnnotatedParameter parameter;
     private final String paramLabel;
 
     private SourceParameter(
             AnnotatedParameter parameter,
             EnumName enumName,
             String paramLabel) {
-        super(enumName);
-        this.parameter = parameter;
+        super(parameter, enumName);
         this.paramLabel = paramLabel;
     }
 
@@ -29,11 +27,6 @@ public final class SourceParameter extends SourceMethod<AnnotatedParameter> {
                         .snake('_')
                         .toUpperCase(Locale.US));
         return new SourceParameter(parameter, enumName, paramLabel);
-    }
-
-    @Override
-    public AnnotatedParameter annotatedMethod() {
-        return parameter;
     }
 
     @Override
