@@ -23,7 +23,7 @@ class SourceFileGeneratorTest {
     private final SourceFileGenerator sourceFileGenerator = new SourceFileGenerator(filer, messager);
 
     @Test
-    void write() throws IOException {
+    void testWriteException() throws IOException {
         JavaFile javaFile = mock(JavaFile.class);
         doThrow(IOException.class).when(javaFile).writeTo(any(Filer.class));
         sourceFileGenerator.write(mock(SourceElement.class), javaFile);

@@ -8,7 +8,7 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 import static java.util.Collections.singletonList;
-import static net.jbock.processor.ProcessorTest.fromSource;
+import static net.jbock.processor.Processor.fromSource;
 
 class InheritanceTest {
 

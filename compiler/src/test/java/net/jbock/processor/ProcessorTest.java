@@ -3,14 +3,11 @@ package net.jbock.processor;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import static com.google.common.truth.Truth.assertAbout;
-import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 import static java.util.Collections.singletonList;
+import static net.jbock.processor.Processor.fromSource;
 
 class ProcessorTest {
 
@@ -737,31 +734,5 @@ class ProcessorTest {
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("inaccessible type: Foo");
-    }
-
-    static JavaFileObject fromSource(String... lines) {
-        List<String> sourceLines = withImports(lines);
-        return forSourceLines("test.Arguments", sourceLines);
-    }
-
-    static List<String> withImports(String... lines) {
-        List<String> header = List.of(
-                "package test;",
-                "",
-                "import java.util.List;",
-                "import java.util.Optional;",
-                "import java.util.function.Supplier;",
-                "",
-                "import net.jbock.util.StringConverter;",
-                "import net.jbock.Command;",
-                "import net.jbock.Parameter;",
-                "import net.jbock.Parameters;",
-                "import net.jbock.Option;",
-                "import net.jbock.Converter;",
-                "");
-        List<String> moreLines = new ArrayList<>(lines.length + header.size());
-        moreLines.addAll(header);
-        Collections.addAll(moreLines, lines);
-        return moreLines;
     }
 }
