@@ -24,10 +24,9 @@ import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static io.jbock.util.Either.right;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static net.jbock.common.Annotations.typeLevelAnnotations;
 
@@ -62,9 +61,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
     @Override
     public Set<String> annotations() {
-        return Stream.of(Command.class)
-                .map(Class::getCanonicalName)
-                .collect(Collectors.toSet());
+        return Set.of(Command.class.getCanonicalName());
     }
 
     @Override
@@ -106,12 +103,10 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     private Either<List<ValidationFailure>, SourceElement> validateSourceElement(
             TypeElement element) {
         return util.commonTypeChecks(element)
-                .or(() -> util.checkNoDuplicateAnnotations(element,
-                        typeLevelAnnotations()))
-                .map(s -> new ValidationFailure(s, element))
+                .or(() -> util.checkNoDuplicateAnnotations(element, typeLevelAnnotations()))
                 .map(List::of)
                 .<Either<List<ValidationFailure>, SourceElement>>map(Either::left)
-                .orElseGet(() -> Either.right(SourceElement.create(element)));
+                .orElseGet(() -> right(SourceElement.create(element)));
     }
 
     private void printFailures(List<ValidationFailure> failures) {

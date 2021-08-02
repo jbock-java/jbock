@@ -2,7 +2,6 @@ package net.jbock.processor;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
-import net.jbock.common.Annotations;
 import net.jbock.common.Util;
 
 import javax.annotation.processing.Messager;
@@ -18,6 +17,7 @@ import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.tools.Diagnostic.Kind.ERROR;
+import static net.jbock.common.Annotations.methodLevelAnnotations;
 
 @ProcessorScope
 public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.Step {
@@ -42,7 +42,7 @@ public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.S
 
     @Override
     public Set<String> annotations() {
-        return Annotations.methodLevelAnnotations().stream()
+        return methodLevelAnnotations().stream()
                 .map(Class::getCanonicalName)
                 .collect(Collectors.toSet());
     }

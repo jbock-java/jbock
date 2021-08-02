@@ -30,17 +30,17 @@ public class Util {
 
     /* Left-Optional
      */
-    public Optional<String> commonTypeChecks(TypeElement classToCheck) {
+    public Optional<ValidationFailure> commonTypeChecks(TypeElement classToCheck) {
         if (classToCheck.getNestingKind().isNested() && !classToCheck.getModifiers().contains(Modifier.STATIC)) {
-            return Optional.of("nested class must be static");
+            return Optional.of(new ValidationFailure("nested class must be static", classToCheck));
         }
         for (TypeElement element : getEnclosingElements(classToCheck)) {
             if (element.getModifiers().contains(Modifier.PRIVATE)) {
-                return Optional.of("class cannot be private");
+                return Optional.of(new ValidationFailure("class cannot be private", classToCheck));
             }
         }
         if (!hasDefaultConstructor(classToCheck)) {
-            return Optional.of("default constructor not found");
+            return Optional.of(new ValidationFailure("default constructor not found", classToCheck));
         }
         return Optional.empty();
     }
