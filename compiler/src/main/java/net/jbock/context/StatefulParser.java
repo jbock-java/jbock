@@ -83,7 +83,7 @@ public class StatefulParser {
         CodeBlock.Builder code = CodeBlock.builder();
         for (Mapping<AnnotatedOption> namedOption : namedOptions) {
             String enumConstant = namedOption.enumName().enumConstant();
-            for (String dashedName : namedOption.sourceMethod().annotatedMethod().names()) {
+            for (String dashedName : namedOption.sourceMethod().names()) {
                 code.addStatement("$N.put($S, $T.$L)",
                         commonFields.optionNames(), dashedName, sourceElement.optionEnumType(),
                         enumConstant);

@@ -1,14 +1,13 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
+import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
-import net.jbock.source.SourceMethod;
-import net.jbock.source.SourceOption;
-import net.jbock.source.SourceParameter;
-import net.jbock.source.SourceParameters;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Name;
@@ -24,9 +23,8 @@ import static io.jbock.util.Eithers.toValidListAll;
 @ValidateScope
 public class MethodsFactory {
 
-    // sort order that puts @Parameters last
-    private static final Comparator<SourceMethod<AnnotatedParameter>> POSITION_COMPARATOR =
-            Comparator.comparingInt(m -> m.annotatedMethod().index());
+    private static final Comparator<AnnotatedParameter> INDEX_COMPARATOR =
+            Comparator.comparingInt(AnnotatedParameter::index);
 
     private final SourceElement sourceElement;
     private final AnnotatedMethodValidator sourceMethodValidator;
@@ -52,18 +50,18 @@ public class MethodsFactory {
                 .filter(methods -> optionalList(validateAtLeastOneParameterInSuperCommand(methods)));
     }
 
-    private AbstractMethods createAbstractMethods(List<SourceMethod<?>> methods) {
-        List<SourceParameter> params = methods.stream()
-                .map(SourceMethod::asAnnotatedParameter)
+    private AbstractMethods createAbstractMethods(List<AnnotatedMethod> methods) {
+        List<AnnotatedParameter> params = methods.stream()
+                .map(AnnotatedMethod::asAnnotatedParameter)
                 .flatMap(Optional::stream)
-                .sorted(POSITION_COMPARATOR)
+                .sorted(INDEX_COMPARATOR)
                 .collect(Collectors.toList());
-        List<SourceParameters> repeatableParams = methods.stream()
-                .map(SourceMethod::asAnnotatedParameters)
+        List<AnnotatedParameters> repeatableParams = methods.stream()
+                .map(AnnotatedMethod::asAnnotatedParameters)
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
-        List<SourceOption> options = methods.stream()
-                .map(SourceMethod::asAnnotatedOption)
+        List<AnnotatedOption> options = methods.stream()
+                .map(AnnotatedMethod::asAnnotatedOption)
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
         return new AbstractMethods(params, repeatableParams, options);
@@ -80,7 +78,7 @@ public class MethodsFactory {
         return List.of(sourceElement.fail(message));
     }
 
-    private Either<List<ValidationFailure>, List<SourceMethod<?>>> validateParameterMethods(
+    private Either<List<ValidationFailure>, List<AnnotatedMethod>> validateParameterMethods(
             AllMethods sourceMethods) {
         Map<Name, EnumName> enumNames = sourceMethods.enumNames();
         return sourceMethods.abstractMethods().stream()

@@ -1,5 +1,6 @@
 package net.jbock.annotated;
 
+import net.jbock.common.EnumName;
 import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.ExecutableElement;
@@ -15,6 +16,6 @@ class AnnotatedMethodTest {
         ExecutableElement executableElement = mock(ExecutableElement.class);
         Annotation annotation = mock(SuppressWarnings.class);
         assertThrows(AssertionError.class, () ->
-                AnnotatedMethod.create(executableElement, annotation));
+                AnnotatedMethod.create(executableElement, annotation, EnumName.create("a")));
     }
 }

@@ -8,7 +8,6 @@ import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
-import net.jbock.source.SourceMethod;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
@@ -66,7 +65,7 @@ public class AutoMappings {
     }
 
     <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findAutoMapping(
-            SourceMethod<M> sourceMethod,
+            M sourceMethod,
             TypeMirror baseType) {
         for (Entry<String, MultilineCodeBlock> converter : converters) {
             if (tool.isSameType(baseType, converter.getKey())) {

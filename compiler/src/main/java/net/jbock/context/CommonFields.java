@@ -65,7 +65,7 @@ class CommonFields {
                 .unindent().build());
         long mapSize = namedOptions.stream()
                 .map(Mapping::sourceMethod)
-                .map(t -> t.annotatedMethod().names())
+                .map(AnnotatedOption::names)
                 .map(List::size)
                 .mapToLong(i -> i)
                 .sum();

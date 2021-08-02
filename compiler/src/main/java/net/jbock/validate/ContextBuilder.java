@@ -6,9 +6,6 @@ import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.context.ContextModule;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
-import net.jbock.source.SourceOption;
-import net.jbock.source.SourceParameter;
-import net.jbock.source.SourceParameters;
 
 import java.util.List;
 
@@ -40,7 +37,7 @@ public final class ContextBuilder {
             return new Step2(this, positionalParameters);
         }
 
-        List<SourceParameter> positionalParameters() {
+        List<AnnotatedParameter> positionalParameters() {
             return abstractMethods.positionalParameters();
         }
     }
@@ -54,7 +51,7 @@ public final class ContextBuilder {
             this.positionalParameters = positionalParameters;
         }
 
-        List<SourceParameters> repeatablePositionalParameters() {
+        List<AnnotatedParameters> repeatablePositionalParameters() {
             return step1.abstractMethods.repeatablePositionalParameters();
         }
 
@@ -72,7 +69,7 @@ public final class ContextBuilder {
             this.repeatablePositionalParameters = repeatablePositionalParameters;
         }
 
-        List<SourceOption> namedOptions() {
+        List<AnnotatedOption> namedOptions() {
             return step2.step1.abstractMethods.namedOptions();
         }
 

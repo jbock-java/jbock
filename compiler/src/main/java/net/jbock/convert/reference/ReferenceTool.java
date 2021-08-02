@@ -4,7 +4,6 @@ import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
-import net.jbock.source.SourceMethod;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
@@ -30,7 +29,7 @@ public class ReferenceTool {
     }
 
     public <M extends AnnotatedMethod> Either<ValidationFailure, StringConverterType> getReferencedType(
-            SourceMethod<M> sourceMethod,
+            M sourceMethod,
             TypeElement converter) {
         Optional<DeclaredType> supplier = checkSupplier(converter);
         Optional<DeclaredType> stringConverter = checkStringConverter(converter);
@@ -44,7 +43,7 @@ public class ReferenceTool {
     }
 
     private <M extends AnnotatedMethod> Either<ValidationFailure, StringConverterType> handleSupplier(
-            SourceMethod<M> sourceMethod,
+            M sourceMethod,
             DeclaredType declaredType) {
         if (declaredType.getTypeArguments().size() != 1) {
             return left(sourceMethod.fail(converterRawType()));
@@ -59,7 +58,7 @@ public class ReferenceTool {
     }
 
     private <M extends AnnotatedMethod> Either<ValidationFailure, StringConverterType> handleStringConverter(
-            SourceMethod<M> parameter,
+            M parameter,
             DeclaredType stringConverterType,
             boolean isSupplier) {
         if (stringConverterType.getTypeArguments().size() != 1) {

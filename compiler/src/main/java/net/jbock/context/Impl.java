@@ -4,9 +4,9 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
-import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -55,10 +55,10 @@ public class Impl {
     }
 
     private MethodSpec parameterMethodOverride(Mapping<?> c) {
-        SourceMethod<?> param = c.sourceMethod();
+        AnnotatedMethod param = c.sourceMethod();
         return MethodSpec.methodBuilder(param.methodName())
                 .returns(TypeName.get(param.returnType()))
-                .addModifiers(param.annotatedMethod().accessModifiers())
+                .addModifiers(param.accessModifiers())
                 .addStatement("return $N", c.asField())
                 .build();
     }

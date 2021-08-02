@@ -10,7 +10,6 @@ import net.jbock.convert.Mapping;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.convert.reference.StringConverterType;
 import net.jbock.processor.SourceElement;
-import net.jbock.source.SourceMethod;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
@@ -45,7 +44,7 @@ public class ConverterValidator {
     }
 
     public <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findMapping(
-            SourceMethod<M> sourceMethod,
+            M sourceMethod,
             TypeElement converter) {
         return util.commonTypeChecks(converter)
                 .map(sourceMethod::fail)
@@ -60,7 +59,7 @@ public class ConverterValidator {
 
     private <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> tryAllMatchers(
             StringConverterType functionType,
-            SourceMethod<M> sourceMethod,
+            M sourceMethod,
             TypeElement converter) {
         return matchFinder.findMatch(sourceMethod)
                 .filter(match -> isValidMatch(match, functionType))
@@ -70,7 +69,7 @@ public class ConverterValidator {
     /* Left-Optional
      */
     private <M extends AnnotatedMethod> Optional<ValidationFailure> checkConverterAnnotationPresent(
-            SourceMethod<M> sourceMethod,
+            M sourceMethod,
             TypeElement converter) {
         Converter converterAnnotation = converter.getAnnotation(Converter.class);
         boolean nestedMapper = util.getEnclosingElements(converter).contains(sourceElement.element());
@@ -84,7 +83,7 @@ public class ConverterValidator {
     /* Left-Optional
      */
     private <M extends AnnotatedMethod> Optional<ValidationFailure> checkNotAbstract(
-            SourceMethod<M> sourceMethod,
+            M sourceMethod,
             TypeElement converter) {
         if (converter.getModifiers().contains(ABSTRACT)) {
             return Optional.of(sourceMethod.fail("converter class may not be abstract"));
@@ -95,7 +94,7 @@ public class ConverterValidator {
     /* Left-Optional
      */
     private <M extends AnnotatedMethod> Optional<ValidationFailure> checkNoTypevars(
-            SourceMethod<M> sourceMethod,
+            M sourceMethod,
             TypeElement converter) {
         if (!converter.getTypeParameters().isEmpty()) {
             return Optional.of(sourceMethod.fail("type parameters are not allowed in converter class declaration"));

@@ -1,9 +1,9 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
+import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
-import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -55,11 +55,11 @@ public class CommandProcessor {
      */
     private Optional<List<ValidationFailure>> checkDuplicateDescriptionKeys(AbstractMethods methods) {
         List<ValidationFailure> failures = new ArrayList<>();
-        List<SourceMethod<?>> items =
+        List<? extends AnnotatedMethod> items =
                 concat(concat(methods.namedOptions(), methods.positionalParameters()), methods.repeatablePositionalParameters());
         Set<String> keys = new HashSet<>();
         sourceElement.descriptionKey().ifPresent(keys::add);
-        for (SourceMethod<?> m : items) {
+        for (AnnotatedMethod m : items) {
             m.descriptionKey().ifPresent(key -> {
                 if (!keys.add(key)) {
                     String message = "duplicate description key: " + key;

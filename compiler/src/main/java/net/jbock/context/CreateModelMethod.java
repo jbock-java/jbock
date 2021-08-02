@@ -82,7 +82,7 @@ public class CreateModelMethod extends CachedMethod {
 
     private CodeBlock optionBlock(Mapping<AnnotatedOption> c) {
         List<CodeBlock> names = new ArrayList<>();
-        for (String name : c.sourceMethod().annotatedMethod().names()) {
+        for (String name : c.sourceMethod().names()) {
             names.add(CodeBlock.of("$S", name));
         }
         List<CodeBlock> code = new ArrayList<>();
@@ -95,7 +95,7 @@ public class CreateModelMethod extends CachedMethod {
         } else if (c.multiplicity() != Multiplicity.OPTIONAL) {
             code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
         }
-        for (String line : c.sourceMethod().annotatedMethod().description()) {
+        for (String line : c.sourceMethod().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
@@ -110,7 +110,7 @@ public class CreateModelMethod extends CachedMethod {
         if (c.multiplicity() != Multiplicity.REQUIRED) {
             code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
         }
-        for (String line : c.sourceMethod().annotatedMethod().description()) {
+        for (String line : c.sourceMethod().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));

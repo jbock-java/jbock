@@ -8,7 +8,6 @@ import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.EnumName;
 import net.jbock.convert.matching.ValidMatch;
 import net.jbock.model.Multiplicity;
-import net.jbock.source.SourceMethod;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
@@ -117,7 +116,7 @@ public final class Mapping<M extends AnnotatedMethod> {
         return modeFlag;
     }
 
-    public SourceMethod<M> sourceMethod() {
+    public M sourceMethod() {
         return match.sourceMethod();
     }
 

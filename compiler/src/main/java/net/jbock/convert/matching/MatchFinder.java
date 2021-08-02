@@ -9,7 +9,6 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.convert.matcher.ListMatcher;
 import net.jbock.convert.matcher.OptionalMatcher;
 import net.jbock.model.Multiplicity;
-import net.jbock.source.SourceMethod;
 import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
@@ -43,18 +42,20 @@ public class MatchFinder {
         this.types = types;
     }
 
-    public <M extends AnnotatedMethod> Either<ValidationFailure, ValidMatch<M>> findMatch(SourceMethod<M> sourceMethod) {
-        Match<M> match = findMatchInternal(sourceMethod);
-        return validateMatch(sourceMethod, match);
+    public <M extends AnnotatedMethod> Either<ValidationFailure, ValidMatch<M>> findMatch(
+            M sourceMethod) {
+        return validateMatch(findMatchInternal(sourceMethod));
     }
 
-    public Either<ValidationFailure, ValidMatch<AnnotatedOption>> findFlagMatch(SourceMethod<AnnotatedOption> sourceMethod) {
+    public Either<ValidationFailure, ValidMatch<AnnotatedOption>> findFlagMatch(
+            AnnotatedOption sourceMethod) {
         PrimitiveType bool = types.getPrimitiveType(BOOLEAN);
         Match<AnnotatedOption> match = Match.create(bool, OPTIONAL, sourceMethod);
-        return validateMatch(sourceMethod, match);
+        return validateMatch(match);
     }
 
-    private <M extends AnnotatedMethod> Match<M> findMatchInternal(SourceMethod<M> sourceMethod) {
+    private <M extends AnnotatedMethod> Match<M> findMatchInternal(
+            M sourceMethod) {
         return List.of(optionalMatcher, listMatcher).stream()
                 .map(matcher -> matcher.tryMatch(sourceMethod))
                 .flatMap(Optional::stream)
@@ -69,21 +70,21 @@ public class MatchFinder {
     }
 
     private static <M extends AnnotatedMethod> Either<ValidationFailure, ValidMatch<M>> validateMatch(
-            SourceMethod<?> sourceMethod,
             Match<M> m) {
-        if (sourceMethod.annotatedMethod().isParameter()
+        M sourceMethod = m.sourceMethod();
+        if (sourceMethod.isParameter()
                 && m.multiplicity() == Multiplicity.REPEATABLE) {
-            return left(m.sourceMethod().fail("method '" +
-                    sourceMethod.annotatedMethod().method().getSimpleName() +
+            return left(sourceMethod.fail("method '" +
+                    sourceMethod.method().getSimpleName() +
                     "' returns a list-based type, so it must be annotated with @" +
                     Option.class.getSimpleName() +
                     " or @" +
                     Parameters.class.getSimpleName()));
         }
-        if (sourceMethod.annotatedMethod().isParameters()
+        if (sourceMethod.isParameters()
                 && m.multiplicity() != Multiplicity.REPEATABLE) {
-            return left(m.sourceMethod().fail("method '" +
-                    sourceMethod.annotatedMethod().method().getSimpleName() +
+            return left(sourceMethod.fail("method '" +
+                    sourceMethod.method().getSimpleName() +
                     "' is annotated with @" +
                     Parameters.class.getSimpleName() +
                     ", so it must return java.util.List"));

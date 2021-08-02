@@ -8,7 +8,6 @@ import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
-import net.jbock.source.SourceMethod;
 import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
@@ -40,20 +39,20 @@ public class AutoValidator {
     }
 
     public <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findMapping(
-            SourceMethod<M> sourceMethod) {
+            M sourceMethod) {
         return matchFinder.findMatch(sourceMethod)
                 .flatMap(m -> findMapping(sourceMethod, m));
     }
 
     private <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findMapping(
-            SourceMethod<M> sourceMethod,
+            M sourceMethod,
             ValidMatch<M> match) {
         return autoConverter.findAutoMapping(sourceMethod, match.baseType())
                 .flatMapLeft(message -> findEnumMapping(sourceMethod, match.baseType()));
     }
 
     private <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findEnumMapping(
-            SourceMethod<M> sourceMethod,
+            M sourceMethod,
             TypeMirror baseType) {
         return TypeTool.AS_DECLARED.visit(baseType)
                 .map(DeclaredType::asElement)

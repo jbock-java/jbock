@@ -5,7 +5,6 @@ import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.matching.Match;
-import net.jbock.source.SourceMethod;
 import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
@@ -34,7 +33,8 @@ public class OptionalMatcher implements Matcher {
     }
 
     @Override
-    public <M extends AnnotatedMethod> Optional<Match<M>> tryMatch(SourceMethod<M> parameter) {
+    public <M extends AnnotatedMethod> Optional<Match<M>> tryMatch(
+            M parameter) {
         TypeMirror returnType = parameter.returnType();
         return getOptionalPrimitive(parameter, returnType)
                 .or(() -> // base
@@ -48,7 +48,9 @@ public class OptionalMatcher implements Matcher {
                                                 CodeBlock.of(".map($1T::of).orElse($1T.none())", types.erasure(el.asType())), parameter))));
     }
 
-    private <M extends AnnotatedMethod> Optional<Match<M>> getOptionalPrimitive(SourceMethod<M> parameter, TypeMirror type) {
+    private <M extends AnnotatedMethod> Optional<Match<M>> getOptionalPrimitive(
+            M parameter,
+            TypeMirror type) {
         for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
             if (tool.isSameType(type, optionalPrimitive.type())) {
                 CodeBlock extractExpr = optionalPrimitive.extractExpr();

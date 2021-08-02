@@ -5,7 +5,6 @@ import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
-import net.jbock.source.SourceParameter;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -37,18 +36,18 @@ public class SourceParameterValidator {
                 .map(step::accept);
     }
 
-    private Either<List<ValidationFailure>, List<SourceParameter>> validatePositions(
-            List<SourceParameter> allPositionalParameters) {
+    private Either<List<ValidationFailure>, List<AnnotatedParameter>> validatePositions(
+            List<AnnotatedParameter> allPositionalParameters) {
         List<ValidationFailure> failures = new ArrayList<>();
         for (int i = 0; i < allPositionalParameters.size(); i++) {
-            SourceParameter sourceParameter = allPositionalParameters.get(i);
-            int index = sourceParameter.annotatedMethod().index();
+            AnnotatedParameter sourceParameter = allPositionalParameters.get(i);
+            int index = sourceParameter.index();
             if (index != i) {
                 failures.add(sourceParameter.fail("invalid position: expecting " + i + " but found " + index));
             }
         }
         return optionalList(failures)
-                .<Either<List<ValidationFailure>, List<SourceParameter>>>map(Either::left)
+                .<Either<List<ValidationFailure>, List<AnnotatedParameter>>>map(Either::left)
                 .orElseGet(() -> right(allPositionalParameters));
     }
 
@@ -63,12 +62,12 @@ public class SourceParameterValidator {
                 .flatMap(firstOptional -> allPositionalParameters.stream()
                         .filter(Mapping::isRequired)
                         .map(Mapping::sourceMethod)
-                        .filter(sourceMethod -> sourceMethod.annotatedMethod().index()
-                                > firstOptional.annotatedMethod().index())
+                        .filter(sourceMethod -> sourceMethod.index()
+                                > firstOptional.index())
                         .map(item -> item.fail("position of required parameter '" +
-                                item.annotatedMethod().method().getSimpleName() +
+                                item.method().getSimpleName() +
                                 "' is greater than position of optional parameter '" +
-                                firstOptional.annotatedMethod().method().getSimpleName() + "'"))
+                                firstOptional.method().getSimpleName() + "'"))
                         .collect(toOptionalList()));
     }
 }

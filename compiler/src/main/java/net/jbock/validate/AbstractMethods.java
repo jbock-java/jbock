@@ -1,35 +1,35 @@
 package net.jbock.validate;
 
-import net.jbock.source.SourceOption;
-import net.jbock.source.SourceParameter;
-import net.jbock.source.SourceParameters;
+import net.jbock.annotated.AnnotatedOption;
+import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
 
 import java.util.List;
 
 class AbstractMethods {
 
-    private final List<SourceParameter> positionalParameters;
-    private final List<SourceParameters> repeatablePositionalParameters;
-    private final List<SourceOption> namedOptions;
+    private final List<AnnotatedParameter> positionalParameters;
+    private final List<AnnotatedParameters> repeatablePositionalParameters;
+    private final List<AnnotatedOption> namedOptions;
 
     AbstractMethods(
-            List<SourceParameter> positionalParameters,
-            List<SourceParameters> repeatablePositionalParameters,
-            List<SourceOption> namedOptions) {
+            List<AnnotatedParameter> positionalParameters,
+            List<AnnotatedParameters> repeatablePositionalParameters,
+            List<AnnotatedOption> namedOptions) {
         this.positionalParameters = positionalParameters;
         this.repeatablePositionalParameters = repeatablePositionalParameters;
         this.namedOptions = namedOptions;
     }
 
-    List<SourceParameter> positionalParameters() {
+    List<AnnotatedParameter> positionalParameters() {
         return positionalParameters;
     }
 
-    List<SourceParameters> repeatablePositionalParameters() {
+    List<AnnotatedParameters> repeatablePositionalParameters() {
         return repeatablePositionalParameters;
     }
 
-    List<SourceOption> namedOptions() {
+    List<AnnotatedOption> namedOptions() {
         return namedOptions;
     }
 }

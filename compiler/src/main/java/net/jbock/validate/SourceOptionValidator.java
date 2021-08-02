@@ -7,7 +7,6 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
 import net.jbock.convert.matching.MatchFinder;
-import net.jbock.source.SourceOption;
 import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
@@ -52,14 +51,14 @@ public class SourceOptionValidator {
     }
 
     private Either<ValidationFailure, Mapping<AnnotatedOption>> wrapOption(
-            SourceOption sourceMethod) {
+            AnnotatedOption sourceMethod) {
         return checkFlag(sourceMethod)
                 .orElseGet(() -> converterFinder.findMapping(sourceMethod));
     }
 
     private Optional<Either<ValidationFailure, Mapping<AnnotatedOption>>> checkFlag(
-            SourceOption sourceOption) {
-        if (sourceOption.annotatedMethod().converter().isPresent()) {
+            AnnotatedOption sourceOption) {
+        if (sourceOption.converter().isPresent()) {
             return Optional.empty();
         }
         if (sourceOption.returnType().getKind() != BOOLEAN) {
@@ -70,12 +69,12 @@ public class SourceOptionValidator {
         return Optional.of(matchFinder.findFlagMatch(sourceOption).map(m -> Mapping.createFlag(code, m)));
     }
 
-    private Either<ValidationFailure, SourceOption> checkOptionNames(
-            SourceOption sourceOption) {
-        if (sourceOption.annotatedMethod().names().isEmpty()) {
+    private Either<ValidationFailure, AnnotatedOption> checkOptionNames(
+            AnnotatedOption sourceOption) {
+        if (sourceOption.names().isEmpty()) {
             return left(sourceOption.fail("define at least one option name"));
         }
-        for (String name : sourceOption.annotatedMethod().names()) {
+        for (String name : sourceOption.names()) {
             Optional<String> check = checkName(name);
             if (check.isPresent()) {
                 return left(sourceOption.fail(check.map(s -> "invalid name: " + s)
@@ -115,13 +114,13 @@ public class SourceOptionValidator {
     /* Left-Optional
      */
     private Optional<List<ValidationFailure>> validateUniqueOptionNames(
-            List<SourceOption> allOptions) {
+            List<AnnotatedOption> allOptions) {
         Set<String> allNames = new HashSet<>();
         return allOptions.stream()
-                .flatMap(item -> item.annotatedMethod().names().stream()
+                .flatMap(option -> option.names().stream()
                         .filter(name -> !allNames.add(name))
                         .map(name -> "duplicate option name: " + name)
-                        .map(item::fail))
+                        .map(option::fail))
                 .collect(toOptionalList());
     }
 }

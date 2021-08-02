@@ -5,7 +5,6 @@ import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.EnumName;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
-import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
@@ -34,14 +33,13 @@ public class AnnotatedMethodValidator {
         this.util = util;
     }
 
-    Either<ValidationFailure, SourceMethod<?>> validateAnnotatedMethod(
+    Either<ValidationFailure, AnnotatedMethod> validateAnnotatedMethod(
             ExecutableElement sourceMethod,
             Map<Name, EnumName> enumNames) {
         List<Class<? extends Annotation>> annotations = methodLevelAnnotations();
         return util.checkAtLeastOneAnnotation(sourceMethod, annotations)
                 .filter(a -> util.checkNoDuplicateAnnotations(sourceMethod, annotations))
-                .map(a -> AnnotatedMethod.create(sourceMethod, a))
-                .<SourceMethod<?>>map(m -> m.sourceMethod(enumNames.get(m.method().getSimpleName())))
+                .map(a -> AnnotatedMethod.create(sourceMethod, a, enumNames.get(sourceMethod.getSimpleName())))
                 .filter(a -> checkAccessibleType(sourceMethod.getReturnType()))
                 .mapLeft(msg -> new ValidationFailure(msg, sourceMethod));
     }

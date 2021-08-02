@@ -1,28 +1,45 @@
 package net.jbock.annotated;
 
 import net.jbock.Parameter;
-import net.jbock.common.Descriptions;
 import net.jbock.common.EnumName;
-import net.jbock.source.SourceMethod;
-import net.jbock.source.SourceParameter;
+import net.jbock.common.SnakeName;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+
+import static net.jbock.common.Descriptions.optionalString;
 
 public final class AnnotatedParameter extends AnnotatedMethod {
 
     private final Parameter parameter;
 
-    AnnotatedParameter(
+    private AnnotatedParameter(
             ExecutableElement method,
+            EnumName enumName,
+            Optional<TypeElement> converter,
+            Parameter parameter,
+            String paramLabel,
+            List<Modifier> accessModifiers) {
+        super(method, accessModifiers, converter, enumName, paramLabel);
+        this.parameter = parameter;
+    }
+
+    static AnnotatedParameter createParameter(
+            ExecutableElement method,
+            EnumName enumName,
             Optional<TypeElement> converter,
             Parameter parameter,
             List<Modifier> accessModifiers) {
-        super(method, accessModifiers, converter);
-        this.parameter = parameter;
+        String paramLabel = optionalString(parameter.paramLabel())
+                .orElseGet(() -> SnakeName.create(method.getSimpleName().toString())
+                        .snake('_')
+                        .toUpperCase(Locale.US));
+        return new AnnotatedParameter(method, enumName, converter,
+                parameter, paramLabel, accessModifiers);
     }
 
     @Override
@@ -37,12 +54,12 @@ public final class AnnotatedParameter extends AnnotatedMethod {
 
     @Override
     public Optional<String> descriptionKey() {
-        return Descriptions.optionalString(parameter.descriptionKey());
+        return optionalString(parameter.descriptionKey());
     }
 
     @Override
     public Optional<String> label() {
-        return Descriptions.optionalString(parameter.paramLabel());
+        return optionalString(parameter.paramLabel());
     }
 
     @Override
@@ -51,8 +68,18 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     }
 
     @Override
-    public SourceMethod<?> sourceMethod(EnumName enumName) {
-        return SourceParameter.create(this, enumName);
+    public Optional<AnnotatedOption> asAnnotatedOption() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<AnnotatedParameter> asAnnotatedParameter() {
+        return Optional.of(this);
+    }
+
+    @Override
+    public Optional<AnnotatedParameters> asAnnotatedParameters() {
+        return Optional.empty();
     }
 
     public int index() {

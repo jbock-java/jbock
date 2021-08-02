@@ -6,7 +6,6 @@ import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.matching.AutoValidator;
 import net.jbock.convert.matching.ConverterValidator;
-import net.jbock.source.SourceMethod;
 import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
@@ -26,8 +25,8 @@ public class MappingFinder {
     }
 
     public <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findMapping(
-            SourceMethod<M> sourceMethod) {
-        return sourceMethod.annotatedMethod().converter()
+            M sourceMethod) {
+        return sourceMethod.converter()
                 .map(converter -> converterValidator.get().findMapping(sourceMethod, converter))
                 .orElseGet(() -> autoConverterFinder.get().findMapping(sourceMethod));
     }
