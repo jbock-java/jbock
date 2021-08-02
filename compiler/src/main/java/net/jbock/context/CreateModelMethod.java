@@ -28,7 +28,7 @@ public class CreateModelMethod extends CachedMethod {
     private final ContextUtil contextUtil;
     private final SourceElement sourceElement;
     private final List<Mapping<AnnotatedOption>> namedOptions;
-    private final NamedOptions options;
+    private final UnixClustering options;
     private final List<Mapping<AnnotatedParameter>> positionalParameters;
     private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
 
@@ -37,7 +37,7 @@ public class CreateModelMethod extends CachedMethod {
             ContextUtil contextUtil,
             SourceElement sourceElement,
             List<Mapping<AnnotatedOption>> namedOptions,
-            NamedOptions options,
+            UnixClustering options,
             List<Mapping<AnnotatedParameter>> positionalParameters,
             List<Mapping<AnnotatedParameters>> repeatablePositionalParameters) {
         this.contextUtil = contextUtil;

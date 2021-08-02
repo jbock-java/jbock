@@ -22,7 +22,7 @@ import static net.jbock.common.Constants.STRING;
 public class RegularOptionParser {
 
     private final GeneratedTypes generatedTypes;
-    private final NamedOptions namedOptions;
+    private final UnixClustering unixClustering;
     private final CommonFields commonFields;
     private final ReadOptionArgumentMethod readOptionArgumentMethod;
     private final ContextUtil contextUtil;
@@ -30,12 +30,12 @@ public class RegularOptionParser {
     @Inject
     RegularOptionParser(
             GeneratedTypes generatedTypes,
-            NamedOptions namedOptions,
+            UnixClustering unixClustering,
             CommonFields commonFields,
             ReadOptionArgumentMethod readOptionArgumentMethod,
             ContextUtil contextUtil) {
         this.generatedTypes = generatedTypes;
-        this.namedOptions = namedOptions;
+        this.unixClustering = unixClustering;
         this.commonFields = commonFields;
         this.readOptionArgumentMethod = readOptionArgumentMethod;
         this.contextUtil = contextUtil;
@@ -58,13 +58,13 @@ public class RegularOptionParser {
                 .addStatement(contextUtil.throwRepetitionErrorStatement(token))
                 .unindent();
         code.addStatement("$N = $N($N, $N)", value, readOptionArgumentMethod.get(), token, it);
-        if (namedOptions.unixClusteringSupported()) {
+        if (unixClustering.unixClusteringSupported()) {
             code.addStatement("return null");
         }
         return MethodSpec.methodBuilder("read")
                 .addException(ExToken.class)
                 .addCode(code.build())
-                .returns(namedOptions.readMethodReturnType())
+                .returns(unixClustering.readMethodReturnType())
                 .addParameters(List.of(token, it)).build();
     }
 

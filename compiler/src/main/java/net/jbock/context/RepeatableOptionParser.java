@@ -22,18 +22,18 @@ import static net.jbock.common.Constants.STRING_ITERATOR;
 public class RepeatableOptionParser {
 
     private final GeneratedTypes generatedTypes;
-    private final NamedOptions namedOptions;
+    private final UnixClustering unixClustering;
     private final CommonFields commonFields;
     private final ReadOptionArgumentMethod readOptionArgumentMethod;
 
     @Inject
     RepeatableOptionParser(
             GeneratedTypes generatedTypes,
-            NamedOptions namedOptions,
+            UnixClustering unixClustering,
             CommonFields commonFields,
             ReadOptionArgumentMethod readOptionArgumentMethod) {
         this.generatedTypes = generatedTypes;
-        this.namedOptions = namedOptions;
+        this.unixClustering = unixClustering;
         this.commonFields = commonFields;
         this.readOptionArgumentMethod = readOptionArgumentMethod;
     }
@@ -53,14 +53,14 @@ public class RepeatableOptionParser {
         CodeBlock.Builder code = CodeBlock.builder();
         code.addStatement("if ($N == null) $N = new $T<>()", values, values, ArrayList.class);
         code.addStatement("values.add($N($N, $N))", readOptionArgumentMethod.get(), token, it);
-        if (namedOptions.unixClusteringSupported()) {
+        if (unixClustering.unixClusteringSupported()) {
             code.addStatement("return null");
         }
         return MethodSpec.methodBuilder("read")
                 .addException(ExToken.class)
                 .addParameters(List.of(token, it))
                 .addCode(code.build())
-                .returns(namedOptions.readMethodReturnType())
+                .returns(unixClustering.readMethodReturnType())
                 .build();
     }
 

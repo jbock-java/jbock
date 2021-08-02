@@ -16,18 +16,18 @@ import static net.jbock.common.Constants.STRING_ITERATOR;
 public class TryParseOptionMethod extends CachedMethod {
 
     private final SourceElement sourceElement;
-    private final NamedOptions namedOptions;
+    private final UnixClustering unixClustering;
     private final CommonFields commonFields;
     private final ReadOptionNameMethod readOptionNameMethod;
 
     @Inject
     TryParseOptionMethod(
             SourceElement sourceElement,
-            NamedOptions namedOptions,
+            UnixClustering unixClustering,
             CommonFields commonFields,
             ReadOptionNameMethod readOptionNameMethod) {
         this.sourceElement = sourceElement;
-        this.namedOptions = namedOptions;
+        this.unixClustering = unixClustering;
         this.commonFields = commonFields;
         this.readOptionNameMethod = readOptionNameMethod;
     }
@@ -40,7 +40,7 @@ public class TryParseOptionMethod extends CachedMethod {
                 .addException(ExToken.class)
                 .addParameter(token)
                 .addParameter(it)
-                .addCode(namedOptions.unixClusteringSupported() ?
+                .addCode(unixClustering.unixClusteringSupported() ?
                         tryParseOptionCodeClustering(token, it) :
                         tryParseOptionCodeSimple(token, it))
                 .returns(BOOLEAN)

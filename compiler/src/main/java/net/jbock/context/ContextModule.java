@@ -60,12 +60,6 @@ public class ContextModule {
 
     @ContextScope
     @Provides
-    NamedOptions namedOptions(SourceElement sourceElement) {
-        return NamedOptions.create(namedOptions, sourceElement.unixClustering());
-    }
-
-    @ContextScope
-    @Provides
     List<Mapping<?>> everything() {
         return concat(concat(namedOptions, positionalParams), repeatablePositionalParameters);
     }

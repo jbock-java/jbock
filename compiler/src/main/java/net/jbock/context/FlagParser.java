@@ -20,18 +20,18 @@ import static javax.lang.model.element.Modifier.STATIC;
 public class FlagParser {
 
     private final GeneratedTypes generatedTypes;
-    private final NamedOptions namedOptions;
+    private final UnixClustering unixClustering;
     private final CommonFields commonFields;
     private final ContextUtil contextUtil;
 
     @Inject
     FlagParser(
             GeneratedTypes generatedTypes,
-            NamedOptions namedOptions,
+            UnixClustering unixClustering,
             CommonFields commonFields,
             ContextUtil contextUtil) {
         this.generatedTypes = generatedTypes;
-        this.namedOptions = namedOptions;
+        this.unixClustering = unixClustering;
         this.commonFields = commonFields;
         this.contextUtil = contextUtil;
     }
@@ -50,10 +50,10 @@ public class FlagParser {
         ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
         return MethodSpec.methodBuilder("read")
                 .addException(ExToken.class)
-                .addCode(namedOptions.unixClusteringSupported() ?
+                .addCode(unixClustering.unixClusteringSupported() ?
                         readMethodFlagCodeClustering(token) :
                         readMethodFlagCodeSimple(token))
-                .returns(namedOptions.readMethodReturnType())
+                .returns(unixClustering.readMethodReturnType())
                 .addParameters(List.of(token, it)).build();
     }
 
