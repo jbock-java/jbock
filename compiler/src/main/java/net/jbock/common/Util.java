@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
+import static net.jbock.common.Annotations.methodLevelAnnotations;
 
 public class Util {
 
@@ -112,18 +113,20 @@ public class Util {
                 })).orElseGet(type::toString);
     }
 
-    public Either<String, Annotation> checkAtLeastOneAnnotation(
-            Element element,
-            List<Class<? extends Annotation>> annotations) {
-        for (Class<? extends Annotation> annotation : annotations) {
+    public Either<String, Annotation> checkAtLeastOneAnnotation(Element element) {
+        for (Class<? extends Annotation> annotation : methodLevelAnnotations()) {
             Annotation a = element.getAnnotation(annotation);
             if (a != null) {
                 return right(a);
             }
         }
-        return left("add one of these annotations: " + annotations.stream()
+        return left(missingAnnotationError());
+    }
+
+    public String missingAnnotationError() {
+        return "add one of these annotations: " + methodLevelAnnotations().stream()
                 .map(ann -> "@" + ann.getSimpleName())
-                .collect(Collectors.joining(", ")));
+                .collect(Collectors.joining(", "));
     }
 
     /* Left-Optional

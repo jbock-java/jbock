@@ -66,6 +66,47 @@ class InheritanceTest {
                 .compilesWithoutError();
     }
 
+    @Test
+    void abstractOverrides() {
+        JavaFileObject parent = fromSource(
+                "interface Parent {",
+                "",
+                "  @Parameter(index = 0)",
+                "  String source();",
+                "",
+                "  @Parameter(index = 1)",
+                "  String dest();",
+                "}");
+        JavaFileObject c = fromSource(
+                "@Command",
+                "abstract class C implements Parent {",
+                "",
+                "  @Override",
+                "  public abstract String dest();",
+                "}");
+        assertAbout(javaSources()).that(List.of(parent, c))
+                .processedWith(Processor.testInstance())
+                .compilesWithoutError();
+    }
+
+    @Test
+    void nonabstractOverrideNoAnnotationNeeded() {
+        JavaFileObject parent = fromSource(
+                "interface Parent {",
+                "",
+                "  boolean isSafe();",
+                "}");
+        JavaFileObject c = fromSource(
+                "@Command",
+                "abstract class C implements Parent {",
+                "",
+                "  @Override",
+                "  public boolean isSafe() { return true; }",
+                "}");
+        assertAbout(javaSources()).that(List.of(parent, c))
+                .processedWith(Processor.testInstance())
+                .compilesWithoutError();
+    }
 
     @Test
     void annotatedMethodOverridden() {
@@ -185,8 +226,7 @@ class InheritanceTest {
                 "}");
         assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("annotated method is overridden");
+                .compilesWithoutError();
     }
 
     @Test

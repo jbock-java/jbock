@@ -34,7 +34,8 @@ class MvArgumentsTest {
     void validInvocation() {
         f.assertThat("a", "b")
                 .has(MvArguments::source, "a")
-                .has(MvArguments::dest, "b");
+                .has(MvArguments::dest, "b")
+                .has(MvArguments::isSafe, true);
     }
 
     @Test

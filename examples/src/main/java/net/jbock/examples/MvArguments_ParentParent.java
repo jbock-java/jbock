@@ -7,5 +7,8 @@ interface MvArguments_ParentParent {
     @Parameter(index = 0)
     String source();
 
+    @Parameter(index = 1)
+    String dest();
+
     boolean isSafe();
 }

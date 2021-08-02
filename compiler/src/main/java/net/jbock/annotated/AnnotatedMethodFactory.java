@@ -37,7 +37,7 @@ public class AnnotatedMethodFactory {
             ExecutableElement sourceMethod,
             Map<Name, EnumName> enumNames) {
         List<Class<? extends Annotation>> annotations = methodLevelAnnotations();
-        return util.checkAtLeastOneAnnotation(sourceMethod, annotations)
+        return util.checkAtLeastOneAnnotation(sourceMethod)
                 .filter(a -> util.checkNoDuplicateAnnotations(sourceMethod, annotations))
                 .map(a -> AnnotatedMethod.create(sourceMethod, a, enumNames.get(sourceMethod.getSimpleName())))
                 .filter(a -> checkAccessibleType(sourceMethod.getReturnType()))

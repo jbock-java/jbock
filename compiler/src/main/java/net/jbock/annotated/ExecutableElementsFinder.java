@@ -1,6 +1,7 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
+import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 import net.jbock.validate.ValidateScope;
@@ -21,14 +22,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
-import static io.jbock.util.Eithers.optionalList;
-import static java.util.stream.Collectors.collectingAndThen;
+import static io.jbock.util.Eithers.toOptionalList;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
+import static net.jbock.common.Annotations.methodLevelAnnotations;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
@@ -36,10 +38,14 @@ import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 public class ExecutableElementsFinder {
 
     private final SourceElement sourceElement;
+    private final Util util;
 
     @Inject
-    ExecutableElementsFinder(SourceElement sourceElement) {
+    ExecutableElementsFinder(
+            SourceElement sourceElement,
+            Util util) {
         this.sourceElement = sourceElement;
+        this.util = util;
     }
 
     /**
@@ -58,9 +64,8 @@ public class ExecutableElementsFinder {
         Set<Name> nonAbstractNames = partitions.get(false).stream()
                 .map(ExecutableElement::getSimpleName)
                 .collect(Collectors.toSet());
-        Map<Name, Integer> allAbstractGrouped = partitions.get(true).stream()
-                .collect(groupingBy(ExecutableElement::getSimpleName,
-                        collectingAndThen(Collectors.toList(), List::size)));
+        Map<Name, List<ExecutableElement>> allAbstractGrouped = partitions.get(true).stream()
+                .collect(groupingBy(ExecutableElement::getSimpleName));
         return findRelevantAbstractMethods(partitions.get(true), allAbstractGrouped, nonAbstractNames);
     }
 
@@ -115,18 +120,46 @@ public class ExecutableElementsFinder {
 
     private Either<List<ValidationFailure>, ExecutableElements> findRelevantAbstractMethods(
             List<ExecutableElement> allAbstract,
-            Map<Name, Integer> allAbstractNameCount,
+            Map<Name, List<ExecutableElement>> allAbstractNameCount,
             Set<Name> nonAbstractNames) {
-        List<ValidationFailure> failures = allAbstract.stream()
-                .filter(m -> allAbstractNameCount.getOrDefault(m.getSimpleName(), 0) >= 2
-                        || nonAbstractNames.contains(m.getSimpleName()))
-                .map(m -> new ValidationFailure("annotated method is overridden", m))
+        List<ValidationFailure> missingAnnotationFailures = allAbstract.stream()
+                .filter(m -> !nonAbstractNames.contains(m.getSimpleName())
+                        && missingAnnotation(allAbstractNameCount.get(m.getSimpleName())))
+                .map(m -> new ValidationFailure(util.missingAnnotationError(), m))
                 .collect(toList());
-        return optionalList(failures)
+        if (!missingAnnotationFailures.isEmpty()) {
+            return left(missingAnnotationFailures);
+        }
+        return allAbstract.stream()
+                .filter(this::hasAnnotation)
+                .filter(m -> nonAbstractNames.contains(m.getSimpleName())
+                        || badOverride(allAbstractNameCount.get(m.getSimpleName())))
+                .map(m -> new ValidationFailure("annotated method is overridden", m))
+                .collect(toOptionalList())
                 .<Either<List<ValidationFailure>, List<ExecutableElement>>>map(Either::left)
                 .orElseGet(() -> right(allAbstract.stream()
                         .filter(m -> !nonAbstractNames.contains(m.getSimpleName()))
+                        .filter(this::hasAnnotation)
                         .collect(toList())))
                 .map(ExecutableElements::create);
+    }
+
+    private boolean badOverride(
+            List<ExecutableElement> overrides) {
+        return overrides.stream()
+                .filter(this::hasAnnotation)
+                .count() >= 2;
+    }
+
+    private boolean missingAnnotation(List<ExecutableElement> overrides) {
+        return overrides.stream()
+                .filter(this::hasAnnotation)
+                .findAny()
+                .isEmpty();
+    }
+
+    private boolean hasAnnotation(ExecutableElement overridden) {
+        return methodLevelAnnotations().stream()
+                .anyMatch(a -> overridden.getAnnotation(a) != null);
     }
 }
