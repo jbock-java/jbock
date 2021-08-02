@@ -110,15 +110,15 @@ public class Util {
 
     /* Left-Optional
      */
-    public Optional<String> checkNoDuplicateAnnotations(
+    public Optional<ValidationFailure> checkNoDuplicateAnnotations(
             Element element,
             List<Class<? extends Annotation>> annotations) {
         List<Class<? extends Annotation>> present = annotations.stream()
                 .filter(ann -> element.getAnnotation(ann) != null)
                 .collect(Collectors.toUnmodifiableList());
         if (present.size() >= 2) {
-            return Optional.of("annotate with either @" + present.get(0).getSimpleName() +
-                    " or @" + present.get(1).getSimpleName() + " but not both");
+            return Optional.of(new ValidationFailure("annotate with either @" + present.get(0).getSimpleName() +
+                    " or @" + present.get(1).getSimpleName() + " but not both", element));
         }
         return Optional.empty();
     }

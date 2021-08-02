@@ -10,12 +10,11 @@ import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.jbock.util.Either.right;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.element.NestingKind.MEMBER;
@@ -36,22 +35,24 @@ public class AnnotatedMethodFactory {
     Either<ValidationFailure, AnnotatedMethod> createAnnotatedMethod(
             SimpleAnnotated sourceMethod,
             Map<Name, EnumName> enumNames) {
-        List<Class<? extends Annotation>> annotations = methodLevelAnnotations();
         ExecutableElement method = sourceMethod.method();
-        return util.checkNoDuplicateAnnotations(method, annotations)
-                .<Either<String, Annotation>>map(Either::left)
-                .orElseGet(() -> Either.right(sourceMethod.annotation()))
-                .map(a -> AnnotatedMethod.create(method, a, enumNames.get(sourceMethod.getSimpleName())))
-                .filter(a -> checkAccessibleType(method.getReturnType()))
-                .mapLeft(msg -> new ValidationFailure(msg, method));
+        EnumName enumName = enumNames.get(sourceMethod.getSimpleName());
+        Annotation annotation = sourceMethod.annotation();
+        return util.checkNoDuplicateAnnotations(method, methodLevelAnnotations())
+                .<Either<ValidationFailure, AnnotatedMethod>>map(Either::left)
+                .orElseGet(() -> right(AnnotatedMethod.create(method, annotation, enumName)))
+                .filter(this::checkAccessibleReturnType);
     }
 
     /* Left-Optional
      */
-    private Optional<String> checkAccessibleType(TypeMirror returnType) {
-        return AS_DECLARED.visit(returnType)
+    private Optional<ValidationFailure> checkAccessibleReturnType(
+            AnnotatedMethod annotatedMethod) {
+        ExecutableElement method = annotatedMethod.method();
+        return AS_DECLARED.visit(method.getReturnType())
                 .filter(this::isInaccessible)
-                .map(type -> "inaccessible type: " + util.typeToString(type));
+                .map(type -> "inaccessible type: " + util.typeToString(type))
+                .map(message -> new ValidationFailure(message, method));
     }
 
     private boolean isInaccessible(DeclaredType declared) {
