@@ -1,8 +1,6 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
-import io.jbock.util.Eithers;
-import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
@@ -13,16 +11,15 @@ import net.jbock.source.SourceParameter;
 import net.jbock.source.SourceParameters;
 
 import javax.inject.Inject;
-import javax.lang.model.element.ExecutableElement;
-import java.util.ArrayList;
+import javax.lang.model.element.Name;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.jbock.util.Eithers.optionalList;
+import static io.jbock.util.Eithers.toValidListAll;
 
 @ValidateScope
 public class MethodsFactory {
@@ -51,7 +48,6 @@ public class MethodsFactory {
     Either<List<ValidationFailure>, AbstractMethods> findAbstractMethods() {
         return abstractMethodsFinder.findAbstractMethods()
                 .flatMap(this::validateParameterMethods)
-                .map(this::createSourceMethods)
                 .map(this::createAbstractMethods)
                 .filter(methods -> optionalList(validateAtLeastOneParameterInSuperCommand(methods)));
     }
@@ -84,24 +80,11 @@ public class MethodsFactory {
         return List.of(sourceElement.fail(message));
     }
 
-    private Either<List<ValidationFailure>, List<AnnotatedMethod>> validateParameterMethods(
-            List<ExecutableElement> sourceMethods) {
-        return sourceMethods.stream()
-                .map(sourceMethodValidator::validateAnnotatedMethod)
-                .collect(Eithers.toValidListAll());
-    }
-
-    private List<SourceMethod<?>> createSourceMethods(List<AnnotatedMethod> methods) {
-        Set<EnumName> names = new HashSet<>();
-        List<SourceMethod<?>> result = new ArrayList<>();
-        for (AnnotatedMethod method : methods) {
-            EnumName name = EnumName.create(method.method().getSimpleName().toString());
-            while (names.contains(name)) {
-                name = name.makeLonger();
-            }
-            names.add(name);
-            result.add(method.sourceMethod(name));
-        }
-        return result;
+    private Either<List<ValidationFailure>, List<SourceMethod<?>>> validateParameterMethods(
+            AllMethods sourceMethods) {
+        Map<Name, EnumName> enumNames = sourceMethods.enumNames();
+        return sourceMethods.abstractMethods().stream()
+                .map(sourceMethod -> sourceMethodValidator.validateAnnotatedMethod(sourceMethod, enumNames))
+                .collect(toValidListAll());
     }
 }

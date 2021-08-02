@@ -1,7 +1,6 @@
 package net.jbock.common;
 
 import io.jbock.util.Either;
-import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.util.StringConverter;
 
 import javax.lang.model.element.Element;
@@ -113,15 +112,7 @@ public class Util {
                 })).orElseGet(type::toString);
     }
 
-    public Either<String, AnnotatedMethod> checkExactlyOneAnnotation(
-            ExecutableElement element,
-            List<Class<? extends Annotation>> annotations) {
-        return checkAtLeastOneAnnotation(element, annotations)
-                .filter(a -> checkNoDuplicateAnnotations(element, annotations))
-                .map(a -> AnnotatedMethod.create(element, a));
-    }
-
-    private Either<String, Annotation> checkAtLeastOneAnnotation(
+    public Either<String, Annotation> checkAtLeastOneAnnotation(
             Element element,
             List<Class<? extends Annotation>> annotations) {
         for (Class<? extends Annotation> annotation : annotations) {

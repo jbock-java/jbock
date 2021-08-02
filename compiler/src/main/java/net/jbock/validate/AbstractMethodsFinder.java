@@ -42,7 +42,7 @@ public class AbstractMethodsFinder {
         this.sourceElement = sourceElement;
     }
 
-    Either<List<ValidationFailure>, List<ExecutableElement>> findAbstractMethods() {
+    Either<List<ValidationFailure>, AllMethods> findAbstractMethods() {
         List<ExecutableElement> methodsIn = findMethodsIn(sourceElement.element().asType());
         Map<Boolean, List<ExecutableElement>> partitions = methodsIn.stream()
                 .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
@@ -112,7 +112,7 @@ public class AbstractMethodsFinder {
      * @param allAbstract the set of all abstract methods in the source elements hierarchy
      * @return the n
      */
-    private Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantAbstractMethods(
+    private Either<List<ValidationFailure>, AllMethods> findRelevantAbstractMethods(
             List<ExecutableElement> allAbstract,
             Map<Name, Integer> allAbstractNameCount,
             Set<Name> nonAbstractNames) {
@@ -126,7 +126,8 @@ public class AbstractMethodsFinder {
                 .<Either<List<ValidationFailure>, List<ExecutableElement>>>map(Either::left)
                 .orElseGet(() -> right(allAbstract.stream()
                         .filter(m -> !nonAbstractNames.contains(m.getSimpleName()))
-                        .collect(toList())));
+                        .collect(toList())))
+                .map(AllMethods::create);
     }
 
     private boolean hasAnnotation(ExecutableElement overridden) {

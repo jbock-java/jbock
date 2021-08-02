@@ -2,15 +2,19 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.common.EnumName;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
+import net.jbock.source.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Name;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -30,9 +34,14 @@ public class AnnotatedMethodValidator {
         this.util = util;
     }
 
-    Either<ValidationFailure, AnnotatedMethod> validateAnnotatedMethod(ExecutableElement sourceMethod) {
+    Either<ValidationFailure, SourceMethod<?>> validateAnnotatedMethod(
+            ExecutableElement sourceMethod,
+            Map<Name, EnumName> enumNames) {
         List<Class<? extends Annotation>> annotations = methodLevelAnnotations();
-        return util.checkExactlyOneAnnotation(sourceMethod, annotations)
+        return util.checkAtLeastOneAnnotation(sourceMethod, annotations)
+                .filter(a -> util.checkNoDuplicateAnnotations(sourceMethod, annotations))
+                .map(a -> AnnotatedMethod.create(sourceMethod, a))
+                .<SourceMethod<?>>map(m -> m.sourceMethod(enumNames.get(m.method().getSimpleName())))
                 .filter(a -> checkAccessibleType(sourceMethod.getReturnType()))
                 .mapLeft(msg -> new ValidationFailure(msg, sourceMethod));
     }
