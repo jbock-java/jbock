@@ -1,6 +1,5 @@
 package net.jbock.common;
 
-import io.jbock.util.Either;
 import net.jbock.util.StringConverter;
 
 import javax.lang.model.element.Element;
@@ -19,8 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static io.jbock.util.Either.left;
-import static io.jbock.util.Either.right;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 
 public class Util {
@@ -113,20 +110,14 @@ public class Util {
                 })).orElseGet(type::toString);
     }
 
-    public Either<String, Annotation> checkAtLeastOneAnnotation(Element element) {
+    public Annotation checkAtLeastOneAnnotation(ExecutableElement method) {
         for (Class<? extends Annotation> annotation : methodLevelAnnotations()) {
-            Annotation a = element.getAnnotation(annotation);
+            Annotation a = method.getAnnotation(annotation);
             if (a != null) {
-                return right(a);
+                return a;
             }
         }
-        return left(missingAnnotationError());
-    }
-
-    public String missingAnnotationError() {
-        return "add one of these annotations: " + methodLevelAnnotations().stream()
-                .map(ann -> "@" + ann.getSimpleName())
-                .collect(Collectors.joining(", "));
+        throw new AssertionError(); // already validated in ExecutableElementsFinder
     }
 
     /* Left-Optional

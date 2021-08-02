@@ -1,7 +1,6 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
-import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 import net.jbock.validate.ValidateScope;
@@ -16,13 +15,14 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.toOptionalList;
 import static java.util.stream.Collectors.groupingBy;
@@ -38,14 +38,10 @@ import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 public class ExecutableElementsFinder {
 
     private final SourceElement sourceElement;
-    private final Util util;
 
     @Inject
-    ExecutableElementsFinder(
-            SourceElement sourceElement,
-            Util util) {
+    ExecutableElementsFinder(SourceElement sourceElement) {
         this.sourceElement = sourceElement;
-        this.util = util;
     }
 
     /**
@@ -64,9 +60,15 @@ public class ExecutableElementsFinder {
         Set<Name> nonAbstractNames = partitions.get(false).stream()
                 .map(ExecutableElement::getSimpleName)
                 .collect(Collectors.toSet());
-        Map<Name, List<ExecutableElement>> allAbstractGrouped = partitions.get(true).stream()
-                .collect(groupingBy(ExecutableElement::getSimpleName));
-        return findRelevantAbstractMethods(partitions.get(true), allAbstractGrouped, nonAbstractNames);
+        List<ExecutableElement> allAbstract = partitions.get(true);
+        Map<Name, List<ExecutableElement>> allAbstractByName = allAbstract.stream()
+                .collect(groupingBy(ExecutableElement::getSimpleName, LinkedHashMap::new, toList()));
+        return validateAbstractMethods(allAbstractByName, nonAbstractNames)
+                .<Either<List<ValidationFailure>, List<SimpleAnnotated>>>map(Either::left)
+                .orElseGet(() -> right(allAbstract.stream()
+                        .flatMap(this::asAnnotated)
+                        .collect(toList())))
+                .map(ExecutableElements::create);
     }
 
     private List<ExecutableElement> findMethodsIn(TypeMirror mirror) {
@@ -118,48 +120,52 @@ public class ExecutableElementsFinder {
                 .collect(toList());
     }
 
-    private Either<List<ValidationFailure>, ExecutableElements> findRelevantAbstractMethods(
-            List<ExecutableElement> allAbstract,
-            Map<Name, List<ExecutableElement>> allAbstractNameCount,
+    private Optional<List<ValidationFailure>> validateAbstractMethods(
+            Map<Name, List<ExecutableElement>> allAbstractByName,
             Set<Name> nonAbstractNames) {
-        List<ValidationFailure> missingAnnotationFailures = allAbstract.stream()
-                .filter(m -> !nonAbstractNames.contains(m.getSimpleName())
-                        && missingAnnotation(allAbstractNameCount.get(m.getSimpleName())))
-                .map(m -> new ValidationFailure(util.missingAnnotationError(), m))
-                .collect(toList());
-        if (!missingAnnotationFailures.isEmpty()) {
-            return left(missingAnnotationFailures);
-        }
-        return allAbstract.stream()
-                .filter(this::hasAnnotation)
-                .filter(m -> nonAbstractNames.contains(m.getSimpleName())
-                        || badOverride(allAbstractNameCount.get(m.getSimpleName())))
-                .map(m -> new ValidationFailure("annotated method is overridden", m))
+        return allAbstractByName.keySet().stream()
+                .filter(name -> !nonAbstractNames.contains(name)
+                        && missingAnnotation(allAbstractByName.get(name)))
+                .map(m -> new ValidationFailure(missingAnnotationError(),
+                        allAbstractByName.get(m).get(0)))
                 .collect(toOptionalList())
-                .<Either<List<ValidationFailure>, List<ExecutableElement>>>map(Either::left)
-                .orElseGet(() -> right(allAbstract.stream()
-                        .filter(m -> !nonAbstractNames.contains(m.getSimpleName()))
-                        .filter(this::hasAnnotation)
-                        .collect(toList())))
-                .map(ExecutableElements::create);
+                .or(() -> allAbstractByName.keySet().stream()
+                        .filter(name -> nonAbstractNames.contains(name)
+                                && allAbstractByName.get(name).stream().anyMatch(this::hasAnnotation)
+                                || multiAnnotation(allAbstractByName.get(name)))
+                        .map(m -> new ValidationFailure("annotated method is overridden",
+                                allAbstractByName.get(m).get(0)))
+                        .collect(toOptionalList()));
     }
 
-    private boolean badOverride(
-            List<ExecutableElement> overrides) {
-        return overrides.stream()
+    private boolean multiAnnotation(List<ExecutableElement> homonyms) {
+        return homonyms.stream()
                 .filter(this::hasAnnotation)
                 .count() >= 2;
     }
 
-    private boolean missingAnnotation(List<ExecutableElement> overrides) {
-        return overrides.stream()
+    private boolean missingAnnotation(List<ExecutableElement> homonyms) {
+        return homonyms.stream()
                 .filter(this::hasAnnotation)
                 .findAny()
                 .isEmpty();
     }
 
-    private boolean hasAnnotation(ExecutableElement overridden) {
+    private boolean hasAnnotation(ExecutableElement method) {
         return methodLevelAnnotations().stream()
-                .anyMatch(a -> overridden.getAnnotation(a) != null);
+                .anyMatch(a -> method.getAnnotation(a) != null);
+    }
+
+    private Stream<SimpleAnnotated> asAnnotated(ExecutableElement method) {
+        return methodLevelAnnotations().stream()
+                .flatMap(a -> method.getAnnotation(a) != null ?
+                        Stream.of(SimpleAnnotated.create(method, method.getAnnotation(a))) :
+                        Stream.empty());
+    }
+
+    private String missingAnnotationError() {
+        return "add one of these annotations: " + methodLevelAnnotations().stream()
+                .map(ann -> "@" + ann.getSimpleName())
+                .collect(Collectors.joining(", "));
     }
 }

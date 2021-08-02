@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static javax.tools.Diagnostic.Kind.ERROR;
+import static net.jbock.common.Annotations.typeLevelAnnotations;
 
 /**
  * This step handles the {@link Command} annotation.
@@ -107,7 +108,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             TypeElement element) {
         return util.commonTypeChecks(element)
                 .or(() -> util.checkNoDuplicateAnnotations(element,
-                        Annotations.typeLevelAnnotations()))
+                        typeLevelAnnotations()))
                 .map(s -> new ValidationFailure(s, element))
                 .map(List::of)
                 .<Either<List<ValidationFailure>, SourceElement>>map(Either::left)

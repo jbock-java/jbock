@@ -2,7 +2,6 @@ package net.jbock.annotated;
 
 import net.jbock.common.EnumName;
 
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,25 +11,25 @@ import java.util.Set;
 
 final class ExecutableElements {
 
-    private final List<ExecutableElement> executableElements;
+    private final List<SimpleAnnotated> executableElements;
     private final Map<Name, EnumName> enumNames;
 
     private ExecutableElements(
-            List<ExecutableElement> executableElements,
+            List<SimpleAnnotated> executableElements,
             Map<Name, EnumName> enumNames) {
         this.executableElements = executableElements;
         this.enumNames = enumNames;
     }
 
-    static ExecutableElements create(List<ExecutableElement> abstractMethods) {
+    static ExecutableElements create(List<SimpleAnnotated> abstractMethods) {
         Map<Name, EnumName> enumNames = createEnumNames(abstractMethods);
         return new ExecutableElements(abstractMethods, enumNames);
     }
 
-    private static Map<Name, EnumName> createEnumNames(List<ExecutableElement> methods) {
+    private static Map<Name, EnumName> createEnumNames(List<SimpleAnnotated> methods) {
         Set<EnumName> names = new HashSet<>();
         Map<Name, EnumName> result = new HashMap<>();
-        for (ExecutableElement method : methods) {
+        for (SimpleAnnotated method : methods) {
             EnumName enumName = EnumName.create(method.getSimpleName().toString());
             while (names.contains(enumName)) {
                 enumName = enumName.makeLonger();
@@ -41,7 +40,7 @@ final class ExecutableElements {
         return result;
     }
 
-    List<ExecutableElement> executableElements() {
+    List<SimpleAnnotated> executableElements() {
         return executableElements;
     }
 
