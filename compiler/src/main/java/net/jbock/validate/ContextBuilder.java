@@ -1,5 +1,6 @@
 package net.jbock.validate;
 
+import net.jbock.annotated.AnnotatedMethods;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
@@ -22,14 +23,14 @@ public final class ContextBuilder {
         this.namedOptions = namedOptions;
     }
 
-    static Step1 builder(AbstractMethods abstractMethods) {
+    static Step1 builder(AnnotatedMethods abstractMethods) {
         return new Step1(abstractMethods);
     }
 
     static final class Step1 {
-        private final AbstractMethods abstractMethods;
+        private final AnnotatedMethods abstractMethods;
 
-        private Step1(AbstractMethods abstractMethods) {
+        private Step1(AnnotatedMethods abstractMethods) {
             this.abstractMethods = abstractMethods;
         }
 

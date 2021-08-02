@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 
-class AnnotationUtil {
+final class AnnotationUtil {
 
     private static final String CONVERTER_ATTRIBUTE = "converter";
 
@@ -45,29 +45,29 @@ class AnnotationUtil {
 
     Optional<TypeElement> getConverterAttribute(ExecutableElement sourceMethod) {
         return getAnnotationMirror(sourceMethod)
-                .map(AnnotationUtil::getAnnotationValue)
+                .map(this::getAnnotationValue)
                 .flatMap(GET_TYPE::visit)
                 .map(MoreTypes::asTypeElement)
-                .filter(AnnotationUtil::isNotVoid);
+                .filter(this::isNotVoid);
     }
 
-    private static Optional<AnnotationMirror> getAnnotationMirror(ExecutableElement sourceMethod) {
+    private Optional<AnnotationMirror> getAnnotationMirror(ExecutableElement sourceMethod) {
         return sourceMethod.getAnnotationMirrors().stream()
-                .filter(AnnotationUtil::hasAnnotationTypeIn)
+                .filter(this::hasAnnotationTypeIn)
                 .map((AnnotationMirror a) -> a) // Avoid returning Optional<? extends AnnotationMirror>.
                 .findFirst();
     }
 
-    private static boolean hasAnnotationTypeIn(AnnotationMirror annotation) {
+    private boolean hasAnnotationTypeIn(AnnotationMirror annotation) {
         return ANNOTATIONS.contains(
                 MoreTypes.asTypeElement(annotation.getAnnotationType()).getQualifiedName().toString());
     }
 
-    private static AnnotationValue getAnnotationValue(AnnotationMirror annotationMirror) {
+    private AnnotationValue getAnnotationValue(AnnotationMirror annotationMirror) {
         return AnnotationMirrors.getAnnotationValue(annotationMirror, CONVERTER_ATTRIBUTE);
     }
 
-    private static boolean isNotVoid(TypeElement typeElement) {
+    private boolean isNotVoid(TypeElement typeElement) {
         return !"java.lang.Void".equals(typeElement.getQualifiedName().toString());
     }
 }

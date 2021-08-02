@@ -1,10 +1,10 @@
-package net.jbock.validate;
+package net.jbock.annotated;
 
 import io.jbock.util.Either;
-import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.EnumName;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
+import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
@@ -24,16 +24,16 @@ import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
 @ValidateScope
-public class AnnotatedMethodValidator {
+public class AnnotatedMethodFactory {
 
     private final Util util;
 
     @Inject
-    AnnotatedMethodValidator(Util util) {
+    AnnotatedMethodFactory(Util util) {
         this.util = util;
     }
 
-    Either<ValidationFailure, AnnotatedMethod> validateAnnotatedMethod(
+    public Either<ValidationFailure, AnnotatedMethod> createAnnotatedMethod(
             ExecutableElement sourceMethod,
             Map<Name, EnumName> enumNames) {
         List<Class<? extends Annotation>> annotations = methodLevelAnnotations();

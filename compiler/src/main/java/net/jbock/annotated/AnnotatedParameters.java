@@ -64,17 +64,17 @@ public final class AnnotatedParameters extends AnnotatedMethod {
     }
 
     @Override
-    public Optional<AnnotatedOption> asAnnotatedOption() {
+    Optional<AnnotatedOption> asAnnotatedOption() {
         return Optional.empty();
     }
 
     @Override
-    public Optional<AnnotatedParameter> asAnnotatedParameter() {
+    Optional<AnnotatedParameter> asAnnotatedParameter() {
         return Optional.empty();
     }
 
     @Override
-    public Optional<AnnotatedParameters> asAnnotatedParameters() {
+    Optional<AnnotatedParameters> asAnnotatedParameters() {
         return Optional.of(this);
     }
 }

@@ -2,6 +2,8 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.annotated.AnnotatedMethods;
+import net.jbock.annotated.MethodsFactory;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 
@@ -43,7 +45,7 @@ public class CommandProcessor {
     }
 
     public Either<List<ValidationFailure>, ContextBuilder> generate() {
-        return methodsFactory.findAbstractMethods()
+        return methodsFactory.createAnnotatedMethods()
                 .filter(this::checkDuplicateDescriptionKeys)
                 .map(ContextBuilder::builder)
                 .flatMap(parameterValidator::wrapPositionalParams)
@@ -53,7 +55,7 @@ public class CommandProcessor {
 
     /* Left-Optional
      */
-    private Optional<List<ValidationFailure>> checkDuplicateDescriptionKeys(AbstractMethods methods) {
+    private Optional<List<ValidationFailure>> checkDuplicateDescriptionKeys(AnnotatedMethods methods) {
         List<ValidationFailure> failures = new ArrayList<>();
         List<? extends AnnotatedMethod> items =
                 concat(concat(methods.namedOptions(), methods.positionalParameters()), methods.repeatablePositionalParameters());

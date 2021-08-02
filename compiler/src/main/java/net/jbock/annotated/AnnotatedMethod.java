@@ -45,7 +45,7 @@ public abstract class AnnotatedMethod {
         this.paramLabel = paramLabel;
     }
 
-    public static AnnotatedMethod create(
+    static AnnotatedMethod create(
             ExecutableElement sourceMethod,
             Annotation annotation,
             EnumName enumName) {
@@ -94,11 +94,11 @@ public abstract class AnnotatedMethod {
 
     public abstract List<String> description();
 
-    public abstract Optional<AnnotatedOption> asAnnotatedOption();
+    abstract Optional<AnnotatedOption> asAnnotatedOption();
 
-    public abstract Optional<AnnotatedParameter> asAnnotatedParameter();
+    abstract Optional<AnnotatedParameter> asAnnotatedParameter();
 
-    public abstract Optional<AnnotatedParameters> asAnnotatedParameters();
+    abstract Optional<AnnotatedParameters> asAnnotatedParameters();
 
     public final EnumName enumName() {
         return enumName;

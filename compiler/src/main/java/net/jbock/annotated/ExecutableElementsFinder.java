@@ -1,8 +1,9 @@
-package net.jbock.validate;
+package net.jbock.annotated;
 
 import io.jbock.util.Either;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
+import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
@@ -28,23 +29,31 @@ import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
-import static net.jbock.common.Annotations.methodLevelAnnotations;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
 @ValidateScope
-public class AbstractMethodsFinder {
+public class ExecutableElementsFinder {
 
     private final SourceElement sourceElement;
 
     @Inject
-    AbstractMethodsFinder(SourceElement sourceElement) {
+    ExecutableElementsFinder(SourceElement sourceElement) {
         this.sourceElement = sourceElement;
     }
 
-    Either<List<ValidationFailure>, AllMethods> findAbstractMethods() {
-        List<ExecutableElement> methodsIn = findMethodsIn(sourceElement.element().asType());
-        Map<Boolean, List<ExecutableElement>> partitions = methodsIn.stream()
+    /**
+     * Returns a Right-Either containing all parameterless abstract methods,
+     * including inherited abstract methods.
+     * If one of the parameterless abstract methods is overridden,
+     * a Left either is returned.
+     *
+     * @return all parameterless abstract methods, including inherited,
+     *         or a nonempty list of validation failures
+     */
+    Either<List<ValidationFailure>, ExecutableElements> findExecutableElements() {
+        List<ExecutableElement> methods = findMethodsIn(sourceElement.element().asType());
+        Map<Boolean, List<ExecutableElement>> partitions = methods.stream()
                 .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
         Set<Name> nonAbstractNames = partitions.get(false).stream()
                 .map(ExecutableElement::getSimpleName)
@@ -104,20 +113,11 @@ public class AbstractMethodsFinder {
                 .collect(toList());
     }
 
-    /**
-     * Returns a Right-Either containing those abstract methods which
-     * are not overridden.
-     * If one of the annotated methods is overridden, a Left either is returned.
-     *
-     * @param allAbstract the set of all abstract methods in the source elements hierarchy
-     * @return the n
-     */
-    private Either<List<ValidationFailure>, AllMethods> findRelevantAbstractMethods(
+    private Either<List<ValidationFailure>, ExecutableElements> findRelevantAbstractMethods(
             List<ExecutableElement> allAbstract,
             Map<Name, Integer> allAbstractNameCount,
             Set<Name> nonAbstractNames) {
         List<ValidationFailure> failures = allAbstract.stream()
-                .filter(this::hasAnnotation)
                 .filter(m -> allAbstractNameCount.getOrDefault(m.getSimpleName(), 0) >= 2
                         || nonAbstractNames.contains(m.getSimpleName()))
                 .map(m -> new ValidationFailure("annotated method is overridden", m))
@@ -127,11 +127,6 @@ public class AbstractMethodsFinder {
                 .orElseGet(() -> right(allAbstract.stream()
                         .filter(m -> !nonAbstractNames.contains(m.getSimpleName()))
                         .collect(toList())))
-                .map(AllMethods::create);
-    }
-
-    private boolean hasAnnotation(ExecutableElement overridden) {
-        return methodLevelAnnotations().stream()
-                .anyMatch(a -> overridden.getAnnotation(a) != null);
+                .map(ExecutableElements::create);
     }
 }

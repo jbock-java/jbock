@@ -1,4 +1,4 @@
-package net.jbock.validate;
+package net.jbock.annotated;
 
 import net.jbock.common.EnumName;
 
@@ -10,21 +10,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-final class AllMethods {
+final class ExecutableElements {
 
-    private final List<ExecutableElement> abstractMethods;
+    private final List<ExecutableElement> executableElements;
     private final Map<Name, EnumName> enumNames;
 
-    private AllMethods(
-            List<ExecutableElement> abstractMethods,
+    private ExecutableElements(
+            List<ExecutableElement> executableElements,
             Map<Name, EnumName> enumNames) {
-        this.abstractMethods = abstractMethods;
+        this.executableElements = executableElements;
         this.enumNames = enumNames;
     }
 
-    static AllMethods create(List<ExecutableElement> abstractMethods) {
+    static ExecutableElements create(List<ExecutableElement> abstractMethods) {
         Map<Name, EnumName> enumNames = createEnumNames(abstractMethods);
-        return new AllMethods(abstractMethods, enumNames);
+        return new ExecutableElements(abstractMethods, enumNames);
     }
 
     private static Map<Name, EnumName> createEnumNames(List<ExecutableElement> methods) {
@@ -41,8 +41,8 @@ final class AllMethods {
         return result;
     }
 
-    List<ExecutableElement> abstractMethods() {
-        return abstractMethods;
+    List<ExecutableElement> executableElements() {
+        return executableElements;
     }
 
     Map<Name, EnumName> enumNames() {
