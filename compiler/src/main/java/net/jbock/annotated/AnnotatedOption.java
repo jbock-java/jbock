@@ -86,11 +86,6 @@ public final class AnnotatedOption extends AnnotatedMethod {
         return optionalString(option.descriptionKey());
     }
 
-    @Override
-    public Optional<String> label() {
-        return optionalString(option.paramLabel());
-    }
-
     public List<String> names() {
         return names;
     }

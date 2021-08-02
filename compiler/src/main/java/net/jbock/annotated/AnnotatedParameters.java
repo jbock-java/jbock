@@ -59,11 +59,6 @@ public final class AnnotatedParameters extends AnnotatedMethod {
     }
 
     @Override
-    public Optional<String> label() {
-        return Descriptions.optionalString(parameters.paramLabel());
-    }
-
-    @Override
     public List<String> description() {
         return List.of(parameters.description());
     }

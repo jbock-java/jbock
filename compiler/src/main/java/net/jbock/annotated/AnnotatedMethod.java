@@ -88,8 +88,6 @@ public abstract class AnnotatedMethod {
 
     public abstract Optional<String> descriptionKey();
 
-    public abstract Optional<String> label();
-
     public abstract boolean isParameter();
 
     public abstract boolean isParameters();
