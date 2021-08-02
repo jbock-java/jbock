@@ -47,7 +47,6 @@ public class ConverterValidator {
             M sourceMethod,
             TypeElement converter) {
         return util.commonTypeChecks(converter)
-                .map(sourceMethod::fail)
                 .or(() -> checkNotAbstract(sourceMethod, converter))
                 .or(() -> checkNoTypevars(sourceMethod, converter))
                 .or(() -> checkConverterAnnotationPresent(sourceMethod, converter))
