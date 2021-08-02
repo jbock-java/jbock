@@ -33,14 +33,14 @@ public class AnnotatedMethodFactory {
         this.util = util;
     }
 
-    public Either<ValidationFailure, AnnotatedMethod> createAnnotatedMethod(
+    Either<ValidationFailure, AnnotatedMethod> createAnnotatedMethod(
             SimpleAnnotated sourceMethod,
             Map<Name, EnumName> enumNames) {
         List<Class<? extends Annotation>> annotations = methodLevelAnnotations();
-        Either<String, Annotation> annotation = Either.right(sourceMethod.annotation());
         ExecutableElement method = sourceMethod.method();
-        return annotation
-                .filter(a -> util.checkNoDuplicateAnnotations(method, annotations))
+        return util.checkNoDuplicateAnnotations(method, annotations)
+                .<Either<String, Annotation>>map(Either::left)
+                .orElseGet(() -> Either.right(sourceMethod.annotation()))
                 .map(a -> AnnotatedMethod.create(method, a, enumNames.get(sourceMethod.getSimpleName())))
                 .filter(a -> checkAccessibleType(method.getReturnType()))
                 .mapLeft(msg -> new ValidationFailure(msg, method));

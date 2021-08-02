@@ -6,7 +6,6 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import io.jbock.util.Either;
 import net.jbock.Command;
-import net.jbock.common.Annotations;
 import net.jbock.common.SafeElements;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;

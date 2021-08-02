@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static net.jbock.common.Annotations.methodLevelAnnotations;
-
 public class Util {
 
     private final Types types;
@@ -108,16 +106,6 @@ public class Util {
                     return base + declared.getTypeArguments().stream().map(this::typeToString)
                             .collect(Collectors.joining(", ", "<", ">"));
                 })).orElseGet(type::toString);
-    }
-
-    public Annotation checkAtLeastOneAnnotation(ExecutableElement method) {
-        for (Class<? extends Annotation> annotation : methodLevelAnnotations()) {
-            Annotation a = method.getAnnotation(annotation);
-            if (a != null) {
-                return a;
-            }
-        }
-        throw new AssertionError(); // already validated in ExecutableElementsFinder
     }
 
     /* Left-Optional
