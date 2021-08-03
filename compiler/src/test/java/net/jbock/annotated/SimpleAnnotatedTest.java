@@ -15,6 +15,6 @@ class SimpleAnnotatedTest {
         ExecutableElement executableElement = mock(ExecutableElement.class);
         Annotation annotation = mock(SuppressWarnings.class);
         assertThrows(AssertionError.class, () ->
-                SimpleAnnotated.create(executableElement, annotation));
+                Executable.create(executableElement, annotation));
     }
 }

@@ -53,7 +53,7 @@ public class ExecutableElementsFinder {
      * @return all parameterless abstract methods, including inherited,
      *         or a nonempty list of validation failures
      */
-    Either<List<ValidationFailure>, ExecutableElements> findExecutableElements() {
+    Either<List<ValidationFailure>, AnnotatedMethodsBuilder.Step2> findExecutableElements() {
         List<ExecutableElement> methods = findMethodsIn(sourceElement.element().asType());
         Map<Boolean, List<ExecutableElement>> partitions = methods.stream()
                 .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
@@ -64,11 +64,12 @@ public class ExecutableElementsFinder {
         Map<Name, List<ExecutableElement>> allAbstractByName = allAbstract.stream()
                 .collect(groupingBy(ExecutableElement::getSimpleName, LinkedHashMap::new, toList()));
         return validateAbstractMethods(allAbstractByName, nonAbstractNames)
-                .<Either<List<ValidationFailure>, List<SimpleAnnotated>>>map(Either::left)
+                .<Either<List<ValidationFailure>, List<Executable>>>map(Either::left)
                 .orElseGet(() -> right(allAbstract.stream()
-                        .flatMap(this::asAnnotated)
+                        .flatMap(this::createExecutable)
                         .collect(toList())))
-                .map(ExecutableElements::create);
+                .map(AnnotatedMethodsBuilder::builder)
+                .map(step -> step.sourceElement(sourceElement));
     }
 
     private List<ExecutableElement> findMethodsIn(TypeMirror mirror) {
@@ -156,10 +157,10 @@ public class ExecutableElementsFinder {
                 .anyMatch(a -> method.getAnnotation(a) != null);
     }
 
-    private Stream<SimpleAnnotated> asAnnotated(ExecutableElement method) {
+    private Stream<Executable> createExecutable(ExecutableElement method) {
         return methodLevelAnnotations().stream()
                 .flatMap(a -> method.getAnnotation(a) != null ?
-                        Stream.of(SimpleAnnotated.create(method, method.getAnnotation(a))) :
+                        Stream.of(Executable.create(method, method.getAnnotation(a))) :
                         Stream.empty());
     }
 

@@ -12,48 +12,21 @@ import java.util.Optional;
 
 public abstract class AnnotatedMethod {
 
-    private final ExecutableElement method;
-    private final List<Modifier> accessModifiers;
-    private final Optional<TypeElement> converter;
     private final EnumName enumName;
     private final String paramLabel;
 
     AnnotatedMethod(
-            ExecutableElement method,
-            List<Modifier> accessModifiers,
-            Optional<TypeElement> converter,
             EnumName enumName,
             String paramLabel) {
-        this.method = method;
-        this.accessModifiers = accessModifiers;
-        this.converter = converter;
         this.enumName = enumName;
         this.paramLabel = paramLabel;
     }
 
-    public final ExecutableElement method() {
-        return method;
-    }
-
-    public final List<Modifier> accessModifiers() {
-        return accessModifiers;
-    }
-
-    public final Optional<TypeElement> converter() {
-        return converter;
-    }
-
-    public final ValidationFailure fail(String message) {
-        return new ValidationFailure(message, method);
-    }
-
-    public abstract Optional<String> descriptionKey();
+    abstract Executable executable();
 
     public abstract boolean isParameter();
 
     public abstract boolean isParameters();
-
-    public abstract List<String> description();
 
     abstract Optional<AnnotatedOption> asAnnotatedOption();
 
@@ -66,14 +39,38 @@ public abstract class AnnotatedMethod {
     }
 
     public final String methodName() {
-        return method.getSimpleName().toString();
+        return method().getSimpleName().toString();
     }
 
     public final TypeMirror returnType() {
-        return method.getReturnType();
+        return method().getReturnType();
     }
 
     public final String paramLabel() {
         return paramLabel;
+    }
+
+    public final List<Modifier> accessModifiers() {
+        return executable().accessModifiers();
+    }
+
+    public final Optional<TypeElement> converter() {
+        return executable().converter();
+    }
+
+    public final ValidationFailure fail(String message) {
+        return executable().fail(message);
+    }
+
+    public final ExecutableElement method() {
+        return executable().method();
+    }
+
+    public final Optional<String> descriptionKey() {
+        return executable().descriptionKey();
+    }
+
+    public final List<String> description() {
+        return executable().description();
     }
 }

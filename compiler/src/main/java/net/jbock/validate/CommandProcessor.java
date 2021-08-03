@@ -3,7 +3,7 @@ package net.jbock.validate;
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.annotated.AnnotatedMethods;
-import net.jbock.annotated.MethodsFactory;
+import net.jbock.annotated.AnnotatedMethodsFactory;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 
@@ -24,7 +24,7 @@ import static net.jbock.common.Constants.concat;
 @ValidateScope
 public class CommandProcessor {
 
-    private final MethodsFactory methodsFactory;
+    private final AnnotatedMethodsFactory methodsFactory;
     private final SourceElement sourceElement;
     private final SourceOptionValidator optionValidator;
     private final SourceParameterValidator parameterValidator;
@@ -32,7 +32,7 @@ public class CommandProcessor {
 
     @Inject
     CommandProcessor(
-            MethodsFactory methodsFactory,
+            AnnotatedMethodsFactory methodsFactory,
             SourceElement sourceElement,
             SourceOptionValidator optionValidator,
             SourceParameterValidator parameterValidator,
