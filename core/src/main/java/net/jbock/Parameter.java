@@ -7,8 +7,10 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for a positional parameter.
- * The annotated method must be abstract
+ * Marker annotation for a positional parameter that is <em>not</em> repeatable.
+ * Use {@link Parameters} to declare a repeatable positional parameter.
+ *
+ * <p>The annotated method must be abstract
  * and have an empty argument list.
  */
 @Target(METHOD)

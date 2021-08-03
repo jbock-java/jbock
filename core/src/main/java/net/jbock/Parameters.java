@@ -9,14 +9,17 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 /**
  * Marker annotation for a <em>repeatable</em> positional parameter.
  * This parameter will capture the remaining tokens,
- * after all other positional parameters have been read.
+ * after all non-repeatable positional parameters have been read.
  *
  * <ul>
  *   <li>The annotated method must be {@code abstract} and have an empty argument list.
- *   <li>It must return {@link java.util.List List&lt;E&gt;}, where {@code E} is a converted type.
+ *   <li>The annotated method must return {@link java.util.List List&lt;E&gt;},
+ *       where {@code E} is a converted type.
  *   <li>There cannot be more than one repeatable positional parameter per command.
  *   <li>Cannot be used when the {@link Command#superCommand()} attribute is set.
  * </ul>
+ *
+ * @see Parameter
  */
 @Target(METHOD)
 @Retention(SOURCE)
@@ -52,7 +55,7 @@ public @interface Parameters {
     String[] description() default {};
 
     /**
-     * A label for this repeatable parameter, to address it in the usage documentation.
+     * A label for these repeatable parameters, to address them in the usage documentation.
      * If empty, a label will be chosen based on the method name.
      *
      * @return description label for these parameters
