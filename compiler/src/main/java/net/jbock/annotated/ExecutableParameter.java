@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static net.jbock.annotated.AnnotatedParameter.createParameter;
-import static net.jbock.common.Descriptions.optionalString;
+import static net.jbock.common.Constants.optionalString;
 
 final class ExecutableParameter extends Executable {
 

@@ -3,7 +3,6 @@ package net.jbock.processor;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Command;
-import net.jbock.common.Descriptions;
 import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;
 
@@ -15,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static net.jbock.common.Constants.ACCESS_MODIFIERS;
+import static net.jbock.common.Constants.optionalString;
 
 public class SourceElement {
 
@@ -45,7 +45,7 @@ public class SourceElement {
                 .filter(ACCESS_MODIFIERS::contains)
                 .collect(Collectors.toUnmodifiableList());
         Command command = typeElement.getAnnotation(Command.class);
-        String programName = Descriptions.optionalString(command.name())
+        String programName = optionalString(command.name())
                 .orElseGet(() -> SnakeName.create(typeElement.getSimpleName().toString()).snake('-'));
         String generatedClassName = String.join("_", ClassName.get(typeElement).simpleNames()) + "Parser";
         ClassName generatedClass = ClassName.get(typeElement)
@@ -93,7 +93,7 @@ public class SourceElement {
     }
 
     public Optional<String> descriptionKey() {
-        return Descriptions.optionalString(command.descriptionKey());
+        return optionalString(command.descriptionKey());
     }
 
     public List<String> description() {
