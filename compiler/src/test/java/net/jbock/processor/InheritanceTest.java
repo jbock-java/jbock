@@ -132,6 +132,30 @@ class InheritanceTest {
     }
 
     @Test
+    void siblingInterfaces() {
+        JavaFileObject a = fromSource(
+                "interface Aaa {",
+                "",
+                "  @Option(names = \"--aaa\")",
+                "  abstract String foo();",
+                "}");
+        JavaFileObject b = fromSource(
+                "interface Bbb {",
+                "",
+                "  @Option(names = \"--bbb\")",
+                "  abstract String foo();",
+                "}");
+        JavaFileObject c = fromSource(
+                "@Command",
+                "abstract class C implements Bbb, Aaa {",
+                "}");
+        assertAbout(javaSources()).that(List.of(a, b, c))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("annotated method is overridden");
+    }
+
+    @Test
     void annotatedMethodOverriddenAbstract() {
         JavaFileObject a = fromSource(
                 "abstract class A {",
