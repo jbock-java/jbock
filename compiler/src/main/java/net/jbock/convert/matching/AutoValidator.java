@@ -24,16 +24,16 @@ import static net.jbock.common.Constants.STRING;
 @ValidateScope
 public class AutoValidator {
 
-    private final AutoMappings autoConverter;
+    private final AutoMapper autoMapper;
     private final Util util;
     private final MatchFinder matchFinder;
 
     @Inject
     AutoValidator(
-            AutoMappings autoConverter,
+            AutoMapper autoMapper,
             Util util,
             MatchFinder matchFinder) {
-        this.autoConverter = autoConverter;
+        this.autoMapper = autoMapper;
         this.util = util;
         this.matchFinder = matchFinder;
     }
@@ -42,21 +42,22 @@ public class AutoValidator {
     Either<ValidationFailure, Mapping<M>> findMapping(
             M sourceMethod) {
         return matchFinder.findMatch(sourceMethod)
-                .flatMap(m -> findMapping(sourceMethod, m));
+                .flatMap(m -> findEnumOrAutoMapping(sourceMethod, m));
     }
 
     private <M extends AnnotatedMethod>
-    Either<ValidationFailure, Mapping<M>> findMapping(
+    Either<ValidationFailure, Mapping<M>> findEnumOrAutoMapping(
             M sourceMethod,
             ValidMatch<M> match) {
-        return autoConverter.findAutoMapping(sourceMethod, match)
-                .flatMapLeft(message -> findEnumMapping(sourceMethod, match.baseType()));
+        return autoMapper.findAutoMapping(sourceMethod, match)
+                .flatMapLeft(message -> findEnumMapping(sourceMethod, match));
     }
 
     private <M extends AnnotatedMethod>
     Either<ValidationFailure, Mapping<M>> findEnumMapping(
             M sourceMethod,
-            TypeMirror baseType) {
+            ValidMatch<M> match) {
+        TypeMirror baseType = match.baseType();
         return TypeTool.AS_DECLARED.visit(baseType)
                 .map(DeclaredType::asElement)
                 .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
@@ -64,14 +65,13 @@ public class AutoValidator {
                 .map(TypeElement::asType)
                 .<Either<ValidationFailure, TypeMirror>>map(Either::right)
                 .orElseGet(() -> left(sourceMethod.fail(util.noMatchError(baseType))))
-                .flatMap(enumType -> matchFinder.findMatch(sourceMethod)
-                        .map(match -> {
-                            CodeBlock code = enumConvertBlock(enumType);
-                            return Mapping.create(code, match, true);
-                        }));
+                .map(enumType -> {
+                    CodeBlock code = enumConversionCode(enumType);
+                    return Mapping.create(code, match, true);
+                });
     }
 
-    private CodeBlock enumConvertBlock(TypeMirror enumType) {
+    private CodeBlock enumConversionCode(TypeMirror enumType) {
         ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
         ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e").build();
         ParameterSpec values = ParameterSpec.builder(STRING, "values").build();

@@ -29,7 +29,7 @@ import static io.jbock.util.Either.right;
 import static net.jbock.common.Constants.STRING;
 
 @ValidateScope
-public class AutoMappings {
+public class AutoMapper {
 
     private static final String NEW = "new";
     private static final String CREATE = "create";
@@ -42,7 +42,7 @@ public class AutoMappings {
     private final List<AutoConversion> conversions;
 
     @Inject
-    AutoMappings(
+    AutoMapper(
             TypeTool tool,
             Util util) {
         this.tool = tool;
