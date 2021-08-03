@@ -29,7 +29,8 @@ public class Match<M extends AnnotatedMethod> {
         this.sourceMethod = sourceMethod;
     }
 
-    public static <M extends AnnotatedMethod> Match<M> create(
+    public static <M extends AnnotatedMethod>
+    Match<M> create(
             TypeMirror baseType,
             Multiplicity multiplicity,
             CodeBlock extractExpr,
@@ -37,7 +38,8 @@ public class Match<M extends AnnotatedMethod> {
         return new Match<>(baseType, multiplicity, Optional.of(extractExpr), sourceMethod);
     }
 
-    public static <M extends AnnotatedMethod> Match<M> create(
+    public static <M extends AnnotatedMethod>
+    Match<M> create(
             TypeMirror baseType,
             Multiplicity multiplicity,
             M sourceMethod) {

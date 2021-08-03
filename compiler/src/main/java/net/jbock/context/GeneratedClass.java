@@ -22,7 +22,7 @@ public final class GeneratedClass {
     private final ParseMethod parseMethod;
     private final Impl impl;
     private final OptionParser optionParser;
-    private final OptionEnum optionEnum;
+    private final OptEnum optionEnum;
     private final StatefulParser statefulParser;
     private final SourceElement sourceElement;
     private final List<Mapping<AnnotatedOption>> namedOptions;
@@ -37,7 +37,7 @@ public final class GeneratedClass {
             SourceElement sourceElement,
             Impl impl,
             OptionParser optionParser,
-            OptionEnum optionEnum,
+            OptEnum optionEnum,
             StatefulParser statefulParser,
             List<Mapping<AnnotatedOption>> namedOptions,
             ParseOrExitMethod parseOrExitMethod,

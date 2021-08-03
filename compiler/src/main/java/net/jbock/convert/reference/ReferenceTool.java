@@ -28,7 +28,8 @@ public class ReferenceTool {
         this.tool = tool;
     }
 
-    public <M extends AnnotatedMethod> Either<ValidationFailure, StringConverterType> getReferencedType(
+    public <M extends AnnotatedMethod>
+    Either<ValidationFailure, StringConverterType> getReferencedType(
             M sourceMethod,
             TypeElement converter) {
         Optional<DeclaredType> supplier = checkSupplier(converter);
@@ -42,7 +43,8 @@ public class ReferenceTool {
                 .orElseGet(() -> left(sourceMethod.fail(errorConverterType())));
     }
 
-    private <M extends AnnotatedMethod> Either<ValidationFailure, StringConverterType> handleSupplier(
+    private <M extends AnnotatedMethod>
+    Either<ValidationFailure, StringConverterType> handleSupplier(
             M sourceMethod,
             DeclaredType declaredType) {
         if (declaredType.getTypeArguments().size() != 1) {
@@ -57,14 +59,15 @@ public class ReferenceTool {
                 .flatMap(suppliedType -> handleStringConverter(sourceMethod, suppliedType, true));
     }
 
-    private <M extends AnnotatedMethod> Either<ValidationFailure, StringConverterType> handleStringConverter(
+    private <M extends AnnotatedMethod>
+    Either<ValidationFailure, StringConverterType> handleStringConverter(
             M parameter,
-            DeclaredType stringConverterType,
+            DeclaredType declaredType,
             boolean isSupplier) {
-        if (stringConverterType.getTypeArguments().size() != 1) {
+        if (declaredType.getTypeArguments().size() != 1) {
             return left(parameter.fail(converterRawType()));
         }
-        TypeMirror typeArgument = stringConverterType.getTypeArguments().get(0);
+        TypeMirror typeArgument = declaredType.getTypeArguments().get(0);
         return right(new StringConverterType(typeArgument, isSupplier));
     }
 

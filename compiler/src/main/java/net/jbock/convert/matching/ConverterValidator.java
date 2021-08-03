@@ -43,31 +43,34 @@ public class ConverterValidator {
         this.matchFinder = matchFinder;
     }
 
-    public <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findMapping(
+    public <M extends AnnotatedMethod>
+    Either<ValidationFailure, Mapping<M>> findMapping(
             M sourceMethod,
             TypeElement converter) {
         return util.commonTypeChecks(converter)
                 .or(() -> checkNotAbstract(sourceMethod, converter))
-                .or(() -> checkNoTypevars(sourceMethod, converter))
+                .or(() -> checkNoTypeVars(sourceMethod, converter))
                 .or(() -> checkConverterAnnotationPresent(sourceMethod, converter))
                 .<Either<ValidationFailure, StringConverterType>>map(Either::left)
                 .orElseGet(() -> referenceTool.getReferencedType(sourceMethod, converter))
                 .mapLeft(failure -> failure.prepend("invalid converter class: "))
-                .flatMap(functionType -> tryAllMatchers(functionType, sourceMethod, converter));
+                .flatMap(converterType -> tryAllMatchers(converterType, sourceMethod, converter));
     }
 
-    private <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> tryAllMatchers(
-            StringConverterType functionType,
+    private <M extends AnnotatedMethod>
+    Either<ValidationFailure, Mapping<M>> tryAllMatchers(
+            StringConverterType converterType,
             M sourceMethod,
             TypeElement converter) {
         return matchFinder.findMatch(sourceMethod)
-                .filter(match -> isValidMatch(match, functionType))
-                .map(match -> Mapping.create(getMapExpr(functionType, converter), match, false));
+                .filter(match -> isValidMatch(match, converterType))
+                .map(match -> Mapping.create(getMapExpr(converterType, converter), match, false));
     }
 
     /* Left-Optional
      */
-    private <M extends AnnotatedMethod> Optional<ValidationFailure> checkConverterAnnotationPresent(
+    private <M extends AnnotatedMethod>
+    Optional<ValidationFailure> checkConverterAnnotationPresent(
             M sourceMethod,
             TypeElement converter) {
         Converter converterAnnotation = converter.getAnnotation(Converter.class);
@@ -81,7 +84,8 @@ public class ConverterValidator {
 
     /* Left-Optional
      */
-    private <M extends AnnotatedMethod> Optional<ValidationFailure> checkNotAbstract(
+    private <M extends AnnotatedMethod>
+    Optional<ValidationFailure> checkNotAbstract(
             M sourceMethod,
             TypeElement converter) {
         if (converter.getModifiers().contains(ABSTRACT)) {
@@ -92,7 +96,8 @@ public class ConverterValidator {
 
     /* Left-Optional
      */
-    private <M extends AnnotatedMethod> Optional<ValidationFailure> checkNoTypevars(
+    private <M extends AnnotatedMethod>
+    Optional<ValidationFailure> checkNoTypeVars(
             M sourceMethod,
             TypeElement converter) {
         if (!converter.getTypeParameters().isEmpty()) {
@@ -110,10 +115,11 @@ public class ConverterValidator {
         return CodeBlock.of("new $T()", converter.asType());
     }
 
-    private <M extends AnnotatedMethod> Optional<ValidationFailure> isValidMatch(
+    private <M extends AnnotatedMethod>
+    Optional<ValidationFailure> isValidMatch(
             ValidMatch<M> match,
-            StringConverterType functionType) {
-        if (!types.isSameType(functionType.outputType(), match.baseType())) {
+            StringConverterType converterType) {
+        if (!types.isSameType(converterType.outputType(), match.baseType())) {
             return Optional.of(match.sourceMethod().fail("invalid converter class: should extend " +
                     StringConverter.class.getSimpleName() +
                     "<" + util.typeToString(match.baseType()) + ">"));

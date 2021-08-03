@@ -24,11 +24,11 @@ enum OptionalPrimitive {
         return CodeBlock.of(".map($1T::of).orElse($1T.empty())", type);
     }
 
-    public String type() {
+    String type() {
         return type.getCanonicalName();
     }
 
-    public String numberType() {
+    String numberType() {
         return numberType;
     }
 }

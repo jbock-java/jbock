@@ -4,7 +4,7 @@ import net.jbock.common.EnumName;
 import net.jbock.common.SnakeName;
 
 import java.util.Locale;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class AnnotatedParameter extends AnnotatedMethod {
 
@@ -45,18 +45,18 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     }
 
     @Override
-    Optional<AnnotatedOption> asAnnotatedOption() {
-        return Optional.empty();
+    Stream<AnnotatedOption> asAnnotatedOption() {
+        return Stream.empty();
     }
 
     @Override
-    Optional<AnnotatedParameter> asAnnotatedParameter() {
-        return Optional.of(this);
+    Stream<AnnotatedParameter> asAnnotatedParameter() {
+        return Stream.of(this);
     }
 
     @Override
-    Optional<AnnotatedParameters> asAnnotatedParameters() {
-        return Optional.empty();
+    Stream<AnnotatedParameters> asAnnotatedParameters() {
+        return Stream.empty();
     }
 
     public int index() {

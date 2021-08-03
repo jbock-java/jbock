@@ -12,19 +12,18 @@ import java.util.List;
 import static javax.lang.model.element.Modifier.PRIVATE;
 
 /**
- * Defines the inner class *Parser.Option.
+ * Defines the inner class *Parser.Opt.
  *
  * @see GeneratedClass
  */
 @ContextScope
-public class OptionEnum {
+public class OptEnum {
 
     private final List<Mapping<AnnotatedOption>> options;
     private final SourceElement sourceElement;
 
     @Inject
-    OptionEnum(
-            List<Mapping<AnnotatedOption>> options,
+    OptEnum(List<Mapping<AnnotatedOption>> options,
             SourceElement sourceElement) {
         this.options = options;
         this.sourceElement = sourceElement;

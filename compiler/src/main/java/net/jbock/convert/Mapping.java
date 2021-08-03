@@ -44,20 +44,23 @@ public final class Mapping<M extends AnnotatedMethod> {
         this.asFieldSpec = asFieldSpec;
     }
 
-    public static <M extends AnnotatedMethod> Mapping<M> create(
+    public static <M extends AnnotatedMethod>
+    Mapping<M> create(
             CodeBlock code,
             ValidMatch<M> match,
             boolean multiline) {
         return Mapping.create(code, match, multiline, false);
     }
 
-    public static <M extends AnnotatedMethod> Mapping<M> createFlag(
+    public static <M extends AnnotatedMethod>
+    Mapping<M> createFlag(
             CodeBlock code,
             ValidMatch<M> match) {
         return Mapping.create(code, match, false, true);
     }
 
-    private static <M extends AnnotatedMethod> Mapping<M> create(
+    private static <M extends AnnotatedMethod>
+    Mapping<M> create(
             CodeBlock mapExpr,
             ValidMatch<M> match,
             boolean multiline,

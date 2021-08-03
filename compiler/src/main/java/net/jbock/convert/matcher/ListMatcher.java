@@ -26,7 +26,8 @@ public class ListMatcher implements Matcher {
     }
 
     @Override
-    public <M extends AnnotatedMethod> Optional<Match<M>> tryMatch(
+    public <M extends AnnotatedMethod>
+    Optional<Match<M>> tryMatch(
             M parameter) {
         TypeMirror returnType = parameter.returnType();
         return elements.getTypeElement("java.util.List")

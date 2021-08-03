@@ -33,7 +33,8 @@ public class OptionalMatcher implements Matcher {
     }
 
     @Override
-    public <M extends AnnotatedMethod> Optional<Match<M>> tryMatch(
+    public <M extends AnnotatedMethod>
+    Optional<Match<M>> tryMatch(
             M parameter) {
         TypeMirror returnType = parameter.returnType();
         return getOptionalPrimitive(parameter, returnType)
@@ -48,7 +49,8 @@ public class OptionalMatcher implements Matcher {
                                                 CodeBlock.of(".map($1T::of).orElse($1T.none())", types.erasure(el.asType())), parameter))));
     }
 
-    private <M extends AnnotatedMethod> Optional<Match<M>> getOptionalPrimitive(
+    private <M extends AnnotatedMethod>
+    Optional<Match<M>> getOptionalPrimitive(
             M parameter,
             TypeMirror type) {
         for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {

@@ -38,20 +38,23 @@ public class AutoValidator {
         this.matchFinder = matchFinder;
     }
 
-    public <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findMapping(
+    public <M extends AnnotatedMethod>
+    Either<ValidationFailure, Mapping<M>> findMapping(
             M sourceMethod) {
         return matchFinder.findMatch(sourceMethod)
                 .flatMap(m -> findMapping(sourceMethod, m));
     }
 
-    private <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findMapping(
+    private <M extends AnnotatedMethod>
+    Either<ValidationFailure, Mapping<M>> findMapping(
             M sourceMethod,
             ValidMatch<M> match) {
-        return autoConverter.findAutoMapping(sourceMethod, match.baseType())
+        return autoConverter.findAutoMapping(sourceMethod, match)
                 .flatMapLeft(message -> findEnumMapping(sourceMethod, match.baseType()));
     }
 
-    private <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findEnumMapping(
+    private <M extends AnnotatedMethod>
+    Either<ValidationFailure, Mapping<M>> findEnumMapping(
             M sourceMethod,
             TypeMirror baseType) {
         return TypeTool.AS_DECLARED.visit(baseType)

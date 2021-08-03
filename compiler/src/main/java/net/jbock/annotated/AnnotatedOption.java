@@ -6,8 +6,8 @@ import net.jbock.common.SnakeName;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class AnnotatedOption extends AnnotatedMethod {
 
@@ -79,17 +79,17 @@ public final class AnnotatedOption extends AnnotatedMethod {
     }
 
     @Override
-    Optional<AnnotatedOption> asAnnotatedOption() {
-        return Optional.of(this);
+    Stream<AnnotatedOption> asAnnotatedOption() {
+        return Stream.of(this);
     }
 
     @Override
-    Optional<AnnotatedParameter> asAnnotatedParameter() {
-        return Optional.empty();
+    Stream<AnnotatedParameter> asAnnotatedParameter() {
+        return Stream.empty();
     }
 
     @Override
-    Optional<AnnotatedParameters> asAnnotatedParameters() {
-        return Optional.empty();
+    Stream<AnnotatedParameters> asAnnotatedParameters() {
+        return Stream.empty();
     }
 }

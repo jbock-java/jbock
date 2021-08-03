@@ -20,13 +20,12 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static io.jbock.util.Either.left;
+import static io.jbock.util.Either.right;
 import static net.jbock.common.Constants.STRING;
 
 @ValidateScope
@@ -40,68 +39,54 @@ public class AutoMappings {
 
     private final TypeTool tool;
     private final Util util;
-    private final List<Entry<String, MultilineCodeBlock>> converters;
-    private final MatchFinder matchFinder;
-
-    private static class MultilineCodeBlock {
-        private final CodeBlock code;
-        private final boolean multiline;
-
-        private MultilineCodeBlock(CodeBlock code, boolean multiline) {
-            this.code = code;
-            this.multiline = multiline;
-        }
-    }
+    private final List<AutoConversion> conversions;
 
     @Inject
     AutoMappings(
             TypeTool tool,
-            Util util,
-            MatchFinder matchFinder) {
+            Util util) {
         this.tool = tool;
         this.util = util;
-        this.matchFinder = matchFinder;
-        this.converters = autoConverters();
+        this.conversions = autoConversions();
     }
 
-    <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findAutoMapping(
+    <M extends AnnotatedMethod>
+    Either<ValidationFailure, Mapping<M>> findAutoMapping(
             M sourceMethod,
-            TypeMirror baseType) {
-        for (Entry<String, MultilineCodeBlock> converter : converters) {
-            if (tool.isSameType(baseType, converter.getKey())) {
-                return matchFinder.findMatch(sourceMethod)
-                        .map(match -> {
-                            CodeBlock code = converter.getValue().code;
-                            boolean multiline = converter.getValue().multiline;
-                            return Mapping.create(code, match, multiline);
-                        });
+            ValidMatch<M> match) {
+        TypeMirror baseType = match.baseType();
+        for (AutoConversion conversion : conversions) {
+            if (tool.isSameType(baseType, conversion.qualifiedName())) {
+                CodeBlock code = conversion.code();
+                boolean multiline = conversion.multiline();
+                return right(Mapping.create(code, match, multiline));
             }
         }
         return left(sourceMethod.fail(util.noMatchError(baseType)));
     }
 
-    private Entry<String, MultilineCodeBlock> create(Class<?> autoType, String methodName) {
+    private AutoConversion create(Class<?> autoType, String methodName) {
         return create(autoType, CodeBlock.of("$T::" + methodName, autoType));
     }
 
-    private Entry<String, MultilineCodeBlock> create(Class<?> autoType, CodeBlock mapExpr) {
+    private AutoConversion create(Class<?> autoType, CodeBlock mapExpr) {
         return create(autoType, CodeBlock.of("$T.create($L)", StringConverter.class, mapExpr), false);
     }
 
-    private Entry<String, MultilineCodeBlock> create(
+    private AutoConversion create(
             Class<?> autoType,
             CodeBlock code,
             boolean multiline) {
         String canonicalName = autoType.getCanonicalName();
-        return new SimpleImmutableEntry<>(canonicalName, new MultilineCodeBlock(code, multiline));
+        return new AutoConversion(canonicalName, code, multiline);
     }
 
-    private List<Entry<String, MultilineCodeBlock>> autoConverters() {
+    private List<AutoConversion> autoConversions() {
         return List.of(
                 create(String.class, CodeBlock.of("$T.identity()", Function.class)),
                 create(Integer.class, VALUE_OF),
                 create(Path.class, CodeBlock.of("$T::get", Paths.class)),
-                create(File.class, autoConverterFile(), true),
+                create(File.class, fileConversionCode(), true),
                 create(URI.class, CREATE),
                 create(Pattern.class, COMPILE),
                 create(LocalDate.class, PARSE),
@@ -110,12 +95,12 @@ public class AutoMappings {
                 create(Byte.class, VALUE_OF),
                 create(Float.class, VALUE_OF),
                 create(Double.class, VALUE_OF),
-                create(Character.class, autoConverterCharBlock(), true),
+                create(Character.class, charConversionCode(), true),
                 create(BigInteger.class, NEW),
                 create(BigDecimal.class, NEW));
     }
 
-    private CodeBlock autoConverterCharBlock() {
+    private CodeBlock charConversionCode() {
         ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
         return CodeBlock.builder()
                 .add("if ($N.length() != 1)\n", token).indent()
@@ -125,7 +110,7 @@ public class AutoMappings {
                 .build();
     }
 
-    private CodeBlock autoConverterFile() {
+    private CodeBlock fileConversionCode() {
         ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
         ParameterSpec file = ParameterSpec.builder(File.class, "file").build();
         CodeBlock.Builder code = CodeBlock.builder();

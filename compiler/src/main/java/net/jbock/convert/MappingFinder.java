@@ -24,7 +24,8 @@ public class MappingFinder {
         this.converterValidator = converterValidator;
     }
 
-    public <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> findMapping(
+    public <M extends AnnotatedMethod>
+    Either<ValidationFailure, Mapping<M>> findMapping(
             M sourceMethod) {
         return sourceMethod.converter()
                 .map(converter -> converterValidator.get().findMapping(sourceMethod, converter))

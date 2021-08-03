@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static io.jbock.util.Either.right;
@@ -102,8 +101,7 @@ final class AnnotatedMethodsBuilder {
 
         Step4 withNamedOptions() {
             List<AnnotatedOption> namedOptions = annotatedMethods.stream()
-                    .map(AnnotatedMethod::asAnnotatedOption)
-                    .flatMap(Optional::stream)
+                    .flatMap(AnnotatedMethod::asAnnotatedOption)
                     .collect(toList());
             return new Step4(this, namedOptions);
         }
@@ -121,8 +119,7 @@ final class AnnotatedMethodsBuilder {
 
         Step5 withPositionalParameters() {
             List<AnnotatedParameter> positionalParameters = step3.annotatedMethods.stream()
-                    .map(AnnotatedMethod::asAnnotatedParameter)
-                    .flatMap(Optional::stream)
+                    .flatMap(AnnotatedMethod::asAnnotatedParameter)
                     .sorted(INDEX_COMPARATOR)
                     .collect(toList());
             return new Step5(this, positionalParameters);
@@ -141,8 +138,7 @@ final class AnnotatedMethodsBuilder {
 
         AnnotatedMethodsBuilder withRepeatablePositionalParameters() {
             List<AnnotatedParameters> repeatablePositionalParameters = step4.step3.annotatedMethods.stream()
-                    .map(AnnotatedMethod::asAnnotatedParameters)
-                    .flatMap(Optional::stream)
+                    .flatMap(AnnotatedMethod::asAnnotatedParameters)
                     .collect(toList());
             return new AnnotatedMethodsBuilder(this, repeatablePositionalParameters);
         }

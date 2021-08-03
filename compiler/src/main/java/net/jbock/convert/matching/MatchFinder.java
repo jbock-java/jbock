@@ -42,19 +42,22 @@ public class MatchFinder {
         this.types = types;
     }
 
-    public <M extends AnnotatedMethod> Either<ValidationFailure, ValidMatch<M>> findMatch(
+    public <M extends AnnotatedMethod>
+    Either<ValidationFailure, ValidMatch<M>> findMatch(
             M sourceMethod) {
         return validateMatch(findMatchInternal(sourceMethod));
     }
 
-    public Either<ValidationFailure, ValidMatch<AnnotatedOption>> findFlagMatch(
+    public Either<ValidationFailure, ValidMatch<AnnotatedOption>>
+    findFlagMatch(
             AnnotatedOption sourceMethod) {
         PrimitiveType bool = types.getPrimitiveType(BOOLEAN);
         Match<AnnotatedOption> match = Match.create(bool, OPTIONAL, sourceMethod);
         return validateMatch(match);
     }
 
-    private <M extends AnnotatedMethod> Match<M> findMatchInternal(
+    private <M extends AnnotatedMethod> Match<M>
+    findMatchInternal(
             M sourceMethod) {
         return List.of(optionalMatcher, listMatcher).stream()
                 .map(matcher -> matcher.tryMatch(sourceMethod))
@@ -69,11 +72,12 @@ public class MatchFinder {
                 });
     }
 
-    private static <M extends AnnotatedMethod> Either<ValidationFailure, ValidMatch<M>> validateMatch(
-            Match<M> m) {
-        M sourceMethod = m.sourceMethod();
+    private static <M extends AnnotatedMethod>
+    Either<ValidationFailure, ValidMatch<M>> validateMatch(
+            Match<M> match) {
+        M sourceMethod = match.sourceMethod();
         if (sourceMethod.isParameter()
-                && m.multiplicity() == Multiplicity.REPEATABLE) {
+                && match.multiplicity() == Multiplicity.REPEATABLE) {
             return left(sourceMethod.fail("method '" +
                     sourceMethod.method().getSimpleName() +
                     "' returns a list-based type, so it must be annotated with @" +
@@ -82,13 +86,13 @@ public class MatchFinder {
                     Parameters.class.getSimpleName()));
         }
         if (sourceMethod.isParameters()
-                && m.multiplicity() != Multiplicity.REPEATABLE) {
+                && match.multiplicity() != Multiplicity.REPEATABLE) {
             return left(sourceMethod.fail("method '" +
                     sourceMethod.method().getSimpleName() +
                     "' is annotated with @" +
                     Parameters.class.getSimpleName() +
                     ", so it must return java.util.List"));
         }
-        return right(new ValidMatch<>(m));
+        return right(new ValidMatch<>(match));
     }
 }

@@ -9,6 +9,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public abstract class AnnotatedMethod {
 
@@ -28,11 +29,11 @@ public abstract class AnnotatedMethod {
 
     public abstract boolean isParameters();
 
-    abstract Optional<AnnotatedOption> asAnnotatedOption();
+    abstract Stream<AnnotatedOption> asAnnotatedOption();
 
-    abstract Optional<AnnotatedParameter> asAnnotatedParameter();
+    abstract Stream<AnnotatedParameter> asAnnotatedParameter();
 
-    abstract Optional<AnnotatedParameters> asAnnotatedParameters();
+    abstract Stream<AnnotatedParameters> asAnnotatedParameters();
 
     public final EnumName enumName() {
         return enumName;

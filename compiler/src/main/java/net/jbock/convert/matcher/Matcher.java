@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface Matcher {
 
-    <M extends AnnotatedMethod> Optional<Match<M>> tryMatch(
+    <M extends AnnotatedMethod>
+    Optional<Match<M>> tryMatch(
             M parameter);
 }
