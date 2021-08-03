@@ -30,12 +30,12 @@ final class ExecutableElements {
         Set<EnumName> names = new HashSet<>();
         Map<Name, EnumName> result = new HashMap<>();
         for (SimpleAnnotated method : methods) {
-            EnumName enumName = EnumName.create(method.getSimpleName().toString());
+            EnumName enumName = EnumName.create(method.simpleName().toString());
             while (names.contains(enumName)) {
                 enumName = enumName.makeLonger();
             }
             names.add(enumName);
-            result.put(method.getSimpleName(), enumName);
+            result.put(method.simpleName(), enumName);
         }
         return result;
     }

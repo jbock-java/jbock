@@ -1,32 +1,63 @@
 package net.jbock.annotated;
 
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Name;
-import java.lang.annotation.Annotation;
+import net.jbock.Option;
+import net.jbock.Parameter;
+import net.jbock.Parameters;
+import net.jbock.common.EnumName;
 
-final class SimpleAnnotated {
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
+import static net.jbock.common.Annotations.methodLevelAnnotations;
+import static net.jbock.common.Constants.ACCESS_MODIFIERS;
+
+abstract class SimpleAnnotated {
+
+    private static final AnnotationUtil ANNOTATION_UTIL = new AnnotationUtil();
 
     private final ExecutableElement method;
-    private final Annotation annotation;
 
-    private SimpleAnnotated(ExecutableElement method, Annotation annotation) {
+    SimpleAnnotated(ExecutableElement method) {
         this.method = method;
-        this.annotation = annotation;
     }
 
     static SimpleAnnotated create(ExecutableElement method, Annotation annotation) {
-        return new SimpleAnnotated(method, annotation);
+        if (annotation instanceof Option) {
+            return new SimpleAnnotatedOption(method, (Option) annotation);
+        }
+        if (annotation instanceof Parameter) {
+            return new SimpleAnnotatedParameter(method, (Parameter) annotation);
+        }
+        if (annotation instanceof Parameters) {
+            return new SimpleAnnotatedParameters(method, (Parameters) annotation);
+        }
+        throw new AssertionError("expecting one of " + methodLevelAnnotations()
+                + " but found: " + annotation.getClass());
     }
 
-    ExecutableElement method() {
+    abstract AnnotatedMethod annotatedMethod(EnumName enumName);
+
+    final ExecutableElement method() {
         return method;
     }
 
-    Annotation annotation() {
-        return annotation;
+    final Name simpleName() {
+        return method.getSimpleName();
     }
 
-    Name getSimpleName() {
-        return method.getSimpleName();
+    final List<Modifier> accessModifiers() {
+        return method().getModifiers().stream()
+                .filter(ACCESS_MODIFIERS::contains)
+                .collect(toList());
+    }
+
+    final Optional<TypeElement> converter() {
+        return ANNOTATION_UTIL.getConverterAttribute(method);
     }
 }

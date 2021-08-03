@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.type.DeclaredType;
-import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,11 +35,10 @@ public class AnnotatedMethodFactory {
             SimpleAnnotated sourceMethod,
             Map<Name, EnumName> enumNames) {
         ExecutableElement method = sourceMethod.method();
-        EnumName enumName = enumNames.get(sourceMethod.getSimpleName());
-        Annotation annotation = sourceMethod.annotation();
+        EnumName enumName = enumNames.get(sourceMethod.simpleName());
         return util.checkNoDuplicateAnnotations(method, methodLevelAnnotations())
                 .<Either<ValidationFailure, AnnotatedMethod>>map(Either::left)
-                .orElseGet(() -> right(AnnotatedMethod.create(method, annotation, enumName)))
+                .orElseGet(() -> right(sourceMethod.annotatedMethod(enumName)))
                 .filter(this::checkAccessibleReturnType);
     }
 
