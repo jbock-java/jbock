@@ -45,16 +45,22 @@ public class ExecutableElementsFinder {
     }
 
     /**
-     * Returns a Right-Either containing all parameterless abstract methods,
-     * including inherited abstract methods.
-     * If one of the parameterless abstract methods is overridden,
-     * a Left either is returned.
+     * Returns a Right-Either containing all annotated parameterless abstract
+     * methods, including methods that are inherited from interfaces and
+     * abstract ancestor classes.
      *
-     * @return all parameterless abstract methods, including inherited,
+     * <p>If one of the annotated parameterless abstract methods is overridden
+     * by a non-abstract method, or by another annotated method,
+     * a Left-Either is returned.
+     *
+     * <p>If one of the unannotated parameterless abstract methods does not have
+     * an annotated ancestor, a Left-Either is returned.
+     *
+     * @return all annotated parameterless abstract methods, including inherited,
      *         or a nonempty list of validation failures
      */
     Either<List<ValidationFailure>, AnnotatedMethodsBuilder.Step2> findExecutableElements() {
-        List<ExecutableElement> methods = findMethodsIn(sourceElement.element().asType());
+        List<ExecutableElement> methods = findParameterlessMethodsIn(sourceElement.element().asType());
         Map<Boolean, List<ExecutableElement>> partitions = methods.stream()
                 .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
         Set<Name> nonAbstractNames = partitions.get(false).stream()
@@ -72,7 +78,7 @@ public class ExecutableElementsFinder {
                 .map(step -> step.sourceElement(sourceElement));
     }
 
-    private List<ExecutableElement> findMethodsIn(TypeMirror mirror) {
+    private List<ExecutableElement> findParameterlessMethodsIn(TypeMirror mirror) {
         Map<Name, List<ExecutableElement>> methodsInInterfaces = findMethodsInInterfaces(mirror);
         List<ExecutableElement> acc = new ArrayList<>();
         methodsInInterfaces.values().forEach(acc::addAll);
@@ -124,13 +130,14 @@ public class ExecutableElementsFinder {
     private Optional<List<ValidationFailure>> validateAbstractMethods(
             Map<Name, List<ExecutableElement>> allAbstractByName,
             Set<Name> nonAbstractNames) {
-        return allAbstractByName.keySet().stream()
+        Set<Name> names = allAbstractByName.keySet();
+        return names.stream()
                 .filter(name -> !nonAbstractNames.contains(name)
                         && missingAnnotation(allAbstractByName.get(name)))
                 .map(m -> new ValidationFailure(missingAnnotationError(),
                         allAbstractByName.get(m).get(0)))
                 .collect(toOptionalList())
-                .or(() -> allAbstractByName.keySet().stream()
+                .or(() -> names.stream()
                         .filter(name -> nonAbstractNames.contains(name)
                                 && allAbstractByName.get(name).stream().anyMatch(this::hasAnnotation)
                                 || multiAnnotation(allAbstractByName.get(name)))
