@@ -128,7 +128,7 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(a, b))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("annotated method is overridden");
+                .withErrorContaining("annotated method 'A.wasp' is overridden by a non-abstract method");
     }
 
     @Test
@@ -152,7 +152,7 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("annotated method is overridden");
+                .withErrorContaining("annotated method 'foo' is inherited multiple times, from these classes or interfaces: [Aaa, Bbb]");
     }
 
     @Test
@@ -176,7 +176,7 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(a, b))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("annotated method is overridden");
+                .withErrorContaining("annotated method 'wasp' is inherited multiple times, from these classes or interfaces: [A, B]");
     }
 
     @Test
@@ -225,7 +225,7 @@ class InheritanceTest {
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("add one of these annotations: [Option, Parameter, Parameters]" +
-                        " to method 'inheritedMethod' in one of these classes: [A, B]");
+                        " to method 'inheritedMethod' in one of these classes or interfaces: [A, B]");
     }
 
     @Test
@@ -251,7 +251,7 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("annotated method is overridden");
+                .withErrorContaining("annotated method 'A.inheritedMethod' is overridden by a non-abstract method");
     }
 
     @Test
@@ -320,7 +320,7 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(a, b))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("annotated method is overridden");
+                .withErrorContaining("annotated method 'param' is inherited multiple times, from these classes or interfaces: [A, B]");
     }
 
     @Test
@@ -344,7 +344,7 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("annotated method is overridden");
+                .withErrorContaining("annotated method 'param' is inherited multiple times, from these classes or interfaces: [A, B]");
     }
 
     @Test

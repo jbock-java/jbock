@@ -130,18 +130,20 @@ public class ExecutableElementsFinder {
     private Optional<List<ValidationFailure>> validateAbstractMethods(
             Map<Name, List<ExecutableElement>> allAbstractByName,
             Set<Name> nonAbstractNames) {
-        Set<Name> names = allAbstractByName.keySet();
-        return names.stream()
+        Set<Name> abstractNames = allAbstractByName.keySet();
+        return abstractNames.stream()
                 .filter(name -> !nonAbstractNames.contains(name)
                         && missingAnnotation(allAbstractByName.get(name)))
                 .map(m -> missingAnnotationError(allAbstractByName.get(m)))
                 .collect(toOptionalList())
-                .or(() -> names.stream()
+                .or(() -> abstractNames.stream()
+                        .filter(name -> multiAnnotation(allAbstractByName.get(name)))
+                        .map(m -> multiAnnotationError(allAbstractByName.get(m)))
+                        .collect(toOptionalList()))
+                .or(() -> abstractNames.stream()
                         .filter(name -> nonAbstractNames.contains(name)
-                                && allAbstractByName.get(name).stream().anyMatch(this::hasAnnotation)
-                                || multiAnnotation(allAbstractByName.get(name)))
-                        .map(m -> new ValidationFailure("annotated method is overridden",
-                                allAbstractByName.get(m).get(0)))
+                                && anyAnnotations(allAbstractByName.get(name)))
+                        .map(m -> nonabstractOverride(allAbstractByName.get(m)))
                         .collect(toOptionalList()));
     }
 
@@ -158,6 +160,11 @@ public class ExecutableElementsFinder {
                 .isEmpty();
     }
 
+    private boolean anyAnnotations(List<ExecutableElement> homonyms) {
+        return homonyms.stream()
+                .anyMatch(this::hasAnnotation);
+    }
+
     private boolean hasAnnotation(ExecutableElement method) {
         return methodLevelAnnotations().stream()
                 .anyMatch(a -> method.getAnnotation(a) != null);
@@ -170,21 +177,38 @@ public class ExecutableElementsFinder {
                         Stream.empty());
     }
 
+    private ValidationFailure nonabstractOverride(List<ExecutableElement> homonyms) {
+        String message = "annotated method '" +
+                homonyms.get(0).getEnclosingElement().getSimpleName() +
+                "." + homonyms.get(0).getSimpleName() +
+                "' is overridden by a non-abstract method";
+        return new ValidationFailure(message, homonyms.get(0));
+    }
+
+    private ValidationFailure multiAnnotationError(List<ExecutableElement> homonyms) {
+        String message = "annotated method '" + homonyms.get(0).getSimpleName() +
+                "' is inherited multiple times, from these classes or interfaces: " + homonyms.stream()
+                .map(m -> m.getEnclosingElement().getSimpleName().toString())
+                .sorted()
+                .collect(toList());
+        return new ValidationFailure(message, homonyms.get(0));
+    }
+
     private ValidationFailure missingAnnotationError(List<ExecutableElement> homonyms) {
         String message = "add one of these annotations: " + methodLevelAnnotations().stream()
                 .map(Class::getSimpleName).collect(toList());
         if (homonyms.size() == 1) {
             message = message + " to method '" +
-                    homonyms.get(0).getEnclosingElement().getSimpleName() + "."
-                    + homonyms.get(0).getSimpleName() + "'";
+                    homonyms.get(0).getEnclosingElement().getSimpleName() +
+                    "." + homonyms.get(0).getSimpleName() + "'";
         } else {
             message = message +
                     " to method '" + homonyms.get(0).getSimpleName() + "'" +
-                    " in one of these classes: " +
+                    " in one of these classes or interfaces: " +
                     homonyms.stream()
                             .map(m -> m.getEnclosingElement().getSimpleName().toString())
                             .sorted()
-                            .collect(Collectors.toList());
+                            .collect(toList());
         }
         return new ValidationFailure(message, homonyms.get(0));
     }
