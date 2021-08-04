@@ -199,7 +199,33 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("add one of these annotations: @Option, @Parameter, @Parameters");
+                .withErrorContaining("add one of these annotations: [Option, Parameter, Parameters] to method 'A.inheritedMethod'");
+    }
+
+    @Test
+    void inheritedMethodIsNotAnnotatedMulti() {
+        JavaFileObject a = fromSource(
+                "interface A {",
+                "",
+                "  abstract String inheritedMethod();",
+                "}");
+        JavaFileObject b = fromSource(
+                "interface B {",
+                "",
+                "  abstract String inheritedMethod();",
+                "}");
+        JavaFileObject c = fromSource(
+                "@Command",
+                "abstract class C implements A, B {",
+                "",
+                "  @Parameter(index = 0)",
+                "  abstract String param();",
+                "}");
+        assertAbout(javaSources()).that(List.of(a, b, c))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("add one of these annotations: [Option, Parameter, Parameters]" +
+                        " to method 'inheritedMethod' in one of these classes: [A, B]");
     }
 
     @Test

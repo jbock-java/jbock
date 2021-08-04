@@ -134,8 +134,7 @@ public class ExecutableElementsFinder {
         return names.stream()
                 .filter(name -> !nonAbstractNames.contains(name)
                         && missingAnnotation(allAbstractByName.get(name)))
-                .map(m -> new ValidationFailure(missingAnnotationError(),
-                        allAbstractByName.get(m).get(0)))
+                .map(m -> missingAnnotationError(allAbstractByName.get(m)))
                 .collect(toOptionalList())
                 .or(() -> names.stream()
                         .filter(name -> nonAbstractNames.contains(name)
@@ -171,9 +170,22 @@ public class ExecutableElementsFinder {
                         Stream.empty());
     }
 
-    private String missingAnnotationError() {
-        return "add one of these annotations: " + methodLevelAnnotations().stream()
-                .map(ann -> "@" + ann.getSimpleName())
-                .collect(Collectors.joining(", "));
+    private ValidationFailure missingAnnotationError(List<ExecutableElement> homonyms) {
+        String message = "add one of these annotations: " + methodLevelAnnotations().stream()
+                .map(Class::getSimpleName).collect(toList());
+        if (homonyms.size() == 1) {
+            message = message + " to method '" +
+                    homonyms.get(0).getEnclosingElement().getSimpleName() + "."
+                    + homonyms.get(0).getSimpleName() + "'";
+        } else {
+            message = message +
+                    " to method '" + homonyms.get(0).getSimpleName() + "'" +
+                    " in one of these classes: " +
+                    homonyms.stream()
+                            .map(m -> m.getEnclosingElement().getSimpleName().toString())
+                            .sorted()
+                            .collect(Collectors.toList());
+        }
+        return new ValidationFailure(message, homonyms.get(0));
     }
 }

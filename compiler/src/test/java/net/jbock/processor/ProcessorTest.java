@@ -596,7 +596,8 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("add one of these annotations: @Option, @Parameter, @Parameters");
+                .withErrorContaining("add one of these annotations: [Option, Parameter, Parameters] " +
+                        "to method 'Arguments.a'");
     }
 
     @Test
