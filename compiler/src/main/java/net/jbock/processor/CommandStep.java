@@ -37,7 +37,7 @@ import static net.jbock.common.Annotations.typeLevelAnnotations;
  * @see ProcessorScope
  */
 @ProcessorScope
-public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
+public class CommandStep implements BasicAnnotationProcessor.Step {
 
     private final Messager messager;
     private final Util util;
@@ -46,7 +46,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     private final SourceFileGenerator sourceFileGenerator;
 
     @Inject
-    CommandProcessingStep(
+    CommandStep(
             Messager messager,
             Util util,
             Types types,

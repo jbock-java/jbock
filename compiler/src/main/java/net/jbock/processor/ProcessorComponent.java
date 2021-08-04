@@ -9,11 +9,11 @@ import dagger.Component;
 @ProcessorScope
 interface ProcessorComponent {
 
-    ParameterMethodProcessingStep parameterMethodProcessingStep();
+    MethodStep methodStep();
 
-    ConverterProcessingStep converterProcessingStep();
+    ConverterStep converterStep();
 
-    CommandProcessingStep commandProcessingStep();
+    CommandStep commandStep();
 
     @Component.Factory
     interface Factory {

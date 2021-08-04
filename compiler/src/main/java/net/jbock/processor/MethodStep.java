@@ -20,7 +20,7 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 
 @ProcessorScope
-public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.Step {
+public class MethodStep implements BasicAnnotationProcessor.Step {
 
     private static final Set<TypeKind> FORBIDDEN_KINDS = EnumSet.of(
             TypeKind.VOID,
@@ -35,7 +35,7 @@ public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.S
     private final Util util;
 
     @Inject
-    ParameterMethodProcessingStep(Messager messager, Util util) {
+    MethodStep(Messager messager, Util util) {
         this.messager = messager;
         this.util = util;
     }

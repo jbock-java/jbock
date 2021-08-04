@@ -12,10 +12,10 @@ import java.util.Set;
  * Ensure that changes in the converter class trigger the processing.
  */
 @ProcessorScope
-public class ConverterProcessingStep implements BasicAnnotationProcessor.Step {
+public class ConverterStep implements BasicAnnotationProcessor.Step {
 
     @Inject
-    ConverterProcessingStep() {
+    ConverterStep() {
     }
 
     @Override

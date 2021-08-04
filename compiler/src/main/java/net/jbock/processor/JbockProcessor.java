@@ -10,7 +10,7 @@ import java.util.List;
  * It defines "steps", which are like subprocessors,
  * each of which handles a subset of the jbock annotations.
  * Most validation, as well as the source code generation,
- * is handled in the {@link CommandProcessingStep}.
+ * is handled in the {@link CommandStep}.
  * The other steps perform some additional validation.
  */
 public final class JbockProcessor extends BasicAnnotationProcessor {
@@ -19,9 +19,9 @@ public final class JbockProcessor extends BasicAnnotationProcessor {
     protected Iterable<? extends Step> steps() {
         ProcessorComponent component = DaggerProcessorComponent.factory()
                 .create(new ProcessorModule(processingEnv));
-        return List.of(component.commandProcessingStep(),
-                component.converterProcessingStep(),
-                component.parameterMethodProcessingStep());
+        return List.of(component.commandStep(),
+                component.converterStep(),
+                component.methodStep());
     }
 
     @Override
