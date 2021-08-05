@@ -11,8 +11,6 @@ interface ProcessorComponent {
 
     MethodStep methodStep();
 
-    ConverterStep converterStep();
-
     CommandStep commandStep();
 
     @Component.Factory

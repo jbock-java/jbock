@@ -1,7 +1,6 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
-import net.jbock.Converter;
 import net.jbock.Option;
 import net.jbock.util.StringConverter;
 
@@ -31,7 +30,6 @@ abstract class PrimitiveOptionalsArguments {
     @Option(names = {"--d", "-d"}, converter = DoubleConverter.class)
     abstract OptionalDouble mappedDouble();
 
-    @Converter
     static class IntegerConverter implements Supplier<StringConverter<Integer>> {
         @Override
         public StringConverter<Integer> get() {
@@ -39,7 +37,6 @@ abstract class PrimitiveOptionalsArguments {
         }
     }
 
-    @Converter
     static class LongConverter implements Supplier<StringConverter<Long>> {
         @Override
         public StringConverter<Long> get() {
@@ -47,7 +44,6 @@ abstract class PrimitiveOptionalsArguments {
         }
     }
 
-    @Converter
     static class DoubleConverter implements Supplier<StringConverter<Double>> {
         @Override
         public StringConverter<Double> get() {

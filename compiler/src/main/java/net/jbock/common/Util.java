@@ -111,7 +111,7 @@ public class Util {
     /* Left-Optional
      */
     public Optional<ValidationFailure> checkNoDuplicateAnnotations(
-            Element element,
+            ExecutableElement element,
             List<Class<? extends Annotation>> annotations) {
         List<Class<? extends Annotation>> present = annotations.stream()
                 .filter(ann -> element.getAnnotation(ann) != null)

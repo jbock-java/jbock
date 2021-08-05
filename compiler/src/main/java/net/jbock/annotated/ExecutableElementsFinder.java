@@ -9,26 +9,17 @@ import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.toOptionalList;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
-import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 import static net.jbock.common.TypeTool.AS_DECLARED;
@@ -60,109 +51,63 @@ public class ExecutableElementsFinder {
      *         or a nonempty list of validation failures
      */
     Either<List<ValidationFailure>, AnnotatedMethodsBuilder.Step2> findExecutableElements() {
-        List<ExecutableElement> methods = findParameterlessMethodsIn(sourceElement.element().asType());
-        Map<Boolean, List<ExecutableElement>> partitions = methods.stream()
-                .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
-        Set<Name> nonAbstractNames = partitions.get(false).stream()
-                .map(ExecutableElement::getSimpleName)
-                .collect(Collectors.toSet());
-        List<ExecutableElement> allAbstract = partitions.get(true);
-        Map<Name, List<ExecutableElement>> allAbstractByName = allAbstract.stream()
-                .collect(groupingBy(ExecutableElement::getSimpleName, LinkedHashMap::new, toList()));
-        return validateAbstractMethods(allAbstractByName, nonAbstractNames)
-                .<Either<List<ValidationFailure>, List<Executable>>>map(Either::left)
-                .orElseGet(() -> right(allAbstract.stream()
-                        .flatMap(this::createExecutable)
-                        .collect(toList())))
-                .map(AnnotatedMethodsBuilder::builder)
-                .map(step -> step.sourceElement(sourceElement));
+        return checkInterfaceOrSimpleClass()
+                .or(this::checkNoInterfaces)
+                .map(List::of)
+                .<Either<List<ValidationFailure>, AnnotatedMethodsBuilder.Step2>>map(Either::left)
+                .orElseGet(() -> {
+                    List<ExecutableElement> allAbstract = parameterlessMethods();
+                    return validateAbstractMethods(allAbstract)
+                            .<Either<List<ValidationFailure>, List<Executable>>>map(Either::left)
+                            .orElseGet(() -> right(allAbstract.stream()
+                                    .flatMap(this::createExecutable)
+                                    .collect(toList())))
+                            .map(AnnotatedMethodsBuilder::builder)
+                            .map(step -> step.sourceElement(sourceElement));
+                });
     }
 
-    private List<ExecutableElement> findParameterlessMethodsIn(TypeMirror mirror) {
-        Map<Name, List<ExecutableElement>> methodsInInterfaces = findMethodsInInterfaces(mirror);
-        List<ExecutableElement> acc = new ArrayList<>();
-        methodsInInterfaces.values().forEach(acc::addAll);
-        while (true) {
-            Optional<TypeElement> element = asAbstractTypeElement(mirror);
-            if (element.isEmpty()) {
-                return acc;
-            }
-            TypeElement el = element.orElseThrow();
-            List<ExecutableElement> methods = parameterlessMethodsIn(el.getEnclosedElements());
-            acc.addAll(methods);
-            mirror = el.getSuperclass();
+    private Optional<ValidationFailure> checkInterfaceOrSimpleClass() {
+        if (sourceElement.isInterface()) {
+            return Optional.empty();
         }
-    }
-
-    private Optional<TypeElement> asAbstractTypeElement(TypeMirror mirror) {
-        return AS_DECLARED.visit(mirror)
+        return AS_DECLARED.visit(sourceElement.element().getSuperclass())
                 .map(DeclaredType::asElement)
                 .flatMap(AS_TYPE_ELEMENT::visit)
-                // interfaces are handled separately
-                .filter(typeElement -> typeElement.getKind() != INTERFACE)
-                // not abstract -> no relevant methods
-                .filter(typeElement -> typeElement.getModifiers().contains(ABSTRACT));
+                .flatMap(superClass -> superClass.getSuperclass().getKind() == TypeKind.NONE ?
+                        Optional.empty() :
+                        Optional.of(sourceElement.fail("invalid superclass: expecting java.lang.Object, but found: " + superClass.getQualifiedName())));
     }
 
-    private Map<Name, List<ExecutableElement>> findMethodsInInterfaces(TypeMirror mirror) {
-        return AS_DECLARED.visit(mirror)
-                .map(DeclaredType::asElement)
-                .flatMap(AS_TYPE_ELEMENT::visit)
-                .map(typeElement -> {
-                    List<ExecutableElement> methods = typeElement.getKind() == INTERFACE ?
-                            parameterlessMethodsIn(typeElement.getEnclosedElements()) :
-                            List.of();
-                    Map<Name, List<ExecutableElement>> acc = new HashMap<>();
-                    acc.put(typeElement.getQualifiedName(), methods);
-                    for (TypeMirror superInterface : typeElement.getInterfaces()) {
-                        acc.putAll(findMethodsInInterfaces(superInterface)); // recursion
-                    }
-                    return acc;
-                }).orElse(Map.of());
+    private Optional<ValidationFailure> checkNoInterfaces() {
+        List<? extends TypeMirror> interfaces = sourceElement.element().getInterfaces();
+        if (!interfaces.isEmpty()) {
+            return Optional.of(sourceElement.fail(
+                    "invalid command class: the command class or interface may not implement or extend any interfaces," +
+                            " but found: " + interfaces.stream()
+                            .map(AS_DECLARED::visit)
+                            .flatMap(Optional::stream)
+                            .map(DeclaredType::asElement)
+                            .map(Element::getSimpleName)
+                            .map(Name::toString)
+                            .collect(toList())));
+        }
+        return Optional.empty();
     }
 
-    private List<ExecutableElement> parameterlessMethodsIn(List<? extends Element> elements) {
-        return ElementFilter.methodsIn(elements).stream()
+    private List<ExecutableElement> parameterlessMethods() {
+        return ElementFilter.methodsIn(sourceElement.element().getEnclosedElements()).stream()
                 .filter(m -> m.getParameters().isEmpty())
+                .filter(m -> m.getModifiers().contains(ABSTRACT))
                 .collect(toList());
     }
 
     private Optional<List<ValidationFailure>> validateAbstractMethods(
-            Map<Name, List<ExecutableElement>> allAbstractByName,
-            Set<Name> nonAbstractNames) {
-        Set<Name> abstractNames = allAbstractByName.keySet();
-        return abstractNames.stream()
-                .filter(name -> !nonAbstractNames.contains(name)
-                        && missingAnnotation(allAbstractByName.get(name)))
-                .map(m -> missingAnnotationError(allAbstractByName.get(m)))
-                .collect(toOptionalList())
-                .or(() -> abstractNames.stream()
-                        .filter(name -> multiAnnotation(allAbstractByName.get(name)))
-                        .map(m -> multiAnnotationError(allAbstractByName.get(m)))
-                        .collect(toOptionalList()))
-                .or(() -> abstractNames.stream()
-                        .filter(name -> nonAbstractNames.contains(name)
-                                && anyAnnotations(allAbstractByName.get(name)))
-                        .map(m -> nonabstractOverride(allAbstractByName.get(m)))
-                        .collect(toOptionalList()));
-    }
-
-    private boolean multiAnnotation(List<ExecutableElement> homonyms) {
-        return homonyms.stream()
-                .filter(this::hasAnnotation)
-                .count() >= 2;
-    }
-
-    private boolean missingAnnotation(List<ExecutableElement> homonyms) {
-        return homonyms.stream()
-                .filter(this::hasAnnotation)
-                .findAny()
-                .isEmpty();
-    }
-
-    private boolean anyAnnotations(List<ExecutableElement> homonyms) {
-        return homonyms.stream()
-                .anyMatch(this::hasAnnotation);
+            List<ExecutableElement> allAbstract) {
+        return allAbstract.stream()
+                .filter(m -> !hasAnnotation(m))
+                .map(this::missingAnnotationError)
+                .collect(toOptionalList());
     }
 
     private boolean hasAnnotation(ExecutableElement method) {
@@ -177,39 +122,12 @@ public class ExecutableElementsFinder {
                         Stream.empty());
     }
 
-    private ValidationFailure nonabstractOverride(List<ExecutableElement> homonyms) {
-        String message = "annotated method '" +
-                homonyms.get(0).getEnclosingElement().getSimpleName() +
-                "." + homonyms.get(0).getSimpleName() +
-                "' is overridden by a non-abstract method";
-        return new ValidationFailure(message, homonyms.get(0));
-    }
-
-    private ValidationFailure multiAnnotationError(List<ExecutableElement> homonyms) {
-        String message = "annotated method '" + homonyms.get(0).getSimpleName() +
-                "' is inherited multiple times, from these classes or interfaces: " + homonyms.stream()
-                .map(m -> m.getEnclosingElement().getSimpleName().toString())
-                .sorted()
-                .collect(toList());
-        return new ValidationFailure(message, homonyms.get(0));
-    }
-
-    private ValidationFailure missingAnnotationError(List<ExecutableElement> homonyms) {
+    private ValidationFailure missingAnnotationError(ExecutableElement m) {
         String message = "add one of these annotations: " + methodLevelAnnotations().stream()
                 .map(Class::getSimpleName).collect(toList());
-        if (homonyms.size() == 1) {
-            message = message + " to method '" +
-                    homonyms.get(0).getEnclosingElement().getSimpleName() +
-                    "." + homonyms.get(0).getSimpleName() + "'";
-        } else {
-            message = message +
-                    " to method '" + homonyms.get(0).getSimpleName() + "'" +
-                    " in one of these classes or interfaces: " +
-                    homonyms.stream()
-                            .map(m -> m.getEnclosingElement().getSimpleName().toString())
-                            .sorted()
-                            .collect(toList());
-        }
-        return new ValidationFailure(message, homonyms.get(0));
+        message = message + " to method '" +
+                m.getEnclosingElement().getSimpleName() +
+                "." + m.getSimpleName() + "'";
+        return new ValidationFailure(message, m);
     }
 }

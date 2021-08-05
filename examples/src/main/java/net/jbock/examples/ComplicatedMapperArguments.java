@@ -1,7 +1,6 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
-import net.jbock.Converter;
 import net.jbock.Option;
 import net.jbock.util.StringConverter;
 
@@ -22,7 +21,6 @@ interface ComplicatedMapperArguments {
             converter = LazyNumberConverter.class)
     List<LazyNumber> numbers();
 
-    @Converter
     class LazyNumberConverter implements Supplier<StringConverter<LazyNumber>> {
         @Override
         public StringConverter<LazyNumber> get() {
@@ -33,7 +31,6 @@ interface ComplicatedMapperArguments {
     interface LazyNumber extends Supplier<Integer> {
     }
 
-    @Converter
     class MyConverter implements Supplier<StringConverter<Integer>> {
         @Override
         public StringConverter<Integer> get() {

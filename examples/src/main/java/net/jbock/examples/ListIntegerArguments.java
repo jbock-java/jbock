@@ -1,7 +1,6 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
-import net.jbock.Converter;
 import net.jbock.Option;
 import net.jbock.util.StringConverter;
 
@@ -18,7 +17,6 @@ abstract class ListIntegerArguments {
     @Option(names = {"--a", "-a"}, converter = Mapper.class)
     abstract ArrayList<Integer> a();
 
-    @Converter
     static class Mapper implements Supplier<StringConverter<ArrayList<Integer>>> {
 
         @Override

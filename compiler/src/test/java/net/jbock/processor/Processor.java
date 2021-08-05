@@ -31,7 +31,6 @@ class Processor {
                 "import net.jbock.Parameter;",
                 "import net.jbock.Parameters;",
                 "import net.jbock.Option;",
-                "import net.jbock.Converter;",
                 "");
         List<String> moreLines = new ArrayList<>(lines.length + header.size());
         moreLines.addAll(header);

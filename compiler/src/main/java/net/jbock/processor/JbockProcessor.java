@@ -20,7 +20,6 @@ public final class JbockProcessor extends BasicAnnotationProcessor {
         ProcessorComponent component = DaggerProcessorComponent.factory()
                 .create(new ProcessorModule(processingEnv));
         return List.of(component.commandStep(),
-                component.converterStep(),
                 component.methodStep());
     }
 

@@ -14,13 +14,31 @@ import static net.jbock.processor.Processor.fromSource;
 class ConverterTest {
 
     @Test
-    void converterImplementsBothFunctionAndSupplier() {
+    void converterNotAnInnerClass() {
         JavaFileObject converter = fromSource(
-                "@Converter",
-                "class MapMap extends StringConverter<String> implements Supplier<StringConverter<String>> {",
+                "class MapMap extends StringConverter<String> {",
+                "",
+                "  @Override",
                 "  public String convert(String token) { return null; }",
-                "  public StringConverter<String> get() { return null; }",
                 "}");
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Option(names = \"--x\", converter = Mimi.class)",
+                "  abstract String foo();",
+                "",
+                "  static class Mimi implements Supplier<StringConverter<String>> {",
+                "    public StringConverter<String> get() { return new MapMap(); }",
+                "  }",
+                "}");
+        assertAbout(javaSources()).that(List.of(converter, javaFile))
+                .processedWith(Processor.testInstance())
+                .compilesWithoutError();
+    }
+
+    @Test
+    void converterImplementsBothFunctionAndSupplier() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
@@ -28,8 +46,12 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract String foo();",
                 "",
+                "  static class MapMap extends StringConverter<String> implements Supplier<StringConverter<String>> {",
+                "    public String convert(String token) { return null; }",
+                "    public StringConverter<String> get() { return null; }",
+                "  }",
                 "}");
-        assertAbout(javaSources()).that(List.of(converter, javaFile))
+        assertAbout(javaSources()).that(List.of(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("invalid converter class: converter must extend StringConverter<X> or implement Supplier<StringConverter<X>> but not both");
@@ -37,20 +59,17 @@ class ConverterTest {
 
     @Test
     void doesNotExtendStringConverter() {
-        JavaFileObject converter = forSourceLines(
-                "something.MapMap",
-                "package something;",
-                "@net.jbock.Converter",
-                "public class MapMap {}");
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Option(names = \"--x\", converter = something.MapMap.class)",
+                "  static class MapMap {}",
+                "",
+                "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract String foo();",
                 "",
                 "}");
-        assertAbout(javaSources()).that(List.of(converter, javaFile))
+        assertAbout(javaSources()).that(List.of(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("invalid converter class: converter must extend StringConverter<X> or implement Supplier<StringConverter<X>>");
@@ -74,30 +93,27 @@ class ConverterTest {
         assertAbout(javaSources()).that(List.of(converter, javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid converter class: converter must be an inner class of the command class, " +
-                        "or carry the @Converter annotation");
+                .withErrorContaining("invalid converter class: converter of 'foo' must be an inner class of " +
+                        "the command class 'Arguments'");
     }
 
     @Test
     void abstractConverter() {
-        JavaFileObject converter = forSourceLines(
-                "something.MapMap",
-                "package something;",
-                "@net.jbock.Converter",
-                "public abstract class MapMap extends net.jbock.util.StringConverter<String> {",
-                "  public String convert(String token) { return null; }",
-                "}");
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Option(names = \"--x\", converter = something.MapMap.class)",
+                "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract String foo();",
+                "",
+                "  static abstract class MapMap extends StringConverter<String> {",
+                "    public String convert(String token) { return null; }",
+                "  }",
                 "}");
-        assertAbout(javaSources()).that(List.of(converter, javaFile))
+        assertAbout(javaSources()).that(List.of(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid converter class: converter class may not be abstract");
+                .withErrorContaining("invalid converter class: the converter class 'MapMap' may not be abstract");
     }
 
     @Test
@@ -109,7 +125,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = ArrayMapper.class)",
                 "  abstract Optional<int[]> foo();",
                 "",
-                "  @Converter",
                 "  static class ArrayMapper implements Supplier<StringConverter<int[]>> {",
                 "    public StringConverter<int[]> get() { return null; }",
                 "  }",
@@ -146,7 +161,6 @@ class ConverterTest {
                 "  @Parameters(converter = BooleanMapper.class)",
                 "  abstract List<Boolean> booleanList();",
                 "",
-                "  @Converter",
                 "  static class BooleanMapper implements Supplier<StringConverter<Boolean>> {",
                 "    public StringConverter<Boolean> get() { return null; }",
                 "  }",
@@ -270,7 +284,8 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("type parameters are not allowed in converter class declaration");
+                .withErrorContaining("invalid converter class: type parameters are not allowed in the declaration" +
+                        " of converter class 'BoundMapper'");
     }
 
     @Test
@@ -453,7 +468,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract Supplier<String> string();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<Supplier<String>>> {",
                 "    public StringConverter<Supplier<String>> get() { return null; }",
                 "  }",
@@ -472,7 +486,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract Supplier<Optional<String>> string();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<Supplier<Optional<String>>>> {",
                 "    public StringConverter<Supplier<Optional<String>>> get() { return null; }",
                 "  }",
@@ -552,7 +565,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract List<java.util.OptionalInt> numbers();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<java.util.OptionalInt>> {",
                 "    public StringConverter<java.util.OptionalInt> get() { return null; }",
                 "  }",
@@ -571,7 +583,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract byte number();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<Byte>> {",
                 "    public StringConverter<Byte> get() { return null; }",
                 "  }",
@@ -590,7 +601,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract Optional<Integer> number();",
                 "",
-                "  @Converter",
                 "  static class MapMap extends StringConverter<Integer> {",
                 "    public Integer convert(String token) { return null; }",
                 "  }",
@@ -609,7 +619,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract java.util.OptionalInt b();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<Integer>> {",
                 "    public StringConverter<Integer> get() { return null; }",
                 "  }",
@@ -668,7 +677,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract java.util.OptionalInt b();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<Integer>> {",
                 "    public StringConverter<Integer> get() { return null; }",
                 "  }",
@@ -687,7 +695,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract List<java.util.Set<Integer>> sets();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<java.util.Set<Integer>>> {",
                 "    public StringConverter<java.util.Set<Integer>> get() { return null; }",
                 "  }",

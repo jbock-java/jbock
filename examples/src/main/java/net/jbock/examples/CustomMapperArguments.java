@@ -1,7 +1,6 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
-import net.jbock.Converter;
 import net.jbock.Option;
 import net.jbock.Parameters;
 import net.jbock.util.StringConverter;
@@ -34,7 +33,7 @@ abstract class CustomMapperArguments {
     @Option(names = "--dateList", converter = DateConverter.class)
     abstract List<Date> dateList();
 
-    @Option(names = "--verbosity", converter = CustomBigIntegerMapperSupplier.class)
+    @Option(names = "--verbosity", converter = MapMap.class)
     abstract Optional<BigInteger> verbosity();
 
     @Option(names = "--aRequiredInt", converter = PositiveNumberConverter.class)
@@ -61,7 +60,6 @@ abstract class CustomMapperArguments {
     @Option(names = "--notFlag", converter = BooleanConverter.class)
     abstract Boolean notFlag();
 
-    @Converter
     static class DateConverter implements Supplier<StringConverter<Date>> {
 
         @Override
@@ -70,7 +68,6 @@ abstract class CustomMapperArguments {
         }
     }
 
-    @Converter
     static class PositiveNumberConverter implements Supplier<StringConverter<Integer>> {
 
         @Override
@@ -144,5 +141,13 @@ abstract class CustomMapperArguments {
 
     enum MyEnum {
         FOO, BAR
+    }
+
+    static class MapMap implements Supplier<StringConverter<BigInteger>> {
+
+        @Override
+        public StringConverter<BigInteger> get() {
+            return new CustomBigIntegerMapperSupplier();
+        }
     }
 }

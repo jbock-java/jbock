@@ -2,7 +2,6 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import io.jbock.util.Either;
-import net.jbock.Converter;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
@@ -17,6 +16,7 @@ import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Types;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
@@ -47,10 +47,11 @@ public class ConverterValidator {
     Either<ValidationFailure, Mapping<M>> findMapping(
             M sourceMethod,
             TypeElement converter) {
-        return util.commonTypeChecks(converter)
+        return checkConverterIsInnerClass(sourceMethod, converter)
+                .or(() -> util.commonTypeChecks(converter))
                 .or(() -> checkNotAbstract(sourceMethod, converter))
                 .or(() -> checkNoTypeVars(sourceMethod, converter))
-                .or(() -> checkConverterAnnotationPresent(sourceMethod, converter))
+                .or(() -> checkConverterIsInnerClass(sourceMethod, converter))
                 .<Either<ValidationFailure, StringConverterType>>map(Either::left)
                 .orElseGet(() -> referenceTool.getReferencedType(sourceMethod, converter))
                 .mapLeft(failure -> failure.prepend("invalid converter class: "))
@@ -70,14 +71,15 @@ public class ConverterValidator {
     /* Left-Optional
      */
     private <M extends AnnotatedMethod>
-    Optional<ValidationFailure> checkConverterAnnotationPresent(
+    Optional<ValidationFailure> checkConverterIsInnerClass(
             M sourceMethod,
             TypeElement converter) {
-        Converter converterAnnotation = converter.getAnnotation(Converter.class);
         boolean nestedMapper = util.getEnclosingElements(converter).contains(sourceElement.element());
-        if (converterAnnotation == null && !nestedMapper) {
-            return Optional.of(sourceMethod.fail("converter must be an inner class of the command class, or carry the @"
-                    + Converter.class.getSimpleName() + " annotation"));
+        if (!nestedMapper) {
+            return Optional.of(sourceMethod.fail("converter of '" +
+                    sourceMethod.methodName() +
+                    "' must be an inner class of the command class '" +
+                    sourceElement.element().getSimpleName() + "'"));
         }
         return Optional.empty();
     }
@@ -89,7 +91,9 @@ public class ConverterValidator {
             M sourceMethod,
             TypeElement converter) {
         if (converter.getModifiers().contains(ABSTRACT)) {
-            return Optional.of(sourceMethod.fail("converter class may not be abstract"));
+            return Optional.of(sourceMethod.fail("the converter class '" +
+                    converter.getSimpleName() +
+                    "' may not be abstract"));
         }
         return Optional.empty();
     }
@@ -101,7 +105,10 @@ public class ConverterValidator {
             M sourceMethod,
             TypeElement converter) {
         if (!converter.getTypeParameters().isEmpty()) {
-            return Optional.of(sourceMethod.fail("type parameters are not allowed in converter class declaration"));
+            return Optional.of(sourceMethod.fail("type parameters are not allowed in the declaration of" +
+                    " converter class '" +
+                    converter.getSimpleName() +
+                    "'"));
         }
         return Optional.empty();
     }
@@ -120,9 +127,10 @@ public class ConverterValidator {
             ValidMatch<M> match,
             StringConverterType converterType) {
         if (!types.isSameType(converterType.outputType(), match.baseType())) {
+            String expectedType = StringConverter.class.getSimpleName() +
+                    "<" + util.typeToString(match.baseType()) + ">";
             return Optional.of(match.sourceMethod().fail("invalid converter class: should extend " +
-                    StringConverter.class.getSimpleName() +
-                    "<" + util.typeToString(match.baseType()) + ">"));
+                    expectedType + " or implement " + Supplier.class.getSimpleName() + "<" + expectedType + ">"));
         }
         return Optional.empty();
     }

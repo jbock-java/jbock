@@ -1,14 +1,17 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
+import net.jbock.Parameter;
 
 @Command
-abstract class MvArguments implements MvArguments_Parent, MvArguments_ParentParent {
+abstract class MvArguments {
 
-    @Override
-    public abstract String dest();
+    @Parameter(index = 0)
+    abstract String source();
 
-    @Override
+    @Parameter(index = 1)
+    abstract String dest();
+
     public boolean isSafe() {
         return true;
     }

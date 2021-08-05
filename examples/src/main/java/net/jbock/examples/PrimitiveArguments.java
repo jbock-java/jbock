@@ -1,7 +1,6 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
-import net.jbock.Converter;
 import net.jbock.Option;
 import net.jbock.util.StringConverter;
 
@@ -57,7 +56,6 @@ abstract class PrimitiveArguments {
     @Option(names = {"--x", "-x"}, converter = BooleanConverter.class)
     abstract boolean mappedBoolean();
 
-    @Converter
     static class IntConverter implements Supplier<StringConverter<Integer>> {
         @Override
         public StringConverter<Integer> get() {
@@ -65,7 +63,6 @@ abstract class PrimitiveArguments {
         }
     }
 
-    @Converter
     static class LongConverter implements Supplier<StringConverter<Long>> {
         @Override
         public StringConverter<Long> get() {
@@ -73,7 +70,6 @@ abstract class PrimitiveArguments {
         }
     }
 
-    @Converter
     static class DoubleConverter implements Supplier<StringConverter<Double>> {
         @Override
         public StringConverter<Double> get() {
@@ -81,7 +77,6 @@ abstract class PrimitiveArguments {
         }
     }
 
-    @Converter
     static class ByteConverter implements Supplier<StringConverter<Byte>> {
         @Override
         public StringConverter<Byte> get() {
@@ -89,7 +84,6 @@ abstract class PrimitiveArguments {
         }
     }
 
-    @Converter
     static class ShortConverter implements Supplier<StringConverter<Short>> {
         @Override
         public StringConverter<Short> get() {
@@ -97,7 +91,6 @@ abstract class PrimitiveArguments {
         }
     }
 
-    @Converter
     static class FloatConverter implements Supplier<StringConverter<Float>> {
         @Override
         public StringConverter<Float> get() {
@@ -105,7 +98,6 @@ abstract class PrimitiveArguments {
         }
     }
 
-    @Converter
     static class CharConverter implements Supplier<StringConverter<Character>> {
         @Override
         public StringConverter<Character> get() {
@@ -113,7 +105,6 @@ abstract class PrimitiveArguments {
         }
     }
 
-    @Converter
     static class BooleanConverter implements Supplier<StringConverter<Boolean>> {
         @Override
         public StringConverter<Boolean> get() {

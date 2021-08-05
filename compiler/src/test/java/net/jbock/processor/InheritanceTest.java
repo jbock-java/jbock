@@ -26,7 +26,8 @@ class InheritanceTest {
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
-                .compilesWithoutError();
+                .failsToCompile()
+                .withErrorContaining("invalid superclass: expecting java.lang.Object, but found: test.Arguments");
     }
 
     @Test
@@ -39,7 +40,8 @@ class InheritanceTest {
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
-                .compilesWithoutError();
+                .failsToCompile()
+                .withErrorContaining("missing command annotation: add the @Command annotation to the enclosing class or interface 'Arguments'");
     }
 
     @Test
@@ -63,7 +65,8 @@ class InheritanceTest {
                 "}");
         assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
-                .compilesWithoutError();
+                .failsToCompile()
+                .withErrorContaining("invalid superclass: expecting java.lang.Object, but found: test.B");
     }
 
     @Test
@@ -86,7 +89,8 @@ class InheritanceTest {
                 "}");
         assertAbout(javaSources()).that(List.of(parent, c))
                 .processedWith(Processor.testInstance())
-                .compilesWithoutError();
+                .failsToCompile()
+                .withErrorContaining("invalid command class: the command class or interface may not implement or extend any interfaces, but found: [Parent]");
     }
 
     @Test
@@ -105,12 +109,14 @@ class InheritanceTest {
                 "}");
         assertAbout(javaSources()).that(List.of(parent, c))
                 .processedWith(Processor.testInstance())
-                .compilesWithoutError();
+                .failsToCompile()
+                .withErrorContaining("invalid command class: the command class or interface may not implement or extend any interfaces, but found: [Parent]");
     }
 
     @Test
     void annotatedMethodOverridden() {
         JavaFileObject a = fromSource(
+                "@Command",
                 "abstract class A {",
                 "",
                 "  @Option(names = \"--ouch\")",
@@ -128,18 +134,20 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(a, b))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("annotated method 'A.wasp' is overridden by a non-abstract method");
+                .withErrorContaining("invalid superclass: expecting java.lang.Object, but found: test.A");
     }
 
     @Test
     void siblingInterfaces() {
         JavaFileObject a = fromSource(
+                "@Command",
                 "interface Aaa {",
                 "",
                 "  @Option(names = \"--aaa\")",
                 "  abstract String foo();",
                 "}");
         JavaFileObject b = fromSource(
+                "@Command",
                 "interface Bbb {",
                 "",
                 "  @Option(names = \"--bbb\")",
@@ -152,12 +160,13 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("annotated method 'foo' is inherited multiple times, from these classes or interfaces: [Aaa, Bbb]");
+                .withErrorContaining("invalid command class: the command class or interface may not implement or extend any interfaces, but found: [Bbb, Aaa]");
     }
 
     @Test
     void annotatedMethodOverriddenAbstract() {
         JavaFileObject a = fromSource(
+                "@Command",
                 "abstract class A {",
                 "",
                 "  @Option(names = \"--ouch\")",
@@ -176,190 +185,28 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(a, b))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("annotated method 'wasp' is inherited multiple times, from these classes or interfaces: [A, B]");
-    }
-
-    @Test
-    void inheritedMethodIsNotAnnotated() {
-        JavaFileObject a = fromSource(
-                "abstract class A {",
-                "",
-                "  abstract String inheritedMethod();",
-                "}");
-        JavaFileObject b = fromSource(
-                "abstract class B extends A {",
-                "}");
-        JavaFileObject c = fromSource(
-                "@Command(superCommand = true)",
-                "abstract class C extends B {",
-                "",
-                "  @Parameter(index = 0)",
-                "  abstract String param();",
-                "}");
-        assertAbout(javaSources()).that(List.of(a, b, c))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("add one of these annotations: [Option, Parameter, Parameters] to method 'A.inheritedMethod'");
-    }
-
-    @Test
-    void inheritedMethodIsNotAnnotatedMulti() {
-        JavaFileObject a = fromSource(
-                "interface A {",
-                "",
-                "  abstract String inheritedMethod();",
-                "}");
-        JavaFileObject b = fromSource(
-                "interface B {",
-                "",
-                "  abstract String inheritedMethod();",
-                "}");
-        JavaFileObject c = fromSource(
-                "@Command",
-                "abstract class C implements A, B {",
-                "",
-                "  @Parameter(index = 0)",
-                "  abstract String param();",
-                "}");
-        assertAbout(javaSources()).that(List.of(a, b, c))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("add one of these annotations: [Option, Parameter, Parameters]" +
-                        " to method 'inheritedMethod' in one of these classes or interfaces: [A, B]");
+                .withErrorContaining("invalid superclass: expecting java.lang.Object, but found: test.A");
     }
 
     @Test
     void annotatedMethodOverriddenInSuperclass() {
         JavaFileObject a = fromSource(
+                "@Command(superCommand = true)",
                 "abstract class A {",
                 "",
-                "  @Parameter(index = 1)",
-                "  abstract String inheritedMethod();",
-                "}");
-        JavaFileObject b = fromSource(
-                "abstract class B extends A {",
-                "",
-                "  String inheritedMethod() { return null; }",
-                "}");
-        JavaFileObject c = fromSource(
-                "@Command(superCommand = true)",
-                "abstract class C extends B {",
-                "",
                 "  @Parameter(index = 0)",
-                "  abstract String param();",
-                "}");
-        assertAbout(javaSources()).that(List.of(a, b, c))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("annotated method 'A.inheritedMethod' is overridden by a non-abstract method");
-    }
-
-    @Test
-    void annotatedMethodOverriddenInSuperclassAbstract() {
-        JavaFileObject a = fromSource(
-                "abstract class A {",
-                "",
-                "  @Parameter(index = 1)",
-                "  abstract String inheritedMethod();",
-                "}");
-        JavaFileObject b = fromSource(
-                "abstract class B extends A {",
-                "",
                 "  abstract String inheritedMethod();",
                 "}");
         JavaFileObject c = fromSource(
                 "@Command(superCommand = true)",
-                "abstract class C extends B {",
+                "abstract class C extends A {",
                 "",
                 "  @Parameter(index = 0)",
                 "  abstract String param();",
                 "}");
-        assertAbout(javaSources()).that(List.of(a, b, c))
-                .processedWith(Processor.testInstance())
-                .compilesWithoutError();
-    }
-
-    @Test
-    void parentParent() {
-        JavaFileObject parentParent = fromSource(
-                "interface ParentParent {",
-                "",
-                "  @Parameter(index = 0)",
-                "  String source();",
-                "}");
-        JavaFileObject parent = fromSource(
-                "interface Parent extends ParentParent {",
-                "}");
-        JavaFileObject javaFile = fromSource(
-                "@Command",
-                "abstract class C implements Parent, ParentParent {",
-                "",
-                "  @Parameter(index = 1)",
-                "  abstract String dest();",
-                "}");
-        assertAbout(javaSources()).that(List.of(parentParent, parent, javaFile))
-                .processedWith(Processor.testInstance())
-                .compilesWithoutError();
-    }
-
-    @Test
-    void inheritanceCollision() {
-        JavaFileObject a = fromSource(
-                "interface A {",
-                "",
-                "  @Parameter(index = 0)",
-                "  String param();",
-                "}");
-        JavaFileObject b = fromSource(
-                "@Command",
-                "abstract class B implements A {",
-                "",
-                "  @Option(names = \"-a\")",
-                "  abstract String param();",
-                "}");
-        assertAbout(javaSources()).that(List.of(a, b))
+        assertAbout(javaSources()).that(List.of(a, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("annotated method 'param' is inherited multiple times, from these classes or interfaces: [A, B]");
-    }
-
-    @Test
-    void inheritanceCollisionAbstract() {
-        JavaFileObject a = fromSource(
-                "interface A {",
-                "",
-                "  @Parameter(index = 0)",
-                "  String param();",
-                "}");
-        JavaFileObject b = fromSource(
-                "interface B extends A {",
-                "",
-                "  @Option(names = \"-a\")",
-                "  String param();",
-                "}");
-        JavaFileObject c = fromSource(
-                "@Command",
-                "abstract class C implements B {",
-                "}");
-        assertAbout(javaSources()).that(List.of(a, b, c))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("annotated method 'param' is inherited multiple times, from these classes or interfaces: [A, B]");
-    }
-
-    @Test
-    void inheritedInterface() {
-        JavaFileObject i = fromSource("interface I {}");
-        JavaFileObject a = fromSource("abstract class A implements I {}");
-        JavaFileObject b = fromSource(
-                "@Command(superCommand = true)",
-                "abstract class B extends A {",
-                "",
-                "  @Parameter(index = 0)",
-                "  abstract String param();",
-                "}");
-        assertAbout(javaSources()).that(List.of(i, a, b))
-                .processedWith(Processor.testInstance())
-                .compilesWithoutError();
+                .withErrorContaining("invalid superclass: expecting java.lang.Object, but found: test.A");
     }
 }

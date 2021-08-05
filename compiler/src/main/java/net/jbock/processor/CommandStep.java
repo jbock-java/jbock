@@ -28,7 +28,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.jbock.util.Either.right;
 import static javax.tools.Diagnostic.Kind.ERROR;
-import static net.jbock.common.Annotations.typeLevelAnnotations;
 
 /**
  * This step handles the {@link Command} annotation.
@@ -103,7 +102,6 @@ public class CommandStep implements BasicAnnotationProcessor.Step {
     private Either<List<ValidationFailure>, SourceElement> validateSourceElement(
             TypeElement element) {
         return util.commonTypeChecks(element)
-                .or(() -> util.checkNoDuplicateAnnotations(element, typeLevelAnnotations()))
                 .map(List::of)
                 .<Either<List<ValidationFailure>, SourceElement>>map(Either::left)
                 .orElseGet(() -> right(SourceElement.create(element)));

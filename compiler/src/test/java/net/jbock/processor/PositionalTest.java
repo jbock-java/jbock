@@ -80,22 +80,6 @@ class PositionalTest {
     }
 
     @Test
-    void commandAndConverterAnnotations() {
-        JavaFileObject javaFile = fromSource(
-                "@Command",
-                "@Converter",
-                "abstract class Arguments {",
-                "",
-                "  @Parameter(index = 0)",
-                "  abstract Optional<String> a();",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("annotate with either @Command or @Converter but not both");
-    }
-
-    @Test
     void repeatableSuperCommand() {
         JavaFileObject javaFile = fromSource(
                 "@Command(superCommand = true)",
