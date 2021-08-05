@@ -4,7 +4,7 @@ import net.jbock.util.StringConverter;
 
 import java.math.BigInteger;
 
-class CustomBigIntegerMapperSupplier extends StringConverter<BigInteger> {
+class BigIntegerConverter extends StringConverter<BigInteger> {
 
     @Override
     protected BigInteger convert(String token) {

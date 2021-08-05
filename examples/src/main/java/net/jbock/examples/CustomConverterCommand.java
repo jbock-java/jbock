@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Command
-abstract class CustomMapperArguments {
+abstract class CustomConverterCommand {
 
     /**
      * The mapper must be a Function from String to whatever-this-returns.
@@ -147,7 +147,7 @@ abstract class CustomMapperArguments {
 
         @Override
         public StringConverter<BigInteger> get() {
-            return new CustomBigIntegerMapperSupplier();
+            return new BigIntegerConverter();
         }
     }
 }

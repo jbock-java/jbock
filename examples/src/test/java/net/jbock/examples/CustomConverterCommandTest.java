@@ -1,6 +1,6 @@
 package net.jbock.examples;
 
-import net.jbock.examples.CustomMapperArguments.MyEnum;
+import net.jbock.examples.CustomConverterCommand.MyEnum;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
@@ -17,16 +17,16 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class CustomMapperArgumentsTest {
+class CustomConverterCommandTest {
 
-    private final CustomMapperArgumentsParser parser = new CustomMapperArgumentsParser();
+    private final CustomConverterCommandParser parser = new CustomConverterCommandParser();
 
-    private final ParserTestFixture<CustomMapperArguments> f =
+    private final ParserTestFixture<CustomConverterCommand> f =
             ParserTestFixture.create(parser::parse);
 
     @Test
     void success() {
-        CustomMapperArguments parsed = f.parse(
+        CustomConverterCommand parsed = f.parse(
                 "--date", "1500000000000",
                 "--optDate", "1500000000000",
                 "--dateList", "1500000000000",
