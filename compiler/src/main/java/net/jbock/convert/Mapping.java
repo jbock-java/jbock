@@ -8,9 +8,11 @@ import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.EnumName;
 import net.jbock.convert.matching.ValidMatch;
 import net.jbock.model.Multiplicity;
+import net.jbock.util.StringConverter;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
@@ -54,8 +56,9 @@ public final class Mapping<M extends AnnotatedMethod> {
 
     public static <M extends AnnotatedMethod>
     Mapping<M> createFlag(
-            CodeBlock code,
             ValidMatch<M> match) {
+        CodeBlock code = CodeBlock.of("$T.create($T.identity())",
+                StringConverter.class, Function.class);
         return Mapping.create(code, match, false, true);
     }
 

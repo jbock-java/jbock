@@ -4,7 +4,6 @@ import io.jbock.util.Either;
 import net.jbock.Option;
 import net.jbock.Parameters;
 import net.jbock.annotated.AnnotatedMethod;
-import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.matcher.ListMatcher;
 import net.jbock.convert.matcher.OptionalMatcher;
@@ -45,15 +44,16 @@ public class MatchFinder {
     public <M extends AnnotatedMethod>
     Either<ValidationFailure, ValidMatch<M>> findMatch(
             M sourceMethod) {
-        return validateMatch(findMatchInternal(sourceMethod));
+        return validateParameterVsParameters(findMatchInternal(sourceMethod));
     }
 
-    public Either<ValidationFailure, ValidMatch<AnnotatedOption>>
+    public <M extends AnnotatedMethod>
+    Either<ValidationFailure, ValidMatch<M>>
     findFlagMatch(
-            AnnotatedOption sourceMethod) {
+            M sourceMethod) {
         PrimitiveType bool = types.getPrimitiveType(BOOLEAN);
-        Match<AnnotatedOption> match = Match.create(bool, OPTIONAL, sourceMethod);
-        return validateMatch(match);
+        Match<M> match = Match.create(bool, OPTIONAL, sourceMethod);
+        return validateParameterVsParameters(match);
     }
 
     private <M extends AnnotatedMethod> Match<M>
@@ -73,7 +73,7 @@ public class MatchFinder {
     }
 
     private static <M extends AnnotatedMethod>
-    Either<ValidationFailure, ValidMatch<M>> validateMatch(
+    Either<ValidationFailure, ValidMatch<M>> validateParameterVsParameters(
             Match<M> match) {
         M sourceMethod = match.sourceMethod();
         if (sourceMethod.isParameter()

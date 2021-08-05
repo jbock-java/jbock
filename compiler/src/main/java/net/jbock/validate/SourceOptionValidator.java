@@ -1,13 +1,11 @@
 package net.jbock.validate;
 
-import com.squareup.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
 import net.jbock.convert.matching.MatchFinder;
-import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
 import java.util.HashSet;
@@ -15,7 +13,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
@@ -53,10 +50,12 @@ public class SourceOptionValidator {
     private Either<ValidationFailure, Mapping<AnnotatedOption>> wrapOption(
             AnnotatedOption sourceMethod) {
         return checkFlag(sourceMethod)
+                .map(m -> matchFinder.findFlagMatch(m)
+                        .map(Mapping::createFlag))
                 .orElseGet(() -> mappingFinder.findMapping(sourceMethod));
     }
 
-    private Optional<Either<ValidationFailure, Mapping<AnnotatedOption>>> checkFlag(
+    private Optional<AnnotatedOption> checkFlag(
             AnnotatedOption sourceOption) {
         if (sourceOption.converter().isPresent()) {
             return Optional.empty();
@@ -64,9 +63,7 @@ public class SourceOptionValidator {
         if (sourceOption.returnType().getKind() != BOOLEAN) {
             return Optional.empty();
         }
-        CodeBlock code = CodeBlock.of("$T.create($T.identity())",
-                StringConverter.class, Function.class);
-        return Optional.of(matchFinder.findFlagMatch(sourceOption).map(m -> Mapping.createFlag(code, m)));
+        return Optional.of(sourceOption);
     }
 
     private Either<ValidationFailure, AnnotatedOption> checkOptionNames(
@@ -74,14 +71,13 @@ public class SourceOptionValidator {
         if (sourceOption.names().isEmpty()) {
             return left(sourceOption.fail("define at least one option name"));
         }
-        for (String name : sourceOption.names()) {
-            Optional<String> check = checkName(name);
-            if (check.isPresent()) {
-                return left(sourceOption.fail(check.map(s -> "invalid name: " + s)
-                        .orElseThrow()));
-            }
-        }
-        return right(sourceOption);
+        return sourceOption.names().stream()
+                .map(this::checkName)
+                .map(s -> "invalid name: " + s)
+                .map(sourceOption::fail)
+                .findFirst()
+                .<Either<ValidationFailure, AnnotatedOption>>map(Either::left)
+                .orElseGet(() -> right(sourceOption));
     }
 
     /* Left-Optional
