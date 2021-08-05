@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
@@ -72,7 +73,7 @@ public class SourceOptionValidator {
             return left(sourceOption.fail("define at least one option name"));
         }
         return sourceOption.names().stream()
-                .map(this::checkName)
+                .flatMap(this::checkName)
                 .map(s -> "invalid name: " + s)
                 .map(sourceOption::fail)
                 .findFirst()
@@ -82,29 +83,29 @@ public class SourceOptionValidator {
 
     /* Left-Optional
      */
-    private Optional<String> checkName(String name) {
+    private Stream<String> checkName(String name) {
         if (Objects.toString(name, "").length() <= 1 || "--".equals(name)) {
-            return Optional.of(name);
+            return Stream.of(name);
         }
         if (!name.startsWith("-")) {
-            return Optional.of("must start with a dash character: " + name);
+            return Stream.of("must start with a dash character: " + name);
         }
         if (name.startsWith("---")) {
-            return Optional.of("cannot start with three dashes: " + name);
+            return Stream.of("cannot start with three dashes: " + name);
         }
         if (!name.startsWith("--") && name.length() > 2) {
-            return Optional.of("single-dash name must be single-character: " + name);
+            return Stream.of("single-dash name must be single-character: " + name);
         }
         for (int i = 0; i < name.length(); i++) {
             char c = name.charAt(i);
             if (isWhitespace(c)) {
-                return Optional.of("whitespace characters: " + name);
+                return Stream.of("whitespace characters: " + name);
             }
             if (c == '=') {
-                return Optional.of("invalid character '=': " + name);
+                return Stream.of("invalid character '=': " + name);
             }
         }
-        return Optional.empty();
+        return Stream.empty();
     }
 
     /* Left-Optional
