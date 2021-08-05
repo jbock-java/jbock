@@ -48,36 +48,36 @@ public class SourceOptionValidator {
     }
 
     private Either<ValidationFailure, Mapping<AnnotatedOption>> wrapOption(
-            AnnotatedOption sourceMethod) {
-        return checkFlag(sourceMethod)
+            AnnotatedOption option) {
+        return checkFlag(option)
                 .map(m -> matchFinder.findFlagMatch(m)
                         .map(Mapping::createFlag))
-                .orElseGet(() -> mappingFinder.findMapping(sourceMethod));
+                .orElseGet(() -> mappingFinder.findMapping(option));
     }
 
     private Optional<AnnotatedOption> checkFlag(
-            AnnotatedOption sourceOption) {
-        if (sourceOption.converter().isPresent()) {
+            AnnotatedOption option) {
+        if (option.converter().isPresent()) {
             return Optional.empty();
         }
-        if (sourceOption.returnType().getKind() != BOOLEAN) {
+        if (option.returnType().getKind() != BOOLEAN) {
             return Optional.empty();
         }
-        return Optional.of(sourceOption);
+        return Optional.of(option);
     }
 
     private Either<ValidationFailure, AnnotatedOption> checkOptionNames(
-            AnnotatedOption sourceOption) {
-        if (sourceOption.names().isEmpty()) {
-            return left(sourceOption.fail("define at least one option name"));
+            AnnotatedOption option) {
+        if (option.names().isEmpty()) {
+            return left(option.fail("define at least one option name"));
         }
-        return sourceOption.names().stream()
-                .map(name -> checkName(sourceOption, name))
+        return option.names().stream()
+                .map(name -> checkName(option, name))
                 .flatMap(Optional::stream)
                 .map(s -> s.prepend("invalid name: "))
                 .findFirst()
                 .<Either<ValidationFailure, AnnotatedOption>>map(Either::left)
-                .orElseGet(() -> right(sourceOption));
+                .orElseGet(() -> right(option));
     }
 
     /* Left-Optional

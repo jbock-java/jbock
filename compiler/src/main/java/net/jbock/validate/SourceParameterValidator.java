@@ -37,10 +37,10 @@ public class SourceParameterValidator {
     }
 
     private Either<List<ValidationFailure>, List<AnnotatedParameter>> validatePositions(
-            List<AnnotatedParameter> allPositionalParameters) {
+            List<AnnotatedParameter> positionalParameters) {
         List<ValidationFailure> failures = new ArrayList<>();
-        for (int i = 0; i < allPositionalParameters.size(); i++) {
-            AnnotatedParameter sourceParameter = allPositionalParameters.get(i);
+        for (int i = 0; i < positionalParameters.size(); i++) {
+            AnnotatedParameter sourceParameter = positionalParameters.get(i);
             int index = sourceParameter.index();
             if (index != i) {
                 failures.add(sourceParameter.fail("invalid position: expecting " + i + " but found " + index));
@@ -48,18 +48,18 @@ public class SourceParameterValidator {
         }
         return optionalList(failures)
                 .<Either<List<ValidationFailure>, List<AnnotatedParameter>>>map(Either::left)
-                .orElseGet(() -> right(allPositionalParameters));
+                .orElseGet(() -> right(positionalParameters));
     }
 
     /* Left-Optional
      */
     private Optional<List<ValidationFailure>> checkNoRequiredAfterOptional(
-            List<Mapping<AnnotatedParameter>> allPositionalParameters) {
-        return allPositionalParameters.stream()
+            List<Mapping<AnnotatedParameter>> positionalParameters) {
+        return positionalParameters.stream()
                 .filter(Mapping::isOptional)
                 .findFirst()
                 .map(Mapping::sourceMethod)
-                .flatMap(firstOptional -> allPositionalParameters.stream()
+                .flatMap(firstOptional -> positionalParameters.stream()
                         .filter(Mapping::isRequired)
                         .map(Mapping::sourceMethod)
                         .filter(sourceMethod -> sourceMethod.index()
