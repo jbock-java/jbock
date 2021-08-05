@@ -18,14 +18,14 @@ import static io.jbock.util.Eithers.toValidListAll;
 @ValidateScope
 public class SourceParametersValidator {
 
-    private final MappingFinder converterFinder;
+    private final MappingFinder mappingFinder;
     private final SourceElement sourceElement;
 
     @Inject
     SourceParametersValidator(
-            MappingFinder converterFinder,
+            MappingFinder mappingFinder,
             SourceElement sourceElement) {
-        this.converterFinder = converterFinder;
+        this.mappingFinder = mappingFinder;
         this.sourceElement = sourceElement;
     }
 
@@ -34,7 +34,7 @@ public class SourceParametersValidator {
         return validateDuplicateParametersAnnotation(step.repeatablePositionalParameters())
                 .filter(this::validateNoRepeatableParameterInSuperCommand)
                 .flatMap(repeatablePositionalParameters -> repeatablePositionalParameters.stream()
-                        .map(converterFinder::findMapping)
+                        .map(mappingFinder::findMapping)
                         .collect(toValidListAll()))
                 .map(step::accept);
     }

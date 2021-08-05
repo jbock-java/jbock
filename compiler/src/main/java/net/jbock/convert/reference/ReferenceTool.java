@@ -86,7 +86,7 @@ public class ReferenceTool {
     }
 
     private String errorConverterType() {
-        return "converter must extend " + StringConverter.class.getSimpleName() +
+        return "invalid converter class: converter must extend " + StringConverter.class.getSimpleName() +
                 "<X> or implement " + Supplier.class.getSimpleName() +
                 "<" + StringConverter.class.getSimpleName() + "<X>>";
     }

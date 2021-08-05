@@ -19,18 +19,18 @@ import static io.jbock.util.Eithers.toValidListAll;
 @ValidateScope
 public class SourceParameterValidator {
 
-    private final MappingFinder converterFinder;
+    private final MappingFinder mappingFinder;
 
     @Inject
-    SourceParameterValidator(MappingFinder converterFinder) {
-        this.converterFinder = converterFinder;
+    SourceParameterValidator(MappingFinder mappingFinder) {
+        this.mappingFinder = mappingFinder;
     }
 
     Either<List<ValidationFailure>, ContextBuilder.Step2> wrapPositionalParams(
             ContextBuilder.Step1 step) {
         return validatePositions(step.positionalParameters())
                 .flatMap(positionalParameters -> positionalParameters.stream()
-                        .map(converterFinder::findMapping)
+                        .map(mappingFinder::findMapping)
                         .collect(toValidListAll()))
                 .filter(this::checkNoRequiredAfterOptional)
                 .map(step::accept);

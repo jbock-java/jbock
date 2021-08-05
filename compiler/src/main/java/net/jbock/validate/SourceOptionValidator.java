@@ -27,14 +27,14 @@ import static javax.lang.model.type.TypeKind.BOOLEAN;
 @ValidateScope
 public class SourceOptionValidator {
 
-    private final MappingFinder converterFinder;
+    private final MappingFinder mappingFinder;
     private final MatchFinder matchFinder;
 
     @Inject
     SourceOptionValidator(
-            MappingFinder converterFinder,
+            MappingFinder mappingFinder,
             MatchFinder matchFinder) {
-        this.converterFinder = converterFinder;
+        this.mappingFinder = mappingFinder;
         this.matchFinder = matchFinder;
     }
 
@@ -53,7 +53,7 @@ public class SourceOptionValidator {
     private Either<ValidationFailure, Mapping<AnnotatedOption>> wrapOption(
             AnnotatedOption sourceMethod) {
         return checkFlag(sourceMethod)
-                .orElseGet(() -> converterFinder.findMapping(sourceMethod));
+                .orElseGet(() -> mappingFinder.findMapping(sourceMethod));
     }
 
     private Optional<Either<ValidationFailure, Mapping<AnnotatedOption>>> checkFlag(
