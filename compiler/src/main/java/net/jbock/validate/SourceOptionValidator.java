@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
@@ -73,9 +72,9 @@ public class SourceOptionValidator {
             return left(sourceOption.fail("define at least one option name"));
         }
         return sourceOption.names().stream()
-                .flatMap(this::checkName)
-                .map(s -> "invalid name: " + s)
-                .map(sourceOption::fail)
+                .map(name -> checkName(sourceOption, name))
+                .flatMap(Optional::stream)
+                .map(s -> s.prepend("invalid name: "))
                 .findFirst()
                 .<Either<ValidationFailure, AnnotatedOption>>map(Either::left)
                 .orElseGet(() -> right(sourceOption));
@@ -83,29 +82,29 @@ public class SourceOptionValidator {
 
     /* Left-Optional
      */
-    private Stream<String> checkName(String name) {
+    private Optional<ValidationFailure> checkName(AnnotatedOption option, String name) {
         if (Objects.toString(name, "").length() <= 1 || "--".equals(name)) {
-            return Stream.of(name);
+            return Optional.of(option.fail(name));
         }
         if (!name.startsWith("-")) {
-            return Stream.of("must start with a dash character: " + name);
+            return Optional.of(option.fail("must start with a dash character: " + name));
         }
         if (name.startsWith("---")) {
-            return Stream.of("cannot start with three dashes: " + name);
+            return Optional.of(option.fail("cannot start with three dashes: " + name));
         }
         if (!name.startsWith("--") && name.length() > 2) {
-            return Stream.of("single-dash name must be single-character: " + name);
+            return Optional.of(option.fail("single-dash name must be single-character: " + name));
         }
         for (int i = 0; i < name.length(); i++) {
             char c = name.charAt(i);
             if (isWhitespace(c)) {
-                return Stream.of("whitespace characters: " + name);
+                return Optional.of(option.fail("whitespace characters: " + name));
             }
             if (c == '=') {
-                return Stream.of("invalid character '=': " + name);
+                return Optional.of(option.fail("invalid character '=': " + name));
             }
         }
-        return Stream.empty();
+        return Optional.empty();
     }
 
     /* Left-Optional
