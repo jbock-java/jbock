@@ -532,7 +532,7 @@ class ProcessorTest {
     }
 
     @Test
-    void parameterlessUnannotated() {
+    void parameterizedUnannotated() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
@@ -540,15 +540,17 @@ class ProcessorTest {
                 "  @Option(names = \"--xoxo\")",
                 "  abstract int goodMethod();",
                 "",
-                "  abstract void parameterless(String foobar);",
+                "  abstract void parameterized(String foobar);",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
-                .compilesWithoutError();
+                .failsToCompile()
+                .withErrorContaining("missing annotation: add one of these annotations:" +
+                        " [Option, Parameter, Parameters] to method 'parameterized'");
     }
 
     @Test
-    void parameterlessAnnotated() {
+    void parameterizedAnnotated() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
@@ -557,12 +559,12 @@ class ProcessorTest {
                 "  abstract int goodMethod();",
                 "",
                 "  @Option(names = \"--xihuan\")",
-                "  abstract void parameterless(String foobar);",
+                "  abstract void parameterized(String foobar);",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid method parameters: abstract method 'parameterless' may not have any" +
+                .withErrorContaining("invalid method parameters: abstract method 'parameterized' may not have any" +
                         " parameters, but found: [foobar]");
     }
 
@@ -631,8 +633,8 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("add one of these annotations: [Option, Parameter, Parameters] " +
-                        "to method 'Arguments.a'");
+                .withErrorContaining("missing annotation: add one of these annotations:" +
+                        " [Option, Parameter, Parameters] to method 'a'");
     }
 
     @Test

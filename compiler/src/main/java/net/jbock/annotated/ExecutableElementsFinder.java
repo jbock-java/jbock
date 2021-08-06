@@ -122,18 +122,17 @@ public class ExecutableElementsFinder {
         }
         return Optional.of(method.fail("invalid method parameters: abstract method '" +
                 method.method().getSimpleName() +
-                "' may not have any parameters, but found: " + method.method().getParameters().stream()
-                .map(VariableElement::getSimpleName)
-                .map(Name::toString)
-                .collect(toList())));
+                "' may not have any parameters, but found: " +
+                method.method().getParameters().stream()
+                        .map(VariableElement::getSimpleName)
+                        .map(Name::toString)
+                        .collect(toList())));
     }
 
     private ValidationFailure missingAnnotationError(ExecutableElement m) {
-        String message = "add one of these annotations: " + methodLevelAnnotations().stream()
+        String message = "missing annotation: add one of these annotations: " + methodLevelAnnotations().stream()
                 .map(Class::getSimpleName).collect(toList());
-        message = message + " to method '" +
-                m.getEnclosingElement().getSimpleName() +
-                "." + m.getSimpleName() + "'";
+        message = message + " to method '" + m.getSimpleName() + "'";
         return new ValidationFailure(message, m);
     }
 }
