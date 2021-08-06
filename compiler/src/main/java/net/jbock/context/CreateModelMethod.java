@@ -17,10 +17,10 @@ import net.jbock.util.ParseRequest;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static net.jbock.common.Constants.concat;
 
 @ContextScope
 public class CreateModelMethod extends CachedMethod {
@@ -68,9 +68,9 @@ public class CreateModelMethod extends CachedMethod {
         for (Mapping<AnnotatedOption> c : namedOptions) {
             code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
         }
-        for (Mapping<?> c : concat(positionalParameters, repeatablePositionalParameters)) {
-            code.add(CodeBlock.of(".addParameter($L)", parameterBlock(c)));
-        }
+        Stream.of(positionalParameters, repeatablePositionalParameters)
+                .flatMap(List::stream)
+                .forEach(c -> code.add(CodeBlock.of(".addParameter($L)", parameterBlock(c))));
         code.add(CodeBlock.of(".build()"));
         return methodBuilder("createModel")
                 .addStatement(contextUtil.joinByNewline(code))

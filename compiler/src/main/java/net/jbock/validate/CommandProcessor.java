@@ -1,7 +1,6 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
-import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.annotated.AnnotatedMethods;
 import net.jbock.annotated.AnnotatedMethodsFactory;
 import net.jbock.common.ValidationFailure;
@@ -13,9 +12,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static io.jbock.util.Eithers.optionalList;
-import static net.jbock.common.Constants.concat;
 
 /**
  * This class is responsible for item validation.
@@ -55,20 +54,21 @@ public class CommandProcessor {
 
     /* Left-Optional
      */
-    private Optional<List<ValidationFailure>> checkDuplicateDescriptionKeys(AnnotatedMethods methods) {
+    private Optional<List<ValidationFailure>> checkDuplicateDescriptionKeys(
+            AnnotatedMethods methods) {
         List<ValidationFailure> failures = new ArrayList<>();
-        List<? extends AnnotatedMethod> items =
-                concat(concat(methods.namedOptions(), methods.positionalParameters()), methods.repeatablePositionalParameters());
         Set<String> keys = new HashSet<>();
         sourceElement.descriptionKey().ifPresent(keys::add);
-        for (AnnotatedMethod m : items) {
-            m.descriptionKey().ifPresent(key -> {
-                if (!keys.add(key)) {
-                    String message = "duplicate description key: " + key;
-                    failures.add(m.fail(message));
-                }
-            });
-        }
+        Stream.of(methods.namedOptions(),
+                methods.positionalParameters(),
+                methods.repeatablePositionalParameters())
+                .flatMap(List::stream)
+                .forEach(m -> m.descriptionKey().ifPresent(key -> {
+                    if (!keys.add(key)) {
+                        String message = "duplicate description key: " + key;
+                        failures.add(m.fail(message));
+                    }
+                }));
         return optionalList(failures);
     }
 }

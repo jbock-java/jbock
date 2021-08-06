@@ -8,7 +8,6 @@ import io.jbock.util.Either;
 import io.jbock.util.Eithers;
 
 import javax.lang.model.element.Modifier;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -39,13 +38,6 @@ public final class Constants {
 
     public static TypeName mapOf(TypeName keyType, TypeName valueType) {
         return ParameterizedTypeName.get(ClassName.get(Map.class), keyType, valueType);
-    }
-
-    public static <E> List<E> concat(List<? extends E> list1, List<? extends E> list2) {
-        List<E> result = new ArrayList<>(list1.size() + list2.size());
-        result.addAll(list1);
-        result.addAll(list2);
-        return result;
     }
 
     public static Optional<String> optionalString(String s) {
