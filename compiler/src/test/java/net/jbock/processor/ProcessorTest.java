@@ -532,6 +532,41 @@ class ProcessorTest {
     }
 
     @Test
+    void parameterlessUnannotated() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Option(names = \"--xoxo\")",
+                "  abstract int goodMethod();",
+                "",
+                "  abstract void parameterless(String foobar);",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .compilesWithoutError();
+    }
+
+    @Test
+    void parameterlessAnnotated() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Option(names = \"--xoxo\")",
+                "  abstract int goodMethod();",
+                "",
+                "  @Option(names = \"--xihuan\")",
+                "  abstract void parameterless(String foobar);",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("invalid method parameters: abstract method 'parameterless' may not have any" +
+                        " parameters, but found: [foobar]");
+    }
+
+    @Test
     void noNames() {
         JavaFileObject javaFile = fromSource(
                 "@Command",

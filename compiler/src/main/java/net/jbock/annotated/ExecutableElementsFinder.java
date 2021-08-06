@@ -9,16 +9,19 @@ import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
+import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
-import static io.jbock.util.Eithers.toOptionalList;
+import static io.jbock.util.Eithers.toValidListAll;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
@@ -37,11 +40,9 @@ public class ExecutableElementsFinder {
 
     /**
      * Returns a Right-Either containing all annotated parameterless abstract
-     * methods, including methods that are inherited from interfaces and
-     * abstract ancestor classes.
+     * methods.
      *
-     * <p>If one of the annotated parameterless abstract methods is overridden
-     * by a non-abstract method, or by another annotated method,
+     * <p>If one of the abstract methods is not annotated,
      * a Left-Either is returned.
      *
      * <p>If one of the unannotated parameterless abstract methods does not have
@@ -55,16 +56,15 @@ public class ExecutableElementsFinder {
                 .or(this::checkNoInterfaces)
                 .map(List::of)
                 .<Either<List<ValidationFailure>, AnnotatedMethodsBuilder.Step2>>map(Either::left)
-                .orElseGet(() -> {
-                    List<ExecutableElement> allAbstract = parameterlessMethods();
-                    return validateAbstractMethods(allAbstract)
-                            .<Either<List<ValidationFailure>, List<Executable>>>map(Either::left)
-                            .orElseGet(() -> right(allAbstract.stream()
-                                    .flatMap(this::createExecutable)
-                                    .collect(toList())))
-                            .map(AnnotatedMethodsBuilder::builder)
-                            .map(step -> step.sourceElement(sourceElement));
-                });
+                .orElseGet(this::validParameterlessAbstract);
+    }
+
+    private Either<List<ValidationFailure>, AnnotatedMethodsBuilder.Step2> validParameterlessAbstract() {
+        return abstractMethods().stream()
+                .map(this::validateAbstractMethod)
+                .collect(toValidListAll())
+                .map(AnnotatedMethodsBuilder::builder)
+                .map(step -> step.sourceElement(sourceElement));
     }
 
     private Optional<ValidationFailure> checkInterfaceOrSimpleClass() {
@@ -95,31 +95,37 @@ public class ExecutableElementsFinder {
         return Optional.empty();
     }
 
-    private List<ExecutableElement> parameterlessMethods() {
+    private List<ExecutableElement> abstractMethods() {
         return ElementFilter.methodsIn(sourceElement.element().getEnclosedElements()).stream()
-                .filter(m -> m.getParameters().isEmpty())
                 .filter(m -> m.getModifiers().contains(ABSTRACT))
                 .collect(toList());
     }
 
-    private Optional<List<ValidationFailure>> validateAbstractMethods(
-            List<ExecutableElement> allAbstract) {
-        return allAbstract.stream()
-                .filter(m -> !hasAnnotation(m))
-                .map(this::missingAnnotationError)
-                .collect(toOptionalList());
+    private Either<ValidationFailure, Executable> validateAbstractMethod(
+            ExecutableElement method) {
+        return getMethodAnnotation(method)
+                .<Either<ValidationFailure, Executable>>map(a -> right(Executable.create(method, a)))
+                .orElseGet(() -> left(missingAnnotationError(method)))
+                .filter(this::validateParameterless);
     }
 
-    private boolean hasAnnotation(ExecutableElement method) {
+    private Optional<? extends Annotation> getMethodAnnotation(ExecutableElement method) {
         return methodLevelAnnotations().stream()
-                .anyMatch(a -> method.getAnnotation(a) != null);
+                .map(method::getAnnotation)
+                .filter(Objects::nonNull)
+                .findFirst();
     }
 
-    private Stream<Executable> createExecutable(ExecutableElement method) {
-        return methodLevelAnnotations().stream()
-                .flatMap(a -> method.getAnnotation(a) != null ?
-                        Stream.of(Executable.create(method, method.getAnnotation(a))) :
-                        Stream.empty());
+    private Optional<ValidationFailure> validateParameterless(Executable method) {
+        if (method.method().getParameters().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(method.fail("invalid method parameters: abstract method '" +
+                method.method().getSimpleName() +
+                "' may not have any parameters, but found: " + method.method().getParameters().stream()
+                .map(VariableElement::getSimpleName)
+                .map(Name::toString)
+                .collect(toList())));
     }
 
     private ValidationFailure missingAnnotationError(ExecutableElement m) {
