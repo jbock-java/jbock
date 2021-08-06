@@ -3,6 +3,7 @@ package net.jbock.convert.matching;
 import com.squareup.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.common.SafeTypes;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
@@ -13,7 +14,6 @@ import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Types;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -22,14 +22,14 @@ public class ConverterValidator {
 
     private final ReferenceTool referenceTool;
     private final Util util;
-    private final Types types;
+    private final SafeTypes types;
     private final MatchFinder matchFinder;
 
     @Inject
     ConverterValidator(
             ReferenceTool referenceTool,
             Util util,
-            Types types,
+            SafeTypes types,
             MatchFinder matchFinder) {
         this.referenceTool = referenceTool;
         this.util = util;

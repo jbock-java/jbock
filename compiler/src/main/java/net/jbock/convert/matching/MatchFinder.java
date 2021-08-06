@@ -4,6 +4,7 @@ import io.jbock.util.Either;
 import net.jbock.Option;
 import net.jbock.Parameters;
 import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.common.SafeTypes;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.matcher.ListMatcher;
 import net.jbock.convert.matcher.OptionalMatcher;
@@ -14,7 +15,6 @@ import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Types;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,13 +29,13 @@ public class MatchFinder {
 
     private final OptionalMatcher optionalMatcher;
     private final ListMatcher listMatcher;
-    private final Types types;
+    private final SafeTypes types;
 
     @Inject
     MatchFinder(
             OptionalMatcher optionalMatcher,
             ListMatcher listMatcher,
-            Types types) {
+            SafeTypes types) {
         this.optionalMatcher = optionalMatcher;
         this.listMatcher = listMatcher;
         this.types = types;

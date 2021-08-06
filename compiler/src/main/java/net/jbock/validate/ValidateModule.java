@@ -3,10 +3,9 @@ package net.jbock.validate;
 import dagger.Module;
 import dagger.Provides;
 import net.jbock.common.SafeElements;
+import net.jbock.common.SafeTypes;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
-
-import javax.lang.model.util.Types;
 
 /**
  * @see ValidateScope
@@ -14,17 +13,17 @@ import javax.lang.model.util.Types;
 @Module
 public class ValidateModule {
 
-    private final Types types;
+    private final SafeTypes types;
     private final SafeElements elements;
 
-    public ValidateModule(Types types, SafeElements elements) {
+    public ValidateModule(SafeTypes types, SafeElements elements) {
         this.types = types;
         this.elements = elements;
     }
 
     @ValidateScope
     @Provides
-    Types types() {
+    SafeTypes types() {
         return types;
     }
 

@@ -3,13 +3,13 @@ package net.jbock.processor;
 import dagger.Module;
 import dagger.Provides;
 import net.jbock.common.SafeElements;
+import net.jbock.common.SafeTypes;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.util.Types;
 
 /**
  * @see ProcessorScope
@@ -43,19 +43,19 @@ public class ProcessorModule {
 
     @ProcessorScope
     @Provides
-    Types types() {
-        return processingEnvironment.getTypeUtils();
+    SafeTypes types() {
+        return new SafeTypes(processingEnvironment.getTypeUtils());
     }
 
     @ProcessorScope
     @Provides
-    TypeTool tool(SafeElements elements) {
-        return new TypeTool(elements, processingEnvironment.getTypeUtils());
+    TypeTool tool(SafeElements elements, SafeTypes types) {
+        return new TypeTool(elements, types);
     }
 
     @ProcessorScope
     @Provides
-    Util util(Types types, TypeTool tool) {
+    Util util(SafeTypes types, TypeTool tool) {
         return new Util(types, tool);
     }
 }

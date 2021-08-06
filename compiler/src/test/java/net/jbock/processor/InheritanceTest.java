@@ -41,7 +41,7 @@ class InheritanceTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("missing command annotation: add the @Command annotation to the enclosing class or interface 'Arguments'");
+                .withErrorContaining("missing command annotation: interface 'Arguments' must be annotated with net.jbock.Command");
     }
 
     @Test

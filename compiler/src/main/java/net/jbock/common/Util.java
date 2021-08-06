@@ -10,7 +10,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import javax.lang.model.util.Types;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -20,10 +19,10 @@ import java.util.stream.Collectors;
 
 public class Util {
 
-    private final Types types;
+    private final SafeTypes types;
     private final TypeTool tool;
 
-    public Util(Types types, TypeTool tool) {
+    public Util(SafeTypes types, TypeTool tool) {
         this.types = types;
         this.tool = tool;
     }
@@ -53,32 +52,32 @@ public class Util {
         for (ExecutableElement constructor : constructors) {
             if (!constructor.getModifiers().contains(Modifier.PRIVATE) &&
                     constructor.getParameters().isEmpty() &&
-                    !throwsAnyCheckedExceptions(constructor)) {
+                    invalidExceptionsInDeclaration(constructor).isEmpty()) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean throwsAnyCheckedExceptions(ExecutableElement element) {
-        for (TypeMirror thrownType : element.getThrownTypes()) {
-            if (!extendsRuntimeException(thrownType)) {
-                return true;
-            }
-        }
-        return false;
+    public List<TypeMirror> invalidExceptionsInDeclaration(ExecutableElement element) {
+        return element.getThrownTypes().stream()
+                .filter(thrownType -> !isPermissibleException(thrownType))
+                .collect(Collectors.toList());
     }
 
-    private boolean extendsRuntimeException(TypeMirror mirror) {
+    private boolean isPermissibleException(TypeMirror mirror) {
         if (mirror.getKind() != TypeKind.DECLARED) {
             return false;
         }
-        if (tool.isSameType(mirror, RuntimeException.class)) {
+        if (tool.isSameType(mirror, RuntimeException.class) ||
+                tool.isSameType(mirror, Error.class)) {
             return true;
         }
-        return TypeTool.AS_TYPE_ELEMENT.visit(types.asElement(mirror))
+        return types.asElement(mirror)
+                .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
+                .filter(t -> commonTypeChecks(t).isEmpty())
                 .map(TypeElement::getSuperclass)
-                .filter(this::extendsRuntimeException)
+                .filter(this::isPermissibleException)
                 .isPresent();
     }
 

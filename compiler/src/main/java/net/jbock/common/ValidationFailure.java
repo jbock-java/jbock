@@ -1,6 +1,9 @@
 package net.jbock.common;
 
+import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
+
+import static javax.tools.Diagnostic.Kind.ERROR;
 
 public class ValidationFailure {
 
@@ -16,11 +19,7 @@ public class ValidationFailure {
         return new ValidationFailure(prefix + message, about);
     }
 
-    public Element about() {
-        return about;
-    }
-
-    public String message() {
-        return message;
+    public void writeTo(Messager messager) {
+        messager.printMessage(ERROR, message, about);
     }
 }

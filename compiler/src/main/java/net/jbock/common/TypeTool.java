@@ -9,7 +9,6 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.SimpleElementVisitor9;
 import javax.lang.model.util.SimpleTypeVisitor9;
-import javax.lang.model.util.Types;
 import java.util.Optional;
 
 public class TypeTool {
@@ -48,12 +47,12 @@ public class TypeTool {
         }
     };
 
-    private final Types types;
+    private final SafeTypes types;
 
     private final SafeElements elements;
 
     // visible for testing
-    public TypeTool(SafeElements elements, Types types) {
+    public TypeTool(SafeElements elements, SafeTypes types) {
         this.types = types;
         this.elements = elements;
     }

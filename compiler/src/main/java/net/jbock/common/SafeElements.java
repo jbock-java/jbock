@@ -4,6 +4,9 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.util.Optional;
 
+/**
+ * A wrapper around {@link Elements} where none of the methods can return {@code null}.
+ */
 public class SafeElements {
 
     private final Elements elements;

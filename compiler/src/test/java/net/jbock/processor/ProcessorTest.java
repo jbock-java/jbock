@@ -147,7 +147,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("abstract method expected");
+                .withErrorContaining("missing method modifier: annotated method 'a' must be abstract");
     }
 
     @Test
@@ -207,7 +207,26 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("checked exceptions are not allowed here");
+                .withErrorContaining("invalid exception declaration: annotated method 'a' may not declare any checked" +
+                        " or inaccessible exceptions, but found: [java.io.IOException]");
+    }
+
+    @Test
+    void inaccessibleException() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Option(names = \"--x\")",
+                "  abstract String a() throws BlueMonday;",
+                "",
+                "  private static class BlueMonday extends RuntimeException {}",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("invalid exception declaration: annotated method 'a' may not declare any checked" +
+                        " or inaccessible exceptions, but found: [test.Arguments.BlueMonday]");
     }
 
     @Test
@@ -297,7 +316,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("method may not return VOID");
+                .withErrorContaining("invalid return type: annotated method 'a' may not return VOID");
     }
 
     @Test
@@ -593,7 +612,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("empty argument list expected");
+                .withErrorContaining("invalid method parameters: abstract method 'a' may not have any parameters, but found: [b, c]");
     }
 
     @Test
@@ -606,7 +625,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("type parameter not expected here");
+                .withErrorContaining("invalid type parameters: annotated method 'a' may not have type parameters, but found: E");
     }
 
     @Test
@@ -619,7 +638,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("type parameters not expected here");
+                .withErrorContaining("invalid type parameters: annotated method 'a' may not have type parameters, but found: E,F");
     }
 
     @Test

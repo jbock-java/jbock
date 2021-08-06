@@ -7,6 +7,7 @@ import com.squareup.javapoet.TypeSpec;
 import io.jbock.util.Either;
 import net.jbock.Command;
 import net.jbock.common.SafeElements;
+import net.jbock.common.SafeTypes;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.context.ContextComponent;
@@ -21,13 +22,11 @@ import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
-import javax.lang.model.util.Types;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.jbock.util.Either.right;
-import static javax.tools.Diagnostic.Kind.ERROR;
 
 /**
  * This step handles the {@link Command} annotation.
@@ -40,7 +39,7 @@ public class CommandStep implements BasicAnnotationProcessor.Step {
 
     private final Messager messager;
     private final Util util;
-    private final Types types;
+    private final SafeTypes types;
     private final SafeElements elements;
     private final SourceFileGenerator sourceFileGenerator;
 
@@ -48,7 +47,7 @@ public class CommandStep implements BasicAnnotationProcessor.Step {
     CommandStep(
             Messager messager,
             Util util,
-            Types types,
+            SafeTypes types,
             SafeElements elements,
             SourceFileGenerator sourceFileGenerator) {
         this.messager = messager;
@@ -109,7 +108,7 @@ public class CommandStep implements BasicAnnotationProcessor.Step {
 
     private void printFailures(List<ValidationFailure> failures) {
         for (ValidationFailure failure : failures) {
-            messager.printMessage(ERROR, failure.message(), failure.about());
+            failure.writeTo(messager);
         }
     }
 }

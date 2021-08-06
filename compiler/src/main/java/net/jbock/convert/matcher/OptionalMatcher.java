@@ -3,6 +3,7 @@ package net.jbock.convert.matcher;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeElements;
+import net.jbock.common.SafeTypes;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.matching.Match;
 import net.jbock.validate.ValidateScope;
@@ -10,7 +11,6 @@ import net.jbock.validate.ValidateScope;
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Types;
 import java.util.Optional;
 
 import static net.jbock.model.Multiplicity.OPTIONAL;
@@ -20,13 +20,13 @@ public class OptionalMatcher implements Matcher {
 
     private final TypeTool tool;
     private final SafeElements elements;
-    private final Types types;
+    private final SafeTypes types;
 
     @Inject
     OptionalMatcher(
             TypeTool tool,
             SafeElements elements,
-            Types types) {
+            SafeTypes types) {
         this.tool = tool;
         this.elements = elements;
         this.types = types;

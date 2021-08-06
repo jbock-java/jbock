@@ -4,20 +4,24 @@ import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
 import net.jbock.Command;
 import net.jbock.common.Util;
+import net.jbock.common.ValidationFailure;
 
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
-import static javax.tools.Diagnostic.Kind.ERROR;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 
 @ProcessorScope
@@ -51,38 +55,68 @@ public class MethodStep implements BasicAnnotationProcessor.Step {
     @Override
     public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
         for (ExecutableElement method : methodsIn(elementsByAnnotation.values())) {
-            validateAnnotatedMethod(method).ifPresent(message ->
-                    messager.printMessage(ERROR, message, method));
+            validateCommandAnnotationPresent(method)
+                    .or(() -> validateAbstract(method))
+                    .or(() -> validateTypeParameters(method))
+                    .or(() -> validateReturnType(method))
+                    .or(() -> validateAnnotatedMethod(method))
+                    .ifPresent(failure -> failure.writeTo(messager));
         }
         return Set.of();
     }
 
-    private Optional<String> validateAnnotatedMethod(ExecutableElement method) {
+    private Optional<ValidationFailure> validateCommandAnnotationPresent(ExecutableElement method) {
         Element enclosingElement = method.getEnclosingElement();
-        if (enclosingElement.getAnnotation(Command.class) == null) {
-            return Optional.of("missing command annotation: add the @" +
-                    Command.class.getSimpleName() +
-                    " annotation to the enclosing class or interface '" +
-                    enclosingElement.getSimpleName() + "'");
+        if (enclosingElement.getAnnotation(Command.class) != null) {
+            return Optional.empty();
         }
-        if (!method.getModifiers().contains(ABSTRACT)) {
-            return Optional.of("abstract method expected");
+        String enclosingElementKind = enclosingElement.getKind() == ElementKind.INTERFACE ?
+                "interface" : "abstract class";
+        return Optional.of(new ValidationFailure("missing command annotation: " +
+                enclosingElementKind + " '" + enclosingElement.getSimpleName() +
+                "' must be annotated with " + Command.class.getCanonicalName(),
+                enclosingElement));
+    }
+
+    private Optional<ValidationFailure> validateAbstract(ExecutableElement method) {
+        if (method.getModifiers().contains(ABSTRACT)) {
+            return Optional.empty();
         }
-        if (!method.getParameters().isEmpty()) {
-            return Optional.of("empty argument list expected");
+        return Optional.of(new ValidationFailure("missing method modifier: annotated method '" +
+                method.getSimpleName() +
+                "' must be abstract", method));
+    }
+
+    private Optional<ValidationFailure> validateTypeParameters(ExecutableElement method) {
+        if (method.getTypeParameters().isEmpty()) {
+            return Optional.empty();
         }
-        if (!method.getTypeParameters().isEmpty()) {
-            return Optional.of("type parameter" +
-                    (method.getTypeParameters().size() >= 2 ? "s" : "") +
-                    " not expected here");
-        }
+        return Optional.of(new ValidationFailure("invalid type parameters: annotated method '" +
+                method.getSimpleName() +
+                "' may not have type parameters, but found: " +
+                method.getTypeParameters(), method));
+    }
+
+    private Optional<ValidationFailure> validateReturnType(ExecutableElement method) {
         TypeKind kind = method.getReturnType().getKind();
-        if (FORBIDDEN_KINDS.contains(kind)) {
-            return Optional.of("method may not return " + kind);
+        if (!FORBIDDEN_KINDS.contains(kind)) {
+            return Optional.empty();
         }
-        if (util.throwsAnyCheckedExceptions(method)) {
-            return Optional.of("checked exceptions are not allowed here");
+        return Optional.of(new ValidationFailure("invalid return type: annotated method '" +
+                method.getSimpleName() +
+                "' may not return " + kind, method));
+    }
+
+    private Optional<ValidationFailure> validateAnnotatedMethod(ExecutableElement method) {
+        List<TypeMirror> invalidExceptions = util.invalidExceptionsInDeclaration(method);
+        if (invalidExceptions.isEmpty()) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.of(new ValidationFailure("invalid exception declaration: annotated method '" +
+                method.getSimpleName() +
+                "' may not declare any checked or inaccessible exceptions, but found: " +
+                invalidExceptions.stream()
+                        .map(TypeMirror::toString)
+                        .collect(toList()), method));
     }
 }
