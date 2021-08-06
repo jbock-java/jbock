@@ -53,8 +53,7 @@ class ConverterTest {
                 "}");
         assertAbout(javaSources()).that(List.of(javaFile))
                 .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("invalid converter class: converter must extend StringConverter<X> or implement Supplier<StringConverter<X>> but not both");
+                .compilesWithoutError();
     }
 
     @Test
@@ -497,7 +496,7 @@ class ConverterTest {
     }
 
     @Test
-    void converterInvalidRawFunctionSupplier() {
+    void converterInvalidRawTypeInSupplier() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
@@ -513,7 +512,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("raw type in converter class");
+                .withErrorContaining("invalid converter class: missing a type parameter in type 'StringConverter'");
     }
 
     @Test
@@ -533,11 +532,11 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("raw type in converter class");
+                .withErrorContaining("invalid converter class: missing a type parameter in type 'Supplier'");
     }
 
     @Test
-    void converterInvalidRawFunction() {
+    void converterInvalidRawStringConverter() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
@@ -553,7 +552,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("raw type in converter class");
+                .withErrorContaining("invalid converter class: missing a type parameter in type 'StringConverter'");
     }
 
     @Test

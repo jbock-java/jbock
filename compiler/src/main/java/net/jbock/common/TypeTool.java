@@ -86,11 +86,4 @@ public class TypeTool {
                         types.erasure(someClass.asType())))
                 .map(declaredType -> declaredType.getTypeArguments().get(0));
     }
-
-    public boolean isSameErasure(TypeMirror x, Class<?> y) {
-        return elements.getTypeElement(y.getCanonicalName())
-                .map(TypeElement::asType)
-                .map(type -> types.isSameType(types.erasure(x), types.erasure(type)))
-                .orElse(false);
-    }
 }
