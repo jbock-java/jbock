@@ -39,16 +39,13 @@ public class ExecutableElementsFinder {
     }
 
     /**
-     * Returns a Right-Either containing all annotated parameterless abstract
-     * methods.
+     * Returns a Right-Either containing all annotated parameterless
+     * abstract methods.
      *
      * <p>If one of the abstract methods is not annotated,
-     * a Left-Either is returned.
+     * or not parameterless, a Left-Either is returned.
      *
-     * <p>If one of the unannotated parameterless abstract methods does not have
-     * an annotated ancestor, a Left-Either is returned.
-     *
-     * @return all annotated parameterless abstract methods, including inherited,
+     * @return all annotated parameterless abstract methods,
      *         or a nonempty list of validation failures
      */
     Either<List<ValidationFailure>, AnnotatedMethodsBuilder.Step2> findExecutableElements() {
