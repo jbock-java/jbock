@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import java.util.Optional;
 
+import static io.jbock.util.Either.right;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
 @ValidateScope
@@ -47,7 +48,7 @@ public class MappingFinder {
                         .or(() -> checkConverterIsInnerClass(sourceMethod, converter))
                         .map(failure -> failure.prepend("invalid converter class: "))
                         .<Either<ValidationFailure, TypeElement>>map(Either::left)
-                        .orElseGet(() -> Either.right(converter))
+                        .orElseGet(() -> right(converter))
                         .flatMap(c -> converterValidator.get().findMapping(sourceMethod, c)))
                 .orElseGet(() -> autoOrEnumMapper.get().findMapping(sourceMethod));
     }

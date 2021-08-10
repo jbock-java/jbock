@@ -121,10 +121,4 @@ public class Util {
         }
         return Optional.empty();
     }
-
-    public String noMatchError(TypeMirror type) {
-        return "define a converter that implements " +
-                StringConverter.class.getSimpleName() +
-                "<" + typeToString(type) + ">";
-    }
 }
