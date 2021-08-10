@@ -8,7 +8,7 @@ import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
-import net.jbock.convert.ref.ReferenceTool;
+import net.jbock.convert.ref.RefTool;
 import net.jbock.convert.ref.StringConverterType;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
@@ -21,16 +21,16 @@ import java.util.function.Supplier;
 @ValidateScope
 public class ConverterMapper {
 
-    private final ReferenceTool referenceTool;
+    private final RefTool refTool;
     private final Util util;
     private final SafeTypes types;
 
     @Inject
     ConverterMapper(
-            ReferenceTool referenceTool,
+            RefTool refTool,
             Util util,
             SafeTypes types) {
-        this.referenceTool = referenceTool;
+        this.refTool = refTool;
         this.util = util;
         this.types = types;
     }
@@ -39,7 +39,7 @@ public class ConverterMapper {
     Either<ValidationFailure, Mapping<M>> findMapping(
             Match<M> match,
             TypeElement converter) {
-        return referenceTool.getReferencedType(match.sourceMethod(), converter)
+        return refTool.getReferencedType(match.sourceMethod(), converter)
                 .filter(referencedType -> checkMatchingMatch(match, referencedType))
                 .map(referencedType -> {
                     CodeBlock mapExpr = getMapExpr(referencedType, converter);

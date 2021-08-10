@@ -20,13 +20,13 @@ import static io.jbock.util.Either.right;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 
 @ValidateScope
-public class ReferenceTool {
+public class RefTool {
 
     private final SafeTypes types;
     private final SafeElements elements;
 
     @Inject
-    ReferenceTool(SafeTypes types, SafeElements elements) {
+    RefTool(SafeTypes types, SafeElements elements) {
         this.types = types;
         this.elements = elements;
     }
