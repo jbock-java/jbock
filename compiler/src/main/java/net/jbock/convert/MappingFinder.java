@@ -5,7 +5,7 @@ import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.matching.AutoValidator;
+import net.jbock.convert.matching.AutoOrEnumMapper;
 import net.jbock.convert.matching.ConverterValidator;
 import net.jbock.processor.SourceElement;
 import net.jbock.validate.ValidateScope;
@@ -19,18 +19,18 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 @ValidateScope
 public class MappingFinder {
 
-    private final Lazy<AutoValidator> autoConverterFinder;
+    private final Lazy<AutoOrEnumMapper> autoOrEnumMapper;
     private final Lazy<ConverterValidator> converterValidator;
     private final SourceElement sourceElement;
     private final Util util;
 
     @Inject
     MappingFinder(
-            Lazy<AutoValidator> autoConverterFinder,
+            Lazy<AutoOrEnumMapper> autoOrEnumMapper,
             Lazy<ConverterValidator> converterValidator,
             SourceElement sourceElement,
             Util util) {
-        this.autoConverterFinder = autoConverterFinder;
+        this.autoOrEnumMapper = autoOrEnumMapper;
         this.converterValidator = converterValidator;
         this.sourceElement = sourceElement;
         this.util = util;
@@ -49,7 +49,7 @@ public class MappingFinder {
                         .<Either<ValidationFailure, TypeElement>>map(Either::left)
                         .orElseGet(() -> Either.right(converter))
                         .flatMap(c -> converterValidator.get().findMapping(sourceMethod, c)))
-                .orElseGet(() -> autoConverterFinder.get().findMapping(sourceMethod));
+                .orElseGet(() -> autoOrEnumMapper.get().findMapping(sourceMethod));
     }
 
     /* Left-Optional

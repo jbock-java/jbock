@@ -22,14 +22,14 @@ import static io.jbock.util.Either.left;
 import static net.jbock.common.Constants.STRING;
 
 @ValidateScope
-public class AutoValidator {
+public class AutoOrEnumMapper {
 
     private final AutoMapper autoMapper;
     private final Util util;
     private final MatchFinder matchFinder;
 
     @Inject
-    AutoValidator(
+    AutoOrEnumMapper(
             AutoMapper autoMapper,
             Util util,
             MatchFinder matchFinder) {
