@@ -42,15 +42,9 @@ public class AutoOrEnumMapper {
     Either<ValidationFailure, Mapping<M>> findMapping(
             M sourceMethod) {
         return matchFinder.findMatch(sourceMethod)
-                .flatMap(m -> findEnumOrAutoMapping(sourceMethod, m));
-    }
-
-    private <M extends AnnotatedMethod>
-    Either<ValidationFailure, Mapping<M>> findEnumOrAutoMapping(
-            M sourceMethod,
-            ValidMatch<M> match) {
-        return autoMapper.findAutoMapping(sourceMethod, match)
-                .flatMapLeft(message -> findEnumMapping(sourceMethod, match));
+                .flatMap(match -> autoMapper.findAutoMapping(match)
+                        .<Either<ValidationFailure, Mapping<M>>>map(Either::right)
+                        .orElseGet(() -> findEnumMapping(sourceMethod, match)));
     }
 
     private <M extends AnnotatedMethod>

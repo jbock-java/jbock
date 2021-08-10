@@ -2,11 +2,8 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
-import net.jbock.common.Util;
-import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
@@ -21,11 +18,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static io.jbock.util.Either.left;
-import static io.jbock.util.Either.right;
 import static net.jbock.common.Constants.STRING;
 
 @ValidateScope
@@ -38,31 +34,26 @@ public class AutoMapper {
     private static final String PARSE = "parse";
 
     private final TypeTool tool;
-    private final Util util;
     private final List<AutoConversion> conversions;
 
     @Inject
-    AutoMapper(
-            TypeTool tool,
-            Util util) {
+    AutoMapper(TypeTool tool) {
         this.tool = tool;
-        this.util = util;
         this.conversions = autoConversions();
     }
 
     <M extends AnnotatedMethod>
-    Either<ValidationFailure, Mapping<M>> findAutoMapping(
-            M sourceMethod,
+    Optional<Mapping<M>> findAutoMapping(
             ValidMatch<M> match) {
         TypeMirror baseType = match.baseType();
         for (AutoConversion conversion : conversions) {
             if (tool.isSameType(baseType, conversion.qualifiedName())) {
                 CodeBlock code = conversion.code();
                 boolean multiline = conversion.multiline();
-                return right(Mapping.create(code, match, multiline));
+                return Optional.of(Mapping.create(code, match, multiline));
             }
         }
-        return left(sourceMethod.fail(util.noMatchError(baseType)));
+        return Optional.empty();
     }
 
     private AutoConversion create(Class<?> autoType, String methodName) {
