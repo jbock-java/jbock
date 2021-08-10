@@ -36,7 +36,7 @@ public class ConverterValidator {
 
     public <M extends AnnotatedMethod>
     Either<ValidationFailure, Mapping<M>> findMapping(
-            ValidMatch<M> match,
+            Match<M> match,
             TypeElement converter) {
         return referenceTool.getReferencedType(match.sourceMethod(), converter)
                 .filter(referencedType -> checkMatchingMatch(match, referencedType))
@@ -57,7 +57,7 @@ public class ConverterValidator {
 
     private <M extends AnnotatedMethod>
     Optional<ValidationFailure> checkMatchingMatch(
-            ValidMatch<M> match,
+            Match<M> match,
             StringConverterType converterType) {
         if (!types.isSameType(converterType.outputType(), match.baseType())) {
             String expectedType = StringConverter.class.getSimpleName() +

@@ -44,7 +44,7 @@ public class AutoMapper {
 
     <M extends AnnotatedMethod>
     Optional<Mapping<M>> findAutoMapping(
-            ValidMatch<M> match) {
+            Match<M> match) {
         TypeMirror baseType = match.baseType();
         for (AutoConversion conversion : conversions) {
             if (tool.isSameType(baseType, conversion.qualifiedName())) {

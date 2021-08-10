@@ -18,7 +18,6 @@ import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
 
-import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
 import static net.jbock.common.TypeTool.AS_PRIMITIVE;
@@ -42,18 +41,23 @@ public class MatchFinder {
     }
 
     public <M extends AnnotatedMethod>
-    Either<ValidationFailure, ValidMatch<M>> findMatch(
+    Either<ValidationFailure, Match<M>> findMatch(
             M sourceMethod) {
-        return validateParameterVsParameters(findMatchInternal(sourceMethod));
+        Match<M> match = findMatchInternal(sourceMethod);
+        return validateParameterVsParameters(match)
+                .<Either<ValidationFailure, Match<M>>>map(Either::left)
+                .orElseGet(() -> right(match));
     }
 
     public <M extends AnnotatedMethod>
-    Either<ValidationFailure, ValidMatch<M>>
+    Either<ValidationFailure, Match<M>>
     findFlagMatch(
             M sourceMethod) {
         PrimitiveType bool = types.getPrimitiveType(BOOLEAN);
         Match<M> match = Match.create(bool, OPTIONAL, sourceMethod);
-        return validateParameterVsParameters(match);
+        return validateParameterVsParameters(match)
+                .<Either<ValidationFailure, Match<M>>>map(Either::left)
+                .orElseGet(() -> right(match));
     }
 
     private <M extends AnnotatedMethod> Match<M>
@@ -72,13 +76,13 @@ public class MatchFinder {
                 });
     }
 
-    private static <M extends AnnotatedMethod>
-    Either<ValidationFailure, ValidMatch<M>> validateParameterVsParameters(
+    private <M extends AnnotatedMethod>
+    Optional<ValidationFailure> validateParameterVsParameters(
             Match<M> match) {
         M sourceMethod = match.sourceMethod();
         if (sourceMethod.isParameter()
                 && match.multiplicity() == Multiplicity.REPEATABLE) {
-            return left(sourceMethod.fail("method '" +
+            return Optional.of(sourceMethod.fail("method '" +
                     sourceMethod.method().getSimpleName() +
                     "' returns a list-based type, so it must be annotated with @" +
                     Option.class.getSimpleName() +
@@ -87,12 +91,12 @@ public class MatchFinder {
         }
         if (sourceMethod.isParameters()
                 && match.multiplicity() != Multiplicity.REPEATABLE) {
-            return left(sourceMethod.fail("method '" +
+            return Optional.of(sourceMethod.fail("method '" +
                     sourceMethod.method().getSimpleName() +
                     "' is annotated with @" +
                     Parameters.class.getSimpleName() +
                     ", so it must return java.util.List"));
         }
-        return right(new ValidMatch<>(match));
+        return Optional.empty();
     }
 }

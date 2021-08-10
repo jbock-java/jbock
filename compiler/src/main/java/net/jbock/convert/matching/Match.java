@@ -2,12 +2,13 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.common.ValidationFailure;
 import net.jbock.model.Multiplicity;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 
-public class Match<M extends AnnotatedMethod> {
+public final class Match<M extends AnnotatedMethod> {
 
     /* baseType ({List<A>, Optional<A>}) == A
      * baseType (OptionalInt) == Integer
@@ -46,19 +47,23 @@ public class Match<M extends AnnotatedMethod> {
         return new Match<>(baseType, multiplicity, Optional.empty(), sourceMethod);
     }
 
-    TypeMirror baseType() {
+    public TypeMirror baseType() {
         return baseType;
     }
 
-    Multiplicity multiplicity() {
+    public Multiplicity multiplicity() {
         return multiplicity;
     }
 
-    M sourceMethod() {
+    public M sourceMethod() {
         return sourceMethod;
     }
 
-    Optional<CodeBlock> extractExpr() {
+    public ValidationFailure fail(String message) {
+        return sourceMethod().fail(message);
+    }
+
+    public Optional<CodeBlock> extractExpr() {
         return extractExpr;
     }
 }

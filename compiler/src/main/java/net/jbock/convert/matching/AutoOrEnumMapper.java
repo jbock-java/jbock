@@ -40,7 +40,7 @@ public class AutoOrEnumMapper {
 
     public <M extends AnnotatedMethod>
     Either<ValidationFailure, Mapping<M>> findMapping(
-            ValidMatch<M> match) {
+            Match<M> match) {
         return autoMapper.findAutoMapping(match)
                 .or(() -> findEnumMapping(match))
                 .<Either<ValidationFailure, Mapping<M>>>map(Either::right)
@@ -49,7 +49,7 @@ public class AutoOrEnumMapper {
 
     private <M extends AnnotatedMethod>
     Optional<Mapping<M>> findEnumMapping(
-            ValidMatch<M> match) {
+            Match<M> match) {
         return TypeTool.AS_DECLARED.visit(match.baseType())
                 .map(DeclaredType::asElement)
                 .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
@@ -82,7 +82,7 @@ public class AutoOrEnumMapper {
         return code.build();
     }
 
-    private ValidationFailure noConverterError(ValidMatch<?> match) {
+    private ValidationFailure noConverterError(Match<?> match) {
         String expectedType = StringConverter.class.getSimpleName() +
                 "<" + util.typeToString(match.baseType()) + ">";
         return match.fail("define a converter class that extends " + expectedType +

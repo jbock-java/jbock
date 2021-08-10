@@ -7,8 +7,8 @@ import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.matching.AutoOrEnumMapper;
 import net.jbock.convert.matching.ConverterValidator;
+import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.MatchFinder;
-import net.jbock.convert.matching.ValidMatch;
 import net.jbock.processor.SourceElement;
 import net.jbock.validate.ValidateScope;
 
@@ -51,7 +51,7 @@ public class MappingFinder {
 
     private <M extends AnnotatedMethod>
     Either<ValidationFailure, Mapping<M>> findMappingWithMatch(
-            ValidMatch<M> match) {
+            Match<M> match) {
         M sourceMethod = match.sourceMethod();
         return sourceMethod.converter()
                 .map(converter -> checkConverterIsInnerClass(sourceMethod, converter)
