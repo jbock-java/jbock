@@ -23,29 +23,27 @@ public class ConverterValidator {
     private final ReferenceTool referenceTool;
     private final Util util;
     private final SafeTypes types;
-    private final MatchFinder matchFinder;
 
     @Inject
     ConverterValidator(
             ReferenceTool referenceTool,
             Util util,
-            SafeTypes types,
-            MatchFinder matchFinder) {
+            SafeTypes types) {
         this.referenceTool = referenceTool;
         this.util = util;
         this.types = types;
-        this.matchFinder = matchFinder;
     }
 
     public <M extends AnnotatedMethod>
     Either<ValidationFailure, Mapping<M>> findMapping(
-            M sourceMethod,
+            ValidMatch<M> match,
             TypeElement converter) {
-        return referenceTool.getReferencedType(sourceMethod, converter)
-                .flatMap(referencedType ->
-                        matchFinder.findMatch(sourceMethod)
-                                .filter(match -> isValidMatch(match, referencedType))
-                                .map(match -> Mapping.create(getMapExpr(referencedType, converter), match, false)));
+        return referenceTool.getReferencedType(match.sourceMethod(), converter)
+                .filter(referencedType -> checkMatchingMatch(match, referencedType))
+                .map(referencedType -> {
+                    CodeBlock mapExpr = getMapExpr(referencedType, converter);
+                    return Mapping.create(mapExpr, match, false);
+                });
     }
 
     private CodeBlock getMapExpr(
@@ -58,14 +56,15 @@ public class ConverterValidator {
     }
 
     private <M extends AnnotatedMethod>
-    Optional<ValidationFailure> isValidMatch(
+    Optional<ValidationFailure> checkMatchingMatch(
             ValidMatch<M> match,
             StringConverterType converterType) {
         if (!types.isSameType(converterType.outputType(), match.baseType())) {
             String expectedType = StringConverter.class.getSimpleName() +
                     "<" + util.typeToString(match.baseType()) + ">";
-            return Optional.of(match.sourceMethod().fail("invalid converter class: should extend " +
-                    expectedType + " or implement " + Supplier.class.getSimpleName() + "<" + expectedType + ">"));
+            return Optional.of(match.fail("invalid converter class: should extend " +
+                    expectedType + " or implement " +
+                    Supplier.class.getSimpleName() + "<" + expectedType + ">"));
         }
         return Optional.empty();
     }

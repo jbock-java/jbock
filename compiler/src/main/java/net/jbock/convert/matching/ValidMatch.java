@@ -2,6 +2,7 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.common.ValidationFailure;
 import net.jbock.model.Multiplicity;
 
 import javax.lang.model.type.TypeMirror;
@@ -25,6 +26,10 @@ public final class ValidMatch<M extends AnnotatedMethod> {
 
     public M sourceMethod() {
         return match.sourceMethod();
+    }
+
+    public final ValidationFailure fail(String message) {
+        return sourceMethod().fail(message);
     }
 
     public Optional<CodeBlock> extractExpr() {

@@ -18,6 +18,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static io.jbock.util.Either.left;
@@ -28,26 +29,22 @@ public class AutoOrEnumMapper {
 
     private final AutoMapper autoMapper;
     private final Util util;
-    private final MatchFinder matchFinder;
 
     @Inject
     AutoOrEnumMapper(
             AutoMapper autoMapper,
-            Util util,
-            MatchFinder matchFinder) {
+            Util util) {
         this.autoMapper = autoMapper;
         this.util = util;
-        this.matchFinder = matchFinder;
     }
 
     public <M extends AnnotatedMethod>
     Either<ValidationFailure, Mapping<M>> findMapping(
-            M sourceMethod) {
-        return matchFinder.findMatch(sourceMethod)
-                .flatMap(match -> autoMapper.findAutoMapping(match)
-                        .or(() -> findEnumMapping(match))
-                        .<Either<ValidationFailure, Mapping<M>>>map(Either::right)
-                        .orElseGet(() -> left(sourceMethod.fail(noMatchError(match)))));
+            ValidMatch<M> match) {
+        return autoMapper.findAutoMapping(match)
+                .or(() -> findEnumMapping(match))
+                .<Either<ValidationFailure, Mapping<M>>>map(Either::right)
+                .orElseGet(() -> left(noConverterError(match)));
     }
 
     private <M extends AnnotatedMethod>
@@ -85,9 +82,12 @@ public class AutoOrEnumMapper {
         return code.build();
     }
 
-    private String noMatchError(ValidMatch<?> match) {
-        return "define a converter that implements " +
-                StringConverter.class.getSimpleName() +
+    private ValidationFailure noConverterError(ValidMatch<?> match) {
+        String expectedType = StringConverter.class.getSimpleName() +
                 "<" + util.typeToString(match.baseType()) + ">";
+        return match.fail("define a converter class that extends " + expectedType +
+                " or implements " +
+                Supplier.class.getSimpleName() +
+                "<" + expectedType + ">");
     }
 }

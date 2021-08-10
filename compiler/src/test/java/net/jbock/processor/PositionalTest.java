@@ -210,7 +210,8 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter that implements StringConverter<StringBuilder>");
+                .withErrorContaining("define a converter class that extends StringConverter<StringBuilder>" +
+                        " or implements Supplier<StringConverter<StringBuilder>>");
     }
 
     @Test

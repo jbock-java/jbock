@@ -1,7 +1,5 @@
 package net.jbock.common;
 
-import net.jbock.util.StringConverter;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;

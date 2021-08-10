@@ -7,6 +7,8 @@ import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.matching.AutoOrEnumMapper;
 import net.jbock.convert.matching.ConverterValidator;
+import net.jbock.convert.matching.MatchFinder;
+import net.jbock.convert.matching.ValidMatch;
 import net.jbock.processor.SourceElement;
 import net.jbock.validate.ValidateScope;
 
@@ -24,22 +26,33 @@ public class MappingFinder {
     private final Lazy<ConverterValidator> converterValidator;
     private final SourceElement sourceElement;
     private final Util util;
+    private final MatchFinder matchFinder;
 
     @Inject
     MappingFinder(
             Lazy<AutoOrEnumMapper> autoOrEnumMapper,
             Lazy<ConverterValidator> converterValidator,
             SourceElement sourceElement,
-            Util util) {
+            Util util,
+            MatchFinder matchFinder) {
         this.autoOrEnumMapper = autoOrEnumMapper;
         this.converterValidator = converterValidator;
         this.sourceElement = sourceElement;
         this.util = util;
+        this.matchFinder = matchFinder;
     }
 
     public <M extends AnnotatedMethod>
     Either<ValidationFailure, Mapping<M>> findMapping(
             M sourceMethod) {
+        return matchFinder.findMatch(sourceMethod)
+                .flatMap(this::findMappingWithMatch);
+    }
+
+    private <M extends AnnotatedMethod>
+    Either<ValidationFailure, Mapping<M>> findMappingWithMatch(
+            ValidMatch<M> match) {
+        M sourceMethod = match.sourceMethod();
         return sourceMethod.converter()
                 .map(converter -> checkConverterIsInnerClass(sourceMethod, converter)
                         .or(() -> util.commonTypeChecks(converter))
@@ -49,8 +62,8 @@ public class MappingFinder {
                         .map(failure -> failure.prepend("invalid converter class: "))
                         .<Either<ValidationFailure, TypeElement>>map(Either::left)
                         .orElseGet(() -> right(converter))
-                        .flatMap(c -> converterValidator.get().findMapping(sourceMethod, c)))
-                .orElseGet(() -> autoOrEnumMapper.get().findMapping(sourceMethod));
+                        .flatMap(c -> converterValidator.get().findMapping(match, c)))
+                .orElseGet(() -> autoOrEnumMapper.get().findMapping(match));
     }
 
     /* Left-Optional

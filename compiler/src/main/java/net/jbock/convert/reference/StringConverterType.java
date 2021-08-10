@@ -4,11 +4,11 @@ import javax.lang.model.type.TypeMirror;
 
 public class StringConverterType {
 
-    private final TypeMirror typeArgument;
-    private final boolean supplier; // wrapped in Supplier?
+    private final TypeMirror outputType; // what the converter returns
+    private final boolean supplier; // true if Supplier<StringConverter>
 
-    StringConverterType(TypeMirror typeArgument, boolean supplier) {
-        this.typeArgument = typeArgument;
+    StringConverterType(TypeMirror outputType, boolean supplier) {
+        this.outputType = outputType;
         this.supplier = supplier;
     }
 
@@ -17,6 +17,6 @@ public class StringConverterType {
     }
 
     public TypeMirror outputType() {
-        return typeArgument;
+        return outputType;
     }
 }
