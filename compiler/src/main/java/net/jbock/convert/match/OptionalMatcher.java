@@ -40,8 +40,8 @@ public class OptionalMatcher implements Matcher {
         return getOptionalPrimitive(sourceMethod, returnType)
                 .or(() -> // base
                         elements.getTypeElement("java.util.Optional")
-                                .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
-                                        .map(typeArg -> Match.create(typeArg, OPTIONAL, sourceMethod))))
+                                .flatMap(el -> tool.getSingleTypeArgument(returnType, el))
+                                .map(typeArg -> Match.create(typeArg, OPTIONAL, sourceMethod)))
                 .or(() -> // vavr
                         elements.getTypeElement("io.vavr.control.Option")
                                 .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
@@ -58,8 +58,8 @@ public class OptionalMatcher implements Matcher {
                 CodeBlock extractExpr = optionalPrimitive.extractExpr();
                 return elements.getTypeElement(optionalPrimitive.numberType())
                         .map(TypeElement::asType)
-                        .flatMap(numberType ->
-                                Optional.of(createWithExtract(numberType, extractExpr, sourceMethod)));
+                        .map(numberType ->
+                                createWithExtract(numberType, extractExpr, sourceMethod));
             }
         }
         return Optional.empty();

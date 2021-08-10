@@ -31,7 +31,7 @@ public class ListMatcher implements Matcher {
             M sourceMethod) {
         TypeMirror returnType = sourceMethod.returnType();
         return elements.getTypeElement("java.util.List")
-                .flatMap(utilList -> tool.getSingleTypeArgument(returnType, utilList)
-                        .map(typeArg -> Match.create(typeArg, REPEATABLE, sourceMethod)));
+                .flatMap(utilList -> tool.getSingleTypeArgument(returnType, utilList))
+                .map(typeArg -> Match.create(typeArg, REPEATABLE, sourceMethod));
     }
 }
