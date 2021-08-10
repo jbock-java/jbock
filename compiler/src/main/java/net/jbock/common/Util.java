@@ -91,9 +91,6 @@ public class Util {
     }
 
     public String typeToString(TypeMirror type) {
-        if (type.getKind() != TypeKind.DECLARED) {
-            return type.toString();
-        }
         return TypeTool.AS_DECLARED.visit(type).flatMap(declared ->
                 TypeTool.AS_TYPE_ELEMENT.visit(declared.asElement()).map(el -> {
                     String base = el.getSimpleName().toString();
@@ -118,5 +115,9 @@ public class Util {
                     " or @" + present.get(1).getSimpleName() + " but not both", element));
         }
         return Optional.empty();
+    }
+
+    public SafeTypes types() {
+        return types;
     }
 }
