@@ -6,7 +6,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.EnumName;
-import net.jbock.convert.matching.Match;
+import net.jbock.convert.match.Match;
 import net.jbock.model.Multiplicity;
 import net.jbock.util.StringConverter;
 

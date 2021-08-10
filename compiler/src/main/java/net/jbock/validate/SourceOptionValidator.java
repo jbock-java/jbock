@@ -5,7 +5,7 @@ import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
-import net.jbock.convert.matching.MatchFinder;
+import net.jbock.convert.match.MatchFinder;
 
 import javax.inject.Inject;
 import java.util.HashSet;

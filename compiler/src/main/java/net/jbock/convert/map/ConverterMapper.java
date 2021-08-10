@@ -1,4 +1,4 @@
-package net.jbock.convert.matching;
+package net.jbock.convert.map;
 
 import com.squareup.javapoet.CodeBlock;
 import io.jbock.util.Either;
@@ -7,6 +7,7 @@ import net.jbock.common.SafeTypes;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
+import net.jbock.convert.match.Match;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.convert.reference.StringConverterType;
 import net.jbock.util.StringConverter;
@@ -18,14 +19,14 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @ValidateScope
-public class ConverterValidator {
+public class ConverterMapper {
 
     private final ReferenceTool referenceTool;
     private final Util util;
     private final SafeTypes types;
 
     @Inject
-    ConverterValidator(
+    ConverterMapper(
             ReferenceTool referenceTool,
             Util util,
             SafeTypes types) {

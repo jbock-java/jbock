@@ -1,4 +1,4 @@
-package net.jbock.convert.matching;
+package net.jbock.convert.match;
 
 import io.jbock.util.Either;
 import net.jbock.Option;
@@ -6,8 +6,6 @@ import net.jbock.Parameters;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.matcher.ListMatcher;
-import net.jbock.convert.matcher.OptionalMatcher;
 import net.jbock.model.Multiplicity;
 import net.jbock.validate.ValidateScope;
 
@@ -22,6 +20,7 @@ import static io.jbock.util.Either.right;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
 import static net.jbock.common.TypeTool.AS_PRIMITIVE;
 import static net.jbock.model.Multiplicity.OPTIONAL;
+import static net.jbock.model.Multiplicity.REQUIRED;
 
 @ValidateScope
 public class MatchFinder {
@@ -72,7 +71,7 @@ public class MatchFinder {
                             .map(types::boxedClass)
                             .map(TypeElement::asType)
                             .orElse(sourceMethod.returnType());
-                    return Match.create(baseType, Multiplicity.REQUIRED, sourceMethod);
+                    return Match.create(baseType, REQUIRED, sourceMethod);
                 });
     }
 

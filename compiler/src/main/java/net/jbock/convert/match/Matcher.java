@@ -1,7 +1,6 @@
-package net.jbock.convert.matcher;
+package net.jbock.convert.match;
 
 import net.jbock.annotated.AnnotatedMethod;
-import net.jbock.convert.matching.Match;
 
 import java.util.Optional;
 

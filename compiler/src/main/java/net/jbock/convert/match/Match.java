@@ -1,4 +1,4 @@
-package net.jbock.convert.matching;
+package net.jbock.convert.match;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.annotated.AnnotatedMethod;
@@ -7,6 +7,8 @@ import net.jbock.model.Multiplicity;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
+
+import static net.jbock.model.Multiplicity.OPTIONAL;
 
 public final class Match<M extends AnnotatedMethod> {
 
@@ -30,16 +32,15 @@ public final class Match<M extends AnnotatedMethod> {
         this.sourceMethod = sourceMethod;
     }
 
-    public static <M extends AnnotatedMethod>
-    Match<M> create(
+    static <M extends AnnotatedMethod>
+    Match<M> createWithExtract(
             TypeMirror baseType,
-            Multiplicity multiplicity,
             CodeBlock extractExpr,
             M sourceMethod) {
-        return new Match<>(baseType, multiplicity, Optional.of(extractExpr), sourceMethod);
+        return new Match<>(baseType, OPTIONAL, Optional.of(extractExpr), sourceMethod);
     }
 
-    public static <M extends AnnotatedMethod>
+    static <M extends AnnotatedMethod>
     Match<M> create(
             TypeMirror baseType,
             Multiplicity multiplicity,

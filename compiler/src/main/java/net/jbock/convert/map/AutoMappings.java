@@ -1,10 +1,11 @@
-package net.jbock.convert.matching;
+package net.jbock.convert.map;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.Mapping;
+import net.jbock.convert.match.Match;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
@@ -25,7 +26,7 @@ import java.util.regex.Pattern;
 import static net.jbock.common.Constants.STRING;
 
 @ValidateScope
-public class AutoMapper {
+public class AutoMappings {
 
     private static final String NEW = "new";
     private static final String CREATE = "create";
@@ -37,7 +38,7 @@ public class AutoMapper {
     private final List<AutoConversion> conversions;
 
     @Inject
-    AutoMapper(TypeTool tool) {
+    AutoMappings(TypeTool tool) {
         this.tool = tool;
         this.conversions = autoConversions();
     }

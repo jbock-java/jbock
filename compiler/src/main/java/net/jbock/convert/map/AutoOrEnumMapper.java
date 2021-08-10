@@ -1,4 +1,4 @@
-package net.jbock.convert.matching;
+package net.jbock.convert.map;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
@@ -8,6 +8,7 @@ import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
+import net.jbock.convert.match.Match;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
@@ -27,12 +28,12 @@ import static net.jbock.common.Constants.STRING;
 @ValidateScope
 public class AutoOrEnumMapper {
 
-    private final AutoMapper autoMapper;
+    private final AutoMappings autoMapper;
     private final Util util;
 
     @Inject
     AutoOrEnumMapper(
-            AutoMapper autoMapper,
+            AutoMappings autoMapper,
             Util util) {
         this.autoMapper = autoMapper;
         this.util = util;

@@ -1,4 +1,4 @@
-package net.jbock.convert.matcher;
+package net.jbock.convert.match;
 
 import com.squareup.javapoet.CodeBlock;
 
