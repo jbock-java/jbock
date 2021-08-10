@@ -1,4 +1,4 @@
-package net.jbock.convert.reference;
+package net.jbock.convert.ref;
 
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;

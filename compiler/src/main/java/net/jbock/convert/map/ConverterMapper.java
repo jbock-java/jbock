@@ -8,8 +8,8 @@ import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
-import net.jbock.convert.reference.ReferenceTool;
-import net.jbock.convert.reference.StringConverterType;
+import net.jbock.convert.ref.ReferenceTool;
+import net.jbock.convert.ref.StringConverterType;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
