@@ -1,6 +1,7 @@
 package net.jbock.context;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -23,9 +24,9 @@ public class MultilineConverter {
     MultilineConverter() {
     }
 
-    TypeSpec define(Mapping<?> m) {
+    TypeSpec define(Mapping<?> m, CodeBlock multilineBlock) {
         return TypeSpec.classBuilder(m.multilineConverterType())
-                .addMethod(convertMethod(m))
+                .addMethod(convertMethod(m, multilineBlock))
                 .superclass(ParameterizedTypeName.get(
                         ClassName.get(StringConverter.class),
                         TypeName.get(m.baseType())))
@@ -33,10 +34,10 @@ public class MultilineConverter {
                 .build();
     }
 
-    private MethodSpec convertMethod(Mapping<?> m) {
+    private MethodSpec convertMethod(Mapping<?> m, CodeBlock multilineBlock) {
         MethodSpec.Builder spec = MethodSpec.methodBuilder("convert");
         spec.addAnnotation(Override.class);
-        spec.addCode(m.mapExpr());
+        spec.addCode(multilineBlock);
         spec.addParameter(ParameterSpec.builder(STRING, "token").build());
         spec.addModifiers(PROTECTED);
         spec.returns(TypeName.get(m.baseType()));

@@ -77,9 +77,8 @@ public final class GeneratedClass {
         spec.addType(impl.define());
 
         for (Mapping<?> item : everything) {
-            if (item.multiline()) {
-                spec.addType(multilineConverter.define(item));
-            }
+            item.multilineBlock().ifPresent(multilineBlock ->
+                    spec.addType(multilineConverter.define(item, multilineBlock)));
         }
 
         spec.addMethod(createModelMethod.get());

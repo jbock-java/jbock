@@ -72,11 +72,10 @@ public final class Mapping<M extends AnnotatedMethod> {
         return new Mapping<>(block, match, modeFlag, asParameterSpec, asFieldSpec);
     }
 
-    public Optional<CodeBlock> simpleMapExpr() {
-        if (block.multiline()) {
-            return Optional.empty();
-        }
-        return Optional.of(block.code());
+    public CodeBlock mapExpr() {
+        return block.multiline() ?
+                CodeBlock.of("new $T()", multilineConverterType()) :
+                block.code();
     }
 
     public Optional<CodeBlock> extractExpr() {
@@ -87,16 +86,14 @@ public final class Mapping<M extends AnnotatedMethod> {
         return match.multiplicity();
     }
 
-    public boolean multiline() {
-        return block.multiline();
-    }
-
     public TypeMirror baseType() {
         return match.baseType();
     }
 
-    public CodeBlock mapExpr() {
-        return block.code();
+    public Optional<CodeBlock> multilineBlock() {
+        return block.multiline() ?
+                Optional.of(block.code()) :
+                Optional.empty();
     }
 
     public EnumName enumName() {
