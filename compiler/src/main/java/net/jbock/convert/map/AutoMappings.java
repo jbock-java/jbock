@@ -49,9 +49,7 @@ public class AutoMappings {
         TypeMirror baseType = match.baseType();
         for (AutoConversion conversion : conversions) {
             if (tool.isSameType(baseType, conversion.qualifiedName())) {
-                CodeBlock code = conversion.code();
-                boolean multiline = conversion.multiline();
-                return Optional.of(Mapping.create(code, match, multiline));
+                return Optional.of(Mapping.create(conversion.block(), match));
             }
         }
         return Optional.empty();
@@ -70,7 +68,8 @@ public class AutoMappings {
             CodeBlock code,
             boolean multiline) {
         String canonicalName = autoType.getCanonicalName();
-        return new AutoConversion(canonicalName, code, multiline);
+        MappingBlock mapping = new MappingBlock(code, multiline);
+        return new AutoConversion(canonicalName, mapping);
     }
 
     private List<AutoConversion> autoConversions() {

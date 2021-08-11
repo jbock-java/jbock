@@ -6,6 +6,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.EnumName;
+import net.jbock.convert.map.MappingBlock;
 import net.jbock.convert.match.Match;
 import net.jbock.model.Multiplicity;
 import net.jbock.util.StringConverter;
@@ -24,34 +25,30 @@ import static net.jbock.model.Multiplicity.OPTIONAL;
  */
 public final class Mapping<M extends AnnotatedMethod> {
 
-    private final CodeBlock mapExpr;
+    private final MappingBlock block;
     private final Match<M> match;
-    private final boolean multiline;
     private final boolean modeFlag;
     private final ParameterSpec asParameterSpec;
     private final FieldSpec asFieldSpec;
 
     private Mapping(
-            CodeBlock mapExpr,
+            MappingBlock block,
             Match<M> match,
-            boolean multiline,
             boolean modeFlag,
             ParameterSpec asParameterSpec,
             FieldSpec asFieldSpec) {
+        this.block = block;
         this.asParameterSpec = asParameterSpec;
         this.match = match;
-        this.multiline = multiline;
         this.modeFlag = modeFlag;
-        this.mapExpr = mapExpr;
         this.asFieldSpec = asFieldSpec;
     }
 
     public static <M extends AnnotatedMethod>
     Mapping<M> create(
-            CodeBlock code,
-            Match<M> match,
-            boolean multiline) {
-        return Mapping.create(code, match, multiline, false);
+            MappingBlock block,
+            Match<M> match) {
+        return create(block, match, false);
     }
 
     public static <M extends AnnotatedMethod>
@@ -59,27 +56,26 @@ public final class Mapping<M extends AnnotatedMethod> {
             Match<M> match) {
         CodeBlock code = CodeBlock.of("$T.create($T.identity())",
                 StringConverter.class, Function.class);
-        return Mapping.create(code, match, false, true);
+        return create(new MappingBlock(code, false), match, true);
     }
 
     private static <M extends AnnotatedMethod>
     Mapping<M> create(
-            CodeBlock mapExpr,
+            MappingBlock block,
             Match<M> match,
-            boolean multiline,
             boolean modeFlag) {
         TypeName fieldType = TypeName.get(match.sourceMethod().returnType());
         String fieldName = match.sourceMethod().enumName().original();
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
-        return new Mapping<>(mapExpr, match, multiline, modeFlag, asParameterSpec, asFieldSpec);
+        return new Mapping<>(block, match, modeFlag, asParameterSpec, asFieldSpec);
     }
 
     public Optional<CodeBlock> simpleMapExpr() {
-        if (multiline) {
+        if (block.multiline()) {
             return Optional.empty();
         }
-        return Optional.of(mapExpr);
+        return Optional.of(block.code());
     }
 
     public Optional<CodeBlock> extractExpr() {
@@ -91,7 +87,7 @@ public final class Mapping<M extends AnnotatedMethod> {
     }
 
     public boolean multiline() {
-        return multiline;
+        return block.multiline();
     }
 
     public TypeMirror baseType() {
@@ -99,7 +95,7 @@ public final class Mapping<M extends AnnotatedMethod> {
     }
 
     public CodeBlock mapExpr() {
-        return mapExpr;
+        return block.code();
     }
 
     public EnumName enumName() {

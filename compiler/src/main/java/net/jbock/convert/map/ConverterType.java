@@ -4,6 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
+import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
 import net.jbock.util.StringConverter;
 
@@ -12,19 +13,25 @@ import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-final class StringConverterType {
+public final class ConverterType<M extends AnnotatedMethod> {
 
+    private final TypeElement converter;
+    private final Match<M> match;
     private final TypeMirror outputType; // the type-arg T in StringConverter<T>
     private final boolean supplier; // true if implements Supplier<StringConverter<T>>
 
-    StringConverterType(TypeMirror outputType, boolean supplier) {
+    ConverterType(
+            TypeElement converter,
+            Match<M> match,
+            TypeMirror outputType,
+            boolean supplier) {
+        this.converter = converter;
+        this.match = match;
         this.outputType = outputType;
         this.supplier = supplier;
     }
 
-    <M extends AnnotatedMethod>
     Optional<ValidationFailure> checkMatchingMatch(
-            Match<M> match,
             Util util) {
         if (!util.types().isSameType(outputType, match.baseType())) {
             String expectedType = StringConverter.class.getSimpleName() +
@@ -36,10 +43,16 @@ final class StringConverterType {
         return Optional.empty();
     }
 
-    CodeBlock getMapExpr(TypeElement converter) {
+    private CodeBlock asBlock() {
+        TypeMirror type = converter.asType();
         if (supplier) {
-            return CodeBlock.of("new $T().get()", converter.asType());
+            return CodeBlock.of("new $T().get()", type);
         }
-        return CodeBlock.of("new $T()", converter.asType());
+        return CodeBlock.of("new $T()", type);
+    }
+
+    Mapping<M> toMapping() {
+        MappingBlock block = new MappingBlock(asBlock(), false);
+        return Mapping.create(block, match);
     }
 }

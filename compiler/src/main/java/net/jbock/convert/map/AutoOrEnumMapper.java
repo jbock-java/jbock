@@ -56,12 +56,12 @@ public class AutoOrEnumMapper {
                 .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
                 .filter(element -> element.getKind() == ElementKind.ENUM)
                 .map(enumType -> {
-                    CodeBlock code = enumConversionCode(enumType);
-                    return Mapping.create(code, match, true);
+                    MappingBlock mapping = enumConversionCode(enumType);
+                    return Mapping.create(mapping, match);
                 });
     }
 
-    private CodeBlock enumConversionCode(TypeElement baseType) {
+    private MappingBlock enumConversionCode(TypeElement baseType) {
         ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
         ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e").build();
         ParameterSpec values = ParameterSpec.builder(STRING, "values").build();
@@ -80,7 +80,7 @@ public class AutoOrEnumMapper {
                 .addStatement("throw new $T($N)", IllegalArgumentException.class, message)
                 .unindent()
                 .add("}\n");
-        return code.build();
+        return new MappingBlock(code.build(), true);
     }
 
     private ValidationFailure noConverterError(Match<?> match) {

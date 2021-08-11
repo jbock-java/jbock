@@ -1,6 +1,5 @@
 package net.jbock.convert.map;
 
-import com.squareup.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeElements;
@@ -41,53 +40,51 @@ public class ConverterMapper {
     Either<ValidationFailure, Mapping<M>> findMapping(
             Match<M> match,
             TypeElement converter) {
-        return getReferencedType(match, converter)
-                .map(referencedType -> {
-                    CodeBlock mapExpr = referencedType.getMapExpr(converter);
-                    return Mapping.create(mapExpr, match, false);
-                });
+        return getConverterType(match, converter)
+                .map(ConverterType::toMapping);
     }
 
     private <M extends AnnotatedMethod>
-    Either<ValidationFailure, StringConverterType> getReferencedType(
+    Either<ValidationFailure, ConverterType<M>> getConverterType(
             Match<M> match,
             TypeElement converter) {
-        M sourceMethod = match.sourceMethod();
         return checkSupplier(converter)
-                .map(declaredType -> handleSupplier(sourceMethod, declaredType))
+                .map(declaredType -> handleSupplier(converter, match, declaredType))
                 .or(() -> checkStringConverter(converter)
                         .map(stringConverterType ->
-                                handleStringConverter(sourceMethod, stringConverterType, false)))
-                .orElseGet(() -> left(sourceMethod.fail(errorConverterType())))
-                .filter(referencedType -> referencedType.checkMatchingMatch(match, util));
+                                handleStringConverter(converter, match, stringConverterType, false)))
+                .orElseGet(() -> left(match.fail(errorConverterType())))
+                .filter(referencedType -> referencedType.checkMatchingMatch(util));
     }
 
     private <M extends AnnotatedMethod>
-    Either<ValidationFailure, StringConverterType> handleSupplier(
-            M sourceMethod,
+    Either<ValidationFailure, ConverterType<M>> handleSupplier(
+            TypeElement converter,
+            Match<M> match,
             DeclaredType declaredType) {
         if (declaredType.getTypeArguments().size() != 1) {
-            return left(sourceMethod.fail(converterRawType(declaredType)));
+            return left(match.fail(converterRawType(declaredType)));
         }
         TypeMirror typeArgument = declaredType.getTypeArguments().get(0);
         return AS_DECLARED.visit(typeArgument)
                 .filter(suppliedFunction -> isSameErasure(suppliedFunction,
                         StringConverter.class))
                 .<Either<ValidationFailure, DeclaredType>>map(Either::right)
-                .orElseGet(() -> left(sourceMethod.fail(errorConverterType())))
-                .flatMap(suppliedType -> handleStringConverter(sourceMethod, suppliedType, true));
+                .orElseGet(() -> left(match.fail(errorConverterType())))
+                .flatMap(suppliedType -> handleStringConverter(converter, match, suppliedType, true));
     }
 
     private <M extends AnnotatedMethod>
-    Either<ValidationFailure, StringConverterType> handleStringConverter(
-            M sourceMethod,
+    Either<ValidationFailure, ConverterType<M>> handleStringConverter(
+            TypeElement converter,
+            Match<M> match,
             DeclaredType declaredType,
             boolean isSupplier) {
         if (declaredType.getTypeArguments().size() != 1) {
-            return left(sourceMethod.fail(converterRawType(declaredType)));
+            return left(match.fail(converterRawType(declaredType)));
         }
         TypeMirror typeArgument = declaredType.getTypeArguments().get(0);
-        return right(new StringConverterType(typeArgument, isSupplier));
+        return right(new ConverterType<>(converter, match, typeArgument, isSupplier));
     }
 
     private Optional<DeclaredType> checkSupplier(TypeElement converter) {

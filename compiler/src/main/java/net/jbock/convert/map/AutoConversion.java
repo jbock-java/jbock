@@ -1,31 +1,22 @@
 package net.jbock.convert.map;
 
-import com.squareup.javapoet.CodeBlock;
-
 final class AutoConversion {
 
     private final String qualifiedName;
-    private final CodeBlock code;
-    private final boolean multiline;
+    private final MappingBlock block;
 
     AutoConversion(
             String qualifiedName,
-            CodeBlock code,
-            boolean multiline) {
+            MappingBlock block) {
         this.qualifiedName = qualifiedName;
-        this.code = code;
-        this.multiline = multiline;
+        this.block = block;
     }
 
     String qualifiedName() {
         return qualifiedName;
     }
 
-    CodeBlock code() {
-        return code;
-    }
-
-    boolean multiline() {
-        return multiline;
+    MappingBlock block() {
+        return block;
     }
 }
