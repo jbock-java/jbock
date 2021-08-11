@@ -17,9 +17,9 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
@@ -49,7 +49,7 @@ public class MethodStep implements BasicAnnotationProcessor.Step {
     public Set<String> annotations() {
         return methodLevelAnnotations().stream()
                 .map(Class::getCanonicalName)
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     @Override

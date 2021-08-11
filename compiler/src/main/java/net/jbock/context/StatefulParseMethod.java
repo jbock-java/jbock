@@ -103,7 +103,7 @@ public class StatefulParseMethod {
                 .addStatement("$T $N = $N.next()", STRING, token, it);
 
         code.beginControlFlow("if (!$N && $S.equals($N))",
-                endOfOptionParsing, "--", token)
+                        endOfOptionParsing, "--", token)
                 .addStatement("$N = $L", endOfOptionParsing, true)
                 .addStatement("continue")
                 .endControlFlow();
@@ -113,7 +113,7 @@ public class StatefulParseMethod {
         }
 
         code.add("if (!$N && $N.matcher($N).matches())\n",
-                endOfOptionParsing, commonFields.suspiciousPattern(), token).indent()
+                        endOfOptionParsing, commonFields.suspiciousPattern(), token).indent()
                 .addStatement(throwInvalidOptionStatement(ErrTokenType.INVALID_OPTION))
                 .unindent();
 
@@ -180,7 +180,7 @@ public class StatefulParseMethod {
 
     private CodeBlock checkSuspicious() {
         return CodeBlock.builder().add("if ($N.matcher($N).matches())\n",
-                commonFields.suspiciousPattern(), token).indent()
+                        commonFields.suspiciousPattern(), token).indent()
                 .addStatement(throwInvalidOptionStatement(ErrTokenType.INVALID_OPTION))
                 .unindent().build();
     }

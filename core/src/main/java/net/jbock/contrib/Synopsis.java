@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static net.jbock.model.Multiplicity.REPEATABLE;
 import static net.jbock.model.Multiplicity.REQUIRED;
 
@@ -72,11 +72,11 @@ final class Synopsis {
     }
 
     private List<Option> requiredOptions() {
-        return filterBySkew(options, REQUIRED).collect(Collectors.toList());
+        return filterBySkew(options, REQUIRED).collect(toList());
     }
 
     private List<Parameter> regularParameters() {
-        return filterBySkew(parameters, sk -> sk != REPEATABLE).collect(Collectors.toList());
+        return filterBySkew(parameters, sk -> sk != REPEATABLE).collect(toList());
     }
 
     private Optional<Parameter> repeatableParameter() {

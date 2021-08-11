@@ -11,8 +11,8 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static net.jbock.common.Constants.ACCESS_MODIFIERS;
 import static net.jbock.common.Constants.optionalString;
 
@@ -43,7 +43,7 @@ public class SourceElement {
     static SourceElement create(TypeElement typeElement) {
         List<Modifier> accessModifiers = typeElement.getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
-                .collect(Collectors.toUnmodifiableList());
+                .collect(toList());
         Command command = typeElement.getAnnotation(Command.class);
         String programName = optionalString(command.name())
                 .orElseGet(() -> SnakeName.create(typeElement.getSimpleName().toString()).snake('-'));

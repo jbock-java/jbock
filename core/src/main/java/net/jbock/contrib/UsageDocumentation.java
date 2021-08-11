@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 final class UsageDocumentation {
 
@@ -170,7 +171,7 @@ final class UsageDocumentation {
                 .orElseGet(() -> item.description().stream()
                         .map(s -> whitespace.split(s, -1))
                         .flatMap(Arrays::stream)
-                        .collect(Collectors.toList())));
+                        .collect(toList())));
         makeLines(indent, tokens).forEach(out::println);
     }
 

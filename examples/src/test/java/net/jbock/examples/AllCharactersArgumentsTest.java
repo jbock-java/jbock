@@ -16,11 +16,11 @@ class AllCharactersArgumentsTest {
     @Test
     void tests() {
         f.assertThat(
-                "--smallChar", "a",
-                "--bigChar", "A",
-                "--charOpt", "X",
-                "--charList", "b",
-                "--charList", "c")
+                        "--smallChar", "a",
+                        "--bigChar", "A",
+                        "--charOpt", "X",
+                        "--charList", "b",
+                        "--charList", "c")
                 .has(AllCharactersArguments::smallChar, 'a')
                 .has(AllCharactersArguments::bigChar, 'A')
                 .has(AllCharactersArguments::charOpt, Optional.of('X'))

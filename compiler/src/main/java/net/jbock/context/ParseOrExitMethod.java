@@ -22,18 +22,18 @@ public class ParseOrExitMethod {
     private final SourceElement sourceElement;
     private final GeneratedTypes generatedTypes;
     private final ParseMethod parseMethod;
-    private final List<Mapping<?>> everything;
+    private final List<Mapping<?>> allMappings;
 
     @Inject
     ParseOrExitMethod(
             SourceElement sourceElement,
             GeneratedTypes generatedTypes,
             ParseMethod parseMethod,
-            List<Mapping<?>> everything) {
+            List<Mapping<?>> allMappings) {
         this.sourceElement = sourceElement;
         this.generatedTypes = generatedTypes;
         this.parseMethod = parseMethod;
-        this.everything = everything;
+        this.allMappings = allMappings;
     }
 
     MethodSpec define() {
@@ -45,7 +45,7 @@ public class ParseOrExitMethod {
 
         CodeBlock.Builder code = CodeBlock.builder();
         code.add("$1T $2N = $1T.standardBuilder($3N)\n", ParseRequest.class, request, args).indent();
-        if (everything.stream().anyMatch(Mapping::isRequired)) {
+        if (allMappings.stream().anyMatch(Mapping::isRequired)) {
             code.add(".withHelpRequested($1N.length == 0 || $2S.equals($1N[0]))\n", args, "--help");
         } else {
             code.add(".withHelpRequested($1N.length > 0 && $2S.equals($1N[0]))\n", args, "--help");

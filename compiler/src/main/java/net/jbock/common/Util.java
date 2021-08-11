@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 public class Util {
 
     private final SafeTypes types;
@@ -60,7 +62,7 @@ public class Util {
     public List<TypeMirror> invalidExceptionsInDeclaration(ExecutableElement element) {
         return element.getThrownTypes().stream()
                 .filter(thrownType -> !isPermissibleException(thrownType))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     private boolean isPermissibleException(TypeMirror mirror) {
@@ -109,7 +111,7 @@ public class Util {
             List<Class<? extends Annotation>> annotations) {
         List<Class<? extends Annotation>> present = annotations.stream()
                 .filter(ann -> element.getAnnotation(ann) != null)
-                .collect(Collectors.toUnmodifiableList());
+                .collect(toList());
         if (present.size() >= 2) {
             return Optional.of(new ValidationFailure("annotate with either @" + present.get(0).getSimpleName() +
                     " or @" + present.get(1).getSimpleName() + " but not both", element));

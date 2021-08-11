@@ -10,8 +10,8 @@ import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 
@@ -25,15 +25,15 @@ public class Impl {
 
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
-    private final List<Mapping<?>> everything;
+    private final List<Mapping<?>> allMappings;
 
     @Inject
     Impl(GeneratedTypes generatedTypes,
          SourceElement sourceElement,
-         List<Mapping<?>> everything) {
+         List<Mapping<?>> allMappings) {
         this.generatedTypes = generatedTypes;
         this.sourceElement = sourceElement;
-        this.everything = everything;
+        this.allMappings = allMappings;
     }
 
     TypeSpec define() {
@@ -43,32 +43,32 @@ public class Impl {
         } else {
             spec.superclass(sourceElement.typeName());
         }
-        for (Mapping<?> c : everything) {
-            spec.addField(c.asField());
+        for (Mapping<?> m : allMappings) {
+            spec.addField(m.asField());
         }
         return spec.addModifiers(PRIVATE, STATIC)
                 .addMethod(implConstructor())
-                .addMethods(everything.stream()
+                .addMethods(allMappings.stream()
                         .map(this::parameterMethodOverride)
-                        .collect(Collectors.toUnmodifiableList()))
+                        .collect(toList()))
                 .build();
     }
 
-    private MethodSpec parameterMethodOverride(Mapping<?> c) {
-        AnnotatedMethod param = c.sourceMethod();
-        return MethodSpec.methodBuilder(param.methodName())
-                .returns(TypeName.get(param.returnType()))
-                .addModifiers(param.accessModifiers())
-                .addStatement("return $N", c.asField())
+    private MethodSpec parameterMethodOverride(Mapping<?> m) {
+        AnnotatedMethod sourceMethod = m.sourceMethod();
+        return MethodSpec.methodBuilder(sourceMethod.methodName())
+                .returns(TypeName.get(sourceMethod.returnType()))
+                .addModifiers(sourceMethod.accessModifiers())
+                .addStatement("return $N", m.asField())
                 .build();
     }
 
     private MethodSpec implConstructor() {
         MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-        for (Mapping<?> c : everything) {
-            FieldSpec field = c.asField();
-            spec.addStatement("this.$N = $N", field, c.asParam());
-            spec.addParameter(c.asParam());
+        for (Mapping<?> m : allMappings) {
+            FieldSpec field = m.asField();
+            spec.addStatement("this.$N = $N", field, m.asParam());
+            spec.addParameter(m.asParam());
         }
         return spec.build();
     }

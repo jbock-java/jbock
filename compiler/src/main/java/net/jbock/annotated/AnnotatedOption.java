@@ -6,8 +6,9 @@ import net.jbock.common.SnakeName;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 public final class AnnotatedOption extends AnnotatedMethod {
 
@@ -37,12 +38,12 @@ public final class AnnotatedOption extends AnnotatedMethod {
             EnumName enumName) {
         List<String> names = option.names().stream()
                 .sorted(UNIX_NAMES_FIRST_COMPARATOR)
-                .collect(Collectors.toList());
+                .collect(toList());
         String paramLabel = option.paramLabel().or(() -> names.stream()
-                .filter(name -> name.startsWith("--"))
-                .map(name -> name.substring(2))
-                .map(s -> s.toUpperCase(Locale.US))
-                .findFirst())
+                        .filter(name -> name.startsWith("--"))
+                        .map(name -> name.substring(2))
+                        .map(s -> s.toUpperCase(Locale.US))
+                        .findFirst())
                 .orElseGet(() -> SnakeName.create(option.simpleName().toString())
                         .snake('_')
                         .toUpperCase(Locale.US));

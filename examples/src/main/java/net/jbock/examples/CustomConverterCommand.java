@@ -15,7 +15,9 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 @Command
 abstract class CustomConverterCommand {
@@ -96,7 +98,7 @@ abstract class CustomConverterCommand {
         public StringConverter<ArrayList<Integer>> get() {
             return StringConverter.create(s -> new ArrayList<>(Arrays.stream(s.split(",", -1))
                     .map(Integer::valueOf)
-                    .collect(Collectors.toList())));
+                    .collect(toList())));
         }
     }
 
@@ -106,7 +108,7 @@ abstract class CustomConverterCommand {
         public StringConverter<Set<MyEnum>> get() {
             return StringConverter.create(s -> Arrays.stream(s.split(",", -1))
                     .map(MyEnum::valueOf)
-                    .collect(Collectors.toSet()));
+                    .collect(toSet()));
         }
     }
 

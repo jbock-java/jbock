@@ -9,8 +9,9 @@ import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @see ContextScope
@@ -60,10 +61,10 @@ public class ContextModule {
 
     @ContextScope
     @Provides
-    List<Mapping<?>> everything() {
+    List<Mapping<?>> allMappings() {
         return Stream.of(namedOptions, positionalParams, repeatablePositionalParameters)
                 .flatMap(List::stream)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     @ContextScope

@@ -15,7 +15,7 @@ class EvilArgumentsTest {
     @Test
     void basicTest() {
         f.assertThat("--Fancy=1", "--fancy=1", "--fAncy=2", "--f_ancy=3",
-                "--f__ancy=3", "--blub=4", "--Blub=5")
+                        "--f__ancy=3", "--blub=4", "--Blub=5")
                 .has(EvilArguments::Fancy, Optional.of("1"))
                 .has(EvilArguments::fancy, "1")
                 .has(EvilArguments::fAncy, "2")

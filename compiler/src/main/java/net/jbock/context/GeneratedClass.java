@@ -29,7 +29,7 @@ public final class GeneratedClass {
     private final ParseOrExitMethod parseOrExitMethod;
     private final CreateModelMethod createModelMethod;
     private final MultilineConverter multilineConverter;
-    private final List<Mapping<?>> everything;
+    private final List<Mapping<?>> allMappings;
 
     @Inject
     GeneratedClass(
@@ -43,7 +43,7 @@ public final class GeneratedClass {
             ParseOrExitMethod parseOrExitMethod,
             CreateModelMethod createModelMethod,
             MultilineConverter multilineConverter,
-            List<Mapping<?>> everything) {
+            List<Mapping<?>> allMappings) {
         this.parseMethod = parseMethod;
         this.sourceElement = sourceElement;
         this.impl = impl;
@@ -54,7 +54,7 @@ public final class GeneratedClass {
         this.parseOrExitMethod = parseOrExitMethod;
         this.createModelMethod = createModelMethod;
         this.multilineConverter = multilineConverter;
-        this.everything = everything;
+        this.allMappings = allMappings;
     }
 
     /**
@@ -76,7 +76,7 @@ public final class GeneratedClass {
         }
         spec.addType(impl.define());
 
-        for (Mapping<?> item : everything) {
+        for (Mapping<?> item : allMappings) {
             item.multilineBlock().ifPresent(multilineBlock ->
                     spec.addType(multilineConverter.define(item, multilineBlock)));
         }
