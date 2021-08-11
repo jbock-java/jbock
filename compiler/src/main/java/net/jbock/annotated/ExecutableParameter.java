@@ -2,6 +2,7 @@ package net.jbock.annotated;
 
 import net.jbock.Parameter;
 import net.jbock.common.EnumName;
+import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.List;
@@ -14,13 +15,18 @@ final class ExecutableParameter extends Executable {
 
     private final Parameter parameter;
 
-    ExecutableParameter(ExecutableElement method, Parameter parameter) {
-        super(method);
+    ExecutableParameter(
+            SourceElement sourceElement,
+            ExecutableElement method,
+            Parameter parameter) {
+        super(sourceElement, method);
         this.parameter = parameter;
     }
 
     @Override
-    AnnotatedMethod annotatedMethod(EnumName enumName) {
+    AnnotatedMethod annotatedMethod(
+            SourceElement sourceElement,
+            EnumName enumName) {
         return createParameter(this, enumName);
     }
 

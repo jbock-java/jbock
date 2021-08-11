@@ -5,6 +5,7 @@ import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
+import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -22,31 +23,40 @@ abstract class Executable {
 
     private static final AnnotationUtil ANNOTATION_UTIL = new AnnotationUtil();
 
+    private final SourceElement sourceElement;
     private final ExecutableElement method;
 
-    Executable(ExecutableElement method) {
+    Executable(SourceElement sourceElement, ExecutableElement method) {
         this.method = method;
+        this.sourceElement = sourceElement;
     }
 
-    static Executable create(ExecutableElement method, Annotation annotation) {
+    static Executable create(
+            SourceElement sourceElement,
+            ExecutableElement method,
+            Annotation annotation) {
         if (annotation instanceof Option) {
-            return new ExecutableOption(method, (Option) annotation);
+            return new ExecutableOption(sourceElement, method, (Option) annotation);
         }
         if (annotation instanceof Parameter) {
-            return new ExecutableParameter(method, (Parameter) annotation);
+            return new ExecutableParameter(sourceElement, method, (Parameter) annotation);
         }
         if (annotation instanceof Parameters) {
-            return new ExecutableParameters(method, (Parameters) annotation);
+            return new ExecutableParameters(sourceElement, method, (Parameters) annotation);
         }
         throw new AssertionError("expecting one of " + methodLevelAnnotations()
                 + " but found: " + annotation.getClass());
     }
 
-    abstract AnnotatedMethod annotatedMethod(EnumName enumName);
+    abstract AnnotatedMethod annotatedMethod(SourceElement sourceElement, EnumName enumName);
 
     abstract Optional<String> descriptionKey();
 
     abstract List<String> description();
+
+    final SourceElement sourceElement() {
+        return sourceElement;
+    }
 
     final ExecutableElement method() {
         return method;

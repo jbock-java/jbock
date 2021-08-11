@@ -101,7 +101,8 @@ public class ExecutableElementsFinder {
     private Either<ValidationFailure, Executable> validateAbstractMethod(
             ExecutableElement method) {
         return getMethodAnnotation(method)
-                .<Either<ValidationFailure, Executable>>map(a -> right(Executable.create(method, a)))
+                .<Either<ValidationFailure, Executable>>map(a ->
+                        right(Executable.create(sourceElement, method, a)))
                 .orElseGet(() -> left(missingAnnotationError(method)))
                 .filter(this::validateParameterless);
     }

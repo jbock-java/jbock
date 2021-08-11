@@ -2,6 +2,7 @@ package net.jbock.annotated;
 
 import net.jbock.Option;
 import net.jbock.common.EnumName;
+import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.List;
@@ -14,13 +15,18 @@ final class ExecutableOption extends Executable {
 
     private final Option option;
 
-    ExecutableOption(ExecutableElement method, Option option) {
-        super(method);
+    ExecutableOption(
+            SourceElement sourceElement,
+            ExecutableElement method,
+            Option option) {
+        super(sourceElement, method);
         this.option = option;
     }
 
     @Override
-    AnnotatedMethod annotatedMethod(EnumName enumName) {
+    AnnotatedMethod annotatedMethod(
+            SourceElement sourceElement,
+            EnumName enumName) {
         return createOption(this, enumName);
     }
 

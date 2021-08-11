@@ -4,6 +4,7 @@ import io.jbock.util.Either;
 import net.jbock.common.EnumName;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
+import net.jbock.processor.SourceElement;
 import net.jbock.validate.ValidateScope;
 
 import javax.inject.Inject;
@@ -27,13 +28,16 @@ import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 public class AnnotatedMethodsFactory {
 
     private final Util util;
+    private final SourceElement sourceElement;
     private final ExecutableElementsFinder executableElementsFinder;
 
     @Inject
     AnnotatedMethodsFactory(
             Util util,
+            SourceElement sourceElement,
             ExecutableElementsFinder executableElementsFinder) {
         this.util = util;
+        this.sourceElement = sourceElement;
         this.executableElementsFinder = executableElementsFinder;
     }
 
@@ -63,7 +67,7 @@ public class AnnotatedMethodsFactory {
         ExecutableElement method = sourceMethod.method();
         return util.checkNoDuplicateAnnotations(method, methodLevelAnnotations())
                 .<Either<ValidationFailure, AnnotatedMethod>>map(Either::left)
-                .orElseGet(() -> right(sourceMethod.annotatedMethod(enumName)))
+                .orElseGet(() -> right(sourceMethod.annotatedMethod(sourceElement, enumName)))
                 .filter(this::checkAccessibleReturnType);
     }
 

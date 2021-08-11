@@ -10,7 +10,6 @@ import net.jbock.common.EnumName;
 import net.jbock.convert.map.MappingBlock;
 import net.jbock.convert.match.Match;
 import net.jbock.model.Multiplicity;
-import net.jbock.processor.SourceElement;
 import net.jbock.util.StringConverter;
 
 import javax.lang.model.type.TypeMirror;
@@ -124,8 +123,8 @@ public final class Mapping<M extends AnnotatedMethod> {
         return match.sourceMethod();
     }
 
-    public ClassName multilineConverterType(SourceElement sourceElement) {
-        return sourceMethod().multilineConverterType(sourceElement);
+    public ClassName multilineConverterType() {
+        return sourceMethod().multilineConverterType();
     }
 
     public String paramLabel() {

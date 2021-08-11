@@ -7,7 +7,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.convert.Mapping;
-import net.jbock.processor.SourceElement;
 import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
@@ -20,15 +19,12 @@ import static net.jbock.common.Constants.STRING;
 @ContextScope
 public class MultilineConverter {
 
-    private final SourceElement sourceElement;
-
     @Inject
-    MultilineConverter(SourceElement sourceElement) {
-        this.sourceElement = sourceElement;
+    MultilineConverter() {
     }
 
     TypeSpec define(Mapping<?> m) {
-        return TypeSpec.classBuilder(m.multilineConverterType(sourceElement))
+        return TypeSpec.classBuilder(m.multilineConverterType())
                 .addMethod(convertMethod(m))
                 .superclass(ParameterizedTypeName.get(
                         ClassName.get(StringConverter.class),
