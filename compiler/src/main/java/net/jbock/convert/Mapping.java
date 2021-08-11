@@ -1,5 +1,6 @@
 package net.jbock.convert;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -9,6 +10,7 @@ import net.jbock.common.EnumName;
 import net.jbock.convert.map.MappingBlock;
 import net.jbock.convert.match.Match;
 import net.jbock.model.Multiplicity;
+import net.jbock.processor.SourceElement;
 import net.jbock.util.StringConverter;
 
 import javax.lang.model.type.TypeMirror;
@@ -120,6 +122,10 @@ public final class Mapping<M extends AnnotatedMethod> {
 
     public M sourceMethod() {
         return match.sourceMethod();
+    }
+
+    public ClassName multilineConverterType(SourceElement sourceElement) {
+        return sourceMethod().multilineConverterType(sourceElement);
     }
 
     public String paramLabel() {

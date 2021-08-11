@@ -1,7 +1,9 @@
 package net.jbock.annotated;
 
+import com.squareup.javapoet.ClassName;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
+import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -73,5 +75,9 @@ public abstract class AnnotatedMethod {
 
     public final List<String> description() {
         return executable().description();
+    }
+
+    public final ClassName multilineConverterType(SourceElement sourceElement) {
+        return sourceElement.nestedClass(enumName.className() + "Converter");
     }
 }
