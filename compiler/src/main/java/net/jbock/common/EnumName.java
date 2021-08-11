@@ -32,10 +32,10 @@ public class EnumName {
         return enumConstant;
     }
 
-    /* Case-independently unique.
+    /* Capitalized, unique.
      */
-    public String original() {
-        return original;
+    public String className() {
+        return Character.toUpperCase(original.charAt(0)) + original.substring(1);
     }
 
     @Override

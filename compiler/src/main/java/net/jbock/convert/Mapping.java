@@ -65,7 +65,7 @@ public final class Mapping<M extends AnnotatedMethod> {
             Match<M> match,
             boolean modeFlag) {
         TypeName fieldType = TypeName.get(match.sourceMethod().returnType());
-        String fieldName = match.sourceMethod().enumName().original();
+        String fieldName = match.sourceMethod().methodName();
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
         return new Mapping<>(block, match, modeFlag, asParameterSpec, asFieldSpec);

@@ -64,9 +64,7 @@ public class GeneratedTypes {
     }
 
     ClassName multilineConverterType(Mapping<?> item) {
-        String name = item.enumName().original();
-        String capitalized = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-        return generatedClass.nestedClass(capitalized + "Converter");
+        return generatedClass.nestedClass(item.enumName().className() + "Converter");
     }
 
     TypeName parseResultType() {
