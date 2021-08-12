@@ -329,7 +329,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid converter class: default constructor not found");
+                .withErrorContaining("invalid converter class: invalid constructor: visibility may not be private");
     }
 
     @Test
@@ -375,7 +375,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid converter class: default constructor not found");
+                .withErrorContaining("invalid converter class: invalid throws clause: found checked exception IOException");
     }
 
     @Test
@@ -395,7 +395,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("nested class must be static");
+                .withErrorContaining("invalid converter class: invalid class: nested class 'MapMap' must be static");
     }
 
     @Test

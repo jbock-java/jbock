@@ -19,6 +19,10 @@ public class ValidationFailure {
         return new ValidationFailure(prefix + message, about);
     }
 
+    public ValidationFailure about(Element about) {
+        return new ValidationFailure(message, about);
+    }
+
     public void writeTo(Messager messager) {
         messager.printMessage(ERROR, message, about);
     }

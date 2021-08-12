@@ -2,20 +2,20 @@ package net.jbock.common;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.STATIC;
+import static javax.lang.model.element.NestingKind.MEMBER;
+import static javax.lang.model.util.ElementFilter.constructorsIn;
 
 public class Util {
 
@@ -30,61 +30,89 @@ public class Util {
     /* Left-Optional
      */
     public Optional<ValidationFailure> commonTypeChecks(TypeElement classToCheck) {
-        if (classToCheck.getNestingKind().isNested() && !classToCheck.getModifiers().contains(Modifier.STATIC)) {
-            return Optional.of(new ValidationFailure("nested class must be static", classToCheck));
+        return checkNesting(classToCheck)
+                .map(f -> f.prepend("invalid class: "))
+                .or(() -> checkDefaultConstructor(classToCheck));
+    }
+
+    private Optional<ValidationFailure> checkNesting(TypeElement classToCheck) {
+        if (classToCheck.getNestingKind().isNested() && !classToCheck.getModifiers().contains(STATIC)) {
+            return Optional.of(new ValidationFailure("nested class '" +
+                    classToCheck.getSimpleName() +
+                    "' must be static", classToCheck));
+        }
+        if (classToCheck.getModifiers().contains(PRIVATE)) {
+            return Optional.of(new ValidationFailure("class '" +
+                    classToCheck.getSimpleName() +
+                    " may not be private", classToCheck));
         }
         for (TypeElement element : getEnclosingElements(classToCheck)) {
-            if (element.getModifiers().contains(Modifier.PRIVATE)) {
-                return Optional.of(new ValidationFailure("class cannot be private", classToCheck));
+            if (element.getModifiers().contains(PRIVATE)) {
+                return Optional.of(new ValidationFailure("enclosing class '" +
+                        element.getSimpleName() +
+                        "' may not be private", classToCheck));
             }
-        }
-        if (!hasDefaultConstructor(classToCheck)) {
-            return Optional.of(new ValidationFailure("default constructor not found", classToCheck));
         }
         return Optional.empty();
     }
 
-    private boolean hasDefaultConstructor(TypeElement classToCheck) {
-        List<ExecutableElement> constructors = ElementFilter.constructorsIn(classToCheck.getEnclosedElements());
+    private Optional<ValidationFailure> checkDefaultConstructor(TypeElement classToCheck) {
+        List<ExecutableElement> constructors = constructorsIn(classToCheck.getEnclosedElements());
         if (constructors.isEmpty()) {
-            return true;
+            return Optional.empty();
         }
-        for (ExecutableElement constructor : constructors) {
-            if (!constructor.getModifiers().contains(Modifier.PRIVATE) &&
-                    constructor.getParameters().isEmpty() &&
-                    invalidExceptionsInDeclaration(constructor).isEmpty()) {
-                return true;
-            }
-        }
-        return false;
+        return constructors.stream()
+                .filter(c -> c.getParameters().isEmpty())
+                .map(c -> {
+                    if (c.getModifiers().contains(PRIVATE)) {
+                        return Optional.of(new ValidationFailure("invalid constructor:" +
+                                " visibility may not be private", c));
+                    }
+                    return checkExceptionsInDeclaration(c);
+                })
+                .flatMap(Optional::stream)
+                .findAny()
+                .or(() -> {
+                    if (constructors.stream().anyMatch(c -> c.getParameters().isEmpty())) {
+                        return Optional.empty();
+                    }
+                    return Optional.of(new ValidationFailure("invalid converter class:" +
+                            " default constructor not found", classToCheck));
+                });
     }
 
-    public List<TypeMirror> invalidExceptionsInDeclaration(ExecutableElement element) {
+    public Optional<ValidationFailure> checkExceptionsInDeclaration(ExecutableElement element) {
         return element.getThrownTypes().stream()
-                .filter(thrownType -> !isPermissibleException(thrownType))
-                .collect(toList());
+                .map(thrown -> checkChecked(element, thrown, thrown))
+                .flatMap(Optional::stream)
+                .findAny();
     }
 
-    private boolean isPermissibleException(TypeMirror mirror) {
-        if (mirror.getKind() != TypeKind.DECLARED) {
-            return false;
-        }
+    private Optional<ValidationFailure> checkChecked(
+            ExecutableElement element,
+            TypeMirror thrown,
+            TypeMirror mirror) {
         if (tool.isSameType(mirror, RuntimeException.class) ||
                 tool.isSameType(mirror, Error.class)) {
-            return true;
+            return Optional.empty();
+        }
+        if (tool.isSameType(mirror, Throwable.class)) {
+            return Optional.of(new ValidationFailure("invalid throws clause:" +
+                    " found checked exception " +
+                    typeToString(thrown), element));
         }
         return types.asElement(mirror)
                 .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
-                .filter(t -> commonTypeChecks(t).isEmpty())
-                .map(TypeElement::getSuperclass)
-                .filter(this::isPermissibleException)
-                .isPresent();
+                .flatMap(t -> checkNesting(t)
+                        .map(f -> f.prepend("invalid throws clause: declared exception " +
+                                typeToString(thrown) + " is invalid: ").about(element))
+                        .or(() -> checkChecked(element, thrown, t.getSuperclass())));
     }
 
     public List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
         LinkedList<TypeElement> result = new LinkedList<>();
         result.add(sourceElement);
-        while (result.getLast().getNestingKind() == NestingKind.MEMBER) {
+        while (result.getLast().getNestingKind() == MEMBER) {
             Element enclosingElement = result.getLast().getEnclosingElement();
             TypeTool.AS_TYPE_ELEMENT.visit(enclosingElement)
                     .ifPresent(result::add);
@@ -94,13 +122,13 @@ public class Util {
 
     public String typeToString(TypeMirror type) {
         return TypeTool.AS_DECLARED.visit(type).flatMap(declared ->
-                TypeTool.AS_TYPE_ELEMENT.visit(declared.asElement()).map(el -> {
-                    String base = el.getSimpleName().toString();
+                TypeTool.AS_TYPE_ELEMENT.visit(declared.asElement()).map(t -> {
+                    String base = t.getSimpleName().toString();
                     if (declared.getTypeArguments().isEmpty()) {
                         return base;
                     }
                     return base + declared.getTypeArguments().stream().map(this::typeToString)
-                            .collect(Collectors.joining(", ", "<", ">"));
+                            .collect(joining(", ", "<", ">"));
                 })).orElseGet(type::toString);
     }
 

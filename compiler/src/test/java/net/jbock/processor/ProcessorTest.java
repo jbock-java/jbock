@@ -211,8 +211,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid exception declaration: annotated method 'a' may not declare any checked" +
-                        " or inaccessible exceptions, but found: [java.io.IOException]");
+                .withErrorContaining("invalid throws clause: found checked exception IOException");
     }
 
     @Test
@@ -229,8 +228,8 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid exception declaration: annotated method 'a' may not declare any checked" +
-                        " or inaccessible exceptions, but found: [test.Arguments.BlueMonday]");
+                .withErrorContaining("invalid throws clause: declared exception BlueMonday is invalid: " +
+                        "class 'BlueMonday may not be private");
     }
 
     @Test
@@ -260,7 +259,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("default constructor not found");
+                .withErrorContaining("invalid throws clause: found checked exception IOException");
     }
 
     @Test
@@ -782,7 +781,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("class cannot be private");
+                .withErrorContaining("invalid class: enclosing class 'Foo' may not be private");
     }
 
     @Test

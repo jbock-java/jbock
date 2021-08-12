@@ -12,13 +12,10 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -59,7 +56,7 @@ public class MethodStep implements BasicAnnotationProcessor.Step {
                     .or(() -> validateAbstract(method))
                     .or(() -> validateTypeParameters(method))
                     .or(() -> validateReturnType(method))
-                    .or(() -> validateAnnotatedMethod(method))
+                    .or(() -> util.checkExceptionsInDeclaration(method))
                     .ifPresent(failure -> failure.writeTo(messager));
         }
         return Set.of();
@@ -105,18 +102,5 @@ public class MethodStep implements BasicAnnotationProcessor.Step {
         return Optional.of(new ValidationFailure("invalid return type: annotated method '" +
                 method.getSimpleName() +
                 "' may not return " + kind, method));
-    }
-
-    private Optional<ValidationFailure> validateAnnotatedMethod(ExecutableElement method) {
-        List<TypeMirror> invalidExceptions = util.invalidExceptionsInDeclaration(method);
-        if (invalidExceptions.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(new ValidationFailure("invalid exception declaration: annotated method '" +
-                method.getSimpleName() +
-                "' may not declare any checked or inaccessible exceptions, but found: " +
-                invalidExceptions.stream()
-                        .map(TypeMirror::toString)
-                        .collect(toList()), method));
     }
 }
