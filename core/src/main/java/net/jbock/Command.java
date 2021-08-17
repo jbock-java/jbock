@@ -11,8 +11,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * that defines a command line API.
  *
  * <p>Each abstract method of the command class must have an empty
- * argument list, and carry exactly one of the
- * following annotations:
+ * argument list, and carry exactly one of these annotations:
  *
  * <ul>
  *   <li>{@link Option}
