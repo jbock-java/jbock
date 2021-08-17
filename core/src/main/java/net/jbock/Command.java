@@ -9,8 +9,9 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 /**
  * Marker annotation for an abstract class or interface
  * that defines a command line API.
- * Every abstract method in the annotated class must have an empty
- * argument list, and be annotated themselves with one of the
+ *
+ * <p>Each abstract method of the command class must have an empty
+ * argument list, and carry exactly one of the
  * following annotations:
  *
  * <ul>
