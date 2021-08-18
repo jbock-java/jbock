@@ -19,8 +19,7 @@ class HelplessSuperArgumentsTest {
     @Test
     void testHelp() {
         Either<ParsingFailed, SuperResult<HelplessSuperArguments>> result =
-                parser.parse(ParseRequest.simple(List.of("--help"))
-                        .build());
+                parser.parse(ParseRequest.simple(List.of("--help")));
         f.assertThat(result).fails("Invalid option: --help");
     }
 }

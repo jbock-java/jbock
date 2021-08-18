@@ -45,7 +45,7 @@ public final class ParserTestFixture<E> {
     }
 
     public AssertionBuilder<E> assertThat(String... args) {
-        ParseRequest request = ParseRequest.simple(List.of(args)).build();
+        ParseRequest request = ParseRequest.simple(List.of(args));
         Either<ParsingFailed, E> instance = parser.apply(request);
         return new AssertionBuilder<>(instance);
     }
@@ -69,8 +69,7 @@ public final class ParserTestFixture<E> {
     }
 
     public E parse(String... args) {
-        ParseRequest request = ParseRequest.simple(List.of(args))
-                .build();
+        ParseRequest request = ParseRequest.simple(List.of(args));
         return parser.apply(request)
                 .orElseThrow(l -> new RuntimeException("expecting success but found " + l.getClass()));
     }

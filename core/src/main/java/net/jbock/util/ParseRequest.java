@@ -8,49 +8,17 @@ import java.util.Optional;
 /**
  * Input for the generated parser.
  */
-public final class ParseRequest {
-
-    private final Optional<Path> path; // if empty, no @-file expansion will be performed
-    private final List<String> args; // command line arguments, excluding path
-
-    private ParseRequest(Optional<Path> path, List<String> args) {
-        this.path = path;
-        this.args = args;
-    }
+public abstract class ParseRequest {
 
     /**
-     * A builder for {@link ParseRequest}.
-     */
-    public static final class Builder {
-
-        private final Optional<Path> path;
-        private final List<String> rest;
-
-        private Builder(Optional<Path> path, List<String> rest) {
-            this.path = path;
-            this.rest = rest;
-        }
-
-        /**
-         * Creates the parse request.
-         *
-         * @return a parse request
-         */
-        public ParseRequest build() {
-            return new ParseRequest(path, rest);
-        }
-    }
-
-    /**
-     * Creates a builder.
-     *
-     * <p>{@code @file} expansion will be enabled if the input is not empty,
+     * Creates a {@code ParseRequest}.
+     * {@code @-file} expansion will be enabled if the input array is nonempty,
      * and the first token starts with an {@code "@"} character.
      *
      * @param args command line input
-     * @return the options in the file, or an error report
+     * @return a parse request
      */
-    public static Builder standardBuilder(String[] args) {
+    public static ParseRequest maybeExpand(String[] args) {
         if (args.length >= 1
                 && args[0].length() >= 2
                 && args[0].startsWith("@")) {
@@ -62,44 +30,41 @@ public final class ParseRequest {
     }
 
     /**
-     * Creates a builder with {@code @file} expansion set to {@code false}.
+     * Creates a {@code ParseRequest} that indicates {@code @-file} expansion should
+     * not be performed.
      *
      * @param args command line input
-     * @return a builder
+     * @return a parse request
      */
-    public static Builder simple(List<String> args) {
-        return new Builder(Optional.empty(), args);
+    public static ParseRequest simple(List<String> args) {
+        return new ParseRequestSimple(args);
     }
 
     /**
-     * Creates a builder with {@code @file} expansion set to {@code true}.
+     * Creates a {@code ParseRequest} that indicates {@code @-file} expansion should
+     * be performed.
      *
-     * @param atFile source for {@code @file} expansion
-     * @param rest the remaining command line arguments, possibly none
-     * @return a builder
+     * @param atFile the {@code @-file}
+     * @param rest additional command line arguments
+     * @return a parse request
      */
-    public static Builder expand(Path atFile, List<String> rest) {
-        return new Builder(Optional.of(atFile), rest);
+    public static ParseRequest expand(Path atFile, List<String> rest) {
+        return new ParseRequestExpand(atFile, rest);
     }
 
     /**
-     * Returns the {@code path} to be used as input for {@code @file} expansion.
-     * If it is empty, {@code @file} expansion should not be performed.
+     * Returns the path of the {@code @-file}, or an empty
+     * {@code Optional} if {@code @-file} expansion is
+     * not requested.
      *
-     * @return input for {@code @file} expansion
+     * @return path of the {@code @-file}, or {@code empty}
      */
-    public Optional<Path> path() {
-        return path;
-    }
+    public abstract Optional<Path> path();
 
     /**
-     * If {@link #path} is empty, contains the command line arguments.
-     * If {@link #path} is nonempty, contains any remaining argument after
-     * the {@code @file} parameter.
+     * Returns the command line arguments, excluding the {@code @-file}.
      *
      * @return command line arguments
      */
-    public List<String> args() {
-        return args;
-    }
+    public abstract List<String> args();
 }

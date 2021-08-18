@@ -58,8 +58,7 @@ public class ParseOrExitMethod {
                     .addStatement("$T.exit(0)", System.class)
                     .endControlFlow();
         }
-        code.add("$1T $2N = $1T.standardBuilder($3N)\n", ParseRequest.class, request, args).indent();
-        code.addStatement(".build()").unindent();
+        code.addStatement("$1T $2N = $1T.maybeExpand($3N)", ParseRequest.class, request, args);
         code.add("return $N($N)", parseMethod.get(), request)
                 .add(".orElseThrow($N -> {\n", notSuccess).indent()
                 .addStatement("$T.builder().build().handle($N)",
