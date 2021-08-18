@@ -7,7 +7,7 @@ import net.jbock.model.Item;
  * Non-exceptional failure object that represents
  * any runtime error during a converter invocation.
  */
-public final class ErrConvert extends NotSuccess implements HasMessage {
+public final class ErrConvert extends ParsingFailed implements HasMessage {
 
     private final ConverterFailure converterFailure;
     private final Item item;

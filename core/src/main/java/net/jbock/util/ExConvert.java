@@ -35,7 +35,7 @@ public final class ExConvert extends ExNotSuccess {
     }
 
     @Override
-    public NotSuccess toError(CommandModel model) {
+    public ParsingFailed toError(CommandModel model) {
         return new ErrConvert(model, failure, model.getItem(itemType, itemIndex));
     }
 }

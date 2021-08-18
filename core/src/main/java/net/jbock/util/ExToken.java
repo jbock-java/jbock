@@ -28,7 +28,7 @@ public final class ExToken extends ExNotSuccess {
     }
 
     @Override
-    public NotSuccess toError(CommandModel model) {
+    public ParsingFailed toError(CommandModel model) {
         return new ErrToken(model, errorType, token);
     }
 }

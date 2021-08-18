@@ -5,8 +5,8 @@ import com.google.common.jimfs.Jimfs;
 import io.jbock.util.Either;
 import net.jbock.examples.CpArguments.Control;
 import net.jbock.examples.fixture.ParserTestFixture;
-import net.jbock.util.NotSuccess;
 import net.jbock.util.ParseRequest;
+import net.jbock.util.ParsingFailed;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -118,7 +118,7 @@ class CpArgumentsTest {
         Files.createDirectory(foo);
         Path path = foo.resolve("hello.txt");
         Files.write(path, List.of("-r", "\"a\"", "\"'b'\"", "--backup=\\", "'SIMPLE'", ""), StandardCharsets.UTF_8);
-        Either<NotSuccess, CpArguments> result = parser.parse(
+        Either<ParsingFailed, CpArguments> result = parser.parse(
                 ParseRequest.expand(path, List.of()).build());
         f.assertThat(result)
                 .has(CpArguments::source, "a")
@@ -131,6 +131,7 @@ class CpArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
+                parser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  cp-arguments [OPTIONS] SOURCE DEST",
                 "",

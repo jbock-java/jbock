@@ -2,7 +2,6 @@ package net.jbock.model;
 
 import net.jbock.Command;
 import net.jbock.util.ItemType;
-import net.jbock.util.ParseRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.List;
  */
 public final class CommandModel {
 
-    private final ParseRequest request;
     private final String descriptionKey;
     private final List<String> descriptionLines;
     private final String programName;
@@ -23,7 +21,6 @@ public final class CommandModel {
     private final List<Parameter> parameters;
 
     private CommandModel(
-            ParseRequest request,
             String descriptionKey,
             List<String> descriptionLines,
             String programName,
@@ -31,7 +28,6 @@ public final class CommandModel {
             boolean unixClustering,
             List<Option> options,
             List<Parameter> parameters) {
-        this.request = request;
         this.descriptionKey = descriptionKey;
         this.descriptionLines = descriptionLines;
         this.programName = programName;
@@ -44,11 +40,10 @@ public final class CommandModel {
     /**
      * Creates a builder instance.
      *
-     * @param request the parse request
      * @return empty builder
      */
-    public static Builder builder(ParseRequest request) {
-        return new Builder(request);
+    public static Builder builder() {
+        return new Builder();
     }
 
     /**
@@ -56,7 +51,6 @@ public final class CommandModel {
      */
     public static final class Builder {
 
-        private final ParseRequest request;
         private String descriptionKey = "";
         private final List<String> descriptionLines = new ArrayList<>();
         private String programName;
@@ -65,8 +59,7 @@ public final class CommandModel {
         private final List<Option> options = new ArrayList<>();
         private final List<Parameter> parameters = new ArrayList<>();
 
-        private Builder(ParseRequest request) {
-            this.request = request;
+        private Builder() {
         }
 
         /**
@@ -157,7 +150,7 @@ public final class CommandModel {
          * @return command model
          */
         public CommandModel build() {
-            return new CommandModel(request, descriptionKey, descriptionLines,
+            return new CommandModel(descriptionKey, descriptionLines,
                     programName, superCommand,
                     unixClustering, options, parameters);
         }
@@ -237,15 +230,6 @@ public final class CommandModel {
      */
     public boolean isUnixClustering() {
         return unixClustering;
-    }
-
-    /**
-     * Returns the parse request.
-     *
-     * @return the parse request
-     */
-    public ParseRequest request() {
-        return request;
     }
 
     /**

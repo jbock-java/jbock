@@ -162,7 +162,7 @@ public class BuildMethod extends CachedMethod {
     private List<CodeBlock> tailExpressionParameter(Mapping<AnnotatedParameter> m, int i) {
         if (m.multiplicity() == Multiplicity.REQUIRED) {
             return List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
-                            ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
+                    ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
                     orElseThrowConverterError(ItemType.PARAMETER, i));
         }
         checkArgument(m.multiplicity() == OPTIONAL);

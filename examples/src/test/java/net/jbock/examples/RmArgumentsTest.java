@@ -28,6 +28,7 @@ class RmArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
+                parser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  rm-arguments [OPTIONS] OTHER_TOKENS...",
                 "",

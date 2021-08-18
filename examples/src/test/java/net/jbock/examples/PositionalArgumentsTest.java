@@ -92,6 +92,7 @@ class PositionalArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
+                parser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  positional-arguments SOURCE DEST ANOTHER_INT [OPT_STRING] OTHER_TOKENS...",
                 "",

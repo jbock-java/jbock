@@ -230,6 +230,7 @@ class CurlArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
+                parser.createModel(),
                 "curl is a tool to transfer data from or to a server using one of the supported",
                 "protocols. curl offers a busload of useful tricks. curl is powered by libcurl for",
                 "all transfer-related features. See libcurl(3) for details.",

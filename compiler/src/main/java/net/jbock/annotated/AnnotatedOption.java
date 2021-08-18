@@ -40,10 +40,10 @@ public final class AnnotatedOption extends AnnotatedMethod {
                 .sorted(UNIX_NAMES_FIRST_COMPARATOR)
                 .collect(toList());
         String paramLabel = option.paramLabel().or(() -> names.stream()
-                        .filter(name -> name.startsWith("--"))
-                        .map(name -> name.substring(2))
-                        .map(s -> s.toUpperCase(Locale.US))
-                        .findFirst())
+                .filter(name -> name.startsWith("--"))
+                .map(name -> name.substring(2))
+                .map(s -> s.toUpperCase(Locale.US))
+                .findFirst())
                 .orElseGet(() -> SnakeName.create(option.simpleName().toString())
                         .snake('_')
                         .toUpperCase(Locale.US));

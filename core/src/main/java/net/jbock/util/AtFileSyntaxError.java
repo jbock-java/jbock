@@ -21,7 +21,7 @@ final class AtFileSyntaxError extends AtFileError {
     }
 
     @Override
-    public NotSuccess addModel(CommandModel model) {
+    public ParsingFailed addModel(CommandModel model) {
         return new ErrAtFile(model, file(), "at line " + number + ": " + message);
     }
 }

@@ -74,6 +74,7 @@ class NoNameArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
+                parser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  no-name-arguments [OPTIONS] -n NUMBER",
                 "",

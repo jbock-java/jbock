@@ -2,9 +2,10 @@ package net.jbock.examples.fixture;
 
 import io.jbock.util.Either;
 import net.jbock.contrib.StandardErrorHandler;
+import net.jbock.model.CommandModel;
 import net.jbock.util.HasMessage;
-import net.jbock.util.NotSuccess;
 import net.jbock.util.ParseRequest;
+import net.jbock.util.ParsingFailed;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.List;
@@ -33,40 +34,38 @@ public final class ParserTestFixture<E> {
         System.out.print(ANSI_RED + String.format("%3d: %s%n", args) + ANSI_RESET);
     }
 
-    private final Function<ParseRequest, Either<NotSuccess, E>> parser;
+    private final Function<ParseRequest, Either<ParsingFailed, E>> parser;
 
-    private ParserTestFixture(Function<ParseRequest, Either<NotSuccess, E>> parser) {
+    private ParserTestFixture(Function<ParseRequest, Either<ParsingFailed, E>> parser) {
         this.parser = parser;
     }
 
-    public static <E> ParserTestFixture<E> create(Function<ParseRequest, Either<NotSuccess, E>> parser) {
+    public static <E> ParserTestFixture<E> create(Function<ParseRequest, Either<ParsingFailed, E>> parser) {
         return new ParserTestFixture<>(parser);
     }
 
     public AssertionBuilder<E> assertThat(String... args) {
         ParseRequest request = ParseRequest.simple(List.of(args)).build();
-        Either<NotSuccess, E> instance = parser.apply(request);
+        Either<ParsingFailed, E> instance = parser.apply(request);
         return new AssertionBuilder<>(instance);
     }
 
-    public AssertionBuilder<E> assertThat(Either<NotSuccess, E> parsed) {
+    public AssertionBuilder<E> assertThat(Either<ParsingFailed, E> parsed) {
         return new AssertionBuilder<>(parsed);
     }
 
-    public void assertPrintsHelp(Map<String, String> messages, String... expected) {
-        ParseRequest request = ParseRequest.simple(List.of())
-                .withHelpRequested(true)
-                .build();
-        Either<NotSuccess, E> result = parser.apply(request);
-        assertTrue(result.isLeft());
-        result.getLeft().ifPresent(l -> {
-            String[] actual = getUsageDocumentation(l, messages);
-            assertArraysEquals(expected, actual);
-        });
+    public void assertPrintsHelp(
+            CommandModel commandModel,
+            Map<String, String> messages,
+            String... expected) {
+        String[] actual = getUsageDocumentation(commandModel, messages);
+        assertArraysEquals(expected, actual);
     }
 
-    public void assertPrintsHelp(String... expected) {
-        assertPrintsHelp(Map.of(), expected);
+    public void assertPrintsHelp(
+            CommandModel commandModel,
+            String... expected) {
+        assertPrintsHelp(commandModel, Map.of(), expected);
     }
 
     public E parse(String... args) {
@@ -119,18 +118,18 @@ public final class ParserTestFixture<E> {
 
     public static class AssertionBuilder<E> {
 
-        private final Either<NotSuccess, E> instance;
+        private final Either<ParsingFailed, E> instance;
 
-        private AssertionBuilder(Either<NotSuccess, E> instance) {
+        private AssertionBuilder(Either<ParsingFailed, E> instance) {
             this.instance = instance;
         }
 
-        Either<NotSuccess, E> getParsed() {
+        Either<ParsingFailed, E> getParsed() {
             return instance;
         }
 
         public <V> AssertionBuilder<E> has(Function<E, V> getter, V expectation) {
-            Either<NotSuccess, E> parsed = getParsed();
+            Either<ParsingFailed, E> parsed = getParsed();
             assertTrue(parsed.isRight(), "Parsing was not successful");
             parsed.getRight().ifPresent(r -> {
                 V result = getter.apply(r);
@@ -144,7 +143,7 @@ public final class ParserTestFixture<E> {
         }
 
         private void fails(Predicate<String> messageTest) {
-            Either<NotSuccess, E> result = getParsed();
+            Either<ParsingFailed, E> result = getParsed();
             assertTrue(result.isLeft());
             result.mapLeft(HasMessage.class::cast)
                     .getLeft()
@@ -158,7 +157,7 @@ public final class ParserTestFixture<E> {
     }
 
     private String[] getUsageDocumentation(
-            NotSuccess notSuccess,
+            CommandModel commandModel,
             Map<String, String> messages) {
         TestOutputStream testOutputStream = new TestOutputStream();
         StandardErrorHandler.builder()
@@ -166,7 +165,7 @@ public final class ParserTestFixture<E> {
                 .withTerminalWidth(MAX_LINE_WIDTH)
                 .withMessages(messages)
                 .build()
-                .handle(notSuccess);
+                .printHelp(commandModel);
         return testOutputStream.split();
     }
 }

@@ -35,6 +35,7 @@ class TarArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
+                parser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  tar-arguments [OPTIONS] -f FILE",
                 "",

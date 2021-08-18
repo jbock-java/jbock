@@ -16,5 +16,5 @@ public abstract class ExNotSuccess extends Exception {
      * @param model the command model
      * @return a failure object that is not an {@code Exception}
      */
-    public abstract NotSuccess toError(CommandModel model);
+    public abstract ParsingFailed toError(CommandModel model);
 }

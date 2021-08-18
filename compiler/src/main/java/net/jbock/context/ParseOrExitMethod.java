@@ -13,7 +13,6 @@ import java.util.List;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static com.squareup.javapoet.TypeName.INT;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
 @ContextScope
@@ -23,39 +22,49 @@ public class ParseOrExitMethod {
     private final GeneratedTypes generatedTypes;
     private final ParseMethod parseMethod;
     private final List<Mapping<?>> allMappings;
+    private final CreateModelMethod createModelMethod;
 
     @Inject
     ParseOrExitMethod(
             SourceElement sourceElement,
             GeneratedTypes generatedTypes,
             ParseMethod parseMethod,
-            List<Mapping<?>> allMappings) {
+            List<Mapping<?>> allMappings,
+            CreateModelMethod createModelMethod) {
         this.sourceElement = sourceElement;
         this.generatedTypes = generatedTypes;
         this.parseMethod = parseMethod;
         this.allMappings = allMappings;
+        this.createModelMethod = createModelMethod;
     }
 
     MethodSpec define() {
 
         ParameterSpec args = builder(STRING_ARRAY, "args").build();
         ParameterSpec notSuccess = builder(generatedTypes.parseResultType(), "notSuccess").build();
-        ParameterSpec returnCode = builder(INT, "code").build();
         ParameterSpec request = builder(ParseRequest.class, "request").build();
 
         CodeBlock.Builder code = CodeBlock.builder();
-        code.add("$1T $2N = $1T.standardBuilder($3N)\n", ParseRequest.class, request, args).indent();
         if (allMappings.stream().anyMatch(Mapping::isRequired)) {
-            code.add(".withHelpRequested($1N.length == 0 || $2S.equals($1N[0]))\n", args, "--help");
+            code.beginControlFlow("if ($1N.length == 0 || $2S.equals($1N[0]))", args, "--help")
+                    .addStatement("$T.builder().build().printHelp($N())",
+                            StandardErrorHandler.class, createModelMethod.get())
+                    .addStatement("$T.exit(0)", System.class)
+                    .endControlFlow();
         } else {
-            code.add(".withHelpRequested($1N.length > 0 && $2S.equals($1N[0]))\n", args, "--help");
+            code.beginControlFlow("if ($1N.length > 0 && $2S.equals($1N[0]))", args, "--help")
+                    .addStatement("$T.builder().build().printHelp($N())",
+                            StandardErrorHandler.class, createModelMethod.get())
+                    .addStatement("$T.exit(0)", System.class)
+                    .endControlFlow();
         }
+        code.add("$1T $2N = $1T.standardBuilder($3N)\n", ParseRequest.class, request, args).indent();
         code.addStatement(".build()").unindent();
         code.add("return $N($N)", parseMethod.get(), request)
                 .add(".orElseThrow($N -> {\n", notSuccess).indent()
-                .addStatement("$T $N = $T.builder().build().handle($N)", INT, returnCode,
+                .addStatement("$T.builder().build().handle($N)",
                         StandardErrorHandler.class, notSuccess)
-                .addStatement("$T.exit($N)", System.class, returnCode)
+                .addStatement("$T.exit(1)", System.class)
                 .addStatement("return new $T()", RuntimeException.class).unindent()
                 .addStatement("})");
         return methodBuilder("parseOrExit").addParameter(args)

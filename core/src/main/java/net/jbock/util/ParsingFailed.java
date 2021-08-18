@@ -8,9 +8,8 @@ import net.jbock.model.CommandModel;
  * Each of the subclasses represents a parsing
  * result that's different from "success".
  *
- * <p>A Left-Either containing an instance of this class will be returned
- * from the generated {@code parse(ParseRequest)} method, if the parsing is unsuccessful,
- * or if {@link ParseRequest#isHelpRequested()} returns {@code true}.
+ * <p>If parsing is not successful, a Left-Either containing an instance of this class
+ * will be returned from the generated {@code parse(ParseRequest)} method.
  *
  * <p>There are a fixed number of subclasses:
  *
@@ -19,14 +18,13 @@ import net.jbock.model.CommandModel;
  *   <li>{@link ErrConvert}
  *   <li>{@link ErrMissingItem}
  *   <li>{@link ErrToken}
- *   <li>{@link HelpRequested}
  * </ul>
  */
-public abstract class NotSuccess {
+public abstract class ParsingFailed {
 
     private final CommandModel commandModel;
 
-    NotSuccess(CommandModel commandModel) {
+    ParsingFailed(CommandModel commandModel) {
         this.commandModel = commandModel;
     }
 

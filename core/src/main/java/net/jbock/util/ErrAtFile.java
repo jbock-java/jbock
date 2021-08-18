@@ -8,7 +8,7 @@ import java.nio.file.Path;
  * Non-exceptional failure object, indicates that reading options
  * from the {@code @file} was unsuccessful.
  */
-public final class ErrAtFile extends NotSuccess implements HasMessage {
+public final class ErrAtFile extends ParsingFailed implements HasMessage {
 
     private final String message;
     private final Path atFile;

@@ -12,12 +12,10 @@ public final class ParseRequest {
 
     private final Optional<Path> path; // if empty, no @-file expansion will be performed
     private final List<String> args; // command line arguments, excluding path
-    private final boolean helpRequested;
 
-    private ParseRequest(Optional<Path> path, List<String> args, boolean helpRequested) {
+    private ParseRequest(Optional<Path> path, List<String> args) {
         this.path = path;
         this.args = args;
-        this.helpRequested = helpRequested;
     }
 
     /**
@@ -27,24 +25,10 @@ public final class ParseRequest {
 
         private final Optional<Path> path;
         private final List<String> rest;
-        private boolean helpRequested;
 
         private Builder(Optional<Path> path, List<String> rest) {
             this.path = path;
             this.rest = rest;
-        }
-
-        /**
-         * Sets the help requested property.
-         * Setting this to {@code true} will cause the generated parser to skip parsing
-         * and print the online documentation instead.
-         *
-         * @param helpRequested {@code true} to skip parsing and print usage documentation
-         * @return the builder instance
-         */
-        public Builder withHelpRequested(boolean helpRequested) {
-            this.helpRequested = helpRequested;
-            return this;
         }
 
         /**
@@ -53,7 +37,7 @@ public final class ParseRequest {
          * @return a parse request
          */
         public ParseRequest build() {
-            return new ParseRequest(path, rest, helpRequested);
+            return new ParseRequest(path, rest);
         }
     }
 
@@ -117,15 +101,5 @@ public final class ParseRequest {
      */
     public List<String> args() {
         return args;
-    }
-
-    /**
-     * Returns {@code true} if parsing should be skipped, and usage documentation
-     * should be printed instead.
-     *
-     * @return {@code true} if usage documentation should be printed
-     */
-    public boolean isHelpRequested() {
-        return helpRequested;
     }
 }

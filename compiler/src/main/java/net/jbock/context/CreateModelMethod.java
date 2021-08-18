@@ -2,7 +2,6 @@ package net.jbock.context;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
@@ -12,7 +11,6 @@ import net.jbock.model.Multiplicity;
 import net.jbock.model.Option;
 import net.jbock.model.Parameter;
 import net.jbock.processor.SourceElement;
-import net.jbock.util.ParseRequest;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -20,7 +18,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
-import static javax.lang.model.element.Modifier.PRIVATE;
 
 @ContextScope
 public class CreateModelMethod extends CachedMethod {
@@ -51,8 +48,7 @@ public class CreateModelMethod extends CachedMethod {
     @Override
     MethodSpec define() {
         List<CodeBlock> code = new ArrayList<>();
-        ParameterSpec request = ParameterSpec.builder(ParseRequest.class, "request").build();
-        code.add(CodeBlock.of("return $T.builder($N)", CommandModel.class, request));
+        code.add(CodeBlock.of("return $T.builder()", CommandModel.class));
         sourceElement.descriptionKey().ifPresent(key ->
                 code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
         for (String descriptionLine : sourceElement.description()) {
@@ -75,8 +71,7 @@ public class CreateModelMethod extends CachedMethod {
         return methodBuilder("createModel")
                 .addStatement(contextUtil.joinByNewline(code))
                 .returns(CommandModel.class)
-                .addModifiers(PRIVATE)
-                .addParameter(request)
+                .addModifiers(sourceElement.accessModifiers())
                 .build();
     }
 

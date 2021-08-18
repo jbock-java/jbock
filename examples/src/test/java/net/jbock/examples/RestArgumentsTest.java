@@ -35,6 +35,7 @@ class RestArgumentsTest {
     @Test
     void testNoBundle() {
         f.assertPrintsHelp(
+                parser.createModel(),
                 "ouch",
                 "",
                 "\u001B[1mUSAGE\u001B[m",
@@ -50,7 +51,9 @@ class RestArgumentsTest {
 
     @Test
     void testBundleKey() {
-        f.assertPrintsHelp(messages,
+        f.assertPrintsHelp(
+                parser.createModel(),
+                messages,
                 "A very good program.",
                 "",
                 "\u001B[1mUSAGE\u001B[m",
@@ -69,7 +72,9 @@ class RestArgumentsTest {
         ResourceBundle bundle = mock(ResourceBundle.class);
         when(bundle.getKeys()).thenReturn(new Vector<>(messages.keySet()).elements());
         messages.forEach((k, v) -> when(bundle.getString(eq(k))).thenReturn(v));
-        f.assertPrintsHelp(toMap(bundle),
+        f.assertPrintsHelp(
+                parser.createModel(),
+                toMap(bundle),
                 "A very good program.",
                 "",
                 "\u001B[1mUSAGE\u001B[m",

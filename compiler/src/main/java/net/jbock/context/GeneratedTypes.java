@@ -4,7 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.processor.SourceElement;
-import net.jbock.util.NotSuccess;
+import net.jbock.util.ParsingFailed;
 import net.jbock.util.SuperResult;
 
 import javax.inject.Inject;
@@ -65,7 +65,7 @@ public class GeneratedTypes {
     TypeName parseResultType() {
         return ParameterizedTypeName.get(
                 EITHER,
-                ClassName.get(NotSuccess.class),
+                ClassName.get(ParsingFailed.class),
                 parseSuccessType());
     }
 }

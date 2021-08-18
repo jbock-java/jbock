@@ -2,8 +2,7 @@ package net.jbock.contrib;
 
 import net.jbock.model.CommandModel;
 import net.jbock.util.HasMessage;
-import net.jbock.util.HelpRequested;
-import net.jbock.util.NotSuccess;
+import net.jbock.util.ParsingFailed;
 
 import java.io.PrintStream;
 import java.util.Collections;
@@ -118,27 +117,26 @@ public final class StandardErrorHandler {
         return new Builder();
     }
 
+    public void printHelp(CommandModel model) {
+        UsageDocumentation.builder(model)
+                .withOutputStream(out)
+                .withAnsi(ansi)
+                .withMessages(messages)
+                .withTerminalWidth(terminalWidth)
+                .build().printUsageDocumentation();
+        out.flush();
+    }
+
     /**
      * This method does standard error handling like printing
      * error messages, or printing usage documentation.
      *
-     * @param notSuccess an object describing the error condition
-     * @return system return code
+     * @param parsingFailed an object describing the error condition
      */
-    public int handle(NotSuccess notSuccess) {
-        CommandModel model = notSuccess.commandModel();
+    public void handle(ParsingFailed parsingFailed) {
+        CommandModel model = parsingFailed.commandModel();
         AnsiStyle ansiStyle = AnsiStyle.create(ansi);
-        if (notSuccess instanceof HelpRequested) {
-            UsageDocumentation.builder(model)
-                    .withOutputStream(out)
-                    .withAnsi(ansi)
-                    .withMessages(messages)
-                    .withTerminalWidth(terminalWidth)
-                    .build().printUsageDocumentation();
-            out.flush();
-            return 0;
-        }
-        out.println(ansiStyle.red("ERROR:") + ' ' + ((HasMessage) notSuccess).message());
+        out.println(ansiStyle.red("ERROR:") + ' ' + ((HasMessage) parsingFailed).message());
         List<String> synopsis = Synopsis.create(model)
                 .createSynopsis("Usage:");
         out.println(String.join(" ", synopsis));
@@ -147,6 +145,5 @@ public final class StandardErrorHandler {
                 ansiStyle.bold(helpCommand).orElseGet(() -> "'" + helpCommand + "'") +
                 " for more information.");
         out.flush();
-        return 1;
     }
 }

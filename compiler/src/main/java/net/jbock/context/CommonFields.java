@@ -1,14 +1,11 @@
 package net.jbock.context;
 
 import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.ParameterSpec;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
-import net.jbock.util.HelpRequested;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -34,7 +31,6 @@ class CommonFields {
     private final FieldSpec seen = FieldSpec.builder(BOOLEAN, "seen")
             .build();
 
-
     private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest")
             .initializer("new $T<>()", ArrayList.class)
             .build();
@@ -57,12 +53,6 @@ class CommonFields {
             SourceElement sourceElement,
             List<Mapping<AnnotatedParameter>> positionalParameters,
             List<Mapping<AnnotatedOption>> namedOptions) {
-        ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
-        CodeBlock.Builder code = CodeBlock.builder();
-        code.add(CodeBlock.builder()
-                .add("$N ->\n", result).indent()
-                .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, HelpRequested.class)
-                .unindent().build());
         long mapSize = namedOptions.stream()
                 .map(Mapping::sourceMethod)
                 .map(AnnotatedOption::names)

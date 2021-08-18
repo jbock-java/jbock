@@ -60,8 +60,8 @@ public class CommandProcessor {
         Set<String> keys = new HashSet<>();
         sourceElement.descriptionKey().ifPresent(keys::add);
         Stream.of(methods.namedOptions(),
-                        methods.positionalParameters(),
-                        methods.repeatablePositionalParameters())
+                methods.positionalParameters(),
+                methods.repeatablePositionalParameters())
                 .flatMap(List::stream)
                 .forEach(m -> m.descriptionKey().ifPresent(key -> {
                     if (!keys.add(key)) {

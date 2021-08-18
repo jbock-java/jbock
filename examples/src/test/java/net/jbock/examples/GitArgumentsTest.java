@@ -67,6 +67,7 @@ class GitArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
+                parser.createModel(),
                 "Git is software for tracking changes in any set of files.",
                 "",
                 "\u001B[1mUSAGE\u001B[m",

@@ -48,6 +48,7 @@ class AdditionArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
+                parser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  addition-arguments A B [C]",
                 "",

@@ -25,7 +25,7 @@ public final class ExMissingItem extends ExNotSuccess {
     }
 
     @Override
-    public NotSuccess toError(CommandModel model) {
+    public ParsingFailed toError(CommandModel model) {
         return new ErrMissingItem(model, model.getItem(itemType, itemIndex));
     }
 }

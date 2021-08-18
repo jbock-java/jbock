@@ -42,6 +42,7 @@ class SuperArgumentsTest {
     @Test
     void testHelp() {
         f.assertPrintsHelp(
+                parser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  super-arguments [OPTIONS] COMMAND",
                 "",

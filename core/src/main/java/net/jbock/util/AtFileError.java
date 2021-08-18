@@ -34,5 +34,5 @@ public abstract class AtFileError {
      * @param model command model
      * @return a non-exceptional failure object
      */
-    public abstract NotSuccess addModel(CommandModel model);
+    public abstract ParsingFailed addModel(CommandModel model);
 }

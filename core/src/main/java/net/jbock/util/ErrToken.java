@@ -8,7 +8,7 @@ import net.jbock.model.CommandModel;
  *
  * @see net.jbock.Command
  */
-public final class ErrToken extends NotSuccess implements HasMessage {
+public final class ErrToken extends ParsingFailed implements HasMessage {
 
     private final ErrTokenType errorType;
     private final String token;
