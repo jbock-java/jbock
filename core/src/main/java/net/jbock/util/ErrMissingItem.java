@@ -9,7 +9,7 @@ import net.jbock.model.Item;
  *
  * @see net.jbock.model.Multiplicity#REQUIRED
  */
-public final class ErrMissingItem extends ParsingFailed implements HasMessage {
+public final class ErrMissingItem extends ParsingFailed {
 
     private final Item item;
 

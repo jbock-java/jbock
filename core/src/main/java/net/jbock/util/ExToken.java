@@ -1,7 +1,6 @@
 package net.jbock.util;
 
 import net.jbock.model.CommandModel;
-import net.jbock.model.Item;
 
 /**
  * A checked exception to signal that a parsing error has occurred
@@ -9,7 +8,9 @@ import net.jbock.model.Item;
  * Internal exception that may be thrown and caught
  * in the generated code.
  *
- * @see Item
+ * <p>This class is internal API and should not be used
+ * in client code. It may be removed without warning in future
+ * releases.
  */
 public final class ExToken extends ExNotSuccess {
 

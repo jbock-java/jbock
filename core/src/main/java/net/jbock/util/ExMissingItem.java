@@ -6,7 +6,9 @@ import net.jbock.model.CommandModel;
  * A checked exception to signal that a required item was
  * missing in the command line input.
  *
- * @see net.jbock.model.Multiplicity#REQUIRED
+ * <p>This class is internal API and should not be used
+ * in client code. It may be removed without warning in future
+ * releases.
  */
 public final class ExMissingItem extends ExNotSuccess {
 

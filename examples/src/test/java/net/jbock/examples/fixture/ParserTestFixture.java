@@ -3,7 +3,6 @@ package net.jbock.examples.fixture;
 import io.jbock.util.Either;
 import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.model.CommandModel;
-import net.jbock.util.HasMessage;
 import net.jbock.util.ParsingFailed;
 import org.junit.jupiter.api.Assertions;
 
@@ -141,8 +140,7 @@ public final class ParserTestFixture<E> {
         private void fails(Predicate<String> messageTest) {
             Either<ParsingFailed, E> result = getParsed();
             assertTrue(result.isLeft());
-            result.mapLeft(HasMessage.class::cast)
-                    .getLeft()
+            result.getLeft()
                     .ifPresent(hasMessage -> {
                         boolean success = messageTest.test(hasMessage.message());
                         if (!success) {
@@ -161,7 +159,7 @@ public final class ParserTestFixture<E> {
                 .withTerminalWidth(MAX_LINE_WIDTH)
                 .withMessages(messages)
                 .build()
-                .printHelp(commandModel);
+                .printUsageDocumentation(commandModel);
         return testOutputStream.split();
     }
 }

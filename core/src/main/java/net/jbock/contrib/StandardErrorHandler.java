@@ -1,7 +1,6 @@
 package net.jbock.contrib;
 
 import net.jbock.model.CommandModel;
-import net.jbock.util.HasMessage;
 import net.jbock.util.ParsingFailed;
 
 import java.io.PrintStream;
@@ -10,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class is responsible for standard error handling,
- * like printing messages and shutting down the JVM.
+ * A convenience class that performs standard error handling,
+ * like printing error messages and printing the usage documentation.
  */
 public final class StandardErrorHandler {
 
@@ -87,10 +86,9 @@ public final class StandardErrorHandler {
         }
 
         /**
-         * Set the value of the ansi attribute.
+         * Sets the value of the ansi attribute.
          *
          * @param ansi if ansi codes should be used
-         *         when printing the usage documentation
          * @return the builder instance
          */
         public Builder withAnsi(boolean ansi) {
@@ -99,7 +97,7 @@ public final class StandardErrorHandler {
         }
 
         /**
-         * Create the error handler.
+         * Creates the error handler.
          *
          * @return an error handler
          */
@@ -117,26 +115,31 @@ public final class StandardErrorHandler {
         return new Builder();
     }
 
-    public void printHelp(CommandModel model) {
+    /**
+     * Prints the usage documentation.
+     *
+     * @param model command model
+     */
+    public void printUsageDocumentation(CommandModel model) {
         UsageDocumentation.builder(model)
                 .withOutputStream(out)
                 .withAnsi(ansi)
                 .withMessages(messages)
                 .withTerminalWidth(terminalWidth)
-                .build().printUsageDocumentation();
+                .build()
+                .printUsageDocumentation();
         out.flush();
     }
 
     /**
-     * This method does standard error handling like printing
-     * error messages, or printing usage documentation.
+     * Prints an error message.
      *
-     * @param parsingFailed an object describing the error condition
+     * @param failure an object describing the error condition
      */
-    public void handle(ParsingFailed parsingFailed) {
-        CommandModel model = parsingFailed.commandModel();
+    public void printErrorMessage(ParsingFailed failure) {
+        CommandModel model = failure.commandModel();
         AnsiStyle ansiStyle = AnsiStyle.create(ansi);
-        out.println(ansiStyle.red("ERROR:") + ' ' + ((HasMessage) parsingFailed).message());
+        out.println(ansiStyle.red("ERROR:") + ' ' + failure.message());
         List<String> synopsis = Synopsis.create(model)
                 .createSynopsis("Usage:");
         out.println(String.join(" ", synopsis));

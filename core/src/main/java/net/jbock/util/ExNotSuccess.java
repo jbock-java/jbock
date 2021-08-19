@@ -7,6 +7,10 @@ import net.jbock.model.CommandModel;
  * in the generated code. These are checked exceptions, to
  * ensure none of them are thrown from the generated
  * parse method.
+ *
+ * <p>This class is internal API and should not be used
+ * in client code. It may be removed without warning in future
+ * releases.
  */
 public abstract class ExNotSuccess extends Exception {
 

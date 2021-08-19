@@ -42,20 +42,20 @@ public class ParseOrExitMethod {
     MethodSpec define() {
 
         ParameterSpec args = builder(STRING_ARRAY, "args").build();
-        ParameterSpec notSuccess = builder(generatedTypes.parseResultType(), "notSuccess").build();
+        ParameterSpec notSuccess = builder(generatedTypes.parseResultType(), "failure").build();
         ParameterSpec err = builder(AtFileError.class, "err").build();
 
         CodeBlock.Builder code = CodeBlock.builder();
         if (allMappings.stream().anyMatch(Mapping::isRequired)) {
             code.beginControlFlow("if ($1N.length == 0 || $2S.equals($1N[0]))", args, "--help")
-                    .addStatement("$T.builder().build().printHelp($N())",
-                            StandardErrorHandler.class, createModelMethod.get())
+                    .add("$T.builder().build()\n", StandardErrorHandler.class).indent()
+                    .add(".printUsageDocumentation($N());\n", createModelMethod.get()).unindent()
                     .addStatement("$T.exit(0)", System.class)
                     .endControlFlow();
         } else {
             code.beginControlFlow("if ($1N.length > 0 && $2S.equals($1N[0]))", args, "--help")
-                    .addStatement("$T.builder().build().printHelp($N())",
-                            StandardErrorHandler.class, createModelMethod.get())
+                    .add("$T.builder().build()\n", StandardErrorHandler.class).indent()
+                    .add(".printUsageDocumentation($N());\n", createModelMethod.get()).unindent()
                     .addStatement("$T.exit(0)", System.class)
                     .endControlFlow();
         }
@@ -64,7 +64,7 @@ public class ParseOrExitMethod {
                 .add(".mapLeft($1N -> $1N.addModel($2N()))\n", err, createModelMethod.get())
                 .add(".flatMap(this::$N)\n", parseMethod.get())
                 .add(".orElseThrow($N -> {\n", notSuccess).indent()
-                .addStatement("$T.builder().build().handle($N)",
+                .addStatement("$T.builder().build().printErrorMessage($N)",
                         StandardErrorHandler.class, notSuccess)
                 .addStatement("$T.exit(1)", System.class)
                 .addStatement("return new $T()", RuntimeException.class).unindent()

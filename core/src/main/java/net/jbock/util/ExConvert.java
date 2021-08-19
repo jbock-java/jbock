@@ -1,17 +1,14 @@
 package net.jbock.util;
 
-import net.jbock.Option;
-import net.jbock.Parameter;
-import net.jbock.Parameters;
 import net.jbock.model.CommandModel;
 
 /**
  * A checked exception to signal that an error has occurred
  * within a particular converter.
  *
- * @see Option#converter()
- * @see Parameter#converter()
- * @see Parameters#converter()
+ * <p>This class is internal API and should not be used
+ * in client code. It may be removed without warning in future
+ * releases.
  */
 public final class ExConvert extends ExNotSuccess {
 

@@ -37,4 +37,11 @@ public abstract class ParsingFailed {
     public CommandModel commandModel() {
         return commandModel;
     }
+
+    /**
+     * Returns an error message that describes the error.
+     *
+     * @return the error message
+     */
+    public abstract String message();
 }
