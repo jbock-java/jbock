@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
@@ -21,16 +20,6 @@ final class ParseRequestExpand extends ParseRequest {
     ParseRequestExpand(Path path, List<String> args) {
         this.path = path;
         this.args = args;
-    }
-
-    @Override
-    public Optional<Path> path() {
-        return Optional.of(path);
-    }
-
-    @Override
-    public List<String> args() {
-        return args;
     }
 
     @Override
