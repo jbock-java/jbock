@@ -5,16 +5,9 @@ import net.jbock.model.CommandModel;
 import java.nio.file.Path;
 
 /**
- * An instance of this class represents failure of {@code @file} expansion.
+ * An instance of this class represents failure of {@code @-file} expansion.
  * This is an intermediate step in the construction of an
  * {@link ErrAtFile} instance.
- *
- * <p>There are a fixed number of subclasses:
- *
- * <ul>
- *   <li>{@link AtFileSyntaxError}
- *   <li>{@link AtFileReadError}
- * </ul>
  */
 public abstract class AtFileError {
 
