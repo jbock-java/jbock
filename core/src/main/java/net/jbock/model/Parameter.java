@@ -1,7 +1,6 @@
 package net.jbock.model;
 
 import net.jbock.Parameters;
-import net.jbock.util.ItemType;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -5,7 +5,7 @@ import net.jbock.model.CommandModel;
 import java.nio.file.Path;
 
 /**
- * Represents a syntax error in the {@code @file}.
+ * Represents a syntax error in the {@code @-file}.
  * This is an intermediate step in the construction of an
  * {@link ErrAtFile} instance.
  */

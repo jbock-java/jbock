@@ -4,8 +4,7 @@ import net.jbock.model.CommandModel;
 import net.jbock.model.Item;
 
 /**
- * Non-exceptional failure object that represents
- * any runtime error during a converter invocation.
+ * Represents a runtime error during a converter invocation.
  */
 public final class ErrConvert extends ParsingFailed {
 
@@ -26,15 +25,6 @@ public final class ErrConvert extends ParsingFailed {
         super(commandModel);
         this.converterFailure = converterFailure;
         this.item = item;
-    }
-
-    /**
-     * Returns the failure object.
-     *
-     * @return the failure object
-     */
-    public ConverterFailure failure() {
-        return converterFailure;
     }
 
     /**

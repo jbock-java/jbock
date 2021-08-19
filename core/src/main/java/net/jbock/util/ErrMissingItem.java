@@ -4,10 +4,8 @@ import net.jbock.model.CommandModel;
 import net.jbock.model.Item;
 
 /**
- * Non-exceptional failure object which indicates that a required item
+ * Indicates that a required option or positional parameter
  * was missing on the command line.
- *
- * @see net.jbock.model.Multiplicity#REQUIRED
  */
 public final class ErrMissingItem extends ParsingFailed {
 

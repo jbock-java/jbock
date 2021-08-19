@@ -1,6 +1,7 @@
 package net.jbock.util;
 
 import net.jbock.model.CommandModel;
+import net.jbock.model.ItemType;
 
 /**
  * A checked exception to signal that a required item was

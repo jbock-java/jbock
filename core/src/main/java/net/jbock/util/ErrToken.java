@@ -3,10 +3,8 @@ package net.jbock.util;
 import net.jbock.model.CommandModel;
 
 /**
- * Non-exceptional failure object that indicates an error in this command's
- * command line syntax.
- *
- * @see net.jbock.Command
+ * Represents some general error in the command line syntax.
+ * The specific type of error is returned from the {@link #errorType()} method.
  */
 public final class ErrToken extends ParsingFailed {
 
@@ -27,7 +25,7 @@ public final class ErrToken extends ParsingFailed {
     }
 
     /**
-     * Returns the error type.
+     * Returns the specific type of this error.
      *
      * @return the error type
      */

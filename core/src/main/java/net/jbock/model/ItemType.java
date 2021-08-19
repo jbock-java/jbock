@@ -1,4 +1,4 @@
-package net.jbock.util;
+package net.jbock.model;
 
 import net.jbock.Option;
 import net.jbock.Parameter;

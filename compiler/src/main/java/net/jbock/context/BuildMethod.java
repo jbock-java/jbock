@@ -13,7 +13,7 @@ import net.jbock.processor.SourceElement;
 import net.jbock.util.ExConvert;
 import net.jbock.util.ExMissingItem;
 import net.jbock.util.ExNotSuccess;
-import net.jbock.util.ItemType;
+import net.jbock.model.ItemType;
 
 import javax.inject.Inject;
 import java.util.ArrayList;

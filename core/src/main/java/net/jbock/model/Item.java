@@ -1,7 +1,5 @@
 package net.jbock.model;
 
-import net.jbock.util.ItemType;
-
 import java.util.List;
 
 /**

@@ -8,8 +8,8 @@ import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 
 /**
- * Converter that converts a string to any arbitrary type.
- * The implementing class must be a public class with no free type variables,
+ * Base class for a converter that converts a command line token.
+ * An implementation class must be public with no free type variables,
  * and have a parameterless public constructor.
  *
  * @param <T> the type of the conversion result
@@ -20,12 +20,7 @@ public abstract class StringConverter<T> implements Function<String, Either<Conv
      * Converts a single command line token.
      * For options, the token is the option argument.
      * This method will be invoked
-     * once per corresponding token in the input array,
-     * so it may never be invoked if no such token exists.
-     * All corresponding tokens will be handled by the same
-     * converter, so this method may be invoked more
-     * than once on the same instance, if it is bound to a
-     * repeatable item.
+     * once per corresponding token in the command line input.
      *
      * <p>The implementation is free to throw any {@link Exception}
      * to signal a converter failure.
@@ -33,18 +28,19 @@ public abstract class StringConverter<T> implements Function<String, Either<Conv
      * from this method.
      *
      * @see net.jbock.model.Multiplicity#REPEATABLE
-     * @param token a non-null string, possibly empty
-     * @return an instance of {@code T}
+     * @param token a non-null string
+     * @return result of the conversion
      * @throws Exception converter failure
      */
     protected abstract T convert(String token) throws Exception;
 
     /**
-     * Creates a {@link StringConverter} from a function.
+     * Creates a {@link StringConverter} from a {@code Function}.
      *
-     * @param function a function that should not return null
-     * @param <T> function output type
-     * @return converter instance
+     * @param function a function that performs string conversion
+     * @param <T> output type of the conversion function
+     * @return an instance of {@code StringConverter} that converts
+     *         by invoking the {@code function}
      */
     public static <T> StringConverter<T> create(Function<String, T> function) {
         return new StringConverter<>() {
@@ -55,10 +51,17 @@ public abstract class StringConverter<T> implements Function<String, Either<Conv
         };
     }
 
+    /**
+     * This method is internal API and should not be used
+     * in client code.
+     *
+     * @param token a non-null string
+     * @return conversion result
+     */
     @Override
-    public final Either<ConverterFailure, T> apply(String s) {
+    public final Either<ConverterFailure, T> apply(String token) {
         try {
-            T result = convert(s);
+            T result = convert(token);
             if (result == null) {
                 return left(new ConverterReturnedNull());
             }

@@ -5,8 +5,8 @@ import net.jbock.model.CommandModel;
 import java.nio.file.Path;
 
 /**
- * Non-exceptional failure object, indicates that reading options
- * from the {@code @file} was unsuccessful.
+ * Indicates that reading options
+ * from the {@code @-file} was unsuccessful.
  */
 public final class ErrAtFile extends ParsingFailed {
 

@@ -3,13 +3,8 @@ package net.jbock.util;
 import net.jbock.model.CommandModel;
 
 /**
- * Superclass of non-exceptional failure objects that may be
- * produced as a result of invoking the generated parser.
- * Each of the subclasses represents a parsing
- * result that's different from "success".
- *
- * <p>If parsing is not successful, a Left-Either containing an instance of this class
- * will be returned from the generated {@code parse(ParseRequest)} method.
+ * Superclass of failure objects that may be
+ * returned from the generated {@code parse} method.
  *
  * <p>There are a fixed number of subclasses:
  *

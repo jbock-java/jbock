@@ -2,12 +2,9 @@ package net.jbock.util;
 
 /**
  * Non-exceptional failure object that represents any converter failure.
- * There are a fixed number of implementations:
  *
- * <ul>
- *   <li>{@link ConverterThrewException}
- *   <li>{@link ConverterReturnedNull}
- * </ul>
+ * <p>This class is internal API and should not be used
+ * in client code.
  */
 public abstract class ConverterFailure {
 
@@ -19,5 +16,5 @@ public abstract class ConverterFailure {
      *
      * @return error message
      */
-    public abstract String converterMessage();
+    abstract String converterMessage();
 }
