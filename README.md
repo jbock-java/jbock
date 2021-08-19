@@ -47,7 +47,7 @@ public static void main(String[] args) {
 
 ````
 
-In addition to `parseOrExit`, there is also a highly configurable `parse` method with no side effects.
+In addition to `parseOrExit`, there is also a basic `parse` method with no side effects.
 Please see the [wiki](https://github.com/h908714124/jbock/wiki) for details.
 
 ### Sample projects

@@ -2,7 +2,6 @@ package net.jbock.examples;
 
 import io.jbock.util.Either;
 import net.jbock.examples.fixture.ParserTestFixture;
-import net.jbock.util.ParseRequest;
 import net.jbock.util.ParsingFailed;
 import net.jbock.util.SuperResult;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,7 @@ class HelplessSuperArgumentsTest {
     @Test
     void testHelp() {
         Either<ParsingFailed, SuperResult<HelplessSuperArguments>> result =
-                parser.parse(ParseRequest.simple(List.of("--help")));
+                parser.parse(List.of("--help"));
         f.assertThat(result).fails("Invalid option: --help");
     }
 }

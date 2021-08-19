@@ -2,7 +2,6 @@ package net.jbock.examples;
 
 import io.jbock.util.Either;
 import net.jbock.examples.fixture.ParserTestFixture;
-import net.jbock.util.ParseRequest;
 import net.jbock.util.ParsingFailed;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +17,7 @@ class HelplessArgumentsTest {
     @Test
     void testHelpIsAcceptedAsNormalOption() {
         Either<ParsingFailed, HelplessArguments> result =
-                parser.parse(ParseRequest.simple(List.of("--help", "x")));
+                parser.parse(List.of("--help", "x"));
         f.assertThat(result)
                 .has(HelplessArguments::required, "x")
                 .has(HelplessArguments::help, true);
@@ -27,7 +26,7 @@ class HelplessArgumentsTest {
     @Test
     void errorNoArguments() {
         Either<ParsingFailed, HelplessArguments> result =
-                parser.parse(ParseRequest.simple(List.of(/* empty */)));
+                parser.parse(List.of(/* empty */));
         f.assertThat(result)
                 .fails("Missing required parameter REQUIRED");
     }
@@ -35,7 +34,7 @@ class HelplessArgumentsTest {
     @Test
     void errorHelpDisabled() {
         Either<ParsingFailed, HelplessArguments> result =
-                parser.parse(ParseRequest.simple(List.of("--help")));
+                parser.parse(List.of("--help"));
         f.assertThat(result)
                 .fails("Missing required parameter REQUIRED");
     }

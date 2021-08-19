@@ -6,6 +6,7 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.AtFileError;
 import net.jbock.util.ParseRequest;
 
 import javax.inject.Inject;
@@ -42,7 +43,7 @@ public class ParseOrExitMethod {
 
         ParameterSpec args = builder(STRING_ARRAY, "args").build();
         ParameterSpec notSuccess = builder(generatedTypes.parseResultType(), "notSuccess").build();
-        ParameterSpec request = builder(ParseRequest.class, "request").build();
+        ParameterSpec err = builder(AtFileError.class, "err").build();
 
         CodeBlock.Builder code = CodeBlock.builder();
         if (allMappings.stream().anyMatch(Mapping::isRequired)) {
@@ -58,14 +59,16 @@ public class ParseOrExitMethod {
                     .addStatement("$T.exit(0)", System.class)
                     .endControlFlow();
         }
-        code.addStatement("$1T $2N = $1T.maybeExpand($3N)", ParseRequest.class, request, args);
-        code.add("return $N($N)", parseMethod.get(), request)
+
+        code.add("return $T.from($N).expand()\n", ParseRequest.class, args).indent()
+                .add(".mapLeft($1N -> $1N.addModel($2N()))\n", err, createModelMethod.get())
+                .add(".flatMap(this::$N)\n", parseMethod.get())
                 .add(".orElseThrow($N -> {\n", notSuccess).indent()
                 .addStatement("$T.builder().build().handle($N)",
                         StandardErrorHandler.class, notSuccess)
                 .addStatement("$T.exit(1)", System.class)
                 .addStatement("return new $T()", RuntimeException.class).unindent()
-                .addStatement("})");
+                .addStatement("})").unindent();
         return methodBuilder("parseOrExit").addParameter(args)
                 .addModifiers(sourceElement.accessModifiers())
                 .returns(generatedTypes.parseSuccessType())

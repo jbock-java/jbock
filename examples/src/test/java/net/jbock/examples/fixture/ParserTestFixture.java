@@ -4,7 +4,6 @@ import io.jbock.util.Either;
 import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.model.CommandModel;
 import net.jbock.util.HasMessage;
-import net.jbock.util.ParseRequest;
 import net.jbock.util.ParsingFailed;
 import org.junit.jupiter.api.Assertions;
 
@@ -34,19 +33,18 @@ public final class ParserTestFixture<E> {
         System.out.print(ANSI_RED + String.format("%3d: %s%n", args) + ANSI_RESET);
     }
 
-    private final Function<ParseRequest, Either<ParsingFailed, E>> parser;
+    private final Function<List<String>, Either<ParsingFailed, E>> parser;
 
-    private ParserTestFixture(Function<ParseRequest, Either<ParsingFailed, E>> parser) {
+    private ParserTestFixture(Function<List<String>, Either<ParsingFailed, E>> parser) {
         this.parser = parser;
     }
 
-    public static <E> ParserTestFixture<E> create(Function<ParseRequest, Either<ParsingFailed, E>> parser) {
+    public static <E> ParserTestFixture<E> create(Function<List<String>, Either<ParsingFailed, E>> parser) {
         return new ParserTestFixture<>(parser);
     }
 
     public AssertionBuilder<E> assertThat(String... args) {
-        ParseRequest request = ParseRequest.simple(List.of(args));
-        Either<ParsingFailed, E> instance = parser.apply(request);
+        Either<ParsingFailed, E> instance = parser.apply(List.of(args));
         return new AssertionBuilder<>(instance);
     }
 
@@ -69,8 +67,7 @@ public final class ParserTestFixture<E> {
     }
 
     public E parse(String... args) {
-        ParseRequest request = ParseRequest.simple(List.of(args));
-        return parser.apply(request)
+        return parser.apply(List.of(args))
                 .orElseThrow(l -> new RuntimeException("expecting success but found " + l.getClass()));
     }
 

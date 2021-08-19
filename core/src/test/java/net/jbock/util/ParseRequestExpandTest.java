@@ -2,18 +2,18 @@ package net.jbock.util;
 
 import io.jbock.util.Either;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Function;
 
-import static net.jbock.util.AtFileReader.LineResult.BACKSLASH_BEFORE_EOF;
-import static net.jbock.util.AtFileReader.LineResult.UNMATCHED_QUOTE;
+import static net.jbock.util.ParseRequestExpand.LineResult.BACKSLASH_BEFORE_EOF;
+import static net.jbock.util.ParseRequestExpand.LineResult.UNMATCHED_QUOTE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class AtFileReaderTest {
-
-    private final AtFileReader reader = new AtFileReader();
+class ParseRequestExpandTest {
 
     @Test
     void testAtFileSyntax() {
@@ -49,7 +49,7 @@ class AtFileReaderTest {
 
     @Test
     void backslashBeforeEof() {
-        AtFileReader.NumberedLineResult error = expectError(List.of("'a'\\"));
+        ParseRequestExpand.NumberedLineResult error = expectError(List.of("'a'\\"));
         assertTrue(error.lineResult().isError());
         assertEquals(1, error.number());
         assertEquals(BACKSLASH_BEFORE_EOF, error.lineResult());
@@ -57,21 +57,21 @@ class AtFileReaderTest {
 
     @Test
     void backslashBeforeEofEscapedDouble() {
-        AtFileReader.NumberedLineResult error = expectError(List.of("\"\\"));
+        ParseRequestExpand.NumberedLineResult error = expectError(List.of("\"\\"));
         assertEquals(1, error.number());
         assertEquals(UNMATCHED_QUOTE, error.lineResult());
     }
 
     @Test
     void backslashBeforeEofEscapedSingle() {
-        AtFileReader.NumberedLineResult error = expectError(List.of("'\\"));
+        ParseRequestExpand.NumberedLineResult error = expectError(List.of("'\\"));
         assertEquals(1, error.number());
         assertEquals(UNMATCHED_QUOTE, error.lineResult());
     }
 
     @Test
     void testUnmatchedSingleQuote() {
-        AtFileReader.NumberedLineResult error = expectError(List.of("'"));
+        ParseRequestExpand.NumberedLineResult error = expectError(List.of("'"));
         assertTrue(error.lineResult().isError());
         assertEquals(1, error.number());
         assertEquals("unmatched quote", error.lineResult().message());
@@ -79,7 +79,7 @@ class AtFileReaderTest {
 
     @Test
     void testUnmatchedDoubleQuote() {
-        AtFileReader.NumberedLineResult error = expectError(List.of("\""));
+        ParseRequestExpand.NumberedLineResult error = expectError(List.of("\""));
         assertTrue(error.lineResult().isError());
         assertEquals(1, error.number());
         assertEquals("unmatched quote", error.lineResult().message());
@@ -127,7 +127,7 @@ class AtFileReaderTest {
 
     @Test
     void testSingleBackslashInDoubleQuotes() {
-        AtFileReader.NumberedLineResult error = expectError(List.of("\"\\\""));
+        ParseRequestExpand.NumberedLineResult error = expectError(List.of("\"\\\""));
         assertTrue(error.lineResult().isError());
         assertEquals(1, error.number());
         assertEquals("unmatched quote", error.lineResult().message());
@@ -144,15 +144,19 @@ class AtFileReaderTest {
     }
 
     private List<String> read(List<String> lines) {
-        Either<AtFileReader.NumberedLineResult, List<String>> either = reader.readAtLines(lines);
+        Path path = Mockito.mock(Path.class);
+        Either<ParseRequestExpand.NumberedLineResult, List<String>> either = new ParseRequestExpand(path, List.of())
+                .readAtLines(lines);
         assertTrue(either.isRight());
         return either.fold(l -> {
             throw new RuntimeException("expecting Right");
         }, Function.identity());
     }
 
-    private AtFileReader.NumberedLineResult expectError(List<String> lines) {
-        Either<AtFileReader.NumberedLineResult, List<String>> either = reader.readAtLines(lines);
+    private ParseRequestExpand.NumberedLineResult expectError(List<String> lines) {
+        Path path = Mockito.mock(Path.class);
+        Either<ParseRequestExpand.NumberedLineResult, List<String>> either = new ParseRequestExpand(path, List.of())
+                .readAtLines(lines);
         assertTrue(either.isLeft());
         return either.fold(Function.identity(), l -> {
             throw new RuntimeException("expecting Left");

@@ -1,5 +1,7 @@
 package net.jbock.util;
 
+import io.jbock.util.Either;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -18,7 +20,7 @@ public abstract class ParseRequest {
      * @param args command line input
      * @return a parse request
      */
-    public static ParseRequest maybeExpand(String[] args) {
+    public static ParseRequest from(String[] args) {
         if (args.length >= 1
                 && args[0].length() >= 2
                 && args[0].startsWith("@")) {
@@ -67,4 +69,6 @@ public abstract class ParseRequest {
      * @return command line arguments
      */
     public abstract List<String> args();
+
+    public abstract Either<? extends AtFileError, List<String>> expand();
 }

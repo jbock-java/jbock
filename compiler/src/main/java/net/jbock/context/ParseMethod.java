@@ -4,16 +4,13 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.processor.SourceElement;
-import net.jbock.util.AtFileError;
-import net.jbock.util.AtFileReader;
 import net.jbock.util.ExNotSuccess;
-import net.jbock.util.ParseRequest;
 
 import javax.inject.Inject;
-import java.util.List;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.EITHER;
+import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING_ITERATOR;
 
 @ContextScope
@@ -39,39 +36,27 @@ public class ParseMethod extends CachedMethod {
     @Override
     MethodSpec define() {
 
-        ParameterSpec request = builder(ParseRequest.class, "request").build();
+        ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
         ParameterSpec it = builder(STRING_ITERATOR, "it").build();
-        ParameterSpec err = builder(AtFileError.class, "err").build();
 
         CodeBlock.Builder code = CodeBlock.builder();
 
-        code.addStatement("return $L", CodeBlock.builder()
-                .add("new $T().read($N)\n", AtFileReader.class, request).indent()
-                .add(".mapLeft($1N -> $1N.addModel($2N()))\n", err, createModelMethod.get())
-                .add(".map($T::iterator)\n", List.class)
-                .add(".flatMap($N -> {\n", it)
-                .indent().add(coreBlock(it)).unindent()
-                .add("})").unindent()
-                .build());
-
-        return MethodSpec.methodBuilder("parse")
-                .addParameter(request)
-                .returns(generatedTypes.parseResultType())
-                .addCode(code.build())
-                .addModifiers(sourceElement.accessModifiers())
-                .build();
-    }
-
-    private CodeBlock coreBlock(ParameterSpec it) {
+        code.addStatement("$T $N = $N.iterator()", STRING_ITERATOR, it, tokens);
         ParameterSpec state = builder(generatedTypes.statefulParserType(), "statefulParser").build();
         ParameterSpec e = builder(Exception.class, "e").build();
-        return CodeBlock.builder().add("$T $N = new $T();\n", state.type, state, state.type)
+        code.add("$T $N = new $T();\n", state.type, state, state.type)
                 .add("try {\n").indent()
                 .add("return $T.right($N.parse($N).$N());\n", EITHER, state, it, buildMethod.get())
                 .unindent().add("} catch ($T $N) {\n", ExNotSuccess.class, e).indent()
                 .add("return $T.left($N.toError($N()));\n",
                         EITHER, e, createModelMethod.get())
-                .unindent().add("}\n")
+                .unindent().add("}\n");
+
+        return MethodSpec.methodBuilder("parse")
+                .addParameter(tokens)
+                .returns(generatedTypes.parseResultType())
+                .addCode(code.build())
+                .addModifiers(sourceElement.accessModifiers())
                 .build();
     }
 }
