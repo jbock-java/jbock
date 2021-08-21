@@ -178,7 +178,6 @@ class ConverterTest {
                 "  @Parameters(converter = MyConverter.class)",
                 "  abstract Integer something();",
                 "",
-                "  @Converter",
                 "  static class MyConverter extends StringConverter<Integer> {",
                 "    public Integer convert(String token) { return null; }",
                 "  }",
@@ -247,6 +246,25 @@ class ConverterTest {
     }
 
     @Test
+    void invalidConverterReturnsOptional() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Parameter(converter = MyConverter.class, index = 0)",
+                "  abstract Optional<Integer> something();",
+                "",
+                "  static class MyConverter extends StringConverter<Optional<Integer>> {",
+                "    public Integer convert(Optional<Integer> token) { return null; }",
+                "  }",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("invalid converter class: should extend StringConverter<Integer> or implement Supplier<StringConverter<Integer>>");
+    }
+
+    @Test
     void parameterInvalidList() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
@@ -255,7 +273,6 @@ class ConverterTest {
                 "  @Parameter(index = 0, converter = MyConverter.class)",
                 "  abstract List<Integer> something();",
                 "",
-                "  @Converter",
                 "  static class MyConverter extends StringConverter<Integer> {",
                 "    public Integer convert(String token) { return null; }",
                 "  }",
@@ -275,7 +292,6 @@ class ConverterTest {
                 "  @Parameter(index = 0, converter = BoundMapper.class)",
                 "  abstract String a();",
                 "",
-                "  @Converter",
                 "  static class BoundMapper<E extends Integer> implements Supplier<StringConverter<E>> {",
                 "    public StringConverter<E> get() { return null; }",
                 "  }",
@@ -296,7 +312,6 @@ class ConverterTest {
                 "  @Parameter(index = 0, converter = BoundMapper.class)",
                 "  abstract String a();",
                 "",
-                "  @Converter",
                 "  static class BoundMapper implements Katz<String> {",
                 "    public StringConverter<String> get() { return null; }",
                 "  }",
@@ -318,7 +333,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract Integer number();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<Integer>> {",
                 "",
                 "    private MapMap() {}",
@@ -341,7 +355,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract Integer number();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<Integer>> {",
                 "",
                 "    MapMap(int i) {}",
@@ -364,7 +377,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract Integer number();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<Integer>> {",
                 "",
                 "    MapMap() throws java.io.IOException {}",
@@ -387,7 +399,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract Integer number();",
                 "",
-                "  @Converter",
                 "  class MapMap implements Supplier<StringConverter<Integer>> {",
                 "    public StringConverter<Integer> get() { return null; }",
                 "  }",
@@ -407,7 +418,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract Integer number();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<String>> {",
                 "    public StringConverter<String> get() { return null; }",
                 "  }",
@@ -427,7 +437,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract java.util.OptionalInt number();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<String>> {",
                 "    public StringConverter<String> get() { return null; }",
                 "  }",
@@ -447,7 +456,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract List<Integer> number();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<String>> {",
                 "    public StringConverter<String> get() { return null; }",
                 "  }",
@@ -504,7 +512,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract Integer number();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter> {",
                 "    public StringConverter get() { return null; }",
                 "  }",
@@ -524,7 +531,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract Integer number();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier {",
                 "    public Object get() { return null; }",
                 "  }",
@@ -544,7 +550,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract Integer number();",
                 "",
-                "  @Converter",
                 "  static class MapMap extends StringConverter {",
                 "    public Object convert(String token) { return null; }",
                 "  }",
@@ -636,7 +641,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract java.util.OptionalInt b();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<java.util.OptionalInt>> {",
                 "    public StringConverter<java.util.OptionalInt> get() { return null; }",
                 "  }",
@@ -656,7 +660,6 @@ class ConverterTest {
                 "  @Option(names = \"--x\", converter = MapMap.class)",
                 "  abstract Optional<Integer> b();",
                 "",
-                "  @Converter",
                 "  static class MapMap implements Supplier<StringConverter<Optional<Integer>>> {",
                 "    public StringConverter<Optional<Integer>> get() { return null; }",
                 "  }",
