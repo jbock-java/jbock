@@ -7,20 +7,12 @@ import com.squareup.javapoet.TypeName;
 import io.jbock.util.Either;
 import io.jbock.util.Eithers;
 
-import javax.lang.model.element.Modifier;
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-
-import static javax.lang.model.element.Modifier.PROTECTED;
-import static javax.lang.model.element.Modifier.PUBLIC;
 
 public final class Constants {
-
-    public static final Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
     public static final ClassName STRING = ClassName.get(String.class);
 

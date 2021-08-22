@@ -12,15 +12,19 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
+import static javax.lang.model.element.Modifier.PROTECTED;
+import static javax.lang.model.element.Modifier.PUBLIC;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
-import static net.jbock.common.Constants.ACCESS_MODIFIERS;
 
 abstract class Executable {
 
+    private static final Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
     private static final AnnotationUtil ANNOTATION_UTIL = new AnnotationUtil();
 
     private final SourceElement sourceElement;

@@ -81,4 +81,12 @@ public @interface Command {
      *         {@code parseOrExit} method
      */
     boolean generateParseOrExitMethod() default true;
+
+    /**
+     * If {@code true}, the generated parser class will be
+     * {@code public}. Otherwise, it will be package-private.
+     *
+     * @return {@code true} to generate a public parser class
+     */
+    boolean publicParser() default false;
 }
