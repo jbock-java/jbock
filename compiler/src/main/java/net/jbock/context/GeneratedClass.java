@@ -85,6 +85,7 @@ public final class GeneratedClass {
 
         return spec.addOriginatingElement(sourceElement.element()) // important
                 .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]))
+                .addModifiers(Modifier.FINAL)
                 .addAnnotation(generatedAnnotation()).build();
     }
 

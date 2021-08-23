@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Command(name = "curl",
-        description = {
+         publicParser = true,
+         description = {
                 "curl  is  a  tool  to  transfer data from or to a server",
                 "using one of the supported protocols.",
                 "curl offers a busload of useful tricks.",

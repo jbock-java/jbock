@@ -12,11 +12,12 @@ import javax.inject.Inject;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 
 /**
- * Defines the *Impl inner class.
+ * Defines the *Impl inner class, which extends the command class.
  *
  * @see GeneratedClass
  */
@@ -46,7 +47,7 @@ public class Impl {
         for (Mapping<?> m : allMappings) {
             spec.addField(m.asField());
         }
-        return spec.addModifiers(PRIVATE, STATIC)
+        return spec.addModifiers(PRIVATE, STATIC, FINAL)
                 .addMethod(implConstructor())
                 .addMethods(allMappings.stream()
                         .map(this::parameterMethodOverride)
@@ -60,6 +61,7 @@ public class Impl {
                 .returns(TypeName.get(sourceMethod.returnType()))
                 .addModifiers(sourceMethod.accessModifiers())
                 .addStatement("return $N", m.asField())
+                .addAnnotation(Override.class)
                 .build();
     }
 
