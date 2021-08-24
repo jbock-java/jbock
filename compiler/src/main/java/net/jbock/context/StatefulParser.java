@@ -9,9 +9,9 @@ import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
-import net.jbock.state.FlagParserClustering;
-import net.jbock.state.RegularOptionParser;
-import net.jbock.state.RepeatableOptionParser;
+import net.jbock.state.OptionStateModeFlag;
+import net.jbock.state.OptionStateRegular;
+import net.jbock.state.OptionStateRepeatable;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -98,11 +98,11 @@ public class StatefulParser {
 
     private ClassName optionParserType(Mapping<AnnotatedOption> param) {
         if (param.isRepeatable()) {
-            return ClassName.get(RepeatableOptionParser.class);
+            return ClassName.get(OptionStateRepeatable.class);
         }
         if (param.modeFlag()) {
-            return ClassName.get(FlagParserClustering.class);
+            return ClassName.get(OptionStateModeFlag.class);
         }
-        return ClassName.get(RegularOptionParser.class);
+        return ClassName.get(OptionStateRegular.class);
     }
 }

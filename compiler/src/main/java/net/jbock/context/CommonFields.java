@@ -7,7 +7,7 @@ import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
-import net.jbock.state.OptionParser;
+import net.jbock.state.OptionState;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -58,7 +58,7 @@ class CommonFields {
         FieldSpec paramParsers = FieldSpec.builder(ArrayTypeName.of(STRING), "params")
                 .initializer("new $T[$L]", STRING, positionalParameters.size())
                 .build();
-        FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionEnumType(), ClassName.get(OptionParser.class)), "optionParsers")
+        FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionEnumType(), ClassName.get(OptionState.class)), "optionStates")
                 .initializer("new $T<>($T.class)", EnumMap.class, sourceElement.optionEnumType())
                 .build();
         return new CommonFields(optionsByName, paramParsers, optionParsers);

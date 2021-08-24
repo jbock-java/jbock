@@ -4,7 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.processor.SourceElement;
-import net.jbock.state.OptionParser;
+import net.jbock.state.OptionState;
 import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
@@ -36,17 +36,17 @@ public class TryReadOptionMethod extends CachedMethod {
                 .addException(ExToken.class)
                 .addParameter(token)
                 .addParameter(it)
-                .addCode(tryParseOptionCodeClustering(token, it))
+                .addCode(tryReadOptionCode(token, it))
                 .returns(BOOLEAN)
                 .build();
     }
 
-    private CodeBlock tryParseOptionCodeClustering(ParameterSpec token, ParameterSpec it) {
+    private CodeBlock tryReadOptionCode(ParameterSpec token, ParameterSpec it) {
         ParameterSpec t = ParameterSpec.builder(STRING, "t").build();
         ParameterSpec option = ParameterSpec.builder(sourceElement.optionEnumType(), "opt").build();
         CodeBlock.Builder code = CodeBlock.builder();
         code.addStatement("$T $N = $N.get($T.readOptionName($N))", sourceElement.optionEnumType(),
-                option, commonFields.optionNames(), OptionParser.class, token);
+                option, commonFields.optionNames(), OptionState.class, token);
         code.add("if ($N == null)\n", option).indent()
                 .addStatement("return false")
                 .unindent();
@@ -54,7 +54,7 @@ public class TryReadOptionMethod extends CachedMethod {
         code.add("while (($1N = $2N.get($3N).read($1N, $4N)) != null)\n",
                 t, commonFields.optionParsers(), option, it).indent();
         code.add("if (($N = $N.get($T.readOptionName($N))) == null)\n", option, commonFields.optionNames(),
-                OptionParser.class, t).indent();
+                OptionState.class, t).indent();
         code.addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
                 ErrTokenType.INVALID_UNIX_GROUP, token);
         code.unindent().unindent();

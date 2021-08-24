@@ -4,26 +4,24 @@ import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-public final class FlagParserClustering extends OptionParser {
+public final class OptionStateRegular extends OptionState {
 
-    private boolean seen;
+    private String value;
 
     @Override
     public String read(String token, Iterator<String> it) throws ExToken {
-        if (seen) {
+        if (value != null) {
             throw new ExToken(ErrTokenType.OPTION_REPETITION, token);
         }
-        seen = true;
-        if (token.startsWith("--") || token.length() == 2) {
-            return null;
-        }
-        return '-' + token.substring(2);
+        value = readOptionArgument(token, it);
+        return null;
     }
 
     @Override
     public Stream<String> stream() {
-        return seen ? Stream.of("") : Stream.empty();
+        return Optional.ofNullable(value).stream();
     }
 }

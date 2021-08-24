@@ -4,7 +4,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.processor.SourceElement;
-import net.jbock.state.OptionParser;
 import net.jbock.util.ParsingFailed;
 import net.jbock.util.SuperResult;
 
@@ -37,10 +36,6 @@ public class GeneratedTypes {
                 ClassName.get(SuperResult.class),
                 sourceElement.typeName());
         return Optional.of(type);
-    }
-
-    ClassName optionParserType() {
-        return ClassName.get(OptionParser.class);
     }
 
     ClassName statefulParserType() {

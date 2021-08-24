@@ -6,7 +6,7 @@ import net.jbock.util.ExToken;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-public abstract class OptionParser {
+public abstract class OptionState {
 
     public static String readOptionName(String token) {
         if (token.length() < 2 || !token.startsWith("-")) {

@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public final class RepeatableOptionParser extends OptionParser {
+public final class OptionStateRepeatable extends OptionState {
 
     private List<String> values;
 
