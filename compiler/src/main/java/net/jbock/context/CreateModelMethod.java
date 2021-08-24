@@ -25,7 +25,6 @@ public class CreateModelMethod extends CachedMethod {
     private final ContextUtil contextUtil;
     private final SourceElement sourceElement;
     private final List<Mapping<AnnotatedOption>> namedOptions;
-    private final UnixClustering options;
     private final List<Mapping<AnnotatedParameter>> positionalParameters;
     private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
 
@@ -34,13 +33,11 @@ public class CreateModelMethod extends CachedMethod {
             ContextUtil contextUtil,
             SourceElement sourceElement,
             List<Mapping<AnnotatedOption>> namedOptions,
-            UnixClustering options,
             List<Mapping<AnnotatedParameter>> positionalParameters,
             List<Mapping<AnnotatedParameters>> repeatablePositionalParameters) {
         this.contextUtil = contextUtil;
         this.sourceElement = sourceElement;
         this.namedOptions = namedOptions;
-        this.options = options;
         this.positionalParameters = positionalParameters;
         this.repeatablePositionalParameters = repeatablePositionalParameters;
     }
@@ -57,9 +54,6 @@ public class CreateModelMethod extends CachedMethod {
         code.add(CodeBlock.of(".withProgramName($S)", sourceElement.programName()));
         if (sourceElement.isSuperCommand()) {
             code.add(CodeBlock.of(".withSuperCommand($L)", true));
-        }
-        if (options.unixClusteringSupported()) {
-            code.add(CodeBlock.of(".withUnixClustering($L)", true));
         }
         for (Mapping<AnnotatedOption> c : namedOptions) {
             code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
@@ -87,7 +81,7 @@ public class CreateModelMethod extends CachedMethod {
         code.add(CodeBlock.of(".withNames($T.of($L))", List.class, contextUtil.joinByComma(names)));
         if (c.modeFlag()) {
             code.add(CodeBlock.of(".withModeFlag()"));
-        } else if (c.multiplicity() != Multiplicity.OPTIONAL) {
+        } else if (!c.isOptional()) {
             code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
         }
         for (String line : c.sourceMethod().description()) {
@@ -102,7 +96,7 @@ public class CreateModelMethod extends CachedMethod {
         code.add(CodeBlock.of("$T.builder()", Parameter.class));
         code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
         c.sourceMethod().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
-        if (c.multiplicity() != Multiplicity.REQUIRED) {
+        if (!c.isRequired()) {
             code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
         }
         for (String line : c.sourceMethod().description()) {

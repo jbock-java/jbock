@@ -1,11 +1,13 @@
 package net.jbock.context;
 
 import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
+import net.jbock.state.OptionParser;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -13,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.mapOf;
@@ -23,13 +24,6 @@ class CommonFields {
     private final FieldSpec optionNames;
     private final FieldSpec params;
     private final FieldSpec optionParsers;
-
-    private final FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
-            .build();
-    private final FieldSpec value = FieldSpec.builder(STRING, "value")
-            .build();
-    private final FieldSpec seen = FieldSpec.builder(BOOLEAN, "seen")
-            .build();
 
     private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest")
             .initializer("new $T<>()", ArrayList.class)
@@ -49,7 +43,6 @@ class CommonFields {
     }
 
     static CommonFields create(
-            GeneratedTypes generatedTypes,
             SourceElement sourceElement,
             List<Mapping<AnnotatedParameter>> positionalParameters,
             List<Mapping<AnnotatedOption>> namedOptions) {
@@ -65,7 +58,7 @@ class CommonFields {
         FieldSpec paramParsers = FieldSpec.builder(ArrayTypeName.of(STRING), "params")
                 .initializer("new $T[$L]", STRING, positionalParameters.size())
                 .build();
-        FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionEnumType(), generatedTypes.optionParserType()), "optionParsers")
+        FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionEnumType(), ClassName.get(OptionParser.class)), "optionParsers")
                 .initializer("new $T<>($T.class)", EnumMap.class, sourceElement.optionEnumType())
                 .build();
         return new CommonFields(optionsByName, paramParsers, optionParsers);
@@ -89,17 +82,5 @@ class CommonFields {
 
     FieldSpec optionParsers() {
         return optionParsers;
-    }
-
-    FieldSpec values() {
-        return values;
-    }
-
-    FieldSpec value() {
-        return value;
-    }
-
-    FieldSpec seen() {
-        return seen;
     }
 }

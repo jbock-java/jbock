@@ -1,14 +1,10 @@
 package net.jbock.context;
 
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
-import net.jbock.processor.JbockProcessor;
 import net.jbock.processor.SourceElement;
 
-import javax.annotation.processing.Generated;
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -17,11 +13,9 @@ import java.util.List;
  * Generates the *Parser class.
  */
 @ContextScope
-public final class GeneratedClass {
+public final class ParserClass {
 
     private final ParseMethod parseMethod;
-    private final Impl impl;
-    private final OptionParser optionParser;
     private final OptEnum optionEnum;
     private final StatefulParser statefulParser;
     private final SourceElement sourceElement;
@@ -30,24 +24,22 @@ public final class GeneratedClass {
     private final CreateModelMethod createModelMethod;
     private final MultilineConverter multilineConverter;
     private final List<Mapping<?>> allMappings;
+    private final GeneratedAnnotation generatedAnnotation;
 
     @Inject
-    GeneratedClass(
+    ParserClass(
             ParseMethod parseMethod,
             SourceElement sourceElement,
-            Impl impl,
-            OptionParser optionParser,
             OptEnum optionEnum,
             StatefulParser statefulParser,
             List<Mapping<AnnotatedOption>> namedOptions,
             ParseOrExitMethod parseOrExitMethod,
             CreateModelMethod createModelMethod,
             MultilineConverter multilineConverter,
-            List<Mapping<?>> allMappings) {
+            List<Mapping<?>> allMappings,
+            GeneratedAnnotation generatedAnnotation) {
         this.parseMethod = parseMethod;
         this.sourceElement = sourceElement;
-        this.impl = impl;
-        this.optionParser = optionParser;
         this.optionEnum = optionEnum;
         this.statefulParser = statefulParser;
         this.namedOptions = namedOptions;
@@ -55,6 +47,7 @@ public final class GeneratedClass {
         this.createModelMethod = createModelMethod;
         this.multilineConverter = multilineConverter;
         this.allMappings = allMappings;
+        this.generatedAnnotation = generatedAnnotation;
     }
 
     /**
@@ -72,9 +65,7 @@ public final class GeneratedClass {
         spec.addType(statefulParser.define());
         if (!namedOptions.isEmpty()) {
             spec.addType(optionEnum.define());
-            spec.addTypes(optionParser.define());
         }
-        spec.addType(impl.define());
 
         for (Mapping<?> item : allMappings) {
             item.multilineBlock().ifPresent(multilineBlock ->
@@ -83,16 +74,9 @@ public final class GeneratedClass {
 
         spec.addMethod(createModelMethod.get());
 
-        return spec.addOriginatingElement(sourceElement.element()) // important
+        return spec.addOriginatingElement(sourceElement.element())
                 .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]))
                 .addModifiers(Modifier.FINAL)
-                .addAnnotation(generatedAnnotation()).build();
-    }
-
-    private AnnotationSpec generatedAnnotation() {
-        return AnnotationSpec.builder(Generated.class)
-                .addMember("value", CodeBlock.of("$S", JbockProcessor.class.getCanonicalName()))
-                .addMember("comments", CodeBlock.of("$S", "https://github.com/jbock-java"))
-                .build();
+                .addAnnotation(generatedAnnotation.define()).build();
     }
 }

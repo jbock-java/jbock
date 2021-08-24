@@ -13,4 +13,5 @@ module net.jbock {
     exports net.jbock.util;
     exports net.jbock.model;
     exports net.jbock.contrib;
+    exports net.jbock.state;
 }

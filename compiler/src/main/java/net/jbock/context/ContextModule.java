@@ -70,10 +70,8 @@ public class ContextModule {
     @ContextScope
     @Provides
     CommonFields commonFields(
-            GeneratedTypes generatedTypes,
             SourceElement sourceElement) {
         return CommonFields.create(
-                generatedTypes,
                 sourceElement,
                 positionalParams,
                 namedOptions);

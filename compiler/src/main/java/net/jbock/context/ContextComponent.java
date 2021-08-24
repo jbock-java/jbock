@@ -6,7 +6,9 @@ import dagger.Component;
 @ContextScope
 public interface ContextComponent {
 
-    GeneratedClass generatedClass();
+    ParserClass parserClass();
+
+    ImplClass implClass();
 
     @Component.Factory
     interface Factory {

@@ -66,14 +66,6 @@ public @interface Command {
     boolean superCommand() default false;
 
     /**
-     * If {@code true}, the generated parser will recognize
-     * clustered options, as in {@code tar -xf foo.tar}.
-     *
-     * @return {@code false} to disable unix clustering
-     */
-    boolean unixClustering() default true;
-
-    /**
      * If {@code true}, the generated parser will contain
      * the {@code parseOrExit} method.
      *

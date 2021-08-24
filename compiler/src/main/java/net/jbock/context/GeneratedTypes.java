@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.processor.SourceElement;
+import net.jbock.state.OptionParser;
 import net.jbock.util.ParsingFailed;
 import net.jbock.util.SuperResult;
 
@@ -39,19 +40,7 @@ public class GeneratedTypes {
     }
 
     ClassName optionParserType() {
-        return generatedClass.nestedClass("OptionParser");
-    }
-
-    ClassName repeatableOptionParserType() {
-        return generatedClass.nestedClass("RepeatableOptionParser");
-    }
-
-    ClassName flagParserType() {
-        return generatedClass.nestedClass("FlagParser");
-    }
-
-    ClassName regularOptionParserType() {
-        return generatedClass.nestedClass("RegularOptionParser");
+        return ClassName.get(OptionParser.class);
     }
 
     ClassName statefulParserType() {
@@ -59,7 +48,7 @@ public class GeneratedTypes {
     }
 
     ClassName implType() {
-        return generatedClass.nestedClass(sourceElement.element().getSimpleName() + "Impl");
+        return generatedClass.peerClass(sourceElement.element().getSimpleName() + "_Impl");
     }
 
     TypeName parseResultType() {

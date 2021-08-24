@@ -98,10 +98,6 @@ public class SourceElement {
         return List.of(command.description());
     }
 
-    public boolean unixClustering() {
-        return command.unixClustering();
-    }
-
     public boolean generateParseOrExitMethod() {
         return command.generateParseOrExitMethod();
     }

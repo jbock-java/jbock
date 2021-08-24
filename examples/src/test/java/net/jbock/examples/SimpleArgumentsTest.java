@@ -15,7 +15,7 @@ class SimpleArgumentsTest {
     @Test
     void invalidOptions() {
         f.assertThat("xf", "1").fails("Excess param: xf");
-        f.assertThat("-xf", "1").fails("Invalid option: -xf");
+        f.assertThat("-xf", "1").fails("Invalid token: -xf");
         f.assertThat("---").fails("Invalid option: ---");
     }
 

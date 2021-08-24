@@ -6,7 +6,7 @@ import net.jbock.Parameter;
 
 import java.util.Optional;
 
-@Command(unixClustering = false)
+@Command
 abstract class CpArguments {
 
     enum Control {

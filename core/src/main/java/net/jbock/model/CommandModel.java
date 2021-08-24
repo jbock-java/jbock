@@ -15,7 +15,6 @@ public final class CommandModel {
     private final List<String> descriptionLines;
     private final String programName;
     private final boolean superCommand;
-    private final boolean unixClustering;
     private final List<Option> options;
     private final List<Parameter> parameters;
 
@@ -24,14 +23,12 @@ public final class CommandModel {
             List<String> descriptionLines,
             String programName,
             boolean superCommand,
-            boolean unixClustering,
             List<Option> options,
             List<Parameter> parameters) {
         this.descriptionKey = descriptionKey;
         this.descriptionLines = descriptionLines;
         this.programName = programName;
         this.superCommand = superCommand;
-        this.unixClustering = unixClustering;
         this.options = options;
         this.parameters = parameters;
     }
@@ -54,7 +51,6 @@ public final class CommandModel {
         private final List<String> descriptionLines = new ArrayList<>();
         private String programName;
         private boolean superCommand;
-        private boolean unixClustering;
         private final List<Option> options = new ArrayList<>();
         private final List<Parameter> parameters = new ArrayList<>();
 
@@ -110,18 +106,6 @@ public final class CommandModel {
         }
 
         /**
-         * Sets the unix clustering property.
-         *
-         * @see Command#unixClustering()
-         * @param unixClustering whether unix clustering is enabled
-         * @return the builder instance
-         */
-        public Builder withUnixClustering(boolean unixClustering) {
-            this.unixClustering = unixClustering;
-            return this;
-        }
-
-        /**
          * Adds an option.
          *
          * @param option a named option
@@ -151,7 +135,7 @@ public final class CommandModel {
         public CommandModel build() {
             return new CommandModel(descriptionKey, descriptionLines,
                     programName, superCommand,
-                    unixClustering, options, parameters);
+                    options, parameters);
         }
     }
 
@@ -217,18 +201,6 @@ public final class CommandModel {
      */
     public boolean isSuperCommand() {
         return superCommand;
-    }
-
-    /**
-     * Returns the value of the {@link Command#unixClustering()}}
-     * attribute. Note, this may also return {@code false}
-     * if unix clustering is impossible because
-     * there are no unix-style mode flags.
-     *
-     * @return {@code true} if unix clustering is enabled
-     */
-    public boolean isUnixClustering() {
-        return unixClustering;
     }
 
     /**

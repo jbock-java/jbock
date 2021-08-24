@@ -9,6 +9,9 @@ import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
+import net.jbock.state.FlagParserClustering;
+import net.jbock.state.RegularOptionParser;
+import net.jbock.state.RepeatableOptionParser;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -30,8 +33,7 @@ public class StatefulParser {
     private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
     private final CommonFields commonFields;
     private final BuildMethod buildMethod;
-    private final TryParseOptionMethod tryParseOptionMethod;
-    private final ReadOptionNameMethod readOptionNameMethod;
+    private final TryReadOptionMethod tryParseOptionMethod;
 
     @Inject
     StatefulParser(
@@ -43,8 +45,7 @@ public class StatefulParser {
             List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
             CommonFields commonFields,
             BuildMethod buildMethod,
-            TryParseOptionMethod tryParseOptionMethod,
-            ReadOptionNameMethod readOptionNameMethod) {
+            TryReadOptionMethod tryParseOptionMethod) {
         this.generatedTypes = generatedTypes;
         this.statefulParseMethod = statefulParseMethod;
         this.sourceElement = sourceElement;
@@ -54,7 +55,6 @@ public class StatefulParser {
         this.commonFields = commonFields;
         this.buildMethod = buildMethod;
         this.tryParseOptionMethod = tryParseOptionMethod;
-        this.readOptionNameMethod = readOptionNameMethod;
     }
 
     TypeSpec define() {
@@ -63,7 +63,6 @@ public class StatefulParser {
                 .addMethod(statefulParseMethod.define());
         spec.addField(commonFields.suspiciousPattern());
         if (!namedOptions.isEmpty()) {
-            spec.addMethod(readOptionNameMethod.get());
             spec.addMethod(tryParseOptionMethod.get());
             spec.addMethod(privateConstructor());
             spec.addField(commonFields.optionNames());
@@ -99,11 +98,11 @@ public class StatefulParser {
 
     private ClassName optionParserType(Mapping<AnnotatedOption> param) {
         if (param.isRepeatable()) {
-            return generatedTypes.repeatableOptionParserType();
+            return ClassName.get(RepeatableOptionParser.class);
         }
         if (param.modeFlag()) {
-            return generatedTypes.flagParserType();
+            return ClassName.get(FlagParserClustering.class);
         }
-        return generatedTypes.regularOptionParserType();
+        return ClassName.get(RegularOptionParser.class);
     }
 }

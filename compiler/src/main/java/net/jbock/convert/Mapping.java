@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
 /**
@@ -68,7 +69,8 @@ public final class Mapping<M extends AnnotatedMethod> {
             boolean modeFlag) {
         TypeName fieldType = TypeName.get(match.sourceMethod().returnType());
         String fieldName = match.sourceMethod().methodName();
-        FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).addModifiers(FINAL).build();
+        FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName)
+                .addModifiers(PRIVATE, FINAL).build();
         ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
         return new Mapping<>(block, match, modeFlag, asParameterSpec, asFieldSpec);
     }

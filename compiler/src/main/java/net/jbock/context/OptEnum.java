@@ -14,7 +14,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 /**
  * Defines the inner class *Parser.Opt.
  *
- * @see GeneratedClass
+ * @see ParserClass
  */
 @ContextScope
 public class OptEnum {

@@ -10,9 +10,7 @@ import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
-import net.jbock.context.ContextComponent;
 import net.jbock.context.DaggerContextComponent;
-import net.jbock.context.GeneratedClass;
 import net.jbock.validate.CommandProcessor;
 import net.jbock.validate.DaggerValidateComponent;
 import net.jbock.validate.ValidateModule;
@@ -82,11 +80,15 @@ public class CommandStep implements BasicAnnotationProcessor.Step {
         processor.generate()
                 .map(items -> items.contextModule(sourceElement))
                 .map(module -> DaggerContextComponent.factory().create(module))
-                .map(ContextComponent::generatedClass)
-                .map(GeneratedClass::define)
                 .ifLeftOrElse(
                         this::printFailures,
-                        typeSpec -> writeSpec(sourceElement, typeSpec));
+                        component -> writeSpecs(sourceElement, List.of(
+                                component.parserClass().define(),
+                                component.implClass().define())));
+    }
+
+    private void writeSpecs(SourceElement sourceElement, List<TypeSpec> typeSpecs) {
+        typeSpecs.forEach(typeSpec -> writeSpec(sourceElement, typeSpec));
     }
 
     private void writeSpec(SourceElement sourceElement, TypeSpec typeSpec) {

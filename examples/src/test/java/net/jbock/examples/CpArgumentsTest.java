@@ -58,11 +58,6 @@ class CpArgumentsTest {
     }
 
     @Test
-    void testNotClustering() {
-        f.assertThat("-rs1", "a", "b").fails("Invalid option: -rs1");
-    }
-
-    @Test
     void flagInVariousPositions() {
         f.assertThat("-r", "a", "b")
                 .has(CpArguments::source, "a")

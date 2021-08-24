@@ -8,12 +8,11 @@ import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.Constants;
 import net.jbock.convert.Mapping;
-import net.jbock.model.Multiplicity;
+import net.jbock.model.ItemType;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ExConvert;
 import net.jbock.util.ExMissingItem;
 import net.jbock.util.ExNotSuccess;
-import net.jbock.model.ItemType;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static net.jbock.common.Constants.EITHERS;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
-import static net.jbock.model.Multiplicity.OPTIONAL;
 
 @ContextScope
 public class BuildMethod extends CachedMethod {
@@ -151,7 +149,7 @@ public class BuildMethod extends CachedMethod {
                         orElseThrowConverterError(ItemType.OPTION, i),
                         CodeBlock.of(".stream().findAny()"));
             default: {
-                checkArgument(m.multiplicity() == Multiplicity.REPEATABLE);
+                checkArgument(m.isRepeatable());
                 return List.of(
                         CodeBlock.of(".collect($T.toValidList())", EITHERS),
                         orElseThrowConverterError(ItemType.OPTION, i));
@@ -160,12 +158,12 @@ public class BuildMethod extends CachedMethod {
     }
 
     private List<CodeBlock> tailExpressionParameter(Mapping<AnnotatedParameter> m, int i) {
-        if (m.multiplicity() == Multiplicity.REQUIRED) {
+        if (m.isRequired()) {
             return List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
-                    ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
+                            ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
                     orElseThrowConverterError(ItemType.PARAMETER, i));
         }
-        checkArgument(m.multiplicity() == OPTIONAL);
+        checkArgument(m.isOptional());
         return List.of(
                 CodeBlock.of(".stream()"),
                 CodeBlock.of(".collect($T.toValidList())", EITHERS),

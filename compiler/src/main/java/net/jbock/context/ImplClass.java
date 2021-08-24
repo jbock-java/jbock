@@ -13,42 +13,45 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
 
 /**
- * Defines the *Impl inner class, which extends the command class.
+ * Defines the *_Impl class, which extends the command class.
  *
- * @see GeneratedClass
+ * @see ParserClass
  */
 @ContextScope
-public class Impl {
+public class ImplClass {
 
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
     private final List<Mapping<?>> allMappings;
+    private final GeneratedAnnotation generatedAnnotation;
 
     @Inject
-    Impl(GeneratedTypes generatedTypes,
-         SourceElement sourceElement,
-         List<Mapping<?>> allMappings) {
+    ImplClass(GeneratedTypes generatedTypes,
+              SourceElement sourceElement,
+              List<Mapping<?>> allMappings,
+              GeneratedAnnotation generatedAnnotation) {
         this.generatedTypes = generatedTypes;
         this.sourceElement = sourceElement;
         this.allMappings = allMappings;
+        this.generatedAnnotation = generatedAnnotation;
     }
 
-    TypeSpec define() {
+    public TypeSpec define() {
         TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType());
         if (sourceElement.isInterface()) {
             spec.addSuperinterface(sourceElement.typeName());
         } else {
             spec.superclass(sourceElement.typeName());
         }
-        for (Mapping<?> m : allMappings) {
-            spec.addField(m.asField());
-        }
-        return spec.addModifiers(PRIVATE, STATIC, FINAL)
+        return spec.addModifiers(FINAL)
+                .addOriginatingElement(sourceElement.element())
                 .addMethod(implConstructor())
+                .addAnnotation(generatedAnnotation.define())
+                .addFields(allMappings.stream()
+                        .map(Mapping::asField)
+                        .collect(toList()))
                 .addMethods(allMappings.stream()
                         .map(this::parameterMethodOverride)
                         .collect(toList()))
