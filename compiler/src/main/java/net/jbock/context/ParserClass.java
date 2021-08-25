@@ -26,6 +26,8 @@ public final class ParserClass {
     private final List<Mapping<?>> allMappings;
     private final GeneratedAnnotation generatedAnnotation;
     private final ConstructMethod constructMethod;
+    private final OptionNamesMethod optionNamesMethod;
+    private final OptionStatesMethod optionStatesMethod;
 
     @Inject
     ParserClass(
@@ -39,7 +41,9 @@ public final class ParserClass {
             MultilineConverter multilineConverter,
             List<Mapping<?>> allMappings,
             GeneratedAnnotation generatedAnnotation,
-            ConstructMethod constructMethod) {
+            ConstructMethod constructMethod,
+            OptionNamesMethod optionNamesMethod,
+            OptionStatesMethod optionStatesMethod) {
         this.parseMethod = parseMethod;
         this.sourceElement = sourceElement;
         this.optionEnum = optionEnum;
@@ -51,6 +55,8 @@ public final class ParserClass {
         this.allMappings = allMappings;
         this.generatedAnnotation = generatedAnnotation;
         this.constructMethod = constructMethod;
+        this.optionNamesMethod = optionNamesMethod;
+        this.optionStatesMethod = optionStatesMethod;
     }
 
     /**
@@ -65,6 +71,8 @@ public final class ParserClass {
             spec.addMethod(parseOrExitMethod.define());
         }
         spec.addMethod(constructMethod.get());
+        spec.addMethod(optionNamesMethod.get());
+        spec.addMethod(optionStatesMethod.get());
 
         spec.addType(statefulParser.define());
         if (!namedOptions.isEmpty()) {
