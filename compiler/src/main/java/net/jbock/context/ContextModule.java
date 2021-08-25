@@ -5,6 +5,7 @@ import dagger.Provides;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
+import net.jbock.common.SafeTypes;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 
@@ -20,12 +21,14 @@ import static java.util.stream.Collectors.toList;
 public class ContextModule {
 
     private final SourceElement sourceElement;
+    private final SafeTypes safeTypes;
     private final List<Mapping<AnnotatedParameter>> positionalParams;
     private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
     private final List<Mapping<AnnotatedOption>> namedOptions;
 
     public ContextModule(
             SourceElement sourceElement,
+            SafeTypes safeTypes,
             List<Mapping<AnnotatedParameter>> positionalParams,
             List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
             List<Mapping<AnnotatedOption>> namedOptions) {
@@ -33,12 +36,19 @@ public class ContextModule {
         this.positionalParams = positionalParams;
         this.repeatablePositionalParameters = repeatablePositionalParameters;
         this.namedOptions = namedOptions;
+        this.safeTypes = safeTypes;
     }
 
     @ContextScope
     @Provides
     SourceElement sourceElement() {
         return sourceElement;
+    }
+
+    @ContextScope
+    @Provides
+    SafeTypes safeTypes() {
+        return safeTypes;
     }
 
     @ContextScope

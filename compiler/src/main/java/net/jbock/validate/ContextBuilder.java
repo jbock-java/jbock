@@ -4,6 +4,7 @@ import net.jbock.annotated.AnnotatedMethods;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
+import net.jbock.common.SafeTypes;
 import net.jbock.context.ContextModule;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
@@ -85,8 +86,8 @@ public final class ContextBuilder {
      * @param sourceElement the command class
      * @return the context module
      */
-    public ContextModule contextModule(SourceElement sourceElement) {
-        return new ContextModule(sourceElement,
+    public ContextModule contextModule(SourceElement sourceElement, SafeTypes safeTypes) {
+        return new ContextModule(sourceElement, safeTypes,
                 step3.step2.positionalParameters,
                 step3.repeatablePositionalParameters,
                 namedOptions);

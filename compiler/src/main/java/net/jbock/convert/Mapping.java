@@ -71,7 +71,7 @@ public final class Mapping<M extends AnnotatedMethod> {
         String fieldName = match.sourceMethod().methodName();
         FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName)
                 .addModifiers(PRIVATE, FINAL).build();
-        ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
+        ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, '_' + fieldName).build();
         return new Mapping<>(block, match, modeFlag, asParameterSpec, asFieldSpec);
     }
 
