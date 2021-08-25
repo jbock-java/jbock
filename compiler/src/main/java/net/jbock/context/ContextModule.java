@@ -83,7 +83,6 @@ public class ContextModule {
             SourceElement sourceElement) {
         return CommonFields.create(
                 sourceElement,
-                positionalParams,
                 namedOptions);
     }
 }

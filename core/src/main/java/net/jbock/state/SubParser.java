@@ -10,13 +10,13 @@ abstract class SubParser<T> extends GenericParser<T> {
 
     SubParser(
             Map<String, T> optionNames,
-            Map<T, OptionState> optionParsers,
+            Map<T, OptionState> optionStates,
             int numParams) {
-        super(optionNames, optionParsers, numParams);
+        super(optionNames, optionStates, numParams);
     }
 
     @Override
-    public final SubParser<T> parse(Iterator<String> it) throws ExToken {
+    final SubParser<T> parse(Iterator<String> it) throws ExToken {
         boolean endOfOptionParsing = false;
         int position = 0;
         while (it.hasNext()) {

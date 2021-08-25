@@ -15,13 +15,13 @@ public final class SuperParser<T> extends GenericParser<T> {
 
     public SuperParser(
             Map<String, T> optionNames,
-            Map<T, OptionState> optionParsers,
+            Map<T, OptionState> optionStates,
             int numParams) {
-        super(optionNames, optionParsers, numParams);
+        super(optionNames, optionStates, numParams);
     }
 
     @Override
-    public SuperParser<T> parse(Iterator<String> it) throws ExToken {
+    SuperParser<T> parse(Iterator<String> it) throws ExToken {
         int position = 0;
         while (it.hasNext()) {
             String token = it.next();
@@ -35,7 +35,7 @@ public final class SuperParser<T> extends GenericParser<T> {
             if (suspicious(token)) {
                 throw new ExToken(ErrTokenType.INVALID_OPTION, token);
             }
-            setParam(position, token);
+            setParam(position++, token);
         }
         return this;
     }

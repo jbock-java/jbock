@@ -4,6 +4,7 @@ import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -13,27 +14,40 @@ public abstract class GenericParser<T> {
 
     private final Pattern sus = Pattern.compile("-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+");
     private final Map<String, T> optionNames;
-    private final Map<T, OptionState> optionParsers;
+    private final Map<T, OptionState> optionStates;
     private final String[] params;
 
     GenericParser(
             Map<String, T> optionNames,
-            Map<T, OptionState> optionParsers,
+            Map<T, OptionState> optionStates,
             int numParams) {
         this.optionNames = optionNames;
-        this.optionParsers = optionParsers;
+        this.optionStates = optionStates;
         this.params = new String[numParams];
     }
 
-    public abstract GenericParser<T> parse(Iterator<String> it) throws ExToken;
+    abstract GenericParser<T> parse(Iterator<String> it) throws ExToken;
+
+    public final GenericParser<T> parse(List<String> tokens) throws ExToken {
+        return parse(tokens.iterator());
+    }
 
     boolean tryReadOption(String token, Iterator<String> it) throws ExToken {
-        T opt = optionNames.get(readOptionName(token));
-        if (opt == null)
+        String name = readOptionName(token);
+        if (name == null) {
             return false;
+        }
+        T opt = optionNames.get(name);
+        if (opt == null) {
+            return false;
+        }
         String t = token;
-        while ((t = optionParsers.get(opt).read(t, it)) != null) {
-            if ((opt = optionNames.get(readOptionName(t))) == null) {
+        while ((t = optionStates.get(opt).read(t, it)) != null) {
+            name = readOptionName(t);
+            if (name == null) {
+                throw new ExToken(ErrTokenType.INVALID_UNIX_GROUP, token);
+            }
+            if ((opt = optionNames.get(name)) == null) {
                 throw new ExToken(ErrTokenType.INVALID_UNIX_GROUP, token);
             }
         }
@@ -56,11 +70,11 @@ public abstract class GenericParser<T> {
     public abstract Stream<String> rest();
 
     public final Stream<String> option(T option) {
-        return optionParsers.get(option).stream();
+        return optionStates.get(option).stream();
     }
 
     public final Optional<String> param(int index) {
-        return Optional.of(params[index]);
+        return Optional.ofNullable(params[index]);
     }
 
     final void setParam(int index, String token) {

@@ -10,9 +10,9 @@ public final class RegularParser<T> extends SubParser<T> {
 
     public RegularParser(
             Map<String, T> optionNames,
-            Map<T, OptionState> optionParsers,
+            Map<T, OptionState> optionStates,
             int numParams) {
-        super(optionNames, optionParsers, numParams);
+        super(optionNames, optionStates, numParams);
     }
 
     @Override

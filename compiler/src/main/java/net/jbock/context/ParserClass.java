@@ -17,7 +17,6 @@ public final class ParserClass {
 
     private final ParseMethod parseMethod;
     private final OptEnum optionEnum;
-    private final StatefulParser statefulParser;
     private final SourceElement sourceElement;
     private final List<Mapping<AnnotatedOption>> namedOptions;
     private final ParseOrExitMethod parseOrExitMethod;
@@ -28,13 +27,13 @@ public final class ParserClass {
     private final ConstructMethod constructMethod;
     private final OptionNamesMethod optionNamesMethod;
     private final OptionStatesMethod optionStatesMethod;
+    private final CommonFields commonFields;
 
     @Inject
     ParserClass(
             ParseMethod parseMethod,
             SourceElement sourceElement,
             OptEnum optionEnum,
-            StatefulParser statefulParser,
             List<Mapping<AnnotatedOption>> namedOptions,
             ParseOrExitMethod parseOrExitMethod,
             CreateModelMethod createModelMethod,
@@ -43,11 +42,11 @@ public final class ParserClass {
             GeneratedAnnotation generatedAnnotation,
             ConstructMethod constructMethod,
             OptionNamesMethod optionNamesMethod,
-            OptionStatesMethod optionStatesMethod) {
+            OptionStatesMethod optionStatesMethod,
+            CommonFields commonFields) {
         this.parseMethod = parseMethod;
         this.sourceElement = sourceElement;
         this.optionEnum = optionEnum;
-        this.statefulParser = statefulParser;
         this.namedOptions = namedOptions;
         this.parseOrExitMethod = parseOrExitMethod;
         this.createModelMethod = createModelMethod;
@@ -57,6 +56,7 @@ public final class ParserClass {
         this.constructMethod = constructMethod;
         this.optionNamesMethod = optionNamesMethod;
         this.optionStatesMethod = optionStatesMethod;
+        this.commonFields = commonFields;
     }
 
     /**
@@ -65,8 +65,10 @@ public final class ParserClass {
      * @return type spec of the generated {@code *Parser}
      */
     public TypeSpec define() {
-        TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass())
-                .addMethod(parseMethod.get());
+        TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass());
+        spec.addField(commonFields.optionNames().toBuilder()
+                .initializer("$N()", optionNamesMethod.get()).build());
+        spec.addMethod(parseMethod.get());
         if (sourceElement.generateParseOrExitMethod()) {
             spec.addMethod(parseOrExitMethod.define());
         }
@@ -74,7 +76,6 @@ public final class ParserClass {
         spec.addMethod(optionNamesMethod.get());
         spec.addMethod(optionStatesMethod.get());
 
-        spec.addType(statefulParser.define());
         if (!namedOptions.isEmpty()) {
             spec.addType(optionEnum.define());
         }

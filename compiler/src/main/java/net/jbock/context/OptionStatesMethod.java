@@ -25,29 +25,35 @@ public class OptionStatesMethod extends CachedMethod {
 
     private final List<Mapping<AnnotatedOption>> namedOptions;
     private final SourceElement sourceElement;
+    private final CommonFields commonFields;
 
     @Inject
     OptionStatesMethod(
             List<Mapping<AnnotatedOption>> namedOptions,
-            SourceElement sourceElement) {
+            SourceElement sourceElement,
+            CommonFields commonFields) {
         this.namedOptions = namedOptions;
         this.sourceElement = sourceElement;
+        this.commonFields = commonFields;
     }
 
     @Override
     MethodSpec define() {
-        ParameterSpec result = ParameterSpec.builder(mapOf(
-                namedOptions.isEmpty() ?
-                        ClassName.get(Void.class) :
-                        sourceElement.optionEnumType(),
-                ClassName.get(OptionState.class)),
-                "result").build();
+        ParameterSpec result = ParameterSpec.builder(
+                mapOf(commonFields.optType(), ClassName.get(OptionState.class)), "result").build();
+        CodeBlock code = namedOptions.isEmpty() ?
+                CodeBlock.builder().addStatement("return $T.of()", Map.class).build() :
+                regularCode(result);
+        return MethodSpec.methodBuilder("optionStates")
+                .addCode(code)
+                .returns(result.type)
+                .addModifiers(PRIVATE)
+                .build();
+    }
+
+    private CodeBlock regularCode(ParameterSpec result) {
         CodeBlock.Builder code = CodeBlock.builder();
-        if (namedOptions.isEmpty()) {
-            code.addStatement("$T $N = $T.of()", result.type, result, Map.class);
-        } else {
-            code.addStatement("$T $N = new $T<>($T.class)", result.type, result, EnumMap.class, sourceElement.optionEnumType());
-        }
+        code.addStatement("$T $N = new $T<>($T.class)", result.type, result, EnumMap.class, sourceElement.optionEnumType());
         for (Mapping<AnnotatedOption> namedOption : namedOptions) {
             String enumConstant = namedOption.enumName().enumConstant();
             code.addStatement("$N.put($T.$L, new $T())",
@@ -55,11 +61,7 @@ public class OptionStatesMethod extends CachedMethod {
                     enumConstant, optionParserType(namedOption));
         }
         code.addStatement("return $N", result);
-        return MethodSpec.methodBuilder("optionStates")
-                .addCode(code.build())
-                .returns(result.type)
-                .addModifiers(PRIVATE)
-                .build();
+        return code.build();
     }
 
     private ClassName optionParserType(Mapping<AnnotatedOption> param) {
