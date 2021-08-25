@@ -8,19 +8,6 @@ import java.util.stream.Stream;
 
 public abstract class OptionState {
 
-    public static String readOptionName(String token) {
-        if (token.length() < 2 || !token.startsWith("-")) {
-            return null;
-        }
-        if (!token.startsWith("--")) {
-            return token.substring(0, 2);
-        }
-        if (!token.contains("=")) {
-            return token;
-        }
-        return token.substring(0, token.indexOf('='));
-    }
-
     public abstract String read(String token, Iterator<String> it) throws ExToken;
 
     public abstract Stream<String> stream();
