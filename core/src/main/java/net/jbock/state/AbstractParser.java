@@ -10,14 +10,14 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public abstract class GenericParser<T> {
+abstract class AbstractParser<T> implements Parser<T> {
 
     private final Pattern sus = Pattern.compile("-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+");
     private final Map<String, T> optionNames;
     private final Map<T, OptionState> optionStates;
     private final String[] params;
 
-    GenericParser(
+    AbstractParser(
             Map<String, T> optionNames,
             Map<T, OptionState> optionStates,
             int numParams) {
@@ -26,13 +26,14 @@ public abstract class GenericParser<T> {
         this.params = new String[numParams];
     }
 
-    abstract GenericParser<T> parse(Iterator<String> it) throws ExToken;
+    abstract void parse(Iterator<String> it) throws ExToken;
 
-    public final GenericParser<T> parse(List<String> tokens) throws ExToken {
-        return parse(tokens.iterator());
+    @Override
+    public final void parse(List<String> tokens) throws ExToken {
+        parse(tokens.iterator());
     }
 
-    boolean tryReadOption(String token, Iterator<String> it) throws ExToken {
+    final boolean tryReadOption(String token, Iterator<String> it) throws ExToken {
         String name = readOptionName(token);
         if (name == null) {
             return false;
@@ -67,12 +68,12 @@ public abstract class GenericParser<T> {
         return token.substring(0, token.indexOf('='));
     }
 
-    public abstract Stream<String> rest();
-
+    @Override
     public final Stream<String> option(T option) {
         return optionStates.get(option).stream();
     }
 
+    @Override
     public final Optional<String> param(int index) {
         return Optional.ofNullable(params[index]);
     }

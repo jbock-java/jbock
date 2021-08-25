@@ -12,7 +12,7 @@ import net.jbock.model.CommandModel;
  * in client code. It may be removed without warning in future
  * releases.
  */
-public final class ExToken extends ExNotSuccess {
+public final class ExToken extends ExFailure {
 
     private final ErrTokenType errorType;
     private final String token;

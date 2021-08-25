@@ -6,18 +6,16 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.WildcardTypeName;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
-import net.jbock.common.SafeTypes;
 import net.jbock.convert.Mapping;
 import net.jbock.model.ItemType;
 import net.jbock.processor.SourceElement;
-import net.jbock.state.GenericParser;
+import net.jbock.state.Parser;
 import net.jbock.util.ExConvert;
 import net.jbock.util.ExMissingItem;
-import net.jbock.util.ExNotSuccess;
+import net.jbock.util.ExFailure;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -30,7 +28,7 @@ import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
 @ContextScope
-public class ConstructMethod extends CachedMethod {
+public class HarvestMethod extends CachedMethod {
 
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
@@ -42,13 +40,13 @@ public class ConstructMethod extends CachedMethod {
     private final ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
 
     @Inject
-    ConstructMethod(
+    HarvestMethod(
             GeneratedTypes generatedTypes,
             SourceElement sourceElement,
             List<Mapping<AnnotatedOption>> namedOptions,
             List<Mapping<AnnotatedParameter>> positionalParameters,
             List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
-            SafeTypes safeTypes,
+            CommonFields commonFields,
             ContextUtil contextUtil) {
         this.generatedTypes = generatedTypes;
         this.sourceElement = sourceElement;
@@ -57,17 +55,15 @@ public class ConstructMethod extends CachedMethod {
         this.repeatablePositionalParameters = repeatablePositionalParameters;
         this.contextUtil = contextUtil;
         this.parser = ParameterSpec.builder(ParameterizedTypeName.get(
-                ClassName.get(GenericParser.class),
-                namedOptions.isEmpty() ?
-                        WildcardTypeName.get(safeTypes.getWildcardType()) :
-                        sourceElement.optionEnumType()),
+                ClassName.get(Parser.class),
+                commonFields.optType()),
                 "parser").build();
     }
 
     @Override
     MethodSpec define() {
         CodeBlock constructorArguments = getConstructorArguments();
-        MethodSpec.Builder spec = MethodSpec.methodBuilder("construct");
+        MethodSpec.Builder spec = MethodSpec.methodBuilder("harvest");
         for (int i = 0; i < namedOptions.size(); i++) {
             Mapping<AnnotatedOption> m = namedOptions.get(i);
             ParameterSpec p = m.asParam();
@@ -95,7 +91,7 @@ public class ConstructMethod extends CachedMethod {
                 () -> spec.addStatement("return new $T($L)", generatedTypes.implType(), constructorArguments));
         return spec.returns(generatedTypes.parseSuccessType())
                 .addParameter(parser)
-                .addException(ExNotSuccess.class)
+                .addException(ExFailure.class)
                 .addModifiers(PRIVATE)
                 .build();
     }

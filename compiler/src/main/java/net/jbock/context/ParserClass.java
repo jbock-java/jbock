@@ -24,7 +24,7 @@ public final class ParserClass {
     private final MultilineConverter multilineConverter;
     private final List<Mapping<?>> allMappings;
     private final GeneratedAnnotation generatedAnnotation;
-    private final ConstructMethod constructMethod;
+    private final HarvestMethod harvestMethod;
     private final OptionNamesMethod optionNamesMethod;
     private final OptionStatesMethod optionStatesMethod;
     private final CommonFields commonFields;
@@ -40,7 +40,7 @@ public final class ParserClass {
             MultilineConverter multilineConverter,
             List<Mapping<?>> allMappings,
             GeneratedAnnotation generatedAnnotation,
-            ConstructMethod constructMethod,
+            HarvestMethod harvestMethod,
             OptionNamesMethod optionNamesMethod,
             OptionStatesMethod optionStatesMethod,
             CommonFields commonFields) {
@@ -53,7 +53,7 @@ public final class ParserClass {
         this.multilineConverter = multilineConverter;
         this.allMappings = allMappings;
         this.generatedAnnotation = generatedAnnotation;
-        this.constructMethod = constructMethod;
+        this.harvestMethod = harvestMethod;
         this.optionNamesMethod = optionNamesMethod;
         this.optionStatesMethod = optionStatesMethod;
         this.commonFields = commonFields;
@@ -72,7 +72,7 @@ public final class ParserClass {
         if (sourceElement.generateParseOrExitMethod()) {
             spec.addMethod(parseOrExitMethod.define());
         }
-        spec.addMethod(constructMethod.get());
+        spec.addMethod(harvestMethod.get());
         spec.addMethod(optionNamesMethod.get());
         spec.addMethod(optionStatesMethod.get());
 

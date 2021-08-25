@@ -6,7 +6,7 @@ import net.jbock.util.ExToken;
 import java.util.Iterator;
 import java.util.Map;
 
-abstract class SubParser<T> extends GenericParser<T> {
+abstract class SubParser<T> extends AbstractParser<T> {
 
     SubParser(
             Map<String, T> optionNames,
@@ -16,7 +16,7 @@ abstract class SubParser<T> extends GenericParser<T> {
     }
 
     @Override
-    final SubParser<T> parse(Iterator<String> it) throws ExToken {
+    final void parse(Iterator<String> it) throws ExToken {
         boolean endOfOptionParsing = false;
         int position = 0;
         while (it.hasNext()) {
@@ -33,7 +33,6 @@ abstract class SubParser<T> extends GenericParser<T> {
             }
             position += handleParam(position, token);
         }
-        return this;
     }
 
     abstract int handleParam(int position, String token) throws ExToken;

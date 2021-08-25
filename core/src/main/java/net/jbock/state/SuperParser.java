@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public final class SuperParser<T> extends GenericParser<T> {
+public final class SuperParser<T> extends AbstractParser<T> {
 
     private final List<String> rest = new ArrayList<>();
 
@@ -21,7 +21,7 @@ public final class SuperParser<T> extends GenericParser<T> {
     }
 
     @Override
-    SuperParser<T> parse(Iterator<String> it) throws ExToken {
+    void parse(Iterator<String> it) throws ExToken {
         int position = 0;
         while (it.hasNext()) {
             String token = it.next();
@@ -37,7 +37,6 @@ public final class SuperParser<T> extends GenericParser<T> {
             }
             setParam(position++, token);
         }
-        return this;
     }
 
     @Override

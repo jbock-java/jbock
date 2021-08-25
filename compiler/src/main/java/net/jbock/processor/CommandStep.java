@@ -78,7 +78,7 @@ public class CommandStep implements BasicAnnotationProcessor.Step {
                 .create()
                 .processor();
         processor.generate()
-                .map(items -> items.contextModule(sourceElement, types))
+                .map(items -> items.contextModule(sourceElement))
                 .map(module -> DaggerContextComponent.factory().create(module))
                 .ifLeftOrElse(
                         this::printFailures,

@@ -5,7 +5,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Types;
 import java.util.Optional;
 
@@ -38,9 +37,5 @@ public final class SafeTypes {
 
     public TypeMirror erasure(TypeMirror t) {
         return types.erasure(t);
-    }
-
-    public WildcardType getWildcardType() {
-        return types.getWildcardType(null, null);
     }
 }

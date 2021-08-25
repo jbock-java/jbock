@@ -11,7 +11,7 @@ import net.jbock.model.ItemType;
  * in client code. It may be removed without warning in future
  * releases.
  */
-public final class ExConvert extends ExNotSuccess {
+public final class ExConvert extends ExFailure {
 
     private final ConverterFailure failure;
     private final ItemType itemType;

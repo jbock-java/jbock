@@ -10,11 +10,11 @@ import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
-import net.jbock.state.GenericParser;
+import net.jbock.state.Parser;
 import net.jbock.state.RegularParser;
 import net.jbock.state.RepeatableParser;
 import net.jbock.state.SuperParser;
-import net.jbock.util.ExNotSuccess;
+import net.jbock.util.ExFailure;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -32,7 +32,7 @@ public class ParseMethod extends CachedMethod {
     private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
     private final List<Mapping<AnnotatedParameter>> positionalParameters;
     private final CommonFields commonFields;
-    private final ConstructMethod constructMethod;
+    private final HarvestMethod harvestMethod;
     private final OptionStatesMethod optionStatesMethod;
 
     @Inject
@@ -43,7 +43,7 @@ public class ParseMethod extends CachedMethod {
             List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
             List<Mapping<AnnotatedParameter>> positionalParameters,
             CommonFields commonFields,
-            ConstructMethod constructMethod,
+            HarvestMethod harvestMethod,
             OptionStatesMethod optionStatesMethod) {
         this.generatedTypes = generatedTypes;
         this.sourceElement = sourceElement;
@@ -51,7 +51,7 @@ public class ParseMethod extends CachedMethod {
         this.repeatablePositionalParameters = repeatablePositionalParameters;
         this.positionalParameters = positionalParameters;
         this.commonFields = commonFields;
-        this.constructMethod = constructMethod;
+        this.harvestMethod = harvestMethod;
         this.optionStatesMethod = optionStatesMethod;
     }
 
@@ -62,14 +62,16 @@ public class ParseMethod extends CachedMethod {
 
         CodeBlock.Builder code = CodeBlock.builder();
 
-        ParameterSpec state = builder(ParameterizedTypeName.get(ClassName.get(GenericParser.class), commonFields.optType()), "statefulParser").build();
+        ParameterSpec parser = builder(ParameterizedTypeName.get(ClassName.get(Parser.class),
+                commonFields.optType()), "parser").build();
         ParameterSpec e = builder(Exception.class, "e").build();
-        code.addStatement("$T $N = $L", state.type, state, parserInit());
+        code.addStatement("$T $N = $L", parser.type, parser, parserInit());
         code.add("try {\n").indent()
-                .add("return $T.right($N($N.parse($N)));\n", EITHER,
-                        constructMethod.get(), state, tokens)
-                .unindent().add("} catch ($T $N) {\n", ExNotSuccess.class, e).indent()
-                .add("return $T.left($N.toError($N()));\n",
+                .addStatement("$N.parse($N)", parser, tokens)
+                .addStatement("return $T.right($N($N))", EITHER,
+                        harvestMethod.get(), parser)
+                .unindent().add("} catch ($T $N) {\n", ExFailure.class, e).indent()
+                .addStatement("return $T.left($N.toError($N()))",
                         EITHER, e, createModelMethod.get())
                 .unindent().add("}\n");
 
