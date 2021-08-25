@@ -2,6 +2,7 @@ package net.jbock.context;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -63,8 +64,7 @@ public class ParseMethod extends CachedMethod {
 
         ParameterSpec state = builder(ParameterizedTypeName.get(ClassName.get(GenericParser.class), commonFields.optType()), "statefulParser").build();
         ParameterSpec e = builder(Exception.class, "e").build();
-        code.addStatement("$T $N = new $T<>($N, $N(), $L)", state.type, state, parserClass(),
-                commonFields.optionNames(), optionStatesMethod.get(), positionalParameters.size());
+        code.addStatement("$T $N = $L", state.type, state, parserInit());
         code.add("try {\n").indent()
                 .add("return $T.right($N($N.parse($N)));\n", EITHER,
                         constructMethod.get(), state, tokens)
@@ -81,13 +81,22 @@ public class ParseMethod extends CachedMethod {
                 .build();
     }
 
-    private ClassName parserClass() {
+    private CodeBlock parserInit() {
+        FieldSpec optionNames = commonFields.optionNames();
+        MethodSpec optionStates = optionStatesMethod.get();
+        int numParams = positionalParameters.size();
         if (sourceElement.isSuperCommand()) {
-            return ClassName.get(SuperParser.class);
+            return CodeBlock.of("new $T<>($N, $N(), $L)",
+                    ClassName.get(SuperParser.class),
+                    optionNames, optionStates, numParams);
         }
-        if (repeatablePositionalParameters.isEmpty()) {
-            return ClassName.get(RegularParser.class);
+        if (!repeatablePositionalParameters.isEmpty()) {
+            return CodeBlock.of("new $T<>($N, $N(), $L)",
+                    ClassName.get(RepeatableParser.class),
+                    optionNames, optionStates, numParams);
         }
-        return ClassName.get(RepeatableParser.class);
+        return CodeBlock.of("new $T<>($N, $N(), $L)",
+                ClassName.get(RegularParser.class),
+                optionNames, optionStates, numParams);
     }
 }
