@@ -2,6 +2,7 @@ package net.jbock.context;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.annotated.AnnotatedMethod;
@@ -72,8 +73,10 @@ public class ImplClass {
         MethodSpec.Builder spec = MethodSpec.constructorBuilder();
         for (Mapping<?> m : allMappings) {
             FieldSpec field = m.asField();
-            spec.addStatement("this.$N = $N", field, m.asParam());
-            spec.addParameter(m.asParam());
+            ParameterSpec param = ParameterSpec.builder(field.type,
+                    m.sourceMethod().methodName()).build();
+            spec.addStatement("this.$N = $N", field, param);
+            spec.addParameter(param);
         }
         return spec.build();
     }

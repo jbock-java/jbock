@@ -1,9 +1,6 @@
 package net.jbock.context;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.ParameterSpec;
-import net.jbock.util.ErrTokenType;
-import net.jbock.util.ExToken;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -43,10 +40,5 @@ public class ContextUtil {
             args.add(code.get(i));
         }
         return args.build();
-    }
-
-    CodeBlock throwRepetitionErrorStatement(ParameterSpec token) {
-        return CodeBlock.of("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
-                ErrTokenType.OPTION_REPETITION, token);
     }
 }

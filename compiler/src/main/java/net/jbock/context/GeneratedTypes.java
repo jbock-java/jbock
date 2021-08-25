@@ -38,10 +38,6 @@ public class GeneratedTypes {
         return Optional.of(type);
     }
 
-    ClassName statefulParserType() {
-        return generatedClass.nestedClass("StatefulParser");
-    }
-
     ClassName implType() {
         return generatedClass.peerClass(sourceElement.element().getSimpleName() + "_Impl");
     }
