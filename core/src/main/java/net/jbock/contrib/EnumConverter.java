@@ -9,6 +9,11 @@ import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.joining;
 
+/**
+ * A {@code StringConverter} that converts to a given enum class.
+ *
+ * @param <E> type of the enum class
+ */
 public final class EnumConverter<E> extends StringConverter<E> {
 
     private final Function<String, E> valueOf;
@@ -21,7 +26,15 @@ public final class EnumConverter<E> extends StringConverter<E> {
         this.values = values;
     }
 
-    public static <E> EnumConverter<E> create(
+    /**
+     * Creates an instance of {@code EnumConverter}.
+     *
+     * @param valueOf reference to the {@code valueOf} enum method
+     * @param values reference to the {@code values} enum method
+     * @param <E> type of the enum class
+     * @return an instance of {@code EnumConverter}
+     */
+    public static <E> StringConverter<E> create(
             Function<String, E> valueOf,
             Supplier<E[]> values) {
         return new EnumConverter<>(valueOf, () -> List.of(values.get()));
@@ -34,8 +47,8 @@ public final class EnumConverter<E> extends StringConverter<E> {
         } catch (IllegalArgumentException e) {
             String strings = values.get().stream()
                     .map(Objects::toString)
-                    .collect(joining(", ", "[", "]"));
-            String message = e.getMessage() + " " + strings;
+                    .collect(joining("\n  ", "", ""));
+            String message = e.getMessage() + "\nPossible values:\n  " + strings;
             throw new IllegalArgumentException(message);
         }
     }

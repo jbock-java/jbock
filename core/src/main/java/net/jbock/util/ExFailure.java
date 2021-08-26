@@ -5,7 +5,7 @@ import net.jbock.model.CommandModel;
 /**
  * Superclass of exceptions that may be used internally
  * in the generated code. These are checked exceptions, to
- * ensure none of them are thrown from the generated
+ * make sure none of them are thrown from the generated
  * parse method.
  *
  * <p>This class is internal API and should not be used

@@ -2,12 +2,20 @@ package net.jbock.contrib;
 
 import net.jbock.util.StringConverter;
 
+/**
+ * A {@code StringConverter} that converts to Character.
+ * Fails if the input consists of more than one character.
+ */
 public final class CharConverter extends StringConverter<Character> {
 
     private CharConverter() {
     }
 
-    public static CharConverter create() {
+    /**
+     * Creates an instance of {@code CharConverter}.
+     * @return an instance of {@code CharConverter}
+     */
+    public static StringConverter<Character> create() {
         return new CharConverter();
     }
 
