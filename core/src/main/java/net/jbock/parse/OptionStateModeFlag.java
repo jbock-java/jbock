@@ -6,6 +6,11 @@ import net.jbock.util.ExToken;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
+/**
+ * Detects and stores the presence of a mode flag.
+ * The {@code read} method cannot be invoked more than once, otherwise
+ * an exception is thrown.
+ */
 public final class OptionStateModeFlag implements OptionState {
 
     private boolean seen;

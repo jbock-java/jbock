@@ -9,11 +9,11 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapping;
-import net.jbock.processor.SourceElement;
 import net.jbock.parse.Parser;
 import net.jbock.parse.RegularParser;
 import net.jbock.parse.RepeatableParser;
 import net.jbock.parse.SuperParser;
+import net.jbock.processor.SourceElement;
 import net.jbock.util.ExFailure;
 
 import javax.inject.Inject;
@@ -88,16 +88,16 @@ public class ParseMethod extends CachedMethod {
         MethodSpec optionStates = optionStatesMethod.get();
         int numParams = positionalParameters.size();
         if (sourceElement.isSuperCommand()) {
-            return CodeBlock.of("new $T<>($N, $N(), $L)",
+            return CodeBlock.of("$T.create($N, $N(), $L)",
                     ClassName.get(SuperParser.class),
                     optionNames, optionStates, numParams);
         }
         if (!repeatablePositionalParameters.isEmpty()) {
-            return CodeBlock.of("new $T<>($N, $N(), $L)",
+            return CodeBlock.of("$T.create($N, $N(), $L)",
                     ClassName.get(RepeatableParser.class),
                     optionNames, optionStates, numParams);
         }
-        return CodeBlock.of("new $T<>($N, $N(), $L)",
+        return CodeBlock.of("$T.create($N, $N(), $L)",
                 ClassName.get(RegularParser.class),
                 optionNames, optionStates, numParams);
     }

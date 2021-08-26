@@ -9,6 +9,9 @@ import java.util.stream.Stream;
 
 import static net.jbock.parse.OptionStateUtil.readOptionArgument;
 
+/**
+ * Reads and stores the arguments of a repeatable option.
+ */
 public final class OptionStateRepeatable implements OptionState {
 
     private List<String> values;

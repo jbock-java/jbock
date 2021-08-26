@@ -6,8 +6,7 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 /**
- * Interface for a mutable class that holds parsed option
- * values.
+ * Interface for a mutable class that reads and remembers option arguments.
  */
 public interface OptionState {
 

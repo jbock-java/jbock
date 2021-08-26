@@ -4,11 +4,15 @@ import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static net.jbock.parse.OptionStateUtil.readOptionArgument;
 
+/**
+ * Reads and stores the argument of a non-repeatable option.
+ * The {@code read} method cannot be invoked more than once, otherwise
+ * an exception is thrown.
+ */
 public final class OptionStateRegular implements OptionState {
 
     private String value;
@@ -24,6 +28,6 @@ public final class OptionStateRegular implements OptionState {
 
     @Override
     public Stream<String> stream() {
-        return Optional.ofNullable(value).stream();
+        return value == null ? Stream.empty() : Stream.of(value);
     }
 }
