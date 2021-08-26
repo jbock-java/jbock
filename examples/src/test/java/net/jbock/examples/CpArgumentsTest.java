@@ -27,7 +27,7 @@ class CpArgumentsTest {
                         "  NONE\n" +
                         "  NUMBERED\n" +
                         "  EXISTING\n" +
-                        "  SIMPLE");
+                        "  SIMPLE\n");
     }
 
     @Test
