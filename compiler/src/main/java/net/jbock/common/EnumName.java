@@ -32,12 +32,6 @@ public class EnumName {
         return enumConstant;
     }
 
-    /* Capitalized, unique.
-     */
-    public String className() {
-        return Character.toUpperCase(original.charAt(0)) + original.substring(1);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

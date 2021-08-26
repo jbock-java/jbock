@@ -43,7 +43,7 @@ public final class ConverterType<M extends AnnotatedMethod> {
         return Optional.empty();
     }
 
-    private CodeBlock asBlock() {
+    private CodeBlock asMapper() {
         TypeMirror type = converter.asType();
         if (supplier) {
             return CodeBlock.of("new $T().get()", type);
@@ -52,7 +52,6 @@ public final class ConverterType<M extends AnnotatedMethod> {
     }
 
     Mapping<M> toMapping() {
-        MappingBlock block = new MappingBlock(asBlock(), false);
-        return Mapping.create(block, match);
+        return Mapping.create(asMapper(), match);
     }
 }

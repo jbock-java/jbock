@@ -102,7 +102,7 @@ public class ExecutableElementsFinder {
             ExecutableElement method) {
         return getMethodAnnotation(method)
                 .<Either<ValidationFailure, Executable>>map(a ->
-                        right(Executable.create(sourceElement, method, a)))
+                        right(Executable.create(method, a)))
                 .orElseGet(() -> left(missingAnnotationError(method)))
                 .filter(this::validateParameterless);
     }

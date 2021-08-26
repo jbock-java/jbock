@@ -23,8 +23,8 @@ public final class EnumConverter<E> extends StringConverter<E> {
 
     public static <E> EnumConverter<E> create(
             Function<String, E> valueOf,
-            Supplier<List<E>> values) {
-        return new EnumConverter<>(valueOf, values);
+            Supplier<E[]> values) {
+        return new EnumConverter<>(valueOf, () -> List.of(values.get()));
     }
 
     @Override

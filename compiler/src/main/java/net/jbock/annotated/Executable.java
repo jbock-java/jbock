@@ -27,26 +27,23 @@ abstract class Executable {
     private static final Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
     private static final AnnotationUtil ANNOTATION_UTIL = new AnnotationUtil();
 
-    private final SourceElement sourceElement;
     private final ExecutableElement method;
 
-    Executable(SourceElement sourceElement, ExecutableElement method) {
+    Executable(ExecutableElement method) {
         this.method = method;
-        this.sourceElement = sourceElement;
     }
 
     static Executable create(
-            SourceElement sourceElement,
             ExecutableElement method,
             Annotation annotation) {
         if (annotation instanceof Option) {
-            return new ExecutableOption(sourceElement, method, (Option) annotation);
+            return new ExecutableOption(method, (Option) annotation);
         }
         if (annotation instanceof Parameter) {
-            return new ExecutableParameter(sourceElement, method, (Parameter) annotation);
+            return new ExecutableParameter(method, (Parameter) annotation);
         }
         if (annotation instanceof Parameters) {
-            return new ExecutableParameters(sourceElement, method, (Parameters) annotation);
+            return new ExecutableParameters(method, (Parameters) annotation);
         }
         throw new AssertionError("expecting one of " + methodLevelAnnotations()
                 + " but found: " + annotation.getClass());
@@ -57,10 +54,6 @@ abstract class Executable {
     abstract Optional<String> descriptionKey();
 
     abstract List<String> description();
-
-    final SourceElement sourceElement() {
-        return sourceElement;
-    }
 
     final ExecutableElement method() {
         return method;

@@ -11,11 +11,11 @@ import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapping;
 import net.jbock.model.ItemType;
-import net.jbock.processor.SourceElement;
 import net.jbock.parse.Parser;
+import net.jbock.processor.SourceElement;
 import net.jbock.util.ExConvert;
-import net.jbock.util.ExMissingItem;
 import net.jbock.util.ExFailure;
+import net.jbock.util.ExMissingItem;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -55,8 +55,8 @@ public class HarvestMethod extends CachedMethod {
         this.repeatablePositionalParameters = repeatablePositionalParameters;
         this.contextUtil = contextUtil;
         this.parser = ParameterSpec.builder(ParameterizedTypeName.get(
-                ClassName.get(Parser.class),
-                commonFields.optType()),
+                        ClassName.get(Parser.class),
+                        commonFields.optType()),
                 "parser").build();
     }
 
@@ -169,7 +169,7 @@ public class HarvestMethod extends CachedMethod {
     private List<CodeBlock> tailExpressionParameter(Mapping<AnnotatedParameter> m, int i) {
         if (m.isRequired()) {
             return List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
-                    ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
+                            ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
                     orElseThrowConverterError(ItemType.PARAMETER, i));
         }
         checkArgument(m.isOptional());

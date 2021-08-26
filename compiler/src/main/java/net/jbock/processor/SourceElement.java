@@ -101,8 +101,4 @@ public class SourceElement {
     public boolean generateParseOrExitMethod() {
         return command.generateParseOrExitMethod();
     }
-
-    public ClassName nestedClass(String className) {
-        return generatedClass.nestedClass(className);
-    }
 }

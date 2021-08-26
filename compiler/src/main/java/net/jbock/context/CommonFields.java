@@ -13,7 +13,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.mapOf;
 
-class CommonFields {
+public class CommonFields {
 
     private final FieldSpec optionNames;
     private final ClassName optType;
@@ -32,7 +32,7 @@ class CommonFields {
                 ClassName.get(Void.class) :
                 sourceElement.optionEnumType();
         FieldSpec optionNames = FieldSpec.builder(
-                mapOf(STRING, optType), "optionNames")
+                        mapOf(STRING, optType), "optionNames")
                 .addModifiers(PRIVATE, FINAL).build();
         return new CommonFields(optionNames, optType);
     }

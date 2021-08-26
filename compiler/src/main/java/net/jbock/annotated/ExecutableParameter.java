@@ -16,10 +16,9 @@ final class ExecutableParameter extends Executable {
     private final Parameter parameter;
 
     ExecutableParameter(
-            SourceElement sourceElement,
             ExecutableElement method,
             Parameter parameter) {
-        super(sourceElement, method);
+        super(method);
         this.parameter = parameter;
     }
 

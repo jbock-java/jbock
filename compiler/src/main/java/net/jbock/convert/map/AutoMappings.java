@@ -41,8 +41,8 @@ public class AutoMappings {
         }
 
         AutoConversion create(Class<?> autoType) {
-            CodeBlock block = CodeBlock.of("$T::" + methodName, autoType);
-            return AutoMappings.wrap(autoType, block);
+            CodeBlock mapper = CodeBlock.of("$T::" + methodName, autoType);
+            return AutoMappings.wrap(autoType, mapper);
         }
     }
 
@@ -61,22 +61,21 @@ public class AutoMappings {
         TypeMirror baseType = match.baseType();
         for (AutoConversion conversion : conversions) {
             if (tool.isSameType(baseType, conversion.qualifiedName())) {
-                return Optional.of(Mapping.create(conversion.block(), match));
+                return Optional.of(conversion.toMapping(match));
             }
         }
         return Optional.empty();
     }
 
-    private static AutoConversion wrap(Class<?> autoType, CodeBlock mapExpr) {
-        return create(autoType, CodeBlock.of("$T.create($L)", StringConverter.class, mapExpr));
+    private static AutoConversion wrap(Class<?> autoType, CodeBlock mapper) {
+        return create(autoType, CodeBlock.of("$T.create($L)", StringConverter.class, mapper));
     }
 
     private static AutoConversion create(
             Class<?> autoType,
-            CodeBlock code) {
+            CodeBlock mapper) {
         String canonicalName = autoType.getCanonicalName();
-        MappingBlock mapping = new MappingBlock(code, false);
-        return new AutoConversion(canonicalName, mapping);
+        return new AutoConversion(canonicalName, mapper);
     }
 
     private List<AutoConversion> autoConversions() {

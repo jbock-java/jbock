@@ -1,6 +1,5 @@
 package net.jbock.annotated;
 
-import net.jbock.processor.SourceElement;
 import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.ExecutableElement;
@@ -15,8 +14,7 @@ class SimpleAnnotatedTest {
     void create() {
         ExecutableElement executableElement = mock(ExecutableElement.class);
         Annotation annotation = mock(SuppressWarnings.class);
-        SourceElement sourceElement = mock(SourceElement.class);
         assertThrows(AssertionError.class, () ->
-                Executable.create(sourceElement, executableElement, annotation));
+                Executable.create(executableElement, annotation));
     }
 }

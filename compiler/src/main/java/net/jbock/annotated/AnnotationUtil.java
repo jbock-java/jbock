@@ -24,9 +24,9 @@ final class AnnotationUtil {
     private static final String CONVERTER_ATTRIBUTE = "converter";
 
     private static final Set<String> ANNOTATIONS = Stream.of(
-            Parameter.class,
-            Parameters.class,
-            Option.class)
+                    Parameter.class,
+                    Parameters.class,
+                    Option.class)
             .map(Class::getCanonicalName).collect(toSet());
 
     // visible for testing

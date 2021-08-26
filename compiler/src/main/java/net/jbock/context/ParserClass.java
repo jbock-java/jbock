@@ -21,8 +21,6 @@ public final class ParserClass {
     private final List<Mapping<AnnotatedOption>> namedOptions;
     private final ParseOrExitMethod parseOrExitMethod;
     private final CreateModelMethod createModelMethod;
-    private final MultilineConverter multilineConverter;
-    private final List<Mapping<?>> allMappings;
     private final GeneratedAnnotation generatedAnnotation;
     private final HarvestMethod harvestMethod;
     private final OptionNamesMethod optionNamesMethod;
@@ -37,8 +35,6 @@ public final class ParserClass {
             List<Mapping<AnnotatedOption>> namedOptions,
             ParseOrExitMethod parseOrExitMethod,
             CreateModelMethod createModelMethod,
-            MultilineConverter multilineConverter,
-            List<Mapping<?>> allMappings,
             GeneratedAnnotation generatedAnnotation,
             HarvestMethod harvestMethod,
             OptionNamesMethod optionNamesMethod,
@@ -50,8 +46,6 @@ public final class ParserClass {
         this.namedOptions = namedOptions;
         this.parseOrExitMethod = parseOrExitMethod;
         this.createModelMethod = createModelMethod;
-        this.multilineConverter = multilineConverter;
-        this.allMappings = allMappings;
         this.generatedAnnotation = generatedAnnotation;
         this.harvestMethod = harvestMethod;
         this.optionNamesMethod = optionNamesMethod;
@@ -78,11 +72,6 @@ public final class ParserClass {
 
         if (!namedOptions.isEmpty()) {
             spec.addType(optionEnum.define());
-        }
-
-        for (Mapping<?> item : allMappings) {
-            item.multilineBlock().ifPresent(multilineBlock ->
-                    spec.addType(multilineConverter.define(item, multilineBlock)));
         }
 
         spec.addMethod(createModelMethod.get());

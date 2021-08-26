@@ -6,10 +6,10 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
+import net.jbock.parse.OptionState;
 import net.jbock.parse.OptionStateModeFlag;
 import net.jbock.parse.OptionStateRegular;
 import net.jbock.parse.OptionStateRepeatable;
-import net.jbock.parse.OptionState;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;

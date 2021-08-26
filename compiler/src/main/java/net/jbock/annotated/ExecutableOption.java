@@ -16,10 +16,9 @@ final class ExecutableOption extends Executable {
     private final Option option;
 
     ExecutableOption(
-            SourceElement sourceElement,
             ExecutableElement method,
             Option option) {
-        super(sourceElement, method);
+        super(method);
         this.option = option;
     }
 
