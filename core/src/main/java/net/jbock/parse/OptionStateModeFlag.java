@@ -6,7 +6,7 @@ import net.jbock.util.ExToken;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-public final class OptionStateModeFlag extends OptionState {
+public final class OptionStateModeFlag implements OptionState {
 
     private boolean seen;
 

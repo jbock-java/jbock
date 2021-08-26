@@ -19,18 +19,15 @@ public final class AnnotatedOption extends AnnotatedMethod {
 
     private final ExecutableOption option;
     private final List<String> names;
-    private final boolean hasUnixName;
 
     private AnnotatedOption(
             EnumName enumName,
             ExecutableOption option,
             String paramLabel,
-            List<String> names,
-            boolean hasUnixName) {
+            List<String> names) {
         super(enumName, paramLabel);
         this.option = option;
         this.names = names;
-        this.hasUnixName = hasUnixName;
     }
 
     static AnnotatedOption createOption(
@@ -40,20 +37,18 @@ public final class AnnotatedOption extends AnnotatedMethod {
                 .sorted(UNIX_NAMES_FIRST_COMPARATOR)
                 .collect(toList());
         String paramLabel = option.paramLabel().or(() -> names.stream()
-                .filter(name -> name.startsWith("--"))
-                .map(name -> name.substring(2))
-                .map(s -> s.toUpperCase(Locale.US))
-                .findFirst())
+                        .filter(name -> name.startsWith("--"))
+                        .map(name -> name.substring(2))
+                        .map(s -> s.toUpperCase(Locale.US))
+                        .findFirst())
                 .orElseGet(() -> SnakeName.create(option.simpleName().toString())
                         .snake('_')
                         .toUpperCase(Locale.US));
-        boolean hasUnixName = names.stream().anyMatch(s -> s.length() == 2);
         return new AnnotatedOption(
                 enumName,
                 option,
                 paramLabel,
-                names,
-                hasUnixName);
+                names);
     }
 
     @Override
@@ -73,10 +68,6 @@ public final class AnnotatedOption extends AnnotatedMethod {
 
     public List<String> names() {
         return names;
-    }
-
-    public boolean hasUnixName() {
-        return hasUnixName;
     }
 
     @Override

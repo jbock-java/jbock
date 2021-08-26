@@ -12,7 +12,8 @@ import java.util.stream.Stream;
 
 abstract class AbstractParser<T> implements Parser<T> {
 
-    private final Pattern sus = Pattern.compile("-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+");
+    private static final Pattern SUSPICIOUS = Pattern.compile("-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+");
+
     private final Map<String, T> optionNames;
     private final Map<T, OptionState> optionStates;
     private final String[] params;
@@ -87,6 +88,6 @@ abstract class AbstractParser<T> implements Parser<T> {
     }
 
     final boolean suspicious(String token) {
-        return sus.matcher(token).matches();
+        return SUSPICIOUS.matcher(token).matches();
     }
 }

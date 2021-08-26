@@ -393,7 +393,7 @@ class ProcessorTest {
     @Test
     void oneOptionalInt() {
         JavaFileObject javaFile = fromSource(
-                "@Command",
+                "@Command(publicParser = true)",
                 "abstract class Arguments {",
                 "",
                 "  @Option(names = \"--x\")",

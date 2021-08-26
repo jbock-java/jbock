@@ -7,7 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public final class OptionStateRepeatable extends OptionState {
+import static net.jbock.parse.OptionStateUtil.readOptionArgument;
+
+public final class OptionStateRepeatable implements OptionState {
 
     private List<String> values;
 

@@ -7,7 +7,9 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public final class OptionStateRegular extends OptionState {
+import static net.jbock.parse.OptionStateUtil.readOptionArgument;
+
+public final class OptionStateRegular implements OptionState {
 
     private String value;
 
