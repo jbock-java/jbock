@@ -12,7 +12,7 @@ import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapping;
 import net.jbock.model.ItemType;
 import net.jbock.processor.SourceElement;
-import net.jbock.state.Parser;
+import net.jbock.parse.Parser;
 import net.jbock.util.ExConvert;
 import net.jbock.util.ExMissingItem;
 import net.jbock.util.ExFailure;

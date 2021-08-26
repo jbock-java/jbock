@@ -7,10 +7,10 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
-import net.jbock.state.OptionState;
-import net.jbock.state.OptionStateModeFlag;
-import net.jbock.state.OptionStateRegular;
-import net.jbock.state.OptionStateRepeatable;
+import net.jbock.parse.OptionState;
+import net.jbock.parse.OptionStateModeFlag;
+import net.jbock.parse.OptionStateRegular;
+import net.jbock.parse.OptionStateRepeatable;
 
 import javax.inject.Inject;
 import java.util.EnumMap;

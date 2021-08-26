@@ -10,10 +10,10 @@ import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
-import net.jbock.state.Parser;
-import net.jbock.state.RegularParser;
-import net.jbock.state.RepeatableParser;
-import net.jbock.state.SuperParser;
+import net.jbock.parse.Parser;
+import net.jbock.parse.RegularParser;
+import net.jbock.parse.RepeatableParser;
+import net.jbock.parse.SuperParser;
 import net.jbock.util.ExFailure;
 
 import javax.inject.Inject;

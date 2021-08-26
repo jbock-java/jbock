@@ -1,4 +1,4 @@
-package net.jbock.state;
+package net.jbock.parse;
 
 import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
