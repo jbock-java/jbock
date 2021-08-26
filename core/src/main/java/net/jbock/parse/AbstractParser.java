@@ -45,8 +45,7 @@ abstract class AbstractParser<T> implements Parser<T> {
         }
         String t = token;
         while ((t = optionStates.get(opt).read(t, it)) != null) {
-            name = readOptionName(t);
-            if (name == null) {
+            if ((name = readOptionName(t)) == null) {
                 throw new ExToken(ErrTokenType.INVALID_UNIX_GROUP, token);
             }
             if ((opt = optionNames.get(name)) == null) {
