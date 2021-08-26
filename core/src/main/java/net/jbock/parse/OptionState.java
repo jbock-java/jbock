@@ -28,6 +28,7 @@ public interface OptionState {
 
     /**
      * Returns the internal state as a stream of strings.
+     * To be invoked after parsing is finished.
      *
      * @return a stream of strings
      */
