@@ -15,7 +15,7 @@ and add the `@Command` annotation.
 In this class or interface, each abstract method corresponds either to a *named option* or a *positional parameter*.
 
 ````java
-@Command(name = "rm", description = "Coffee time!")
+@Command(name = "rm", description = "Beans!")
 abstract class DeleteCommand {
 
   /* Path, not Optional<Path>:
