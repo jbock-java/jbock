@@ -14,6 +14,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
 
 /**
  * Defines the *_Impl class, which extends the command class.
@@ -51,7 +52,7 @@ public class ImplClass {
                 .addMethod(implConstructor())
                 .addAnnotation(generatedAnnotation.define())
                 .addFields(allMappings.stream()
-                        .map(Mapping::asField)
+                        .map(this::asField)
                         .collect(toList()))
                 .addMethods(allMappings.stream()
                         .map(this::parameterMethodOverride)
@@ -64,7 +65,7 @@ public class ImplClass {
         return MethodSpec.methodBuilder(sourceMethod.methodName())
                 .returns(TypeName.get(sourceMethod.returnType()))
                 .addModifiers(sourceMethod.accessModifiers())
-                .addStatement("return $N", m.asField())
+                .addStatement("return $N", asField(m))
                 .addAnnotation(Override.class)
                 .build();
     }
@@ -72,12 +73,19 @@ public class ImplClass {
     private MethodSpec implConstructor() {
         MethodSpec.Builder spec = MethodSpec.constructorBuilder();
         for (Mapping<?> m : allMappings) {
-            FieldSpec field = m.asField();
+            FieldSpec field = asField(m);
             ParameterSpec param = ParameterSpec.builder(field.type,
                     m.sourceMethod().methodName()).build();
             spec.addStatement("this.$N = $N", field, param);
             spec.addParameter(param);
         }
         return spec.build();
+    }
+
+    private FieldSpec asField(Mapping<?> mapping) {
+        TypeName fieldType = TypeName.get(mapping.sourceMethod().returnType());
+        String fieldName = mapping.sourceMethod().methodName();
+        return FieldSpec.builder(fieldType, fieldName)
+                .addModifiers(PRIVATE, FINAL).build();
     }
 }

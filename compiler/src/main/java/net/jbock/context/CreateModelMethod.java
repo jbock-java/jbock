@@ -79,7 +79,7 @@ public class CreateModelMethod extends CachedMethod {
         code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
         c.sourceMethod().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
         code.add(CodeBlock.of(".withNames($T.of($L))", List.class, contextUtil.joinByComma(names)));
-        if (c.modeFlag()) {
+        if (c.isModeFlag()) {
             code.add(CodeBlock.of(".withModeFlag()"));
         } else if (!c.isOptional()) {
             code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));

@@ -68,7 +68,7 @@ public class OptionStatesMethod extends CachedMethod {
         if (param.isRepeatable()) {
             return ClassName.get(OptionStateRepeatable.class);
         }
-        if (param.modeFlag()) {
+        if (param.isModeFlag()) {
             return ClassName.get(OptionStateModeFlag.class);
         }
         return ClassName.get(OptionStateRegular.class);

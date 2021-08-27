@@ -6,6 +6,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
@@ -66,16 +67,16 @@ public class HarvestMethod extends CachedMethod {
         MethodSpec.Builder spec = MethodSpec.methodBuilder("harvest");
         for (int i = 0; i < namedOptions.size(); i++) {
             Mapping<AnnotatedOption> m = namedOptions.get(i);
-            ParameterSpec p = m.asParam();
+            ParameterSpec p = asParam(m);
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionOption(m, i));
         }
         for (int i = 0; i < positionalParameters.size(); i++) {
             Mapping<AnnotatedParameter> m = positionalParameters.get(i);
-            ParameterSpec p = m.asParam();
+            ParameterSpec p = asParam(m);
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionRegularParameter(m, i));
         }
         repeatablePositionalParameters.forEach(m -> {
-            ParameterSpec p = m.asParam();
+            ParameterSpec p = asParam(m);
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionRepeatableParameter(m));
         });
         generatedTypes.superResultType().ifPresentOrElse(parseResultWithRestType -> {
@@ -98,14 +99,14 @@ public class HarvestMethod extends CachedMethod {
 
     private CodeBlock getConstructorArguments() {
         List<CodeBlock> code = new ArrayList<>();
-        for (Mapping<AnnotatedOption> c : namedOptions) {
-            code.add(CodeBlock.of("$N", c.asParam()));
+        for (Mapping<AnnotatedOption> m : namedOptions) {
+            code.add(CodeBlock.of("$N", asParam(m)));
         }
-        for (Mapping<AnnotatedParameter> c : positionalParameters) {
-            code.add(CodeBlock.of("$N", c.asParam()));
+        for (Mapping<AnnotatedParameter> m : positionalParameters) {
+            code.add(CodeBlock.of("$N", asParam(m)));
         }
         repeatablePositionalParameters.stream()
-                .map(m -> CodeBlock.of("$N", m.asParam()))
+                .map(m -> CodeBlock.of("$N", asParam(m)))
                 .forEach(code::add);
         return contextUtil.joinByComma(code);
     }
@@ -114,8 +115,8 @@ public class HarvestMethod extends CachedMethod {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.option($T.$N)", parser,
                 sourceElement.optionEnumType(), m.enumName().enumConstant()));
-        if (!m.modeFlag()) {
-            code.add(CodeBlock.of(".map($L)", m.mapExpr()));
+        if (!m.isModeFlag()) {
+            code.add(CodeBlock.of(".map($L)", m.mapper()));
         }
         code.addAll(tailExpressionOption(m, i));
         m.extractExpr().ifPresent(code::add);
@@ -126,7 +127,7 @@ public class HarvestMethod extends CachedMethod {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.param($L)", parser,
                 m.sourceMethod().index()));
-        code.add(CodeBlock.of(".map($L)", m.mapExpr()));
+        code.add(CodeBlock.of(".map($L)", m.mapper()));
         code.addAll(tailExpressionParameter(m, i));
         m.extractExpr().ifPresent(code::add);
         return contextUtil.joinByNewline(code);
@@ -135,14 +136,14 @@ public class HarvestMethod extends CachedMethod {
     private CodeBlock convertExpressionRepeatableParameter(Mapping<AnnotatedParameters> m) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.rest()", parser));
-        code.add(CodeBlock.of(".map($L)", m.mapExpr()));
+        code.add(CodeBlock.of(".map($L)", m.mapper()));
         code.add(CodeBlock.of(".collect($T.toValidList())", EITHERS));
         code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.size()));
         return contextUtil.joinByNewline(code);
     }
 
     private List<CodeBlock> tailExpressionOption(Mapping<AnnotatedOption> m, int i) {
-        if (m.modeFlag()) {
+        if (m.isModeFlag()) {
             return List.of(CodeBlock.of(".findAny().isPresent()"));
         }
         switch (m.multiplicity()) {
@@ -183,5 +184,11 @@ public class HarvestMethod extends CachedMethod {
     private CodeBlock orElseThrowConverterError(ItemType itemType, int i) {
         return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5L))",
                 left, ExConvert.class, ItemType.class, itemType, i);
+    }
+
+    private ParameterSpec asParam(Mapping<?> mapping) {
+        TypeName type = TypeName.get(mapping.sourceMethod().returnType());
+        String name = mapping.sourceMethod().methodName();
+        return ParameterSpec.builder(type, '_' + name).build();
     }
 }

@@ -13,8 +13,8 @@ import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static io.jbock.util.Either.right;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
@@ -50,7 +50,7 @@ public class MatchFinder {
 
     public <M extends AnnotatedMethod>
     Either<ValidationFailure, Match<M>>
-    findFlagMatch(
+    validateModeFlag(
             M sourceMethod) {
         PrimitiveType bool = types.getPrimitiveType(BOOLEAN);
         Match<M> match = Match.create(bool, OPTIONAL, sourceMethod);
@@ -62,7 +62,7 @@ public class MatchFinder {
     private <M extends AnnotatedMethod> Match<M>
     findMatchInternal(
             M sourceMethod) {
-        return List.of(optionalMatcher, listMatcher).stream()
+        return Stream.of(optionalMatcher, listMatcher)
                 .map(matcher -> matcher.tryMatch(sourceMethod))
                 .flatMap(Optional::stream)
                 .findFirst()

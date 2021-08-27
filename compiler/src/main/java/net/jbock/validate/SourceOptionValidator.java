@@ -50,8 +50,8 @@ public class SourceOptionValidator {
     private Either<ValidationFailure, Mapping<AnnotatedOption>> wrapOption(
             AnnotatedOption option) {
         return checkFlag(option)
-                .map(m -> matchFinder.findFlagMatch(m)
-                        .map(Mapping::createFlag))
+                .map(m -> matchFinder.validateModeFlag(m)
+                        .map(Mapping::createModeFlag))
                 .orElseGet(() -> mappingFinder.findMapping(option));
     }
 
