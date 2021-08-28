@@ -3,7 +3,7 @@ package net.jbock.util;
 /**
  * Indicates that a converter returned {@code null}.
  */
-final class ConverterReturnedNull extends ConverterFailure {
+public final class ConverterReturnedNull extends ConverterFailure {
 
     ConverterReturnedNull() {
     }
