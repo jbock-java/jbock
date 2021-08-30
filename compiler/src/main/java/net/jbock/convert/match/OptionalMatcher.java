@@ -38,15 +38,23 @@ public class OptionalMatcher implements Matcher {
             M sourceMethod) {
         TypeMirror returnType = sourceMethod.returnType();
         return getOptionalPrimitive(sourceMethod, returnType)
-                .or(() -> // base
-                        elements.getTypeElement("java.util.Optional")
-                                .flatMap(el -> tool.getSingleTypeArgument(returnType, el))
-                                .map(typeArg -> Match.create(typeArg, OPTIONAL, sourceMethod)))
-                .or(() -> // vavr
-                        elements.getTypeElement("io.vavr.control.Option")
-                                .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
-                                        .map(typeArg -> createWithExtract(typeArg,
-                                                CodeBlock.of(".map($1T::of).orElse($1T.none())", types.erasure(el.asType())), sourceMethod))));
+                .or(() -> matchOptional(sourceMethod, returnType))
+                .or(() -> matchVavr(sourceMethod, returnType));
+    }
+
+    private <M extends AnnotatedMethod> Optional<Match<M>>
+    matchOptional(M sourceMethod, TypeMirror returnType) {
+        return elements.getTypeElement("java.util.Optional")
+                .flatMap(el -> tool.getSingleTypeArgument(returnType, el))
+                .map(typeArg -> Match.create(typeArg, OPTIONAL, sourceMethod));
+    }
+
+    private <M extends AnnotatedMethod> Optional<Match<M>>
+    matchVavr(M sourceMethod, TypeMirror returnType) {
+        return elements.getTypeElement("io.vavr.control.Option")
+                .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
+                        .map(typeArg -> createWithExtract(typeArg,
+                                CodeBlock.of(".map($1T::of).orElse($1T.none())", types.erasure(el.asType())), sourceMethod)));
     }
 
     private <M extends AnnotatedMethod>

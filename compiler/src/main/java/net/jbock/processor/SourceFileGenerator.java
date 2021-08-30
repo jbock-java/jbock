@@ -5,10 +5,11 @@ import com.squareup.javapoet.JavaFile;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
-import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+
+import static javax.tools.Diagnostic.Kind.ERROR;
 
 @ProcessorScope
 public class SourceFileGenerator {
@@ -29,7 +30,7 @@ public class SourceFileGenerator {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
             String stack = sw.toString();
-            messager.printMessage(Diagnostic.Kind.ERROR, stack, sourceElement.element());
+            messager.printMessage(ERROR, stack, sourceElement.element());
         }
     }
 }
