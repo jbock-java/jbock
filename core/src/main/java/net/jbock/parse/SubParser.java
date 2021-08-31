@@ -1,10 +1,11 @@
 package net.jbock.parse;
 
-import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
 import java.util.Iterator;
 import java.util.Map;
+
+import static net.jbock.util.ErrTokenType.INVALID_OPTION;
 
 abstract class SubParser<T> extends AbstractParser<T> {
 
@@ -29,7 +30,7 @@ abstract class SubParser<T> extends AbstractParser<T> {
                 continue;
             }
             if (!endOfOptionParsing && suspicious(token)) {
-                throw new ExToken(ErrTokenType.INVALID_OPTION, token);
+                throw new ExToken(INVALID_OPTION, token);
             }
             position += handleParam(position, token);
         }

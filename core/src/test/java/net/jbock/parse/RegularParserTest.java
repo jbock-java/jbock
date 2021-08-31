@@ -10,13 +10,22 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class RegularParserTest {
 
     @Test
-    void testZeroParamsFail() {
+    void testZeroParamsExcess() {
         RegularParser<String> parser = RegularParser.create(Map.of(), Map.of(), 0);
         assertThrows(ExToken.class, () -> parser.parse(List.of("1")));
+    }
+
+    @Test
+    void testZeroParamsSuspicious() {
+        RegularParser<String> parser = RegularParser.create(Map.of(), Map.of(), 0);
+        assertThrows(ExToken.class, () -> parser.parse(List.of("-a")));
     }
 
     @Test
@@ -37,7 +46,7 @@ class RegularParserTest {
     }
 
     @Test
-    void testOneParamsFail() {
+    void testOneParamExcess() {
         RegularParser<String> parser = RegularParser.create(Map.of(), Map.of(), 1);
         assertThrows(ExToken.class, () -> parser.parse(List.of("1", "2")));
     }
@@ -66,6 +75,25 @@ class RegularParserTest {
         RegularParser<String> parser = RegularParser.create(optionNames, optionStates, 0);
         parser.parse(List.of("-a", "1"));
         assertEquals(List.of("1"), parser.option("A").toList());
+    }
+
+    @Test
+    void testOneUnixOptionClusterFail() {
+        Map<String, String> optionNames = Map.of("-a", "A");
+        Map<String, OptionState> optionStates = Map.of("A", new OptionStateModeFlag());
+        RegularParser<String> parser = RegularParser.create(optionNames, optionStates, 0);
+        assertThrows(ExToken.class, () -> parser.parse(List.of("-ab")));
+    }
+
+    @Test
+    void testOneUnixOptionClusterBadOptionState() throws ExToken {
+        Map<String, String> optionNames = Map.of("-a", "A");
+        OptionState optionState = mock(OptionState.class);
+        when(optionState.read(any(), any()))
+                .thenReturn("readOptionName_invalid_input");
+        Map<String, OptionState> optionStates = Map.of("A", optionState);
+        RegularParser<String> parser = RegularParser.create(optionNames, optionStates, 0);
+        assertThrows(ExToken.class, () -> parser.parse(List.of("-a-")));
     }
 
     @Test
