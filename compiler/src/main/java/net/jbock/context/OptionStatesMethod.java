@@ -8,7 +8,7 @@ import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
 import net.jbock.parse.OptionState;
 import net.jbock.parse.OptionStateModeFlag;
-import net.jbock.parse.OptionStateRegular;
+import net.jbock.parse.OptionStateNonRepeatable;
 import net.jbock.parse.OptionStateRepeatable;
 import net.jbock.processor.SourceElement;
 
@@ -71,6 +71,6 @@ public class OptionStatesMethod extends CachedMethod {
         if (param.isModeFlag()) {
             return ClassName.get(OptionStateModeFlag.class);
         }
-        return ClassName.get(OptionStateRegular.class);
+        return ClassName.get(OptionStateNonRepeatable.class);
     }
 }
