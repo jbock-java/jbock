@@ -9,11 +9,11 @@ import java.util.stream.Stream;
 import static net.jbock.parse.OptionStateUtil.readOptionArgument;
 
 /**
- * Reads and stores the argument of a non-repeatable option.
+ * State of a non-repeatable option.
  * The {@code read} method cannot be invoked more than once, otherwise
  * an exception is thrown.
  */
-public final class OptionStateRegular implements OptionState {
+public final class OptionStateNonRepeatable implements OptionState {
 
     private String value;
 
