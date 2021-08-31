@@ -7,7 +7,7 @@ and [picocli](https://github.com/remkop/picocli).
 However it makes no use of reflection whatsoever.
 It is an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
-that generates custom parsing code at compile time.
+that generates a custom, [commons-cli](https://commons.apache.org/proper/commons-cli/index.html)-like parser, at compile time.
 jbock requires Java 11.
 
 ### Quick start
