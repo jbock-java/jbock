@@ -70,11 +70,18 @@ abstract class AbstractParser<T> implements Parser<T> {
 
     @Override
     public final Stream<String> option(T option) {
-        return optionStates.get(option).stream();
+        OptionState optionState = optionStates.get(option);
+        if (optionState == null) {
+            return Stream.empty();
+        }
+        return optionState.stream();
     }
 
     @Override
     public final Optional<String> param(int index) {
+        if (index < 0 || index >= numParams()) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(params[index]);
     }
 
