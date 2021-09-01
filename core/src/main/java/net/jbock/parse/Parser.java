@@ -14,7 +14,7 @@ import java.util.stream.Stream;
  *
  * @param <T> type of keys that identify named options
  */
-public interface Parser<T> {
+interface Parser<T> {
 
     /**
      * Parse the given input and store the result internally.
