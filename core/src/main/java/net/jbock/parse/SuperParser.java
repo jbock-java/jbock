@@ -65,7 +65,15 @@ public final class SuperParser<T> extends AbstractParser<T> {
         }
     }
 
-    @Override
+    /**
+     * Returns all remaining tokens, after the last
+     * regular positional parameter was read.
+     *
+     * <p>This method should be not be invoked before {@link #parse(List)}
+     * was invoked.
+     *
+     * @return a stream of strings
+     */
     public Stream<String> rest() {
         return rest.stream();
     }

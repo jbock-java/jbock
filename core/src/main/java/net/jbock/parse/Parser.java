@@ -26,18 +26,6 @@ public interface Parser<T> {
     void parse(List<String> tokens) throws ExFailure;
 
     /**
-     * Returns the stream of rest tokens.
-     * If the parser does not allow rest tokens,
-     * an empty stream is returned.
-     *
-     * <p>This method should be not be invoked before {@link #parse(List)}
-     * was invoked.
-     *
-     * @return a stream of strings
-     */
-    Stream<String> rest();
-
-    /**
      * Returns the arguments of the given option.
      * If the option was not present on the command line,
      * an empty stream is returned. If the option is not

@@ -13,11 +13,11 @@ import java.util.stream.Stream;
  *
  * @param <T> type of keys that identify named options
  */
-public final class RepeatableParser<T> extends SubParser<T> {
+public final class RestParser<T> extends SubParser<T> {
 
     private final List<String> rest = new ArrayList<>();
 
-    private RepeatableParser(
+    private RestParser(
             Map<String, T> optionNames,
             Map<T, OptionState> optionStates,
             int numParams) {
@@ -34,11 +34,11 @@ public final class RepeatableParser<T> extends SubParser<T> {
      *
      * @return a parser instance
      */
-    public static <T> RepeatableParser<T> create(
+    public static <T> RestParser<T> create(
             Map<String, T> optionNames,
             Map<T, OptionState> optionStates,
             int numParams) {
-        return new RepeatableParser<>(optionNames, optionStates, numParams);
+        return new RestParser<>(optionNames, optionStates, numParams);
     }
 
     @Override
@@ -52,7 +52,15 @@ public final class RepeatableParser<T> extends SubParser<T> {
         }
     }
 
-    @Override
+    /**
+     * Returns the additional positional parameters, after the last
+     * regular positional parameter was read.
+     *
+     * <p>This method should be not be invoked before {@link #parse(List)}
+     * was invoked.
+     *
+     * @return a stream of strings
+     */
     public Stream<String> rest() {
         return rest.stream();
     }

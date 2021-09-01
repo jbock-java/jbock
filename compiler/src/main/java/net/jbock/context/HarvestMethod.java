@@ -1,18 +1,15 @@
 package net.jbock.context;
 
 import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapping;
 import net.jbock.model.ItemType;
-import net.jbock.parse.Parser;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ExConvert;
 import net.jbock.util.ExFailure;
@@ -29,15 +26,15 @@ import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
 @ContextScope
-public class HarvestMethod extends CachedMethod {
+public final class HarvestMethod extends Cached<MethodSpec> {
 
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
-    private final ParameterSpec parser;
     private final List<Mapping<AnnotatedOption>> namedOptions;
     private final List<Mapping<AnnotatedParameter>> positionalParameters;
     private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
     private final ContextUtil contextUtil;
+    private final ParserTypeFactory parserTypeFactory;
     private final ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
 
     @Inject
@@ -47,22 +44,20 @@ public class HarvestMethod extends CachedMethod {
             List<Mapping<AnnotatedOption>> namedOptions,
             List<Mapping<AnnotatedParameter>> positionalParameters,
             List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
-            CommonFields commonFields,
-            ContextUtil contextUtil) {
+            ContextUtil contextUtil,
+            ParserTypeFactory parserTypeFactory) {
         this.generatedTypes = generatedTypes;
         this.sourceElement = sourceElement;
         this.namedOptions = namedOptions;
         this.positionalParameters = positionalParameters;
         this.repeatablePositionalParameters = repeatablePositionalParameters;
         this.contextUtil = contextUtil;
-        this.parser = ParameterSpec.builder(ParameterizedTypeName.get(
-                        ClassName.get(Parser.class),
-                        commonFields.optType()),
-                "parser").build();
+        this.parserTypeFactory = parserTypeFactory;
     }
 
     @Override
     MethodSpec define() {
+        ParameterSpec parser = parserTypeFactory.define().asParam();
         CodeBlock constructorArguments = getConstructorArguments();
         MethodSpec.Builder spec = MethodSpec.methodBuilder("harvest");
         for (int i = 0; i < namedOptions.size(); i++) {
@@ -112,6 +107,7 @@ public class HarvestMethod extends CachedMethod {
     }
 
     private CodeBlock convertExpressionOption(Mapping<AnnotatedOption> m, int i) {
+        ParameterSpec parser = parserTypeFactory.define().asParam();
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.option($T.$N)", parser,
                 sourceElement.optionEnumType(), m.enumName().enumConstant()));
@@ -124,6 +120,7 @@ public class HarvestMethod extends CachedMethod {
     }
 
     private CodeBlock convertExpressionRegularParameter(Mapping<AnnotatedParameter> m, int i) {
+        ParameterSpec parser = parserTypeFactory.define().asParam();
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.param($L)", parser,
                 m.sourceMethod().index()));
@@ -134,6 +131,7 @@ public class HarvestMethod extends CachedMethod {
     }
 
     private CodeBlock convertExpressionRepeatableParameter(Mapping<AnnotatedParameters> m) {
+        ParameterSpec parser = parserTypeFactory.define().asParam();
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.rest()", parser));
         code.add(CodeBlock.of(".map($L)", m.mapper()));

@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 
 @ContextScope
-public class CreateModelMethod extends CachedMethod {
+public final class CreateModelMethod extends Cached<MethodSpec> {
 
     private final ContextUtil contextUtil;
     private final SourceElement sourceElement;

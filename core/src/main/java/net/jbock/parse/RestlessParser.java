@@ -4,7 +4,6 @@ import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * Mutable command line parser that does not know about
@@ -14,9 +13,9 @@ import java.util.stream.Stream;
  *
  * @param <T> type of keys that identify named options
  */
-public final class RegularParser<T> extends SubParser<T> {
+public final class RestlessParser<T> extends SubParser<T> {
 
-    private RegularParser(
+    private RestlessParser(
             Map<String, T> optionNames,
             Map<T, OptionState> optionStates,
             int numParams) {
@@ -33,11 +32,11 @@ public final class RegularParser<T> extends SubParser<T> {
      *
      * @return a parser instance
      */
-    public static <T> RegularParser<T> create(
+    public static <T> RestlessParser<T> create(
             Map<String, T> optionNames,
             Map<T, OptionState> optionStates,
             int numParams) {
-        return new RegularParser<>(optionNames, optionStates, numParams);
+        return new RestlessParser<>(optionNames, optionStates, numParams);
     }
 
     @Override
@@ -47,10 +46,5 @@ public final class RegularParser<T> extends SubParser<T> {
         }
         setParam(position, token);
         return 1;
-    }
-
-    @Override
-    public Stream<String> rest() {
-        return Stream.of();
     }
 }
