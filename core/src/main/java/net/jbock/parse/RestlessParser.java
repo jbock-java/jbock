@@ -6,9 +6,11 @@ import net.jbock.util.ExToken;
 import java.util.Map;
 
 /**
- * Mutable command line parser that does not know about
- * {@link #rest()} tokens.
- * This parser rejects suspicious tokens, and allows
+ * Mutable command line parser that does not allow additional
+ * non-option tokens after the last positional parameter has
+ * been read.
+ *
+ * <p>The parser rejects suspicious tokens, and allows
  * double-dash escape.
  *
  * @param <T> type of keys that identify named options

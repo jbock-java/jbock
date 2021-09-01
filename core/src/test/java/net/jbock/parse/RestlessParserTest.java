@@ -14,7 +14,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class RegularParserTest {
+class RestlessParserTest {
 
     @Test
     void testZeroParamsExcess() {

@@ -10,11 +10,12 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Mutable command line parser that allows additional
- * {@link #rest()} tokens after the last positional parameter.
- * This parser rejects suspicious tokens, but allows them after
- * the last positional parameter has been read. It does not support
- * double-dash escape.
+ * Mutable command line parser that allows arbitrary additional
+ * tokens, after the last positional parameter has been read.
+ *
+ * <p>The parser rejects suspicious tokens, but allows them after
+ * the last positional parameter has been read.
+ * Double-dash escape is <em>not</em> supported.
  *
  * @param <T> type of keys that identify named options
  */

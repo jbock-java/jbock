@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 /**
  * Mutable command line parser that allows additional
- * {@link #rest()} tokens after the last positional parameter.
+ * non-option tokens after the last positional parameter.
  * This parser rejects suspicious tokens, and allows
  * double-dash escape.
  *
