@@ -10,7 +10,15 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-abstract class AbstractParser<T> implements Parser<T> {
+/**
+ * Abstract superclass of several types of mutable command line parsers.
+ * Mutable parsers are not re-usable.
+ * These parsers do not perform string conversion, so all parsing results
+ * are in the basic form of strings.
+ *
+ * @param <T> type of keys that identify named options
+ */
+abstract class AbstractParser<T> {
 
     private static final Pattern SUSPICIOUS = Pattern.compile("-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+");
 
@@ -29,7 +37,13 @@ abstract class AbstractParser<T> implements Parser<T> {
 
     abstract void parse(Iterator<String> it) throws ExToken;
 
-    @Override
+    /**
+     * Parse the given input and store the result internally.
+     * This method should only be invoked once.
+     *
+     * @param tokens command line input
+     * @throws ExToken if the input is not valid command line syntax
+     */
     public final void parse(List<String> tokens) throws ExToken {
         parse(tokens.iterator());
     }
@@ -68,7 +82,21 @@ abstract class AbstractParser<T> implements Parser<T> {
         return token.substring(0, token.indexOf('='));
     }
 
-    @Override
+    /**
+     * Returns the arguments of the given option.
+     * If the option was not present on the command line,
+     * an empty stream is returned. If the option is not
+     * repeatable, the stream will contain exactly one element.
+     * In the case of a nullary option, an empty stream
+     * represents absence, and any nonempty stream represents presence
+     * of the option.
+     *
+     * <p>This method should be not be invoked before {@link #parse(List)}
+     * was invoked.
+     *
+     * @param option the option key
+     * @return a stream of strings
+     */
     public final Stream<String> option(T option) {
         OptionState optionState = optionStates.get(option);
         if (optionState == null) {
@@ -77,7 +105,16 @@ abstract class AbstractParser<T> implements Parser<T> {
         return optionState.stream();
     }
 
-    @Override
+    /**
+     * Returns the value of the positional parameter at the given position,
+     * if any.
+     *
+     * <p>This method should be not be invoked before {@link #parse(List)}
+     * was invoked.
+     *
+     * @param index the parameter position
+     * @return an optional string
+     */
     public final Optional<String> param(int index) {
         if (index < 0 || index >= numParams()) {
             return Optional.empty();
