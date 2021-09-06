@@ -24,7 +24,7 @@ class SuperParserTest {
     }
 
     @Test
-    void testZeroParamsSuspicious() throws ExToken {
+    void testZeroParamsNotSuspicious() throws ExToken {
         SuperParser<String> parser = SuperParser.create(Map.of(), Map.of(), 0);
         parser.parse(List.of("-a"));
         assertEquals(List.of("-a"), parser.rest().toList());
@@ -45,6 +45,12 @@ class SuperParserTest {
         assertTrue(parser.option("a").findAny().isEmpty());
         assertTrue(parser.param(0).isEmpty());
         assertEquals(List.of("--"), parser.rest().toList());
+    }
+
+    @Test
+    void testOneParamSuspicious() {
+        SuperParser<String> parser = SuperParser.create(Map.of(), Map.of(), 1);
+        assertThrows(ExToken.class, () -> parser.parse(List.of("-a")));
     }
 
     @Test
