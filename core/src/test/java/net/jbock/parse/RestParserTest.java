@@ -36,11 +36,20 @@ class RestParserTest {
     }
 
     @Test
-    void testOptionRepetition() {
+    void testOptionNonRepeatableRepetition() {
         Map<String, String> optionNames = Map.of("-a", "A");
         Map<String, OptionState> optionStates = Map.of("A", new OptionStateNonRepeatable());
         RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
         assertThrows(ExToken.class, () -> parser.parse(List.of("-a1", "-a1")));
+    }
+
+    @Test
+    void testOptionRepeatableRepetition() throws ExToken {
+        Map<String, String> optionNames = Map.of("-a", "A");
+        Map<String, OptionState> optionStates = Map.of("A", new OptionStateRepeatable());
+        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        parser.parse(List.of("-a1", "-a2"));
+        assertEquals(List.of("1", "2"), parser.option("A").toList());
     }
 
     @Test
