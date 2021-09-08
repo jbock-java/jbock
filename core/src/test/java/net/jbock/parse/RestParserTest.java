@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class RestParserTest {
 
@@ -24,5 +25,29 @@ class RestParserTest {
         parser.parse(List.of("1", "2"));
         assertEquals(Optional.of("1"), parser.param(0));
         assertEquals(List.of("2"), parser.rest().toList());
+    }
+
+    @Test
+    void testModeFlagRepetition() {
+        Map<String, String> optionNames = Map.of("-a", "A");
+        Map<String, OptionState> optionStates = Map.of("A", new OptionStateModeFlag());
+        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        assertThrows(ExToken.class, () -> parser.parse(List.of("-a", "-a")));
+    }
+
+    @Test
+    void testOptionRepetition() {
+        Map<String, String> optionNames = Map.of("-a", "A");
+        Map<String, OptionState> optionStates = Map.of("A", new OptionStateNonRepeatable());
+        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        assertThrows(ExToken.class, () -> parser.parse(List.of("-a1", "-a1")));
+    }
+
+    @Test
+    void testMissingOptionArgument() {
+        Map<String, String> optionNames = Map.of("-a", "A");
+        Map<String, OptionState> optionStates = Map.of("A", new OptionStateNonRepeatable());
+        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        assertThrows(ExToken.class, () -> parser.parse(List.of("-a")));
     }
 }
