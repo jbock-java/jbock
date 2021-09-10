@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static net.jbock.util.ErrTokenType.INVALID_OPTION;
+
 /**
  * Abstract superclass of several types of mutable command line parsers.
  * Mutable parsers are not re-usable.
@@ -26,8 +28,6 @@ abstract class AbstractParser<T> {
     private final Map<T, OptionState> optionStates;
     private final String[] params;
 
-    private int position = 0;
-
     AbstractParser(
             Map<String, T> optionNames,
             Map<T, OptionState> optionStates,
@@ -37,7 +37,37 @@ abstract class AbstractParser<T> {
         this.params = new String[numParams];
     }
 
-    abstract void parse(Iterator<String> it) throws ExToken;
+    final void parse(Iterator<String> it) throws ExToken {
+        int position = 0;
+        boolean endOfOptionParsing = false;
+        while (it.hasNext()) {
+            if (hasOptionParsingEnded(position)) {
+                endOfOptionParsing = true;
+            }
+            String token = it.next();
+            if (!endOfOptionParsing && isEscapeSequence(token)) {
+                endOfOptionParsing = true;
+                continue;
+            }
+            if (!endOfOptionParsing && tryReadOption(token, it)) {
+                continue;
+            }
+            if (!endOfOptionParsing && SUSPICIOUS.matcher(token).matches()) {
+                throw new ExToken(INVALID_OPTION, token);
+            }
+            if (position >= params.length) {
+                handleExcessParam(token);
+            } else {
+                params[position++] = token;
+            }
+        }
+    }
+
+    abstract boolean hasOptionParsingEnded(int position);
+
+    abstract boolean isEscapeSequence(String token);
+
+    abstract void handleExcessParam(String token) throws ExToken;
 
     /**
      * Parse the given input and store the result internally.
@@ -50,7 +80,7 @@ abstract class AbstractParser<T> {
         parse(tokens.iterator());
     }
 
-    final boolean tryReadOption(String token, Iterator<String> it) throws ExToken {
+    private boolean tryReadOption(String token, Iterator<String> it) throws ExToken {
         String name = readOptionName(token);
         if (name == null) {
             return false;
@@ -124,15 +154,7 @@ abstract class AbstractParser<T> {
         return Optional.ofNullable(params[index]);
     }
 
-    final void handleParam(String token) {
-        params[position++] = token;
-    }
-
-    final boolean isExcessPosition() {
-        return position >= params.length;
-    }
-
-    final boolean suspicious(String token) {
-        return SUSPICIOUS.matcher(token).matches();
+    final int numParams() {
+        return params.length;
     }
 }

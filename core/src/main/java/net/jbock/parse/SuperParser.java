@@ -1,10 +1,6 @@
 package net.jbock.parse;
 
-import net.jbock.util.ErrTokenType;
-import net.jbock.util.ExToken;
-
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -48,21 +44,18 @@ public final class SuperParser<T> extends AbstractParser<T> {
     }
 
     @Override
-    void parse(Iterator<String> it) throws ExToken {
-        while (it.hasNext()) {
-            String token = it.next();
-            if (isExcessPosition()) {
-                rest.add(token);
-                continue;
-            }
-            if (tryReadOption(token, it)) {
-                continue;
-            }
-            if (suspicious(token)) {
-                throw new ExToken(ErrTokenType.INVALID_OPTION, token);
-            }
-            handleParam(token);
-        }
+    boolean hasOptionParsingEnded(int position) {
+        return position >= numParams();
+    }
+
+    @Override
+    boolean isEscapeSequence(String token) {
+        return false;
+    }
+
+    @Override
+    void handleExcessParam(String token) {
+        rest.add(token);
     }
 
     /**
