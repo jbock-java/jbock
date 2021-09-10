@@ -49,10 +49,9 @@ public final class SuperParser<T> extends AbstractParser<T> {
 
     @Override
     void parse(Iterator<String> it) throws ExToken {
-        int position = 0;
         while (it.hasNext()) {
             String token = it.next();
-            if (position == numParams()) {
+            if (isExcessPosition()) {
                 rest.add(token);
                 continue;
             }
@@ -62,7 +61,7 @@ public final class SuperParser<T> extends AbstractParser<T> {
             if (suspicious(token)) {
                 throw new ExToken(ErrTokenType.INVALID_OPTION, token);
             }
-            setParam(position++, token);
+            handleParam(token);
         }
     }
 

@@ -42,14 +42,8 @@ public final class RestParser<T> extends SubParser<T> {
     }
 
     @Override
-    int handleParam(int position, String token) {
-        if (position < numParams()) {
-            setParam(position, token);
-            return 1;
-        } else {
-            rest.add(token);
-            return 0;
-        }
+    void handleExcessParam(String token) {
+        rest.add(token);
     }
 
     /**

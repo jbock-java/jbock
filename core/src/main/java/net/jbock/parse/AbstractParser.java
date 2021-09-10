@@ -26,6 +26,8 @@ abstract class AbstractParser<T> {
     private final Map<T, OptionState> optionStates;
     private final String[] params;
 
+    private int position = 0;
+
     AbstractParser(
             Map<String, T> optionNames,
             Map<T, OptionState> optionStates,
@@ -116,18 +118,18 @@ abstract class AbstractParser<T> {
      * @return an optional string
      */
     public final Optional<String> param(int index) {
-        if (index < 0 || index >= numParams()) {
+        if (index < 0 || index >= params.length) {
             return Optional.empty();
         }
         return Optional.ofNullable(params[index]);
     }
 
-    final void setParam(int index, String token) {
-        this.params[index] = token;
+    final void handleParam(String token) {
+        params[position++] = token;
     }
 
-    final int numParams() {
-        return params.length;
+    final boolean isExcessPosition() {
+        return position >= params.length;
     }
 
     final boolean suspicious(String token) {

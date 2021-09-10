@@ -42,11 +42,7 @@ public final class RestlessParser<T> extends SubParser<T> {
     }
 
     @Override
-    int handleParam(int position, String token) throws ExToken {
-        if (position == numParams()) {
-            throw new ExToken(ErrTokenType.EXCESS_PARAM, token);
-        }
-        setParam(position, token);
-        return 1;
+    void handleExcessParam(String token) throws ExToken {
+        throw new ExToken(ErrTokenType.EXCESS_PARAM, token);
     }
 }

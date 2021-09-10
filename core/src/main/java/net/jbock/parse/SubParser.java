@@ -19,7 +19,6 @@ abstract class SubParser<T> extends AbstractParser<T> {
     @Override
     final void parse(Iterator<String> it) throws ExToken {
         boolean endOfOptionParsing = false;
-        int position = 0;
         while (it.hasNext()) {
             String token = it.next();
             if (!endOfOptionParsing && "--".equals(token)) {
@@ -32,9 +31,13 @@ abstract class SubParser<T> extends AbstractParser<T> {
             if (!endOfOptionParsing && suspicious(token)) {
                 throw new ExToken(INVALID_OPTION, token);
             }
-            position += handleParam(position, token);
+            if (isExcessPosition()) {
+                handleExcessParam(token);
+            } else {
+                handleParam(token);
+            }
         }
     }
 
-    abstract int handleParam(int position, String token) throws ExToken;
+    abstract void handleExcessParam(String token) throws ExToken;
 }
