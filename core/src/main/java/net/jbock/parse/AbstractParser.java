@@ -41,19 +41,19 @@ abstract class AbstractParser<T> {
         int position = 0;
         boolean endOfOptionParsing = false;
         while (it.hasNext()) {
-            if (hasOptionParsingEnded(position)) {
-                endOfOptionParsing = true;
-            }
+            endOfOptionParsing |= hasOptionParsingEnded(position);
             String token = it.next();
-            if (!endOfOptionParsing && isEscapeSequence(token)) {
-                endOfOptionParsing = true;
-                continue;
-            }
-            if (!endOfOptionParsing && tryReadOption(token, it)) {
-                continue;
-            }
-            if (!endOfOptionParsing && SUSPICIOUS.matcher(token).matches()) {
-                throw new ExToken(INVALID_OPTION, token);
+            if (!endOfOptionParsing) {
+                if (isEscapeSequence(token)) {
+                    endOfOptionParsing = true;
+                    continue;
+                }
+                if (tryReadOption(token, it)) {
+                    continue;
+                }
+                if (SUSPICIOUS.matcher(token).matches()) {
+                    throw new ExToken(INVALID_OPTION, token);
+                }
             }
             if (position >= params.length) {
                 handleExcessParam(token);
@@ -119,7 +119,7 @@ abstract class AbstractParser<T> {
      * If the option was not present on the command line,
      * an empty stream is returned. If the option is not
      * repeatable, the stream will contain exactly one element.
-     * In the case of a nullary option, an empty stream
+     * For nullary options, an empty stream
      * represents absence, and any nonempty stream represents presence
      * of the option.
      *
