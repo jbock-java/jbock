@@ -55,10 +55,10 @@ abstract class AbstractParser<T> {
                     throw new ExToken(INVALID_OPTION, token);
                 }
             }
-            if (position >= params.length) {
-                handleExcessParam(token);
-            } else {
+            if (position < params.length) {
                 params[position++] = token;
+            } else {
+                handleExcessParam(token);
             }
         }
     }
