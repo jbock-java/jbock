@@ -5,7 +5,7 @@ import net.jbock.Parameters;
 
 import java.util.List;
 
-@Command(generateParseOrExitMethod = false)
+@Command(skipGeneratingParseOrExitMethod = true)
 abstract class ExtremelySimpleArguments {
 
     @Parameters

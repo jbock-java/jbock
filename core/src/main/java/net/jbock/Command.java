@@ -66,13 +66,13 @@ public @interface Command {
     boolean superCommand() default false;
 
     /**
-     * If {@code true}, the generated parser will contain
+     * If {@code true}, the generated parser will not contain
      * the {@code parseOrExit} method.
      *
-     * @return {@code false} to skip generating the
+     * @return {@code true} to skip generating the
      *         {@code parseOrExit} method
      */
-    boolean generateParseOrExitMethod() default true;
+    boolean skipGeneratingParseOrExitMethod() default false;
 
     /**
      * If {@code true}, the generated parser class will be

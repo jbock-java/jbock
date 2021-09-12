@@ -63,7 +63,7 @@ public final class ParserClass {
         spec.addField(commonFields.optionNames().toBuilder()
                 .initializer("$N()", optionNamesMethod.get()).build());
         spec.addMethod(parseMethod.get());
-        if (sourceElement.generateParseOrExitMethod()) {
+        if (!sourceElement.skipGeneratingParseOrExitMethod()) {
             spec.addMethod(parseOrExitMethod.define());
         }
         spec.addMethod(harvestMethod.get());

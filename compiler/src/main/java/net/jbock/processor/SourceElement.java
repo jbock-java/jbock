@@ -98,7 +98,7 @@ public class SourceElement {
         return List.of(command.description());
     }
 
-    public boolean generateParseOrExitMethod() {
-        return command.generateParseOrExitMethod();
+    public boolean skipGeneratingParseOrExitMethod() {
+        return command.skipGeneratingParseOrExitMethod();
     }
 }
