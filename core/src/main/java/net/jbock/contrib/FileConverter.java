@@ -3,12 +3,13 @@ package net.jbock.contrib;
 import net.jbock.util.StringConverter;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 /**
- * A {@code StringConverter} that converts to {@code File}.
- * Fails if the input file does not exist.
+ * A {@code StringConverter} that converts the given path name to a {@code File}.
+ * Fails if the input path does not exist.
  *
- * <p>Note: Use {@link java.nio.file.Path} for file arguments
+ * <p>Note: Use {@link java.nio.file.Path} for paths
  *    that may not exist.
  */
 public final class FileConverter extends StringConverter<File> {
@@ -26,12 +27,9 @@ public final class FileConverter extends StringConverter<File> {
 
     @Override
     protected File convert(String token) {
-        File file = new File(token);
+        File file = Paths.get(token).toFile();
         if (!file.exists()) {
             throw new IllegalStateException("File does not exist: " + token);
-        }
-        if (!file.isFile()) {
-            throw new IllegalStateException("Not a file: " + token);
         }
         return file;
     }
