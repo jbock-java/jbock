@@ -21,8 +21,11 @@ public final class CharConverter extends StringConverter<Character> {
 
     @Override
     protected Character convert(String token) {
-        if (token.length() != 1) {
-            throw new RuntimeException("Not a single character: <" + token + ">");
+        if (token.isEmpty()) {
+            throw new RuntimeException("Expecting a single character, but found an empty string");
+        }
+        if (token.length() >= 2) {
+            throw new RuntimeException("Expecting a single character, but found: <" + token + ">");
         }
         return token.charAt(0);
     }

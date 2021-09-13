@@ -49,7 +49,7 @@ public final class EnumConverter<E> extends StringConverter<E> {
                     .map(Objects::toString)
                     .collect(joining("\n  ", "", "\n"));
             String message = e.getMessage() + "\nPossible values:\n  " + strings;
-            throw new IllegalArgumentException(message);
+            throw new RuntimeException(message);
         }
     }
 }
