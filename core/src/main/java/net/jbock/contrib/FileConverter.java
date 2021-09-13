@@ -29,7 +29,7 @@ public final class FileConverter extends StringConverter<File> {
     protected File convert(String token) {
         File file = Paths.get(token).toFile();
         if (!file.exists()) {
-            throw new IllegalStateException("File does not exist: " + token);
+            throw new IllegalStateException("Path does not exist: " + token);
         }
         return file;
     }
