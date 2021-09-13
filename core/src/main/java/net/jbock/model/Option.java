@@ -16,7 +16,7 @@ public final class Option extends Item {
     private final List<String> names;
     private final Arity arity;
 
-    Option(
+    private Option(
             String paramLabel,
             String descriptionKey,
             List<String> description,

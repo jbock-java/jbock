@@ -16,7 +16,7 @@ import java.util.Locale;
  */
 public final class Parameter extends Item {
 
-    Parameter(
+    private Parameter(
             String paramLabel,
             String descriptionKey,
             List<String> description,
