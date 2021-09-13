@@ -29,8 +29,8 @@ public final class Parameter extends Item {
      *
      * @return an empty builder
      */
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(Multiplicity multiplicity) {
+        return new Builder(multiplicity);
     }
 
     /**
@@ -41,9 +41,10 @@ public final class Parameter extends Item {
         private String paramLabel;
         private String descriptionKey = "";
         private final List<String> description = new ArrayList<>();
-        private Multiplicity multiplicity = Multiplicity.REQUIRED;
+        private final Multiplicity multiplicity;
 
-        private Builder() {
+        private Builder(Multiplicity multiplicity) {
+            this.multiplicity = multiplicity;
         }
 
         /**
@@ -82,17 +83,6 @@ public final class Parameter extends Item {
          */
         public Builder addDescriptionLine(String descriptionLine) {
             this.description.add(descriptionLine);
-            return this;
-        }
-
-        /**
-         * Sets the multiplicity of this parameter.
-         *
-         * @param multiplicity the multiplicity
-         * @return the builder instance
-         */
-        public Builder withMultiplicity(Multiplicity multiplicity) {
-            this.multiplicity = multiplicity;
             return this;
         }
 

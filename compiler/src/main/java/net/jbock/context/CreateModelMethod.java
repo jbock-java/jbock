@@ -69,37 +69,33 @@ public final class CreateModelMethod extends Cached<MethodSpec> {
                 .build();
     }
 
-    private CodeBlock optionBlock(Mapping<AnnotatedOption> c) {
+    private CodeBlock optionBlock(Mapping<AnnotatedOption> m) {
         List<CodeBlock> names = new ArrayList<>();
-        for (String name : c.sourceMethod().names()) {
+        for (String name : m.sourceMethod().names()) {
             names.add(CodeBlock.of("$S", name));
         }
         List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$T.builder()", Option.class));
-        code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
-        c.sourceMethod().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
-        code.add(CodeBlock.of(".withNames($T.of($L))", List.class, contextUtil.joinByComma(names)));
-        if (c.isModeFlag()) {
-            code.add(CodeBlock.of(".withModeFlag()"));
-        } else if (!c.isOptional()) {
-            code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
+        if (m.isModeFlag()) {
+            code.add(CodeBlock.of("$T.nullary()", Option.class));
+        } else {
+            code.add(CodeBlock.of("$T.unary($T.$L)", Option.class, Multiplicity.class, m.multiplicity().name()));
         }
-        for (String line : c.sourceMethod().description()) {
+        code.add(CodeBlock.of(".withParamLabel($S)", m.paramLabel()));
+        m.sourceMethod().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
+        code.add(CodeBlock.of(".withNames($T.of($L))", List.class, contextUtil.joinByComma(names)));
+        for (String line : m.sourceMethod().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
         return contextUtil.joinByNewline(code);
     }
 
-    private CodeBlock parameterBlock(Mapping<?> c) {
+    private CodeBlock parameterBlock(Mapping<?> m) {
         List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$T.builder()", Parameter.class));
-        code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
-        c.sourceMethod().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
-        if (!c.isRequired()) {
-            code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
-        }
-        for (String line : c.sourceMethod().description()) {
+        code.add(CodeBlock.of("$T.builder($T.$L)", Parameter.class, Multiplicity.class, m.multiplicity().name()));
+        code.add(CodeBlock.of(".withParamLabel($S)", m.paramLabel()));
+        m.sourceMethod().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
+        for (String line : m.sourceMethod().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));

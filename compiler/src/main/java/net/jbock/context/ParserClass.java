@@ -60,17 +60,16 @@ public final class ParserClass {
      */
     public TypeSpec define() {
         TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass());
-        spec.addField(commonFields.optionNames().toBuilder()
-                .initializer("$N()", optionNamesMethod.get()).build());
         spec.addMethod(parseMethod.get());
         if (!sourceElement.skipGeneratingParseOrExitMethod()) {
             spec.addMethod(parseOrExitMethod.define());
         }
         spec.addMethod(harvestMethod.get());
-        spec.addMethod(optionNamesMethod.get());
-        spec.addMethod(optionStatesMethod.get());
-
         if (!namedOptions.isEmpty()) {
+            spec.addField(commonFields.optionNames().toBuilder()
+                    .initializer("$N()", optionNamesMethod.get()).build());
+            spec.addMethod(optionNamesMethod.get());
+            spec.addMethod(optionStatesMethod.get());
             spec.addType(optionEnum.define());
         }
 

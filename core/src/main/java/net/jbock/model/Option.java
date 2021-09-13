@@ -36,8 +36,17 @@ public final class Option extends Item {
      *
      * @return empty builder
      */
-    public static Builder builder() {
-        return new Builder();
+    public static Builder nullary() {
+        return new Builder(Multiplicity.OPTIONAL, Arity.NULLARY);
+    }
+
+    /**
+     * Creates a builder instance.
+     *
+     * @return empty builder
+     */
+    public static Builder unary(Multiplicity multiplicity) {
+        return new Builder(multiplicity, Arity.UNARY);
     }
 
     /**
@@ -49,10 +58,12 @@ public final class Option extends Item {
         private String descriptionKey = "";
         private final List<String> description = new ArrayList<>();
         private List<String> names;
-        private Multiplicity multiplicity = Multiplicity.OPTIONAL;
-        private Arity arity = Arity.UNARY;
+        private final Multiplicity multiplicity;
+        private final Arity arity;
 
-        private Builder() {
+        private Builder(Multiplicity multiplicity, Arity arity) {
+            this.multiplicity = multiplicity;
+            this.arity = arity;
         }
 
         /**
@@ -92,7 +103,7 @@ public final class Option extends Item {
         }
 
         /**
-         * Sets the list of all option names.
+         * Sets the list of option names.
          *
          * @see net.jbock.Option#names()
          * @param names the option names
@@ -100,28 +111,6 @@ public final class Option extends Item {
          */
         public Builder withNames(List<String> names) {
             this.names = names;
-            return this;
-        }
-
-        /**
-         * Sets the multiplicity of this option.
-         *
-         * @param multiplicity the multiplicity
-         * @return the builder instance
-         */
-        public Builder withMultiplicity(Multiplicity multiplicity) {
-            this.multiplicity = multiplicity;
-            return this;
-        }
-
-        /**
-         * Marks this option as a mode flag.
-         *
-         * @return the builder instance
-         */
-        public Builder withModeFlag() {
-            this.multiplicity = Multiplicity.OPTIONAL;
-            this.arity = Arity.NULLARY;
             return this;
         }
 
@@ -176,9 +165,9 @@ public final class Option extends Item {
     }
 
     /**
-     * Returns the arity of this option.
+     * Returns the option arity.
      *
-     * @return this option's arity
+     * @return the option arity
      */
     public Arity arity() {
         return arity;

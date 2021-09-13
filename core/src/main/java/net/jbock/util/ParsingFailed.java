@@ -3,8 +3,8 @@ package net.jbock.util;
 import net.jbock.model.CommandModel;
 
 /**
- * Superclass of failure objects that may be
- * returned from the generated {@code parse} method.
+ * Superclass of non-exceptional failure objects that can occur
+ * during command line parsing.
  *
  * <p>There are a fixed number of subclasses:
  *

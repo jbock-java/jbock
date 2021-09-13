@@ -21,10 +21,10 @@ public final class ExConvert extends ExFailure {
      * Public constructor.
      *
      * @param failure the specific failure that has occurred
-     * @param itemType the item type
-     * @param itemIndex the index of the converted item
-     *                  within {@link CommandModel#parameters()} or
-     *                  {@link CommandModel#options()}
+     * @param itemType the item type (option or parameter)
+     * @param itemIndex the index of the item (option or parameter)
+     *                  within {@link CommandModel#options()} or
+     *                  {@link CommandModel#parameters()}
      */
     public ExConvert(ConverterFailure failure, ItemType itemType, int itemIndex) {
         this.failure = failure;
