@@ -21,8 +21,7 @@ class CpArgumentsTest {
     @Test
     void enumValuesInMessage() {
         f.assertThat("a", "b", "--backup", "CLOUD").fails(
-                "while converting option BACKUP (--backup): No enum constant " +
-                        "net.jbock.examples.CpArguments.Control.CLOUD\n" +
+                "while converting option BACKUP (--backup): No enum constant CLOUD\n" +
                         "Possible values:\n" +
                         "  NONE\n" +
                         "  NUMBERED\n" +
