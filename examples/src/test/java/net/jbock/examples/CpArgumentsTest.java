@@ -21,8 +21,8 @@ class CpArgumentsTest {
     @Test
     void enumValuesInMessage() {
         f.assertThat("a", "b", "--backup", "CLOUD").fails(
-                "while converting option BACKUP (--backup): No enum constant CLOUD\n" +
-                        "Possible values:\n" +
+                "while converting option BACKUP (--backup): No such constant: CLOUD\n" +
+                        "Possible values (ignoring case):\n" +
                         "  NONE\n" +
                         "  NUMBERED\n" +
                         "  EXISTING\n" +
