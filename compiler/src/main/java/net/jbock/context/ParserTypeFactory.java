@@ -2,8 +2,6 @@ package net.jbock.context;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
@@ -46,33 +44,31 @@ public final class ParserTypeFactory extends Cached<ParserType> {
 
     @Override
     ParserType define() {
-        FieldSpec optionNames = commonFields.optionNames();
-        MethodSpec optionStates = optionStatesMethod.get();
-        CodeBlock optionNamesBlock = namedOptions.isEmpty() ?
+        CodeBlock optionNames = namedOptions.isEmpty() ?
                 CodeBlock.of("$T.of()", Map.class) :
-                CodeBlock.of("$N", optionNames);
-        CodeBlock optionStatesBlock = namedOptions.isEmpty() ?
+                CodeBlock.of("$N", commonFields.optionNames());
+        CodeBlock optionStates = namedOptions.isEmpty() ?
                 CodeBlock.of("$T.of()", Map.class) :
-                CodeBlock.of("$N()", optionStates);
+                CodeBlock.of("$N()", optionStatesMethod.get());
         int numParams = positionalParameters.size();
         if (sourceElement.isSuperCommand()) {
             ClassName parserClass = ClassName.get(SuperParser.class);
             CodeBlock init = CodeBlock.of("$T.create($L, $L, $L)",
                     ClassName.get(SuperParser.class),
-                    optionNamesBlock, optionStatesBlock, numParams);
+                    optionNames, optionStates, numParams);
             return ParserType.create(ParameterizedTypeName.get(parserClass, commonFields.optType()), init);
         }
         if (!repeatablePositionalParameters.isEmpty()) {
             ClassName parserClass = ClassName.get(RestParser.class);
             CodeBlock init = CodeBlock.of("$T.create($L, $L, $L)",
                     ClassName.get(RestParser.class),
-                    optionNamesBlock, optionStatesBlock, numParams);
+                    optionNames, optionStates, numParams);
             return ParserType.create(ParameterizedTypeName.get(parserClass, commonFields.optType()), init);
         }
         ClassName parserClass = ClassName.get(RestlessParser.class);
         CodeBlock init = CodeBlock.of("$T.create($L, $L, $L)",
                 ClassName.get(RestlessParser.class),
-                optionNamesBlock, optionStatesBlock, numParams);
+                optionNames, optionStates, numParams);
         return ParserType.create(ParameterizedTypeName.get(parserClass, commonFields.optType()), init);
     }
 }
