@@ -43,6 +43,7 @@ public final class EnumConverter<E> extends StringConverter<E> {
         }
         String strings = Arrays.stream(values)
                 .map(Objects::toString)
+                .map(s -> s.toUpperCase(Locale.US))
                 .collect(joining("\n  ", "", "\n"));
         String message = "No such constant: " + token.toUpperCase(Locale.US) +
                 "\nPossible values (ignoring case):\n  " + strings;
