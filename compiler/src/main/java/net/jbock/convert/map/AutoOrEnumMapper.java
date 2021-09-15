@@ -51,7 +51,7 @@ public class AutoOrEnumMapper {
                 .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
                 .filter(element -> element.getKind() == ElementKind.ENUM)
                 .map(enumType -> {
-                    CodeBlock mapper = CodeBlock.of("$T.create($T::values)",
+                    CodeBlock mapper = CodeBlock.of("$1T.create($2T::valueOf, $2T::values)",
                             EnumConverter.class, enumType.asType());
                     return Mapping.create(mapper, match);
                 });
