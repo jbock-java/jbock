@@ -43,6 +43,7 @@ public final class Option extends Item {
     /**
      * Creates a builder instance.
      *
+     * @param multiplicity multiplicity
      * @return empty builder
      */
     public static Builder unary(Multiplicity multiplicity) {

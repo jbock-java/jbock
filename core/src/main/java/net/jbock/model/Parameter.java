@@ -27,6 +27,7 @@ public final class Parameter extends Item {
     /**
      * Creates a builder instance.
      *
+     * @param multiplicity multiplicity
      * @return an empty builder
      */
     public static Builder builder(Multiplicity multiplicity) {
