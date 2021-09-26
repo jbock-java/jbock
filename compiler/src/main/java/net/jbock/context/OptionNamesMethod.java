@@ -10,7 +10,6 @@ import net.jbock.processor.SourceElement;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -36,17 +35,6 @@ public final class OptionNamesMethod extends Cached<MethodSpec> {
     MethodSpec define() {
         ParameterSpec result = ParameterSpec.builder(
                 commonFields.optionNames().type, "result").build();
-        CodeBlock code = namedOptions.isEmpty() ?
-                CodeBlock.builder().addStatement("return $T.of()", Map.class).build() :
-                regularCode(result);
-        return MethodSpec.methodBuilder("optionNames")
-                .addCode(code)
-                .returns(result.type)
-                .addModifiers(PRIVATE, STATIC)
-                .build();
-    }
-
-    private CodeBlock regularCode(ParameterSpec result) {
         long mapSize = namedOptions.stream()
                 .map(Mapping::sourceMethod)
                 .map(AnnotatedOption::names)
@@ -64,6 +52,10 @@ public final class OptionNamesMethod extends Cached<MethodSpec> {
             }
         }
         code.addStatement("return $N", result);
-        return code.build();
+        return MethodSpec.methodBuilder("optionNames")
+                .addCode(code.build())
+                .returns(result.type)
+                .addModifiers(PRIVATE, STATIC)
+                .build();
     }
 }

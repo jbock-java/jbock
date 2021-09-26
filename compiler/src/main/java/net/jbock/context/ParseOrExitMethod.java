@@ -4,13 +4,11 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.contrib.StandardErrorHandler;
-import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.AtFileError;
 import net.jbock.util.ParseRequest;
 
 import javax.inject.Inject;
-import java.util.List;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
@@ -22,7 +20,6 @@ public class ParseOrExitMethod {
     private final SourceElement sourceElement;
     private final GeneratedTypes generatedTypes;
     private final ParseMethod parseMethod;
-    private final List<Mapping<?>> allMappings;
     private final CreateModelMethod createModelMethod;
 
     @Inject
@@ -30,12 +27,10 @@ public class ParseOrExitMethod {
             SourceElement sourceElement,
             GeneratedTypes generatedTypes,
             ParseMethod parseMethod,
-            List<Mapping<?>> allMappings,
             CreateModelMethod createModelMethod) {
         this.sourceElement = sourceElement;
         this.generatedTypes = generatedTypes;
         this.parseMethod = parseMethod;
-        this.allMappings = allMappings;
         this.createModelMethod = createModelMethod;
     }
 
@@ -46,19 +41,11 @@ public class ParseOrExitMethod {
         ParameterSpec err = builder(AtFileError.class, "err").build();
 
         CodeBlock.Builder code = CodeBlock.builder();
-        if (allMappings.stream().anyMatch(Mapping::isRequired)) {
-            code.beginControlFlow("if ($1N.length == 0 || $2S.equals($1N[0]))", args, "--help")
-                    .add("$T.builder().build()\n", StandardErrorHandler.class).indent()
-                    .add(".printUsageDocumentation($N());\n", createModelMethod.get()).unindent()
-                    .addStatement("$T.exit(0)", System.class)
-                    .endControlFlow();
-        } else {
-            code.beginControlFlow("if ($1N.length > 0 && $2S.equals($1N[0]))", args, "--help")
-                    .add("$T.builder().build()\n", StandardErrorHandler.class).indent()
-                    .add(".printUsageDocumentation($N());\n", createModelMethod.get()).unindent()
-                    .addStatement("$T.exit(0)", System.class)
-                    .endControlFlow();
-        }
+        code.beginControlFlow("if ($1N.length > 0 && $2S.equals($1N[0]))", args, "--help")
+                .add("$T.builder().build()\n", StandardErrorHandler.class).indent()
+                .add(".printUsageDocumentation($N());\n", createModelMethod.get()).unindent()
+                .addStatement("$T.exit(0)", System.class)
+                .endControlFlow();
 
         code.add("return $T.from($N).expand()\n", ParseRequest.class, args).indent()
                 .add(".mapLeft($1N -> $1N.addModel($2N()))\n", err, createModelMethod.get())

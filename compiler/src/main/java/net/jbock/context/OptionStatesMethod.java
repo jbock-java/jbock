@@ -15,7 +15,6 @@ import net.jbock.processor.SourceElement;
 import javax.inject.Inject;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.mapOf;
@@ -41,17 +40,6 @@ public final class OptionStatesMethod extends Cached<MethodSpec> {
     MethodSpec define() {
         ParameterSpec result = ParameterSpec.builder(
                 mapOf(commonFields.optType(), ClassName.get(OptionState.class)), "result").build();
-        CodeBlock code = namedOptions.isEmpty() ?
-                CodeBlock.builder().addStatement("return $T.of()", Map.class).build() :
-                regularCode(result);
-        return MethodSpec.methodBuilder("optionStates")
-                .addCode(code)
-                .returns(result.type)
-                .addModifiers(PRIVATE)
-                .build();
-    }
-
-    private CodeBlock regularCode(ParameterSpec result) {
         CodeBlock.Builder code = CodeBlock.builder();
         code.addStatement("$T $N = new $T<>($T.class)", result.type, result, EnumMap.class, sourceElement.optionEnumType());
         for (Mapping<AnnotatedOption> namedOption : namedOptions) {
@@ -61,7 +49,11 @@ public final class OptionStatesMethod extends Cached<MethodSpec> {
                     enumConstant, optionParserType(namedOption));
         }
         code.addStatement("return $N", result);
-        return code.build();
+        return MethodSpec.methodBuilder("optionStates")
+                .addCode(code.build())
+                .returns(result.type)
+                .addModifiers(PRIVATE)
+                .build();
     }
 
     private ClassName optionParserType(Mapping<AnnotatedOption> param) {
