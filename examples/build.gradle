@@ -24,7 +24,7 @@ dependencies {
     implementation 'io.vavr:vavr:1.0.0-alpha-3'
     annotationProcessor project(':compiler')
     annotationProcessor(core)
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 }
 
 test {

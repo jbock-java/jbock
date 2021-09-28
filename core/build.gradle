@@ -36,7 +36,7 @@ tasks.withType(GenerateModuleMetadata) {
 dependencies {
     api('io.github.jbock-java:either:1.5')
     testImplementation('org.mockito:mockito-core:3.12.4')
-    testImplementation('org.junit.jupiter:junit-jupiter:5.8.0')
+    testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
 }
 
 jar {
