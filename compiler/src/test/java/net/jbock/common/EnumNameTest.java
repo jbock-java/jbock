@@ -14,7 +14,7 @@ class EnumNameTest {
 
     @Test
     void testEnumConstantUpperCase() {
-        assertEquals("MYCOMMAND", EnumName.create("MyCommand").enumConstant());
-        assertEquals("__", EnumName.create("_").enumConstant());
+        assertEquals("MY_COMMAND", EnumName.create("MyCommand").enumConstant());
+        assertEquals("_1", EnumName.create("_").enumConstant());
     }
 }
