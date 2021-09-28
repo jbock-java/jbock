@@ -2,7 +2,7 @@ package net.jbock.annotated;
 
 import io.jbock.util.Either;
 import io.jbock.util.Eithers;
-import net.jbock.common.EnumName;
+import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 
@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,36 +47,45 @@ final class AnnotatedMethodsBuilder {
         Step2 sourceElement(SourceElement sourceElement) {
             return new Step2(methods, createEnumNames(methods), sourceElement);
         }
-    }
 
-    private static Map<Name, EnumName> createEnumNames(List<Executable> methods) {
-        Set<String> names = new HashSet<>(methods.size());
-        Map<Name, EnumName> result = new HashMap<>(methods.size());
-        for (Executable method : methods) {
-            EnumName enumName = EnumName.create(method.simpleName().toString());
-            while (!names.add(enumName.enumConstant())) {
-                enumName = enumName.makeLonger();
+        private Map<Name, String> createEnumNames(List<Executable> methods) {
+            Set<String> names = new HashSet<>(methods.size());
+            Map<Name, String> result = new HashMap<>(methods.size());
+            for (Executable method : methods) {
+                String enumName = createEnumName(method.simpleName().toString());
+                while (!names.add(enumName)) {
+                    String suffix = enumName.endsWith("1") ? "1" : "_1";
+                    enumName = enumName + suffix;
+                }
+                result.put(method.simpleName(), enumName);
             }
-            result.put(method.simpleName(), enumName);
+            return result;
         }
-        return result;
+
+        private String createEnumName(String input) {
+            if ("_".equals(input)) {
+                return "_1"; // prevent potential problems
+            }
+            String snakeName = SnakeName.create(input).snake('_');
+            return snakeName.toUpperCase(Locale.US);
+        }
     }
 
     static final class Step2 {
 
         private final List<Executable> methods;
-        private final Map<Name, EnumName> enumNames;
+        private final Map<Name, String> enumNames;
         private final SourceElement sourceElement;
 
         Step2(List<Executable> methods,
-              Map<Name, EnumName> enumNames,
+              Map<Name, String> enumNames,
               SourceElement sourceElement) {
             this.methods = methods;
             this.enumNames = enumNames;
             this.sourceElement = sourceElement;
         }
 
-        Map<Name, EnumName> enumNames() {
+        Map<Name, String> enumNames() {
             return enumNames;
         }
 

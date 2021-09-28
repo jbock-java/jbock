@@ -1,7 +1,6 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
-import net.jbock.common.EnumName;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
@@ -52,7 +51,7 @@ public class AnnotatedMethodsFactory {
 
     private Either<List<ValidationFailure>, AnnotatedMethodsBuilder.Step3> createAnnotatedMethods(
             AnnotatedMethodsBuilder.Step2 step) {
-        Map<Name, EnumName> enumNames = step.enumNames();
+        Map<Name, String> enumNames = step.enumNames();
         return step.methods().stream()
                 .map(sourceMethod -> createAnnotatedMethod(sourceMethod,
                         enumNames.get(sourceMethod.simpleName())))
@@ -63,7 +62,7 @@ public class AnnotatedMethodsFactory {
 
     private Either<ValidationFailure, AnnotatedMethod> createAnnotatedMethod(
             Executable sourceMethod,
-            EnumName enumName) {
+            String enumName) {
         ExecutableElement method = sourceMethod.method();
         return util.checkNoDuplicateAnnotations(method, methodLevelAnnotations())
                 .<Either<ValidationFailure, AnnotatedMethod>>map(Either::left)

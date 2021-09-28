@@ -2,7 +2,6 @@ package net.jbock.convert;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.annotated.AnnotatedMethod;
-import net.jbock.common.EnumName;
 import net.jbock.convert.match.Match;
 import net.jbock.model.Multiplicity;
 import net.jbock.util.StringConverter;
@@ -60,7 +59,7 @@ public final class Mapping<M extends AnnotatedMethod> {
         return match.multiplicity();
     }
 
-    public EnumName enumName() {
+    public String enumName() {
         return sourceMethod().enumName();
     }
 

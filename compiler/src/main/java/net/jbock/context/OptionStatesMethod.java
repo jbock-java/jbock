@@ -43,10 +43,9 @@ public final class OptionStatesMethod extends Cached<MethodSpec> {
         CodeBlock.Builder code = CodeBlock.builder();
         code.addStatement("$T $N = new $T<>($T.class)", result.type, result, EnumMap.class, sourceElement.optionEnumType());
         for (Mapping<AnnotatedOption> namedOption : namedOptions) {
-            String enumConstant = namedOption.enumName().enumConstant();
             code.addStatement("$N.put($T.$L, new $T())",
                     result, sourceElement.optionEnumType(),
-                    enumConstant, optionParserType(namedOption));
+                    namedOption.enumName(), optionParserType(namedOption));
         }
         code.addStatement("return $N", result);
         return MethodSpec.methodBuilder("optionStates")

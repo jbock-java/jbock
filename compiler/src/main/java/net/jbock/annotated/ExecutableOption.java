@@ -1,7 +1,6 @@
 package net.jbock.annotated;
 
 import net.jbock.Option;
-import net.jbock.common.EnumName;
 import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
@@ -25,7 +24,7 @@ final class ExecutableOption extends Executable {
     @Override
     AnnotatedMethod annotatedMethod(
             SourceElement sourceElement,
-            EnumName enumName) {
+            String enumName) {
         return createOption(this, enumName);
     }
 

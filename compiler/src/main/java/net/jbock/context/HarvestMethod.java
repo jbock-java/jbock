@@ -110,7 +110,7 @@ public final class HarvestMethod extends Cached<MethodSpec> {
         ParameterSpec parser = parserTypeFactory.define().asParam();
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.option($T.$N)", parser,
-                sourceElement.optionEnumType(), m.enumName().enumConstant()));
+                sourceElement.optionEnumType(), m.enumName()));
         if (!m.isModeFlag()) {
             code.add(CodeBlock.of(".map($L)", m.mapper()));
         }

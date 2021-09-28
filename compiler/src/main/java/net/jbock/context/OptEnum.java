@@ -2,7 +2,6 @@ package net.jbock.context;
 
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.annotated.AnnotatedOption;
-import net.jbock.common.EnumName;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 
@@ -32,9 +31,7 @@ public class OptEnum {
     TypeSpec define() {
         TypeSpec.Builder spec = TypeSpec.enumBuilder(sourceElement.optionEnumType());
         for (Mapping<AnnotatedOption> option : options) {
-            EnumName enumName = option.enumName();
-            String enumConstant = enumName.enumConstant();
-            spec.addEnumConstant(enumConstant);
+            spec.addEnumConstant(option.enumName());
         }
         return spec.addModifiers(PRIVATE)
                 .build();

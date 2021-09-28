@@ -1,6 +1,5 @@
 package net.jbock.annotated;
 
-import net.jbock.common.EnumName;
 import net.jbock.common.SnakeName;
 
 import java.util.Locale;
@@ -11,7 +10,7 @@ public final class AnnotatedParameters extends AnnotatedMethod {
     private final ExecutableParameters parameters;
 
     private AnnotatedParameters(
-            EnumName enumName,
+            String enumName,
             ExecutableParameters parameters,
             String paramLabel) {
         super(enumName, paramLabel);
@@ -20,7 +19,7 @@ public final class AnnotatedParameters extends AnnotatedMethod {
 
     static AnnotatedParameters createParameters(
             ExecutableParameters parameters,
-            EnumName enumName) {
+            String enumName) {
         String paramLabel = parameters.paramLabel()
                 .orElseGet(() -> SnakeName.create(parameters.simpleName().toString())
                         .snake('_')

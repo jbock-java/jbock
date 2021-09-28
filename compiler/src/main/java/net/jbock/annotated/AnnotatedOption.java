@@ -1,6 +1,5 @@
 package net.jbock.annotated;
 
-import net.jbock.common.EnumName;
 import net.jbock.common.SnakeName;
 
 import java.util.Comparator;
@@ -21,7 +20,7 @@ public final class AnnotatedOption extends AnnotatedMethod {
     private final List<String> names;
 
     private AnnotatedOption(
-            EnumName enumName,
+            String enumName,
             ExecutableOption option,
             String paramLabel,
             List<String> names) {
@@ -32,7 +31,7 @@ public final class AnnotatedOption extends AnnotatedMethod {
 
     static AnnotatedOption createOption(
             ExecutableOption option,
-            EnumName enumName) {
+            String enumName) {
         List<String> names = option.names().stream()
                 .sorted(UNIX_NAMES_FIRST_COMPARATOR)
                 .collect(toList());

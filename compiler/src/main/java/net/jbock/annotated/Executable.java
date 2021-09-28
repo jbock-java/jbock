@@ -3,7 +3,6 @@ package net.jbock.annotated;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
-import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 
@@ -49,7 +48,7 @@ abstract class Executable {
                 + " but found: " + annotation.getClass());
     }
 
-    abstract AnnotatedMethod annotatedMethod(SourceElement sourceElement, EnumName enumName);
+    abstract AnnotatedMethod annotatedMethod(SourceElement sourceElement, String enumName);
 
     abstract Optional<String> descriptionKey();
 

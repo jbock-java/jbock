@@ -1,6 +1,5 @@
 package net.jbock.annotated;
 
-import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.ExecutableElement;
@@ -13,11 +12,11 @@ import java.util.stream.Stream;
 
 public abstract class AnnotatedMethod {
 
-    private final EnumName enumName;
+    private final String enumName;
     private final String paramLabel;
 
     AnnotatedMethod(
-            EnumName enumName,
+            String enumName,
             String paramLabel) {
         this.enumName = enumName;
         this.paramLabel = paramLabel;
@@ -35,7 +34,7 @@ public abstract class AnnotatedMethod {
 
     abstract Stream<AnnotatedParameters> asAnnotatedParameters();
 
-    public final EnumName enumName() {
+    public final String enumName() {
         return enumName;
     }
 

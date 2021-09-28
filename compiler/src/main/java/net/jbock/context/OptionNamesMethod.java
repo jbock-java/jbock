@@ -44,11 +44,10 @@ public final class OptionNamesMethod extends Cached<MethodSpec> {
         CodeBlock.Builder code = CodeBlock.builder();
         code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
         for (Mapping<AnnotatedOption> namedOption : namedOptions) {
-            String enumConstant = namedOption.enumName().enumConstant();
             for (String dashedName : namedOption.sourceMethod().names()) {
                 code.addStatement("$N.put($S, $T.$L)",
                         result, dashedName, sourceElement.optionEnumType(),
-                        enumConstant);
+                        namedOption.enumName());
             }
         }
         code.addStatement("return $N", result);
