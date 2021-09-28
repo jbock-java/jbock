@@ -1,47 +1,31 @@
 package net.jbock.common;
 
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 public class EnumName {
 
-    private static final Pattern ENDS_WITH_NUMBER = Pattern.compile(".*\\d");
     private final String enumConstant; // all-caps, unique
-    private final String original; // case-independently unique
 
-    private EnumName(String original, String enumConstant) {
-        this.original = original;
+    private EnumName(String enumConstant) {
         this.enumConstant = enumConstant;
     }
 
     public static EnumName create(String input) {
         if ("_".equals(input)) {
-            return new EnumName("__", "__"); // prevent potential problems
+            return new EnumName("_1"); // prevent potential problems
         }
-        return new EnumName(input, input.toUpperCase(Locale.US));
+        String snakeName = SnakeName.create(input).snake('_');
+        return new EnumName(snakeName.toUpperCase(Locale.US));
     }
 
     public EnumName makeLonger() {
-        String appendage = ENDS_WITH_NUMBER.matcher(enumConstant).matches() ? "1" : "_1";
-        return new EnumName(original + appendage, enumConstant + appendage);
+        String suffix = enumConstant.endsWith("1") ? "1" : "_1";
+        return new EnumName(enumConstant + suffix);
     }
 
     /* All-caps, unique.
      */
     public String enumConstant() {
         return enumConstant;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        EnumName other = (EnumName) o;
-        return enumConstant.equals(other.enumConstant);
-    }
-
-    @Override
-    public int hashCode() {
-        return enumConstant.hashCode();
     }
 }

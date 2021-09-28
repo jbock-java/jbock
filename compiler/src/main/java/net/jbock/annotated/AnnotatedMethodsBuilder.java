@@ -49,14 +49,13 @@ final class AnnotatedMethodsBuilder {
     }
 
     private static Map<Name, EnumName> createEnumNames(List<Executable> methods) {
-        Set<EnumName> names = new HashSet<>();
-        Map<Name, EnumName> result = new HashMap<>();
+        Set<String> names = new HashSet<>(methods.size());
+        Map<Name, EnumName> result = new HashMap<>(methods.size());
         for (Executable method : methods) {
             EnumName enumName = EnumName.create(method.simpleName().toString());
-            while (names.contains(enumName)) {
+            while (!names.add(enumName.enumConstant())) {
                 enumName = enumName.makeLonger();
             }
-            names.add(enumName);
             result.put(method.simpleName(), enumName);
         }
         return result;
