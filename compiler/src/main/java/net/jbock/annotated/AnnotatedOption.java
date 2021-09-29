@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.toList;
 public final class AnnotatedOption extends AnnotatedMethod {
 
     // visible for testing
-    static final Comparator<String> UNIX_NAMES_FIRST_COMPARATOR = Comparator
+    static final Comparator<String> LENGTH_FIRST_COMPARATOR = Comparator
             .comparing(String::length)
             .thenComparing(String::toString);
 
@@ -33,7 +33,7 @@ public final class AnnotatedOption extends AnnotatedMethod {
             ExecutableOption option,
             String enumName) {
         List<String> names = option.names().stream()
-                .sorted(UNIX_NAMES_FIRST_COMPARATOR)
+                .sorted(LENGTH_FIRST_COMPARATOR)
                 .collect(toList());
         String paramLabel = option.paramLabel().or(() -> names.stream()
                         .filter(name -> name.startsWith("--"))

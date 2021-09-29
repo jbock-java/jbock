@@ -1,6 +1,7 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
+import net.jbock.common.SnakeName;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
@@ -10,12 +11,18 @@ import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.type.DeclaredType;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.toValidListAll;
+import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.element.NestingKind.MEMBER;
@@ -25,6 +32,9 @@ import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
 @ValidateScope
 public class AnnotatedMethodsFactory {
+
+    private final Comparator<AnnotatedParameter> indexComparator =
+            Comparator.comparingInt(AnnotatedParameter::index);
 
     private final Util util;
     private final SourceElement sourceElement;
@@ -42,23 +52,43 @@ public class AnnotatedMethodsFactory {
 
     public Either<List<ValidationFailure>, AnnotatedMethods> createAnnotatedMethods() {
         return executableElementsFinder.findExecutableElements()
-                .flatMap(this::createAnnotatedMethods)
-                .map(AnnotatedMethodsBuilder.Step3::withNamedOptions)
-                .map(AnnotatedMethodsBuilder.Step4::withPositionalParameters)
-                .map(AnnotatedMethodsBuilder.Step5::withRepeatablePositionalParameters)
+                .map(AnnotatedMethodsBuilder::builder)
+                .map(step1 -> step1.withEnumNames(createEnumNames(step1.methods())))
+                .map(step2 -> step2.withSourceElement(sourceElement))
+                .flatMap(step3 -> step3.methods().stream()
+                        .map(sourceMethod -> createAnnotatedMethod(sourceMethod,
+                                step3.enumNames().get(sourceMethod.simpleName())))
+                        .collect(toValidListAll())
+                        .map(step3::withAnnotatedMethods))
+                .map(step4 -> step4.withNamedOptions(step4.annotatedMethods()
+                        .flatMap(AnnotatedMethod::asAnnotatedOption)
+                        .collect(toList())))
+                .map(step5 -> step5.withPositionalParameters(step5.annotatedMethods()
+                        .flatMap(AnnotatedMethod::asAnnotatedParameter)
+                        .sorted(indexComparator)
+                        .collect(toList())))
+                .map(step6 -> step6.withRepeatablePositionalParameters(step6.annotatedMethods()
+                        .flatMap(AnnotatedMethod::asAnnotatedParameters)
+                        .collect(toList())))
                 .flatMap(AnnotatedMethodsBuilder::build);
     }
 
-    private Either<List<ValidationFailure>, AnnotatedMethodsBuilder.Step3> createAnnotatedMethods(
-            AnnotatedMethodsBuilder.Step2 step) {
-        Map<Name, String> enumNames = step.enumNames();
-        return step.methods().stream()
-                .map(sourceMethod -> createAnnotatedMethod(sourceMethod,
-                        enumNames.get(sourceMethod.simpleName())))
-                .collect(toValidListAll())
-                .map(step::withAnnotatedMethods);
+    private Map<Name, String> createEnumNames(List<Executable> methods) {
+        Set<String> enumNames = new HashSet<>(methods.size());
+        Map<Name, String> result = new HashMap<>(methods.size());
+        for (Executable method : methods) {
+            String simpleName = method.simpleName().toString();
+            String enumName = "_".equals(simpleName) ?
+                    "_1" : // avoid potential keyword issue
+                    SnakeName.create(simpleName).snake('_').toUpperCase(Locale.US);
+            while (!enumNames.add(enumName)) {
+                String suffix = enumName.endsWith("1") ? "1" : "_1";
+                enumName = enumName + suffix;
+            }
+            result.put(method.simpleName(), enumName);
+        }
+        return result;
     }
-
 
     private Either<ValidationFailure, AnnotatedMethod> createAnnotatedMethod(
             Executable sourceMethod,
@@ -70,8 +100,6 @@ public class AnnotatedMethodsFactory {
                 .filter(this::checkAccessibleReturnType);
     }
 
-    /* Left-Optional
-     */
     private Optional<ValidationFailure> checkAccessibleReturnType(
             AnnotatedMethod annotatedMethod) {
         return AS_DECLARED.visit(annotatedMethod.returnType())

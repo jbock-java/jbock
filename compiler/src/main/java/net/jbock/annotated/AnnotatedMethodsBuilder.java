@@ -2,34 +2,25 @@ package net.jbock.annotated;
 
 import io.jbock.util.Either;
 import io.jbock.util.Eithers;
-import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.Name;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Stream;
 
 import static io.jbock.util.Either.right;
-import static java.util.stream.Collectors.toList;
 
 final class AnnotatedMethodsBuilder {
 
-    private static final Comparator<AnnotatedParameter> INDEX_COMPARATOR =
-            Comparator.comparingInt(AnnotatedParameter::index);
-
-    private final Step5 step5;
+    private final Step6 step6;
     private final List<AnnotatedParameters> repeatablePositionalParameters;
 
     private AnnotatedMethodsBuilder(
-            Step5 step5,
+            Step6 step6,
             List<AnnotatedParameters> repeatablePositionalParameters) {
-        this.step5 = step5;
+        this.step6 = step6;
         this.repeatablePositionalParameters = repeatablePositionalParameters;
     }
 
@@ -44,30 +35,12 @@ final class AnnotatedMethodsBuilder {
             this.methods = methods;
         }
 
-        Step2 sourceElement(SourceElement sourceElement) {
-            return new Step2(methods, createEnumNames(methods), sourceElement);
+        List<Executable> methods() {
+            return methods;
         }
 
-        private Map<Name, String> createEnumNames(List<Executable> methods) {
-            Set<String> names = new HashSet<>(methods.size());
-            Map<Name, String> result = new HashMap<>(methods.size());
-            for (Executable method : methods) {
-                String enumName = createEnumName(method.simpleName().toString());
-                while (!names.add(enumName)) {
-                    String suffix = enumName.endsWith("1") ? "1" : "_1";
-                    enumName = enumName + suffix;
-                }
-                result.put(method.simpleName(), enumName);
-            }
-            return result;
-        }
-
-        private String createEnumName(String input) {
-            if ("_".equals(input)) {
-                return "_1"; // prevent potential problems
-            }
-            String snakeName = SnakeName.create(input).snake('_');
-            return snakeName.toUpperCase(Locale.US);
+        Step2 withEnumNames(Map<Name, String> enumNames) {
+            return new Step2(methods, enumNames);
         }
     }
 
@@ -75,80 +48,95 @@ final class AnnotatedMethodsBuilder {
 
         private final List<Executable> methods;
         private final Map<Name, String> enumNames;
-        private final SourceElement sourceElement;
 
         Step2(List<Executable> methods,
-              Map<Name, String> enumNames,
-              SourceElement sourceElement) {
+              Map<Name, String> enumNames) {
             this.methods = methods;
             this.enumNames = enumNames;
-            this.sourceElement = sourceElement;
         }
 
-        Map<Name, String> enumNames() {
-            return enumNames;
-        }
-
-        List<Executable> methods() {
-            return methods;
-        }
-
-        Step3 withAnnotatedMethods(List<AnnotatedMethod> annotatedMethods) {
-            return new Step3(this, annotatedMethods);
+        Step3 withSourceElement(SourceElement sourceElement) {
+            return new Step3(this, sourceElement);
         }
     }
 
     static final class Step3 {
 
         private final Step2 step2;
-        private final List<AnnotatedMethod> annotatedMethods;
+        private final SourceElement sourceElement;
 
-        Step3(Step2 step2, List<AnnotatedMethod> annotatedMethods) {
+        Step3(Step2 step2,
+              SourceElement sourceElement) {
             this.step2 = step2;
-            this.annotatedMethods = annotatedMethods;
+            this.sourceElement = sourceElement;
         }
 
-        Step4 withNamedOptions() {
-            List<AnnotatedOption> namedOptions = annotatedMethods.stream()
-                    .flatMap(AnnotatedMethod::asAnnotatedOption)
-                    .collect(toList());
-            return new Step4(this, namedOptions);
+        Map<Name, String> enumNames() {
+            return step2.enumNames;
+        }
+
+        List<Executable> methods() {
+            return step2.methods;
+        }
+
+        Step4 withAnnotatedMethods(List<AnnotatedMethod> annotatedMethods) {
+            return new Step4(this, annotatedMethods);
         }
     }
 
     static final class Step4 {
 
         private final Step3 step3;
-        private final List<AnnotatedOption> namedOptions;
+        private final List<AnnotatedMethod> annotatedMethods;
 
-        Step4(Step3 step3, List<AnnotatedOption> namedOptions) {
+        Step4(Step3 step3, List<AnnotatedMethod> annotatedMethods) {
             this.step3 = step3;
-            this.namedOptions = namedOptions;
+            this.annotatedMethods = annotatedMethods;
         }
 
-        Step5 withPositionalParameters() {
-            List<AnnotatedParameter> positionalParameters = step3.annotatedMethods.stream()
-                    .flatMap(AnnotatedMethod::asAnnotatedParameter)
-                    .sorted(INDEX_COMPARATOR)
-                    .collect(toList());
-            return new Step5(this, positionalParameters);
+        Stream<AnnotatedMethod> annotatedMethods() {
+            return annotatedMethods.stream();
+        }
+
+        Step5 withNamedOptions(List<AnnotatedOption> namedOptions) {
+            return new Step5(this, namedOptions);
         }
     }
 
     static final class Step5 {
 
         private final Step4 step4;
+        private final List<AnnotatedOption> namedOptions;
+
+        Step5(Step4 step4, List<AnnotatedOption> namedOptions) {
+            this.step4 = step4;
+            this.namedOptions = namedOptions;
+        }
+
+        Stream<AnnotatedMethod> annotatedMethods() {
+            return step4.annotatedMethods.stream();
+        }
+
+        Step6 withPositionalParameters(List<AnnotatedParameter> positionalParameters) {
+            return new Step6(this, positionalParameters);
+        }
+    }
+
+    static final class Step6 {
+
+        private final Step5 step5;
         private final List<AnnotatedParameter> positionalParameters;
 
-        Step5(Step4 step4, List<AnnotatedParameter> positionalParameters) {
-            this.step4 = step4;
+        Step6(Step5 step5, List<AnnotatedParameter> positionalParameters) {
+            this.step5 = step5;
             this.positionalParameters = positionalParameters;
         }
 
-        AnnotatedMethodsBuilder withRepeatablePositionalParameters() {
-            List<AnnotatedParameters> repeatablePositionalParameters = step4.step3.annotatedMethods.stream()
-                    .flatMap(AnnotatedMethod::asAnnotatedParameters)
-                    .collect(toList());
+        Stream<AnnotatedMethod> annotatedMethods() {
+            return step5.step4.annotatedMethods.stream();
+        }
+
+        AnnotatedMethodsBuilder withRepeatablePositionalParameters(List<AnnotatedParameters> repeatablePositionalParameters) {
             return new AnnotatedMethodsBuilder(this, repeatablePositionalParameters);
         }
     }
@@ -157,18 +145,18 @@ final class AnnotatedMethodsBuilder {
         return Eithers.optionalList(validateAtLeastOneParameterInSuperCommand())
                 .<Either<List<ValidationFailure>, AnnotatedMethods>>map(Either::left)
                 .orElseGet(() -> right(new AnnotatedMethods(
-                        step5.step4.namedOptions,
-                        step5.positionalParameters,
+                        step6.step5.namedOptions,
+                        step6.positionalParameters,
                         repeatablePositionalParameters)));
     }
 
     private List<ValidationFailure> validateAtLeastOneParameterInSuperCommand() {
-        if (!step5.step4.step3.step2.sourceElement.isSuperCommand() ||
-                !step5.positionalParameters.isEmpty()) {
+        if (!step6.step5.step4.step3.sourceElement.isSuperCommand() ||
+                !step6.positionalParameters.isEmpty()) {
             return List.of();
         }
         String message = "at least one positional parameter must be defined" +
                 " when the superCommand attribute is set";
-        return List.of(step5.step4.step3.step2.sourceElement.fail(message));
+        return List.of(step6.step5.step4.step3.sourceElement.fail(message));
     }
 }

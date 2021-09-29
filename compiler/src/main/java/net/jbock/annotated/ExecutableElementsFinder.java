@@ -48,20 +48,18 @@ public class ExecutableElementsFinder {
      * @return all annotated parameterless abstract methods,
      *         or a nonempty list of validation failures
      */
-    Either<List<ValidationFailure>, AnnotatedMethodsBuilder.Step2> findExecutableElements() {
+    Either<List<ValidationFailure>, List<Executable>> findExecutableElements() {
         return checkInterfaceOrSimpleClass()
                 .or(this::checkNoInterfaces)
                 .map(List::of)
-                .<Either<List<ValidationFailure>, AnnotatedMethodsBuilder.Step2>>map(Either::left)
+                .<Either<List<ValidationFailure>, List<Executable>>>map(Either::left)
                 .orElseGet(this::validParameterlessAbstract);
     }
 
-    private Either<List<ValidationFailure>, AnnotatedMethodsBuilder.Step2> validParameterlessAbstract() {
+    private Either<List<ValidationFailure>, List<Executable>> validParameterlessAbstract() {
         return abstractMethods().stream()
                 .map(this::validateAbstractMethod)
-                .collect(toValidListAll())
-                .map(AnnotatedMethodsBuilder::builder)
-                .map(step -> step.sourceElement(sourceElement));
+                .collect(toValidListAll());
     }
 
     private Optional<ValidationFailure> checkInterfaceOrSimpleClass() {

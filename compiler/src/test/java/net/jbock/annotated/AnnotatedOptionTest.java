@@ -13,13 +13,13 @@ class AnnotatedOptionTest {
     @Test
     void testUnixNamesFirstComparator() {
         assertEquals(List.of("-x", "--a"), Stream.of("--a", "-x")
-                .sorted(AnnotatedOption.UNIX_NAMES_FIRST_COMPARATOR)
+                .sorted(AnnotatedOption.LENGTH_FIRST_COMPARATOR)
                 .collect(toList()));
         assertEquals(List.of("-a", "-b"), Stream.of("-b", "-a")
-                .sorted(AnnotatedOption.UNIX_NAMES_FIRST_COMPARATOR)
+                .sorted(AnnotatedOption.LENGTH_FIRST_COMPARATOR)
                 .collect(toList()));
         assertEquals(List.of("--a", "--b"), Stream.of("--b", "--a")
-                .sorted(AnnotatedOption.UNIX_NAMES_FIRST_COMPARATOR)
+                .sorted(AnnotatedOption.LENGTH_FIRST_COMPARATOR)
                 .collect(toList()));
     }
 }
