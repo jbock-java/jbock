@@ -76,18 +76,18 @@ public class ExecutableElementsFinder {
 
     private Optional<ValidationFailure> checkNoInterfaces() {
         List<? extends TypeMirror> interfaces = sourceElement.element().getInterfaces();
-        if (!interfaces.isEmpty()) {
-            return Optional.of(sourceElement.fail(
-                    "invalid command class: the command class or interface may not implement or extend any interfaces," +
-                            " but found: " + interfaces.stream()
-                            .map(AS_DECLARED::visit)
-                            .flatMap(Optional::stream)
-                            .map(DeclaredType::asElement)
-                            .map(Element::getSimpleName)
-                            .map(Name::toString)
-                            .collect(toList())));
+        if (interfaces.isEmpty()) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.of(sourceElement.fail(
+                "invalid command class: the command class or interface may not implement or extend any interfaces," +
+                        " but found: " + interfaces.stream()
+                        .map(AS_DECLARED::visit)
+                        .flatMap(Optional::stream)
+                        .map(DeclaredType::asElement)
+                        .map(Element::getSimpleName)
+                        .map(Name::toString)
+                        .collect(toList())));
     }
 
     private List<ExecutableElement> abstractMethods() {
