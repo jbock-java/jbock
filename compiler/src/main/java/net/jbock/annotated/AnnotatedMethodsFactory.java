@@ -53,13 +53,13 @@ public class AnnotatedMethodsFactory {
 
     public Either<List<ValidationFailure>, AnnotatedMethods> createAnnotatedMethods() {
         return executableElementsFinder.findExecutableElements()
-                .map(AnnotatedMethodsBuilder::builder)
+                .map(EnumNamesBuilder::create)
                 .map(step1 -> step1.withEnumNames(createEnumNames(step1.methods())))
                 .flatMap(builder -> builder.methods().stream()
                         .map(sourceMethod -> createAnnotatedMethod(sourceMethod,
                                 builder.enumNames().get(sourceMethod.simpleName())))
                         .collect(toValidListAll())
-                        .map(ItemSeparationBuilder::builder))
+                        .map(ItemSeparationBuilder::create))
                 .map(step1 -> step1.withNamedOptions(step1.annotatedMethods()
                         .flatMap(AnnotatedMethod::asAnnotatedOption)
                         .collect(toList())))

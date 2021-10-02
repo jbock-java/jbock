@@ -4,17 +4,17 @@ import javax.lang.model.element.Name;
 import java.util.List;
 import java.util.Map;
 
-final class AnnotatedMethodsBuilder {
+final class EnumNamesBuilder {
 
     private final Step1 step1;
     private final Map<Name, String> enumNames;
 
-    private AnnotatedMethodsBuilder(Step1 step1, Map<Name, String> enumNames) {
+    private EnumNamesBuilder(Step1 step1, Map<Name, String> enumNames) {
         this.step1 = step1;
         this.enumNames = enumNames;
     }
 
-    static Step1 builder(List<Executable> methods) {
+    static Step1 create(List<Executable> methods) {
         return new Step1(methods);
     }
 
@@ -30,8 +30,8 @@ final class AnnotatedMethodsBuilder {
             return methods;
         }
 
-        AnnotatedMethodsBuilder withEnumNames(Map<Name, String> enumNames) {
-            return new AnnotatedMethodsBuilder(this, enumNames);
+        EnumNamesBuilder withEnumNames(Map<Name, String> enumNames) {
+            return new EnumNamesBuilder(this, enumNames);
         }
     }
 
