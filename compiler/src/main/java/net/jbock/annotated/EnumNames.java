@@ -4,17 +4,17 @@ import javax.lang.model.element.Name;
 import java.util.List;
 import java.util.Map;
 
-final class EnumNamesBuilder {
+final class EnumNames {
 
     private final Step1 step1;
     private final Map<Name, String> enumNames;
 
-    private EnumNamesBuilder(Step1 step1, Map<Name, String> enumNames) {
+    private EnumNames(Step1 step1, Map<Name, String> enumNames) {
         this.step1 = step1;
         this.enumNames = enumNames;
     }
 
-    static Step1 create(List<Executable> methods) {
+    static Step1 builder(List<Executable> methods) {
         return new Step1(methods);
     }
 
@@ -30,8 +30,8 @@ final class EnumNamesBuilder {
             return methods;
         }
 
-        EnumNamesBuilder withEnumNames(Map<Name, String> enumNames) {
-            return new EnumNamesBuilder(this, enumNames);
+        EnumNames withEnumNames(Map<Name, String> enumNames) {
+            return new EnumNames(this, enumNames);
         }
     }
 
