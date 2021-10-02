@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.jbock.util.Either.right;
-import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toValidListAll;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -70,18 +69,18 @@ public class AnnotatedMethodsFactory {
                 .map(builder -> builder.withRepeatablePositionalParameters(builder.annotatedMethods()
                         .flatMap(AnnotatedMethod::asAnnotatedParameters)
                         .collect(toList())))
-                .filter(methods -> optionalList(validateAtLeastOneParameterInSuperCommand(methods)));
+                .filter(this::validateAtLeastOneParameterInSuperCommand);
     }
 
-    private List<ValidationFailure> validateAtLeastOneParameterInSuperCommand(
+    private Optional<List<ValidationFailure>> validateAtLeastOneParameterInSuperCommand(
             AnnotatedMethods annotatedMethods) {
         if (!sourceElement.isSuperCommand() ||
                 !annotatedMethods.positionalParameters().isEmpty()) {
-            return List.of();
+            return Optional.empty();
         }
         String message = "at least one positional parameter must be defined" +
                 " when the superCommand attribute is set";
-        return List.of(sourceElement.fail(message));
+        return Optional.of(List.of(sourceElement.fail(message)));
     }
 
     private Map<Name, String> createEnumNames(List<Executable> methods) {
