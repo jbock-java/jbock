@@ -1,6 +1,7 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
+import io.jbock.util.Eithers;
 import net.jbock.common.SnakeName;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
@@ -54,24 +55,43 @@ public class AnnotatedMethodsFactory {
         return executableElementsFinder.findExecutableElements()
                 .map(AnnotatedMethodsBuilder::builder)
                 .map(step1 -> step1.withEnumNames(createEnumNames(step1.methods())))
-                .map(step2 -> step2.withSourceElement(sourceElement))
-                .flatMap(step3 -> step3.methods().stream()
+                .flatMap(builder -> builder.methods().stream()
                         .map(sourceMethod -> createAnnotatedMethod(sourceMethod,
-                                step3.enumNames().get(sourceMethod.simpleName())))
+                                builder.enumNames().get(sourceMethod.simpleName())))
                         .collect(toValidListAll())
-                        .map(step3::withAnnotatedMethods))
-                .map(step4 -> step4.withNamedOptions(step4.annotatedMethods()
+                        .map(ItemSeparationBuilder::builder))
+                .map(step1 -> step1.withNamedOptions(step1.annotatedMethods()
                         .flatMap(AnnotatedMethod::asAnnotatedOption)
                         .collect(toList())))
-                .map(step5 -> step5.withPositionalParameters(step5.annotatedMethods()
+                .map(step2 -> step2.withPositionalParameters(step2.annotatedMethods()
                         .flatMap(AnnotatedMethod::asAnnotatedParameter)
                         .sorted(indexComparator)
                         .collect(toList())))
-                .map(step6 -> step6.withRepeatablePositionalParameters(step6.annotatedMethods()
+                .map(step3 -> step3.withRepeatablePositionalParameters(step3.annotatedMethods()
                         .flatMap(AnnotatedMethod::asAnnotatedParameters)
                         .collect(toList())))
-                .flatMap(AnnotatedMethodsBuilder::build);
+                .flatMap(this::build);
     }
+
+    private Either<List<ValidationFailure>, AnnotatedMethods> build(ItemSeparationBuilder builder) {
+        return Eithers.optionalList(validateAtLeastOneParameterInSuperCommand(builder))
+                .<Either<List<ValidationFailure>, AnnotatedMethods>>map(Either::left)
+                .orElseGet(() -> right(new AnnotatedMethods(
+                        builder.namedOptions(),
+                        builder.positionalParameters(),
+                        builder.repeatablePositionalParameters())));
+    }
+
+    private List<ValidationFailure> validateAtLeastOneParameterInSuperCommand(ItemSeparationBuilder builder) {
+        if (!sourceElement.isSuperCommand() ||
+                !builder.positionalParameters().isEmpty()) {
+            return List.of();
+        }
+        String message = "at least one positional parameter must be defined" +
+                " when the superCommand attribute is set";
+        return List.of(sourceElement.fail(message));
+    }
+
 
     private Map<Name, String> createEnumNames(List<Executable> methods) {
         Set<String> enumNames = new HashSet<>(methods.size());
