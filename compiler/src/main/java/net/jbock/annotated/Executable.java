@@ -6,6 +6,7 @@ import net.jbock.Parameters;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
@@ -19,7 +20,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static net.jbock.common.Annotations.methodLevelAnnotations;
+import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
 abstract class Executable {
 
@@ -27,25 +28,47 @@ abstract class Executable {
     private static final AnnotationUtil ANNOTATION_UTIL = new AnnotationUtil();
 
     private final ExecutableElement method;
+    private final AnnotationMirror annotationMirror;
 
-    Executable(ExecutableElement method) {
+    Executable(ExecutableElement method, AnnotationMirror annotationMirror) {
         this.method = method;
+        this.annotationMirror = annotationMirror;
     }
 
     static Executable create(
             ExecutableElement method,
             Annotation annotation) {
+        String canonicalName = findCanonicalName(annotation);
+        AnnotationMirror annotationMirror = method.getAnnotationMirrors().stream()
+                .filter(mirror -> AS_TYPE_ELEMENT.visit(mirror.getAnnotationType().asElement())
+                        .map(TypeElement::getQualifiedName)
+                        .map(Name::toString)
+                        .filter(canonicalName::equals)
+                        .isPresent())
+                .findFirst()
+                .orElseThrow(AssertionError::new);
         if (annotation instanceof Option) {
-            return new ExecutableOption(method, (Option) annotation);
+            return new ExecutableOption(method, (Option) annotation, annotationMirror);
         }
         if (annotation instanceof Parameter) {
-            return new ExecutableParameter(method, (Parameter) annotation);
+            return new ExecutableParameter(method, (Parameter) annotation, annotationMirror);
         }
         if (annotation instanceof Parameters) {
-            return new ExecutableParameters(method, (Parameters) annotation);
+            return new ExecutableParameters(method, (Parameters) annotation, annotationMirror);
         }
-        throw new AssertionError("expecting one of " + methodLevelAnnotations()
-                + " but found: " + annotation.getClass());
+        throw new AssertionError();
+    }
+
+    private static String findCanonicalName(Annotation annotation) {
+        if (annotation instanceof Option) {
+            return Option.class.getCanonicalName();
+        } else if (annotation instanceof Parameter) {
+            return Parameter.class.getCanonicalName();
+        } else if (annotation instanceof Parameters) {
+            return Parameters.class.getCanonicalName();
+        } else {
+            throw new AssertionError();
+        }
     }
 
     abstract AnnotatedMethod annotatedMethod(SourceElement sourceElement, String enumName);
@@ -69,7 +92,7 @@ abstract class Executable {
     }
 
     final Optional<TypeElement> converter() {
-        return ANNOTATION_UTIL.getConverterAttribute(method);
+        return ANNOTATION_UTIL.getConverterAttribute(annotationMirror);
     }
 
     final ValidationFailure fail(String message) {
