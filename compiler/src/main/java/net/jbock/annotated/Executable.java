@@ -42,7 +42,7 @@ abstract class Executable {
     static Executable create(
             ExecutableElement method,
             Annotation annotation) {
-        String canonicalName = findCanonicalName(annotation);
+        String canonicalName = annotation.annotationType().getCanonicalName();
         AnnotationMirror annotationMirror = method.getAnnotationMirrors().stream()
                 .filter(mirror -> AS_TYPE_ELEMENT.visit(mirror.getAnnotationType().asElement())
                         .map(TypeElement::getQualifiedName)
@@ -62,18 +62,6 @@ abstract class Executable {
             return new ExecutableParameters(method, (Parameters) annotation, converter);
         }
         throw new AssertionError();
-    }
-
-    private static String findCanonicalName(Annotation annotation) {
-        if (annotation instanceof Option) {
-            return Option.class.getCanonicalName();
-        } else if (annotation instanceof Parameter) {
-            return Parameter.class.getCanonicalName();
-        } else if (annotation instanceof Parameters) {
-            return Parameters.class.getCanonicalName();
-        } else {
-            throw new AssertionError();
-        }
     }
 
     abstract AnnotatedMethod annotatedMethod(SourceElement sourceElement, String enumName);
