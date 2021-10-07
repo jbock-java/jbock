@@ -3,8 +3,8 @@ package net.jbock.annotated;
 import net.jbock.Option;
 import net.jbock.processor.SourceElement;
 
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,8 +18,8 @@ final class ExecutableOption extends Executable {
     ExecutableOption(
             ExecutableElement method,
             Option option,
-            AnnotationMirror annotationMirror) {
-        super(method, annotationMirror);
+            Optional<TypeElement> converter) {
+        super(method, converter);
         this.option = option;
     }
 

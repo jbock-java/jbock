@@ -3,8 +3,8 @@ package net.jbock.annotated;
 import net.jbock.Parameters;
 import net.jbock.processor.SourceElement;
 
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,8 +18,8 @@ final class ExecutableParameters extends Executable {
     ExecutableParameters(
             ExecutableElement method,
             Parameters parameters,
-            AnnotationMirror annotationMirror) {
-        super(method, annotationMirror);
+            Optional<TypeElement> converter) {
+        super(method, converter);
         this.parameters = parameters;
     }
 

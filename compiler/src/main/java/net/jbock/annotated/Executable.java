@@ -32,11 +32,11 @@ abstract class Executable {
     private static final Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
     private final ExecutableElement method;
-    private final AnnotationMirror annotationMirror;
+    private final Optional<TypeElement> converter;
 
-    Executable(ExecutableElement method, AnnotationMirror annotationMirror) {
+    Executable(ExecutableElement method, Optional<TypeElement> converter) {
         this.method = method;
-        this.annotationMirror = annotationMirror;
+        this.converter = converter;
     }
 
     static Executable create(
@@ -51,14 +51,15 @@ abstract class Executable {
                         .isPresent())
                 .findFirst()
                 .orElseThrow(AssertionError::new);
+        Optional<TypeElement> converter = findConverterAttribute(annotationMirror);
         if (annotation instanceof Option) {
-            return new ExecutableOption(method, (Option) annotation, annotationMirror);
+            return new ExecutableOption(method, (Option) annotation, converter);
         }
         if (annotation instanceof Parameter) {
-            return new ExecutableParameter(method, (Parameter) annotation, annotationMirror);
+            return new ExecutableParameter(method, (Parameter) annotation, converter);
         }
         if (annotation instanceof Parameters) {
-            return new ExecutableParameters(method, (Parameters) annotation, annotationMirror);
+            return new ExecutableParameters(method, (Parameters) annotation, converter);
         }
         throw new AssertionError();
     }
@@ -95,7 +96,7 @@ abstract class Executable {
                 .collect(toList());
     }
 
-    final Optional<TypeElement> converter() {
+    private static Optional<TypeElement> findConverterAttribute(AnnotationMirror annotationMirror) {
         Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues =
                 annotationMirror.getElementValues();
         return elementValues.entrySet().stream()
@@ -107,6 +108,10 @@ abstract class Executable {
                 .map(DeclaredType::asElement)
                 .flatMap(AS_TYPE_ELEMENT::visit)
                 .filter(element -> !"java.lang.Void".equals(element.getQualifiedName().toString()));
+    }
+
+    final Optional<TypeElement> converter() {
+        return converter;
     }
 
     final ValidationFailure fail(String message) {
