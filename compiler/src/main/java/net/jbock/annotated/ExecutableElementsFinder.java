@@ -20,7 +20,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static io.jbock.util.Either.left;
-import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.toValidListAll;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -99,20 +98,22 @@ public class ExecutableElementsFinder {
     private Either<ValidationFailure, Executable> validateAbstractMethod(
             ExecutableElement method) {
         return getMethodAnnotation(method)
-                .<Either<ValidationFailure, Executable>>map(a ->
-                        right(Executable.create(method, a)))
-                .orElseGet(() -> left(missingAnnotationError(method)))
+                .map(a -> Executable.create(method, a))
                 .filter(this::validateParameterless);
     }
 
-    private Optional<? extends Annotation> getMethodAnnotation(ExecutableElement method) {
+    private Either<ValidationFailure, Annotation> getMethodAnnotation(
+            ExecutableElement method) {
         return methodLevelAnnotations().stream()
                 .map(method::getAnnotation)
                 .filter(Objects::nonNull)
-                .findFirst();
+                .findFirst()
+                .<Either<ValidationFailure, Annotation>>map(Either::right)
+                .orElseGet(() -> left(missingAnnotationError(method)));
     }
 
-    private Optional<ValidationFailure> validateParameterless(Executable method) {
+    private Optional<ValidationFailure> validateParameterless(
+            Executable method) {
         if (method.method().getParameters().isEmpty()) {
             return Optional.empty();
         }
@@ -125,10 +126,11 @@ public class ExecutableElementsFinder {
                         .collect(toList())));
     }
 
-    private ValidationFailure missingAnnotationError(ExecutableElement m) {
+    private ValidationFailure missingAnnotationError(
+            ExecutableElement method) {
         String message = "missing annotation: add one of these annotations: " + methodLevelAnnotations().stream()
                 .map(Class::getSimpleName).collect(toList());
-        message = message + " to method '" + m.getSimpleName() + "'";
-        return new ValidationFailure(message, m);
+        message = message + " to method '" + method.getSimpleName() + "'";
+        return new ValidationFailure(message, method);
     }
 }
