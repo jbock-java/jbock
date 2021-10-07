@@ -7,25 +7,29 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import java.lang.annotation.Annotation;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static net.jbock.common.TypeTool.ANNOTATION_VALUE_AS_TYPE;
+import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
 abstract class Executable {
 
     private static final Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
-    private static final AnnotationUtil ANNOTATION_UTIL = new AnnotationUtil();
 
     private final ExecutableElement method;
     private final AnnotationMirror annotationMirror;
@@ -92,7 +96,17 @@ abstract class Executable {
     }
 
     final Optional<TypeElement> converter() {
-        return ANNOTATION_UTIL.getConverterAttribute(annotationMirror);
+        Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues =
+                annotationMirror.getElementValues();
+        return elementValues.entrySet().stream()
+                .filter(e -> "converter".equals(e.getKey().getSimpleName().toString()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .flatMap(ANNOTATION_VALUE_AS_TYPE::visit)
+                .flatMap(AS_DECLARED::visit)
+                .map(DeclaredType::asElement)
+                .flatMap(AS_TYPE_ELEMENT::visit)
+                .filter(element -> !"java.lang.Void".equals(element.getQualifiedName().toString()));
     }
 
     final ValidationFailure fail(String message) {

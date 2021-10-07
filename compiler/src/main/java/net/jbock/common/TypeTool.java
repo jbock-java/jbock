@@ -1,5 +1,6 @@
 package net.jbock.common;
 
+import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.TypeElement;
@@ -7,6 +8,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
+import javax.lang.model.util.SimpleAnnotationValueVisitor9;
 import javax.lang.model.util.SimpleElementVisitor9;
 import javax.lang.model.util.SimpleTypeVisitor9;
 import java.util.Optional;
@@ -43,6 +45,19 @@ public class TypeTool {
 
         @Override
         protected Optional<TypeElement> defaultAction(Element e, Void nothing) {
+            return Optional.empty();
+        }
+    };
+
+    public static final AnnotationValueVisitor<Optional<TypeMirror>, Void> ANNOTATION_VALUE_AS_TYPE = new SimpleAnnotationValueVisitor9<>() {
+
+        @Override
+        public Optional<TypeMirror> visitType(TypeMirror mirror, Void nothing) {
+            return Optional.of(mirror);
+        }
+
+        @Override
+        protected Optional<TypeMirror> defaultAction(Object o, Void nothing) {
             return Optional.empty();
         }
     };
