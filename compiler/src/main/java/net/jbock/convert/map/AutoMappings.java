@@ -1,6 +1,7 @@
 package net.jbock.convert.map;
 
 import com.squareup.javapoet.CodeBlock;
+import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
 import net.jbock.contrib.CharConverter;
@@ -10,7 +11,6 @@ import net.jbock.convert.match.Match;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
-import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
 import java.io.File;
 import java.math.BigDecimal;

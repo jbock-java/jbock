@@ -1,6 +1,7 @@
 package net.jbock.convert.match;
 
 import io.jbock.util.Either;
+import jakarta.inject.Inject;
 import net.jbock.Option;
 import net.jbock.Parameters;
 import net.jbock.annotated.AnnotatedMethod;
@@ -9,7 +10,6 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.model.Multiplicity;
 import net.jbock.validate.ValidateScope;
 
-import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;

@@ -2,12 +2,12 @@ package net.jbock.processor;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
+import jakarta.inject.Inject;
 import net.jbock.Command;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 
 import javax.annotation.processing.Messager;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;

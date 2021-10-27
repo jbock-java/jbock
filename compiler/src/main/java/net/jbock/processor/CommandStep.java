@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import io.jbock.util.Either;
+import jakarta.inject.Inject;
 import net.jbock.Command;
 import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
@@ -16,7 +17,6 @@ import net.jbock.validate.DaggerValidateComponent;
 import net.jbock.validate.ValidateModule;
 
 import javax.annotation.processing.Messager;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;

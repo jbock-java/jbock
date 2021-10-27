@@ -3,12 +3,11 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import jakarta.inject.Inject;
 import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.AtFileError;
 import net.jbock.util.ParseRequest;
-
-import javax.inject.Inject;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;

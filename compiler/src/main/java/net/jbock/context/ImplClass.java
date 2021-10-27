@@ -5,11 +5,11 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 
-import javax.inject.Inject;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;

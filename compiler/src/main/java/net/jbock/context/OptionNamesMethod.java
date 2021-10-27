@@ -3,11 +3,11 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 

@@ -3,6 +3,7 @@ package net.jbock.context;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
+import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
@@ -12,7 +13,6 @@ import net.jbock.parse.RestlessParser;
 import net.jbock.parse.SuperParser;
 import net.jbock.processor.SourceElement;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 

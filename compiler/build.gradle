@@ -44,7 +44,7 @@ shadowJar {
     relocate('com.squareup.javapoet', 'net.jbock.javapoet')
     relocate('com.google', 'net.jbock.google')
     relocate('org.checkerframework', 'net.jbock.org.checkerframework')
-    relocate('javax.inject', 'net.jbock.javax.inject')
+    relocate('jakarta.inject', 'net.jbock.jakarta.inject')
 }
 
 dependencies {
@@ -54,8 +54,8 @@ dependencies {
     implementation('com.google.guava:guava:30.1.1-jre')
     shadow('io.github.jbock-java:either:1.5')
     shadow(core)
-    implementation('com.google.dagger:dagger:2.37')
-    annotationProcessor('com.google.dagger:dagger-compiler:2.37')
+    implementation('io.github.jbock-java:dapper:1.2')
+    annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
     implementation('javax.annotation:jsr250-api:1.0')
     testImplementation(core)
     testImplementation('com.google.testing.compile:compile-testing:0.19')

@@ -1,11 +1,11 @@
 package net.jbock.context;
 
 import com.squareup.javapoet.TypeSpec;
+import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 
-import javax.inject.Inject;
 import java.util.List;
 
 import static javax.lang.model.element.Modifier.PRIVATE;

@@ -2,10 +2,10 @@ package net.jbock.context;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
+import jakarta.inject.Inject;
 import net.jbock.processor.JbockProcessor;
 
 import javax.annotation.processing.Generated;
-import javax.inject.Inject;
 
 @ContextScope
 public class GeneratedAnnotation {

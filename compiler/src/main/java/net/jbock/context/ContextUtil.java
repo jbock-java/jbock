@@ -1,8 +1,8 @@
 package net.jbock.context;
 
 import com.squareup.javapoet.CodeBlock;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import java.util.List;
 
 @ContextScope

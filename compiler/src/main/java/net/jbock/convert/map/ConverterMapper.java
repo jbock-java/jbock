@@ -1,6 +1,7 @@
 package net.jbock.convert.map;
 
 import io.jbock.util.Either;
+import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
@@ -11,7 +12,6 @@ import net.jbock.convert.match.Match;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
-import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;

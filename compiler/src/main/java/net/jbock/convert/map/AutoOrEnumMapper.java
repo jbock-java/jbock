@@ -2,6 +2,7 @@ package net.jbock.convert.map;
 
 import com.squareup.javapoet.CodeBlock;
 import io.jbock.util.Either;
+import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
@@ -12,7 +13,6 @@ import net.jbock.convert.match.Match;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
-import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.DeclaredType;
 import java.util.Optional;

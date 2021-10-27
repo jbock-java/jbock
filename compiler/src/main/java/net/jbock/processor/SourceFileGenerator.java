@@ -1,10 +1,10 @@
 package net.jbock.processor;
 
 import com.squareup.javapoet.JavaFile;
+import jakarta.inject.Inject;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;

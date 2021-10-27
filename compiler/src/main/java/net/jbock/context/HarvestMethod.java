@@ -5,6 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
@@ -15,7 +16,6 @@ import net.jbock.util.ExConvert;
 import net.jbock.util.ExFailure;
 import net.jbock.util.ExMissingItem;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 

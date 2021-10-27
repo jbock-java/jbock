@@ -1,11 +1,11 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
+import jakarta.inject.Inject;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 import net.jbock.validate.ValidateScope;
 
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;

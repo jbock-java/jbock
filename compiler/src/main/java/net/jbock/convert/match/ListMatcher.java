@@ -1,11 +1,11 @@
 package net.jbock.convert.match;
 
+import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.validate.ValidateScope;
 
-import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 

@@ -3,11 +3,11 @@ package net.jbock.context;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import jakarta.inject.Inject;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ParsingFailed;
 import net.jbock.util.SuperResult;
 
-import javax.inject.Inject;
 import java.util.Optional;
 
 import static net.jbock.common.Constants.EITHER;
