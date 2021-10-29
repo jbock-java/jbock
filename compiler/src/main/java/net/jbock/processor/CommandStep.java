@@ -1,6 +1,5 @@
 package net.jbock.processor;
 
-import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;

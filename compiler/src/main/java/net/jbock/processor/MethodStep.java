@@ -1,6 +1,5 @@
 package net.jbock.processor;
 
-import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
 import jakarta.inject.Inject;
 import net.jbock.Command;

@@ -1,7 +1,5 @@
 package net.jbock.processor;
 
-import com.google.auto.common.BasicAnnotationProcessor;
-
 import javax.lang.model.SourceVersion;
 import java.util.List;
 
