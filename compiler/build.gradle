@@ -36,9 +36,6 @@ tasks.withType(GenerateModuleMetadata) {
 
 shadowJar {
     minimize()
-    dependencies {
-        exclude('javax.annotation:jsr250-api:.*')
-    }
     archiveClassifier.set('')
     relocate('dagger', 'net.jbock.dagger')
     relocate('com.squareup.javapoet', 'net.jbock.javapoet')
