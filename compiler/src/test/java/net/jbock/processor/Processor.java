@@ -1,16 +1,23 @@
 package net.jbock.processor;
 
+import com.google.testing.compile.Compiler;
+
 import javax.tools.JavaFileObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.google.testing.compile.Compiler.javac;
 import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 
 class Processor {
 
     static JbockProcessor testInstance() {
         return new JbockProcessor();
+    }
+
+    static Compiler compiler() {
+        return javac().withProcessors(List.of(new JbockProcessor()));
     }
 
     static JavaFileObject fromSource(String... lines) {

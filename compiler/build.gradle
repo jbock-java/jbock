@@ -69,6 +69,7 @@ jar {
 
 test {
     useJUnitPlatform()
+    jvmArgs = ['--add-opens', 'jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED']
     testLogging {
         events('failed')
     }
