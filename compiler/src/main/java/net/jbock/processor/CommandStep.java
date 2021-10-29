@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static io.jbock.util.Either.right;
 
 /**
@@ -90,7 +89,9 @@ public class CommandStep implements BasicAnnotationProcessor.Step {
     }
 
     private void writeSpec(SourceElement sourceElement, TypeSpec typeSpec) {
-        checkArgument(typeSpec.originatingElements.size() == 1);
+        if (typeSpec.originatingElements.size() != 1) {
+            throw new AssertionError();
+        }
         String packageName = sourceElement.generatedClass().packageName();
         JavaFile javaFile = JavaFile.builder(packageName, typeSpec)
                 .skipJavaLangImports(true)

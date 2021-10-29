@@ -19,7 +19,6 @@ import net.jbock.util.ExMissingItem;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.EITHERS;
 import static net.jbock.common.Constants.STRING;
@@ -157,7 +156,9 @@ public final class HarvestMethod extends Cached<MethodSpec> {
                         orElseThrowConverterError(ItemType.OPTION, i),
                         CodeBlock.of(".stream().findAny()"));
             default: {
-                checkArgument(m.isRepeatable());
+                if (!m.isRepeatable()) {
+                    throw new AssertionError();
+                }
                 return List.of(
                         CodeBlock.of(".collect($T.toValidList())", EITHERS),
                         orElseThrowConverterError(ItemType.OPTION, i));
@@ -171,7 +172,9 @@ public final class HarvestMethod extends Cached<MethodSpec> {
                             ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
                     orElseThrowConverterError(ItemType.PARAMETER, i));
         }
-        checkArgument(m.isOptional());
+        if (!m.isOptional()) {
+            throw new AssertionError();
+        }
         return List.of(
                 CodeBlock.of(".stream()"),
                 CodeBlock.of(".collect($T.toValidList())", EITHERS),

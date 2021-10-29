@@ -42,16 +42,12 @@ shadowJar {
     archiveClassifier.set('')
     relocate('dagger', 'net.jbock.dagger')
     relocate('com.squareup.javapoet', 'net.jbock.javapoet')
-    relocate('com.google', 'net.jbock.google')
-    relocate('org.checkerframework', 'net.jbock.org.checkerframework')
     relocate('jakarta.inject', 'net.jbock.jakarta.inject')
 }
 
 dependencies {
     def core = project(':core')
     implementation('com.squareup:javapoet:1.13.0')
-    implementation('com.google.auto:auto-common:1.0')
-    implementation('com.google.guava:guava:30.1.1-jre')
     shadow('io.github.jbock-java:either:1.5')
     shadow(core)
     implementation('io.github.jbock-java:dapper:1.2')
