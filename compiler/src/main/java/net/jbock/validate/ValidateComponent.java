@@ -10,6 +10,10 @@ public interface ValidateComponent {
 
     CommandProcessor processor();
 
+    static Builder builder() {
+        return DaggerValidateComponent.builder();
+    }
+
     @Component.Builder
     interface Builder {
 

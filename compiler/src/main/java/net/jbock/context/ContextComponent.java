@@ -10,6 +10,10 @@ public interface ContextComponent {
 
     ImplClass implClass();
 
+    static ContextComponent create(ContextModule module) {
+        return DaggerContextComponent.factory().create(module);
+    }
+
     @Component.Factory
     interface Factory {
 

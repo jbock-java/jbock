@@ -9,9 +9,9 @@ import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
-import net.jbock.context.DaggerContextComponent;
+import net.jbock.context.ContextComponent;
 import net.jbock.validate.CommandProcessor;
-import net.jbock.validate.DaggerValidateComponent;
+import net.jbock.validate.ValidateComponent;
 import net.jbock.validate.ValidateModule;
 
 import javax.annotation.processing.Messager;
@@ -69,14 +69,14 @@ public class CommandStep implements BasicAnnotationProcessor.Step {
     }
 
     private void processSourceElement(SourceElement sourceElement) {
-        CommandProcessor processor = DaggerValidateComponent.builder()
+        CommandProcessor processor = ValidateComponent.builder()
                 .sourceElement(sourceElement)
                 .module(new ValidateModule(types, elements))
                 .create()
                 .processor();
         processor.generate()
                 .map(items -> items.contextModule(sourceElement))
-                .map(module -> DaggerContextComponent.factory().create(module))
+                .map(ContextComponent::create)
                 .ifLeftOrElse(
                         this::printFailures,
                         component -> writeSpecs(sourceElement, List.of(

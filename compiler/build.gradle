@@ -47,12 +47,12 @@ shadowJar {
 
 dependencies {
     def core = project(':core')
-    implementation('com.squareup:javapoet:1.13.0')
+    implementation('io.github.jbock-java:javapoet:1.14')
     shadow('io.github.jbock-java:either:1.5')
     shadow(core)
     implementation('io.github.jbock-java:dapper:1.2')
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
-    implementation('javax.annotation:jsr250-api:1.0')
+    //implementation('javax.annotation:jsr250-api:1.0')
     testImplementation(core)
     testImplementation('com.google.testing.compile:compile-testing:0.19')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
@@ -62,7 +62,6 @@ dependencies {
 jar {
     manifest {
         attributes(
-                'Automatic-Module-Name': 'net.jbock.compiler',
                 'Implementation-Version': project.properties['version']
         )
     }
