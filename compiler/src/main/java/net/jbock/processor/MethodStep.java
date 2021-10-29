@@ -1,6 +1,5 @@
 package net.jbock.processor;
 
-import com.google.common.collect.ImmutableSetMultimap;
 import jakarta.inject.Inject;
 import net.jbock.Command;
 import net.jbock.common.Util;
@@ -12,6 +11,8 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeKind;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -49,8 +50,10 @@ public class MethodStep implements BasicAnnotationProcessor.Step {
     }
 
     @Override
-    public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
-        for (ExecutableElement method : methodsIn(elementsByAnnotation.values())) {
+    public void process(Map<String, Set<Element>> elementsByAnnotation) {
+        HashSet<Element> allElements = new HashSet<>();
+        elementsByAnnotation.values().forEach(allElements::addAll);
+        for (ExecutableElement method : methodsIn(allElements)) {
             validateCommandAnnotationPresent(method)
                     .or(() -> validateAbstract(method))
                     .or(() -> validateTypeParameters(method))
@@ -58,7 +61,6 @@ public class MethodStep implements BasicAnnotationProcessor.Step {
                     .or(() -> util.checkExceptionsInDeclaration(method))
                     .ifPresent(failure -> failure.writeTo(messager));
         }
-        return Set.of();
     }
 
     private Optional<ValidationFailure> validateCommandAnnotationPresent(ExecutableElement method) {

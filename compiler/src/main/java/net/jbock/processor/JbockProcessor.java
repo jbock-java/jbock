@@ -14,7 +14,7 @@ import java.util.List;
 public final class JbockProcessor extends BasicAnnotationProcessor {
 
     @Override
-    protected Iterable<? extends Step> steps() {
+    protected List<? extends Step> steps() {
         ProcessorComponent component = DaggerProcessorComponent.factory()
                 .create(new ProcessorModule(processingEnv));
         return List.of(component.commandStep(),
