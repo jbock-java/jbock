@@ -52,7 +52,6 @@ dependencies {
     shadow(core)
     implementation('io.github.jbock-java:dapper:1.2')
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
-    //implementation('javax.annotation:jsr250-api:1.0')
     testImplementation(core)
     testImplementation('com.google.testing.compile:compile-testing:0.19')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
