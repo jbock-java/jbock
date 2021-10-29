@@ -13,6 +13,10 @@ interface ProcessorComponent {
 
     CommandStep commandStep();
 
+    static ProcessorComponent create(ProcessorModule module) {
+        return DaggerProcessorComponent.factory().create(module);
+    }
+
     @Component.Factory
     interface Factory {
 
