@@ -22,7 +22,7 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 
 @ProcessorScope
-public class MethodStep implements BaseAnnotationProcessor.Step {
+public class MethodStep implements BasicAnnotationProcessor.Step {
 
     private static final Set<TypeKind> FORBIDDEN_KINDS = EnumSet.of(
             TypeKind.VOID,
@@ -50,7 +50,7 @@ public class MethodStep implements BaseAnnotationProcessor.Step {
     }
 
     @Override
-    public void process(Map<String, Set<Element>> elementsByAnnotation) {
+    public Set<? extends Element> process(Map<String, Set<Element>> elementsByAnnotation) {
         HashSet<Element> allElements = new HashSet<>();
         elementsByAnnotation.values().forEach(allElements::addAll);
         for (ExecutableElement method : methodsIn(allElements)) {
@@ -61,6 +61,7 @@ public class MethodStep implements BaseAnnotationProcessor.Step {
                     .or(() -> util.checkExceptionsInDeclaration(method))
                     .ifPresent(failure -> failure.writeTo(messager));
         }
+        return Set.of();
     }
 
     private Optional<ValidationFailure> validateCommandAnnotationPresent(ExecutableElement method) {

@@ -31,7 +31,7 @@ import static io.jbock.util.Either.right;
  * @see ProcessorScope
  */
 @ProcessorScope
-public class CommandStep implements BaseAnnotationProcessor.Step {
+public class CommandStep implements BasicAnnotationProcessor.Step {
 
     private final Messager messager;
     private final Util util;
@@ -59,13 +59,14 @@ public class CommandStep implements BaseAnnotationProcessor.Step {
     }
 
     @Override
-    public void process(Map<String, Set<Element>> elementsByAnnotation) {
+    public Set<? extends Element> process(Map<String, Set<Element>> elementsByAnnotation) {
         elementsByAnnotation.forEach((annotationName, elements) ->
                 ElementFilter.typesIn(elements).stream()
                         .map(this::validateSourceElement)
                         .forEach(either -> either.ifLeftOrElse(
                                 this::printFailures,
                                 this::processSourceElement)));
+        return Set.of();
     }
 
     private void processSourceElement(SourceElement sourceElement) {
