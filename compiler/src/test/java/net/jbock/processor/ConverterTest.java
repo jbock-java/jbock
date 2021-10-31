@@ -1,5 +1,6 @@
 package net.jbock.processor;
 
+import com.google.testing.compile.JavaFileObjects;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
@@ -15,7 +16,12 @@ class ConverterTest {
 
     @Test
     void converterNotAnInnerClass() {
-        JavaFileObject converter = fromSource(
+        JavaFileObject converter = JavaFileObjects.forSourceLines(
+                "test.MapMap",
+                "package test;",
+                "",
+                "import net.jbock.util.StringConverter;",
+                "",
                 "class MapMap extends StringConverter<String> {",
                 "",
                 "  @Override",
