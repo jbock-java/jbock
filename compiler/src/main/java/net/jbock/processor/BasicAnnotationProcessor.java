@@ -185,7 +185,7 @@ public abstract class BasicAnnotationProcessor extends AbstractProcessor {
         for (Step step : steps) {
             Set<TypeElement> annotationTypes = getSupportedAnnotationTypeElements(step);
             Map<TypeElement, Set<Element>> stepElements = new HashMap<>(
-                    indexByAnnotation(elementsDeferredBySteps.get(step), annotationTypes));
+                    indexByAnnotation(elementsDeferredBySteps.getOrDefault(step, Set.of()), annotationTypes));
             validElements.forEach((k, v) -> {
                 if (annotationTypes.contains(k)) {
                     stepElements.put(k, v);
@@ -254,7 +254,7 @@ public abstract class BasicAnnotationProcessor extends AbstractProcessor {
         // Look at the elements we've found and the new elements from this round and validate them.
         for (TypeElement annotationType : getSupportedAnnotationTypeElements()) {
             Set<? extends Element> roundElements = roundEnv.getElementsAnnotatedWith(annotationType);
-            Set<Element> prevRoundElements = deferredElementsByAnnotation.get(annotationType);
+            Set<Element> prevRoundElements = deferredElementsByAnnotation.getOrDefault(annotationType, Set.of());
             for (Element element : Stream.concat(roundElements.stream(), prevRoundElements.stream()).collect(Collectors.toSet())) {
                 ElementName elementName = ElementName.forAnnotatedElement(element);
                 boolean isValidElement =
