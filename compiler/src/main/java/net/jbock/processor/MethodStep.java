@@ -22,7 +22,7 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 
 @ProcessorScope
-public class MethodStep implements BasicAnnotationProcessor.Step {
+public class MethodStep implements BaseAnnotationProcessor.Step {
 
     private static final Set<TypeKind> FORBIDDEN_KINDS = EnumSet.of(
             TypeKind.VOID,

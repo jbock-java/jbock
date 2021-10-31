@@ -31,7 +31,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
-abstract class BasicAnnotationProcessor extends AbstractProcessor {
+abstract class BaseAnnotationProcessor extends AbstractProcessor {
 
     private Elements elements;
     private List<? extends Step> steps;

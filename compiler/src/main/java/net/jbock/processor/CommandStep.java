@@ -31,7 +31,7 @@ import static io.jbock.util.Either.right;
  * @see ProcessorScope
  */
 @ProcessorScope
-public class CommandStep implements BasicAnnotationProcessor.Step {
+public class CommandStep implements BaseAnnotationProcessor.Step {
 
     private final Messager messager;
     private final Util util;
