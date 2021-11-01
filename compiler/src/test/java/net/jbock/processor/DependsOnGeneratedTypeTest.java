@@ -1,7 +1,6 @@
 package net.jbock.processor;
 
 import com.google.testing.compile.Compilation;
-import com.google.testing.compile.JavaFileObjects;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
@@ -13,17 +12,6 @@ class DependsOnGeneratedTypeTest {
 
     @Test
     void dependsOnGeneratedType() {
-        JavaFileObject converter = JavaFileObjects.forSourceLines(
-                "test.MapMap",
-                "package test;",
-                "",
-                "import net.jbock.util.StringConverter;",
-                "",
-                "class MapMap extends StringConverter<GeneratedType> {",
-                "",
-                "  @Override",
-                "  public GeneratedType convert(String token) { return null; }",
-                "}");
         JavaFileObject command = fromSource(
                 "@Command",
                 "abstract class Arguments {",
@@ -42,10 +30,20 @@ class DependsOnGeneratedTypeTest {
                 "",
                 "final class GeneratedType {",
                 "}");
+        GeneratingProcessor converter = new GeneratingProcessor(
+                "test.MapMap",
+                "package test;",
+                "",
+                "import net.jbock.util.StringConverter;",
+                "",
+                "class MapMap extends StringConverter<GeneratedType> {",
+                "",
+                "  @Override",
+                "  public GeneratedType convert(String token) { return null; }",
+                "}");
         Compilation compilation =
-                Processor.compiler(generatingProcessor)
-                        .compile(converter, command);
+                Processor.compiler(generatingProcessor, converter)
+                        .compile(command);
         assertThat(compilation).succeededWithoutWarnings();
     }
-
 }

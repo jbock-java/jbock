@@ -20,8 +20,11 @@ class Processor {
         return javac().withProcessors(List.of(new JbockProcessor()));
     }
 
-    static Compiler compiler(javax.annotation.processing.Processor additionalProcessor) {
-        return javac().withProcessors(List.of(new JbockProcessor(), additionalProcessor));
+    static Compiler compiler(javax.annotation.processing.Processor... additionalProcessors) {
+        List<javax.annotation.processing.Processor> processors = new ArrayList<>();
+        processors.add(new JbockProcessor());
+        Collections.addAll(processors, additionalProcessors);
+        return javac().withProcessors(processors);
     }
 
     static JavaFileObject fromSource(String... lines) {
