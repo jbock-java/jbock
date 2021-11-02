@@ -6,13 +6,22 @@ import org.junit.jupiter.api.Test;
 import javax.tools.JavaFileObject;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
-import static net.jbock.processor.Processor.fromSource;
+import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 
 class DependsOnGeneratedTypeTest {
 
     @Test
     void dependsOnGeneratedType() {
-        JavaFileObject command = fromSource(
+        JavaFileObject command = forSourceLines(
+                "test.Arguments",
+                "package test;",
+                "",
+                "import java.util.Optional;",
+                "import java.util.function.Supplier;",
+                "import net.jbock.Command;",
+                "import net.jbock.Parameter;",
+                "import net.jbock.util.StringConverter;",
+                "",
                 "@Command",
                 "abstract class Arguments {",
                 "",
@@ -23,7 +32,6 @@ class DependsOnGeneratedTypeTest {
                 "    public StringConverter<GeneratedType> get() { return new MapMap(); }",
                 "  }",
                 "}");
-
         GeneratingProcessor generatingProcessor = new GeneratingProcessor(
                 "test.GeneratedType",
                 "package test;",
