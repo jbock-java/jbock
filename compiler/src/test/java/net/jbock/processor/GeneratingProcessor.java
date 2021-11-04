@@ -32,7 +32,6 @@ import java.util.Set;
 final class GeneratingProcessor extends AbstractProcessor {
   private final String generatedClassName;
   private final String generatedSource;
-  private final String supportedAnnotationType;
   private boolean processed;
 
   GeneratingProcessor(String generatedClassName, String... source) {
