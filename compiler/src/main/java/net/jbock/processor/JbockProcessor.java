@@ -10,7 +10,6 @@ import java.util.List;
 public final class JbockProcessor extends com.google.auto.common.BasicAnnotationProcessor {
 
 
-
     @Override
     protected List<com.google.auto.common.BasicAnnotationProcessor.Step> steps() {
         ProcessorModule module = new ProcessorModule(processingEnv);

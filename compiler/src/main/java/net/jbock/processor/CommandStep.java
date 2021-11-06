@@ -22,6 +22,7 @@ import javax.lang.model.util.ElementFilter;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.auto.common.BasicAnnotationProcessor.Step;
 import static io.jbock.util.Either.right;
 
 /**
@@ -31,7 +32,7 @@ import static io.jbock.util.Either.right;
  * @see ProcessorScope
  */
 @ProcessorScope
-public class CommandStep implements com.google.auto.common.BasicAnnotationProcessor.Step {
+public class CommandStep implements Step {
 
     private final Messager messager;
     private final Util util;

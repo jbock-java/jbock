@@ -1,5 +1,6 @@
 package net.jbock.processor;
 
+import com.google.auto.common.BasicAnnotationProcessor.Step;
 import com.google.common.collect.ImmutableSetMultimap;
 import jakarta.inject.Inject;
 import net.jbock.Command;
@@ -12,8 +13,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeKind;
 import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -23,14 +22,13 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 
 @ProcessorScope
-public class MethodStep implements com.google.auto.common.BasicAnnotationProcessor.Step {
+public class MethodStep implements Step {
 
     private static final Set<TypeKind> FORBIDDEN_KINDS = EnumSet.of(
             TypeKind.VOID,
             TypeKind.TYPEVAR,
             TypeKind.WILDCARD,
             TypeKind.OTHER,
-            TypeKind.ERROR,
             TypeKind.UNION,
             TypeKind.NONE);
 
