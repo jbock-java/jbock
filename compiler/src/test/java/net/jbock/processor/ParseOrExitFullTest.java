@@ -4,15 +4,17 @@ import com.google.testing.compile.Compilation;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
+import java.io.IOException;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
-import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import static net.jbock.processor.Processor.fromSource;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 class ParseOrExitFullTest {
 
     @Test
-    public void testBasicGenerated() {
+    public void testBasicGenerated() throws IOException {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
@@ -20,10 +22,8 @@ class ParseOrExitFullTest {
                 "  @Parameters",
                 "  abstract List<String> hello();",
                 "}");
-        JavaFileObject generatedParser =
-                forSourceLines(
-                        "test.ArgumentsParser",
-                        "",
+        String[] expectedParser =
+                new String[]{
                         "package test;",
                         "",
                         "import io.jbock.util.Either;",
@@ -40,14 +40,15 @@ class ParseOrExitFullTest {
                         "import net.jbock.parse.RestParser;",
                         "import net.jbock.util.ExConvert;",
                         "import net.jbock.util.ExFailure;",
+                        "import net.jbock.util.ParseRequest;",
                         "import net.jbock.util.ParsingFailed;",
                         "import net.jbock.util.StringConverter;",
                         "",
                         "@Generated(",
-                        "  value = \"net.jbock.processor.JbockProcessor\",",
-                        "  comments = \"https://github.com/jbock-java\")",
+                        "    value = \"net.jbock.processor.JbockProcessor\",",
+                        "    comments = \"https://github.com/jbock-java\"",
+                        ")",
                         "final class ArgumentsParser {",
-                        "",
                         "  Either<ParsingFailed, Arguments> parse(List<String> tokens) {",
                         "    RestParser<Void> parser = RestParser.create(Map.of(), Map.of(), 0);",
                         "    try {",
@@ -90,19 +91,18 @@ class ParseOrExitFullTest {
                         "            .build())",
                         "          .build();",
                         "  }",
-                        "}");
-        JavaFileObject generatedImpl =
-                forSourceLines(
-                        "test.Arguments_Impl",
-                        "",
+                        "}"};
+        String[] expectedImpl =
+                new String[]{
                         "package test;",
                         "",
                         "import java.util.List;",
                         "import javax.annotation.processing.Generated;",
                         "",
                         "@Generated(",
-                        "  value = \"net.jbock.processor.JbockProcessor\",",
-                        "  comments = \"https://github.com/jbock-java\")",
+                        "    value = \"net.jbock.processor.JbockProcessor\",",
+                        "    comments = \"https://github.com/jbock-java\"",
+                        ")",
                         "final class Arguments_Impl extends Arguments {",
                         "  private final List<String> hello;",
                         "",
@@ -114,19 +114,19 @@ class ParseOrExitFullTest {
                         "  List<String> hello() {",
                         "    return hello;",
                         "  }",
-                        "}");
+                        "}"};
         Compilation compilation = Processor.compiler().compile(javaFile);
         assertThat(compilation).succeeded();
-        assertThat(compilation)
-                .generatedSourceFile("test.ArgumentsParser")
-                .containsElementsIn(generatedParser);
-        assertThat(compilation)
-                .generatedSourceFile("test.Arguments_Impl")
-                .containsElementsIn(generatedImpl);
+        String actualParser = compilation.generatedSourceFile("test.ArgumentsParser")
+                .orElseThrow().getCharContent(false).toString();
+        assertThat(actualParser.lines().toArray(), is(expectedParser));
+        String actualImpl = compilation.generatedSourceFile("test.Arguments_Impl")
+                .orElseThrow().getCharContent(false).toString();
+        assertThat(actualImpl.lines().toArray(), is(expectedImpl));
     }
 
     @Test
-    public void testPublicParser() {
+    public void testPublicParser() throws IOException {
         JavaFileObject javaFile = fromSource(
                 "@Command(publicParser = true)",
                 "abstract class Arguments {",
@@ -134,10 +134,8 @@ class ParseOrExitFullTest {
                 "  @Parameters",
                 "  abstract List<String> hello();",
                 "}");
-        JavaFileObject generatedParser =
-                forSourceLines(
-                        "test.ArgumentsParser",
-                        "",
+        String[] expectedParser =
+                new String[]{
                         "package test;",
                         "",
                         "import io.jbock.util.Either;",
@@ -154,14 +152,15 @@ class ParseOrExitFullTest {
                         "import net.jbock.parse.RestParser;",
                         "import net.jbock.util.ExConvert;",
                         "import net.jbock.util.ExFailure;",
+                        "import net.jbock.util.ParseRequest;",
                         "import net.jbock.util.ParsingFailed;",
                         "import net.jbock.util.StringConverter;",
                         "",
                         "@Generated(",
-                        "  value = \"net.jbock.processor.JbockProcessor\",",
-                        "  comments = \"https://github.com/jbock-java\")",
+                        "    value = \"net.jbock.processor.JbockProcessor\",",
+                        "    comments = \"https://github.com/jbock-java\"",
+                        ")",
                         "public final class ArgumentsParser {",
-                        "",
                         "  public Either<ParsingFailed, Arguments> parse(List<String> tokens) {",
                         "    RestParser<Void> parser = RestParser.create(Map.of(), Map.of(), 0);",
                         "    try {",
@@ -204,19 +203,18 @@ class ParseOrExitFullTest {
                         "            .build())",
                         "          .build();",
                         "  }",
-                        "}");
-        JavaFileObject generatedImpl =
-                forSourceLines(
-                        "test.Arguments_Impl",
-                        "",
+                        "}"};
+        String[] expectedImpl =
+                new String[]{
                         "package test;",
                         "",
                         "import java.util.List;",
                         "import javax.annotation.processing.Generated;",
                         "",
                         "@Generated(",
-                        "  value = \"net.jbock.processor.JbockProcessor\",",
-                        "  comments = \"https://github.com/jbock-java\")",
+                        "    value = \"net.jbock.processor.JbockProcessor\",",
+                        "    comments = \"https://github.com/jbock-java\"",
+                        ")",
                         "final class Arguments_Impl extends Arguments {",
                         "  private final List<String> hello;",
                         "",
@@ -228,14 +226,14 @@ class ParseOrExitFullTest {
                         "  List<String> hello() {",
                         "    return hello;",
                         "  }",
-                        "}");
+                        "}"};
         Compilation compilation = Processor.compiler().compile(javaFile);
         assertThat(compilation).succeeded();
-        assertThat(compilation)
-                .generatedSourceFile("test.ArgumentsParser")
-                .containsElementsIn(generatedParser);
-        assertThat(compilation)
-                .generatedSourceFile("test.Arguments_Impl")
-                .containsElementsIn(generatedImpl);
+        String actualParser = compilation.generatedSourceFile("test.ArgumentsParser")
+                .orElseThrow().getCharContent(false).toString();
+        assertThat(actualParser.lines().toArray(), is(expectedParser));
+        String actualImpl = compilation.generatedSourceFile("test.Arguments_Impl")
+                .orElseThrow().getCharContent(false).toString();
+        assertThat(actualImpl.lines().toArray(), is(expectedImpl));
     }
 }
