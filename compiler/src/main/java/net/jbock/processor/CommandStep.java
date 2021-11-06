@@ -1,5 +1,6 @@
 package net.jbock.processor;
 
+import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import io.jbock.util.Either;
@@ -19,7 +20,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static io.jbock.util.Either.right;
@@ -59,13 +59,12 @@ public class CommandStep implements com.google.auto.common.BasicAnnotationProces
     }
 
     @Override
-    public Set<? extends Element> process(Map<String, Set<Element>> elementsByAnnotation) {
-        elementsByAnnotation.forEach((annotationName, elements) ->
-                ElementFilter.typesIn(elements).stream()
-                        .map(this::validateSourceElement)
-                        .forEach(either -> either.ifLeftOrElse(
+    public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
+        ElementFilter.typesIn(elementsByAnnotation.values())
+                .forEach(element ->
+                        validateSourceElement(element).ifLeftOrElse(
                                 this::printFailures,
-                                this::processSourceElement)));
+                                this::processSourceElement));
         return Set.of();
     }
 

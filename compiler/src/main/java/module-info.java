@@ -8,4 +8,5 @@ module net.jbock.compiler {
     requires io.jbock.util;
     requires dagger;
     requires net.jbock;
+    requires com.google.common;
 }

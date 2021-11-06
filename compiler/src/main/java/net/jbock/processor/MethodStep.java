@@ -1,5 +1,6 @@
 package net.jbock.processor;
 
+import com.google.common.collect.ImmutableSetMultimap;
 import jakarta.inject.Inject;
 import net.jbock.Command;
 import net.jbock.common.Util;
@@ -50,10 +51,8 @@ public class MethodStep implements com.google.auto.common.BasicAnnotationProcess
     }
 
     @Override
-    public Set<? extends Element> process(Map<String, Set<Element>> elementsByAnnotation) {
-        HashSet<Element> allElements = new HashSet<>();
-        elementsByAnnotation.values().forEach(allElements::addAll);
-        for (ExecutableElement method : methodsIn(allElements)) {
+    public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
+        for (ExecutableElement method : methodsIn(elementsByAnnotation.values())) {
             validateCommandAnnotationPresent(method)
                     .or(() -> validateAbstract(method))
                     .or(() -> validateTypeParameters(method))
