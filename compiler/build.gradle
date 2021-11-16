@@ -51,10 +51,9 @@ dependencies {
     implementation('io.github.jbock-java:dapper:1.2')
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
     testImplementation(core)
-    testImplementation('io.github.jbock-java:compile-testing:0.19.0')
+    testImplementation('io.github.jbock-java:compile-testing:0.19.10')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
     testImplementation('org.mockito:mockito-core:3.12.4')
-    testImplementation('org.hamcrest:hamcrest-core:2.2')
 }
 
 jar {

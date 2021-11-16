@@ -4,17 +4,15 @@ import com.google.testing.compile.Compilation;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
-import java.io.IOException;
+import java.util.List;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static net.jbock.processor.Processor.fromSource;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 class ParseOrExitFullTest {
 
     @Test
-    public void testBasicGenerated() throws IOException {
+    void testBasicGenerated() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
@@ -22,8 +20,8 @@ class ParseOrExitFullTest {
                 "  @Parameters",
                 "  abstract List<String> hello();",
                 "}");
-        String[] expectedParser =
-                new String[]{
+        List<String> expectedParser =
+                List.of(
                         "package test;",
                         "",
                         "import io.jbock.util.Either;",
@@ -91,9 +89,9 @@ class ParseOrExitFullTest {
                         "            .build())",
                         "          .build();",
                         "  }",
-                        "}"};
-        String[] expectedImpl =
-                new String[]{
+                        "}");
+        List<String> expectedImpl =
+                List.of(
                         "package test;",
                         "",
                         "import java.util.List;",
@@ -114,19 +112,21 @@ class ParseOrExitFullTest {
                         "  List<String> hello() {",
                         "    return hello;",
                         "  }",
-                        "}"};
+                        "}");
         Compilation compilation = Processor.compiler().compile(javaFile);
         assertThat(compilation).succeeded();
-        String actualParser = compilation.generatedSourceFile("test.ArgumentsParser")
-                .orElseThrow().getCharContent(false).toString();
-        assertThat(actualParser.lines().toArray(), is(expectedParser));
-        String actualImpl = compilation.generatedSourceFile("test.Arguments_Impl")
-                .orElseThrow().getCharContent(false).toString();
-        assertThat(actualImpl.lines().toArray(), is(expectedImpl));
+        assertThat(compilation).generatedSourceFile("test.ArgumentsParser")
+                .contentsAsUtf8Iterable()
+                .containsExactlyElementsIn(expectedParser)
+                .inOrder();
+        assertThat(compilation).generatedSourceFile("test.Arguments_Impl")
+                .contentsAsUtf8Iterable()
+                .containsExactlyElementsIn(expectedImpl)
+                .inOrder();
     }
 
     @Test
-    public void testPublicParser() throws IOException {
+    void testPublicParser() {
         JavaFileObject javaFile = fromSource(
                 "@Command(publicParser = true)",
                 "abstract class Arguments {",
@@ -134,8 +134,8 @@ class ParseOrExitFullTest {
                 "  @Parameters",
                 "  abstract List<String> hello();",
                 "}");
-        String[] expectedParser =
-                new String[]{
+        List<String> expectedParser =
+                List.of(
                         "package test;",
                         "",
                         "import io.jbock.util.Either;",
@@ -203,9 +203,9 @@ class ParseOrExitFullTest {
                         "            .build())",
                         "          .build();",
                         "  }",
-                        "}"};
-        String[] expectedImpl =
-                new String[]{
+                        "}");
+        List<String> expectedImpl =
+                List.of(
                         "package test;",
                         "",
                         "import java.util.List;",
@@ -226,14 +226,16 @@ class ParseOrExitFullTest {
                         "  List<String> hello() {",
                         "    return hello;",
                         "  }",
-                        "}"};
+                        "}");
         Compilation compilation = Processor.compiler().compile(javaFile);
         assertThat(compilation).succeeded();
-        String actualParser = compilation.generatedSourceFile("test.ArgumentsParser")
-                .orElseThrow().getCharContent(false).toString();
-        assertThat(actualParser.lines().toArray(), is(expectedParser));
-        String actualImpl = compilation.generatedSourceFile("test.Arguments_Impl")
-                .orElseThrow().getCharContent(false).toString();
-        assertThat(actualImpl.lines().toArray(), is(expectedImpl));
+        assertThat(compilation).generatedSourceFile("test.ArgumentsParser")
+                .contentsAsUtf8Iterable()
+                .containsExactlyElementsIn(expectedParser)
+                .inOrder();
+        assertThat(compilation).generatedSourceFile("test.Arguments_Impl")
+                .contentsAsUtf8Iterable()
+                .containsExactlyElementsIn(expectedImpl)
+                .inOrder();
     }
 }
