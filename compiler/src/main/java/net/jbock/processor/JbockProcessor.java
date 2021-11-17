@@ -1,5 +1,7 @@
 package net.jbock.processor;
 
+import com.google.auto.common.BasicAnnotationProcessor;
+
 import javax.lang.model.SourceVersion;
 import java.util.List;
 
@@ -7,13 +9,12 @@ import java.util.List;
  * This is the jbock annotation processor.
  * It extends {@link javax.annotation.processing.AbstractProcessor AbstractProcessor}.
  */
-public final class JbockProcessor extends com.google.auto.common.BasicAnnotationProcessor {
+public final class JbockProcessor extends BasicAnnotationProcessor {
 
 
     @Override
-    protected List<com.google.auto.common.BasicAnnotationProcessor.Step> steps() {
-        ProcessorModule module = new ProcessorModule(processingEnv);
-        ProcessorComponent component = ProcessorComponent.create(module);
+    protected List<Step> steps() {
+        ProcessorComponent component = ProcessorComponent.create(processingEnv);
         return List.of(
                 component.commandStep(),
                 component.methodStep());

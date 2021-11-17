@@ -4,9 +4,7 @@ import net.jbock.annotated.AnnotatedMethods;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
-import net.jbock.context.ContextModule;
 import net.jbock.convert.Mapping;
-import net.jbock.processor.SourceElement;
 
 import java.util.List;
 
@@ -79,16 +77,15 @@ public final class ContextBuilder {
         }
     }
 
-    /**
-     * Creates the context module.
-     *
-     * @param sourceElement the command class
-     * @return the context module
-     */
-    public ContextModule contextModule(SourceElement sourceElement) {
-        return new ContextModule(sourceElement,
-                step3.step2.positionalParameters,
-                step3.repeatablePositionalParameters,
-                namedOptions);
+    public List<Mapping<AnnotatedOption>> namedOptions() {
+        return namedOptions;
+    }
+
+    public List<Mapping<AnnotatedParameter>> positionalParameters() {
+        return step3.step2.positionalParameters;
+    }
+
+    public List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
+        return step3.repeatablePositionalParameters;
     }
 }

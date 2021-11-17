@@ -13,7 +13,6 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.context.ContextComponent;
 import net.jbock.validate.CommandProcessor;
 import net.jbock.validate.ValidateComponent;
-import net.jbock.validate.ValidateModule;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
@@ -72,12 +71,17 @@ public class CommandStep implements Step {
     private void processSourceElement(SourceElement sourceElement) {
         CommandProcessor processor = ValidateComponent.builder()
                 .sourceElement(sourceElement)
-                .module(new ValidateModule(types, elements))
-                .create()
+                .types(types)
+                .elements(elements)
+                .build()
                 .processor();
         processor.generate()
-                .map(items -> items.contextModule(sourceElement))
-                .map(ContextComponent::create)
+                .map(items -> ContextComponent.builder()
+                        .sourceElement(sourceElement)
+                        .namedOptions(items.namedOptions())
+                        .repeatablePositionalParameters(items.repeatablePositionalParameters())
+                        .positionalParams(items.positionalParameters())
+                        .build())
                 .ifLeftOrElse(
                         this::printFailures,
                         component -> writeSpecs(sourceElement, List.of(

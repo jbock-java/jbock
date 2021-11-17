@@ -2,6 +2,8 @@ package net.jbock.validate;
 
 import dagger.BindsInstance;
 import dagger.Component;
+import net.jbock.common.SafeElements;
+import net.jbock.common.SafeTypes;
 import net.jbock.processor.SourceElement;
 
 @Component(modules = ValidateModule.class)
@@ -20,8 +22,12 @@ public interface ValidateComponent {
         @BindsInstance
         Builder sourceElement(SourceElement sourceElement);
 
-        Builder module(ValidateModule module);
+        @BindsInstance
+        Builder types(SafeTypes types);
 
-        ValidateComponent create();
+        @BindsInstance
+        Builder elements(SafeElements elements);
+
+        ValidateComponent build();
     }
 }

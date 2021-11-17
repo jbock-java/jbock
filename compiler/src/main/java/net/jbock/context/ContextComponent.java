@@ -1,6 +1,14 @@
 package net.jbock.context;
 
+import dagger.BindsInstance;
 import dagger.Component;
+import net.jbock.annotated.AnnotatedOption;
+import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.AnnotatedParameters;
+import net.jbock.convert.Mapping;
+import net.jbock.processor.SourceElement;
+
+import java.util.List;
 
 @Component(modules = ContextModule.class)
 @ContextScope
@@ -10,13 +18,25 @@ public interface ContextComponent {
 
     ImplClass implClass();
 
-    static ContextComponent create(ContextModule module) {
-        return DaggerContextComponent.factory().create(module);
+    static ContextComponent.Builder builder() {
+        return DaggerContextComponent.builder();
     }
 
-    @Component.Factory
-    interface Factory {
+    @Component.Builder
+    interface Builder {
 
-        ContextComponent create(ContextModule module);
+        @BindsInstance
+        Builder sourceElement(SourceElement sourceElement);
+
+        @BindsInstance
+        Builder repeatablePositionalParameters(List<Mapping<AnnotatedParameters>> repeatablePositionalParameters);
+
+        @BindsInstance
+        Builder positionalParams(List<Mapping<AnnotatedParameter>> positionalParams);
+
+        @BindsInstance
+        Builder namedOptions(List<Mapping<AnnotatedOption>> namedOptions);
+
+        ContextComponent build();
     }
 }

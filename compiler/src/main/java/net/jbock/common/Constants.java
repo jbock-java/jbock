@@ -7,11 +7,6 @@ import com.squareup.javapoet.TypeName;
 import io.jbock.util.Either;
 import io.jbock.util.Eithers;
 
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ErrorType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

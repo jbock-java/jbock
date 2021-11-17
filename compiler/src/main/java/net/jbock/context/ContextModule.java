@@ -17,51 +17,14 @@ import static java.util.stream.Collectors.toList;
  * @see ContextScope
  */
 @Module
-public class ContextModule {
+public interface ContextModule {
 
-    private final SourceElement sourceElement;
-    private final List<Mapping<AnnotatedParameter>> positionalParams;
-    private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
-    private final List<Mapping<AnnotatedOption>> namedOptions;
-
-    public ContextModule(
-            SourceElement sourceElement,
+    @ContextScope
+    @Provides
+    static List<Mapping<?>> allMappings(
             List<Mapping<AnnotatedParameter>> positionalParams,
             List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
             List<Mapping<AnnotatedOption>> namedOptions) {
-        this.sourceElement = sourceElement;
-        this.positionalParams = positionalParams;
-        this.repeatablePositionalParameters = repeatablePositionalParameters;
-        this.namedOptions = namedOptions;
-    }
-
-    @ContextScope
-    @Provides
-    SourceElement sourceElement() {
-        return sourceElement;
-    }
-
-    @ContextScope
-    @Provides
-    List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
-        return repeatablePositionalParameters;
-    }
-
-    @ContextScope
-    @Provides
-    List<Mapping<AnnotatedParameter>> positionalParameters() {
-        return positionalParams;
-    }
-
-    @ContextScope
-    @Provides
-    List<Mapping<AnnotatedOption>> getNamedOptions() {
-        return namedOptions;
-    }
-
-    @ContextScope
-    @Provides
-    List<Mapping<?>> allMappings() {
         return Stream.of(namedOptions, positionalParams, repeatablePositionalParameters)
                 .flatMap(List::stream)
                 .collect(toList());
@@ -69,8 +32,9 @@ public class ContextModule {
 
     @ContextScope
     @Provides
-    CommonFields commonFields(
-            SourceElement sourceElement) {
+    static CommonFields commonFields(
+            SourceElement sourceElement,
+            List<Mapping<AnnotatedOption>> namedOptions) {
         return CommonFields.create(
                 sourceElement,
                 namedOptions);

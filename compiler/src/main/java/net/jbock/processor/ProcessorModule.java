@@ -15,47 +15,41 @@ import javax.annotation.processing.ProcessingEnvironment;
  * @see ProcessorScope
  */
 @Module
-public class ProcessorModule {
-
-    private final ProcessingEnvironment processingEnvironment;
-
-    ProcessorModule(ProcessingEnvironment processingEnvironment) {
-        this.processingEnvironment = processingEnvironment;
-    }
+public interface ProcessorModule {
 
     @ProcessorScope
     @Provides
-    Messager messager() {
+    static Messager messager(ProcessingEnvironment processingEnvironment) {
         return processingEnvironment.getMessager();
     }
 
     @ProcessorScope
     @Provides
-    Filer filer() {
+    static Filer filer(ProcessingEnvironment processingEnvironment) {
         return processingEnvironment.getFiler();
     }
 
     @ProcessorScope
     @Provides
-    SafeElements elements() {
+    static SafeElements elements(ProcessingEnvironment processingEnvironment) {
         return new SafeElements(processingEnvironment.getElementUtils());
     }
 
     @ProcessorScope
     @Provides
-    SafeTypes types() {
+    static SafeTypes types(ProcessingEnvironment processingEnvironment) {
         return new SafeTypes(processingEnvironment.getTypeUtils());
     }
 
     @ProcessorScope
     @Provides
-    TypeTool tool(SafeElements elements, SafeTypes types) {
+    static TypeTool tool(SafeElements elements, SafeTypes types) {
         return new TypeTool(elements, types);
     }
 
     @ProcessorScope
     @Provides
-    Util util(SafeTypes types, TypeTool tool) {
+    static Util util(SafeTypes types, TypeTool tool) {
         return new Util(types, tool);
     }
 }

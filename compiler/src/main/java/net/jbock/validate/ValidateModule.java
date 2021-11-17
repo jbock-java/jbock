@@ -11,37 +11,17 @@ import net.jbock.common.Util;
  * @see ValidateScope
  */
 @Module
-public class ValidateModule {
-
-    private final SafeTypes types;
-    private final SafeElements elements;
-
-    public ValidateModule(SafeTypes types, SafeElements elements) {
-        this.types = types;
-        this.elements = elements;
-    }
+interface ValidateModule {
 
     @ValidateScope
     @Provides
-    SafeTypes types() {
-        return types;
-    }
-
-    @ValidateScope
-    @Provides
-    TypeTool tool() {
+    static TypeTool tool(SafeTypes types, SafeElements elements) {
         return new TypeTool(elements, types);
     }
 
     @ValidateScope
     @Provides
-    Util util(TypeTool tool) {
+    static Util util(SafeTypes types, TypeTool tool) {
         return new Util(types, tool);
-    }
-
-    @ValidateScope
-    @Provides
-    SafeElements elements() {
-        return elements;
     }
 }
