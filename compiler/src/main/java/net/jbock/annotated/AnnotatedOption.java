@@ -40,7 +40,7 @@ public final class AnnotatedOption extends AnnotatedMethod {
                         .map(name -> name.substring(2))
                         .map(s -> s.toUpperCase(Locale.US))
                         .findFirst())
-                .orElseGet(() -> SnakeName.create(option.simpleName().toString())
+                .orElseGet(() -> SnakeName.create(option.simpleName())
                         .snake('_')
                         .toUpperCase(Locale.US));
         return new AnnotatedOption(

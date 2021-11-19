@@ -21,7 +21,7 @@ public final class AnnotatedParameter extends AnnotatedMethod {
             ExecutableParameter parameter,
             String enumName) {
         String paramLabel = parameter.paramLabel()
-                .orElseGet(() -> SnakeName.create(parameter.simpleName().toString())
+                .orElseGet(() -> SnakeName.create(parameter.simpleName())
                         .snake('_')
                         .toUpperCase(Locale.US));
         return new AnnotatedParameter(enumName,

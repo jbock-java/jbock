@@ -12,7 +12,7 @@ public class SnakeName {
         this.parts = parts;
     }
 
-    public static SnakeName create(String input) {
+    public static SnakeName create(CharSequence input) {
         List<String> result = new ArrayList<>();
         CharType t2 = CharType.OTHER;
         CharType t1 = CharType.OTHER;

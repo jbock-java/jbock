@@ -3,7 +3,6 @@ package net.jbock.annotated;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
 import net.jbock.common.SnakeName;
-import net.jbock.common.TypeNotPresentFailure;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
@@ -11,11 +10,7 @@ import net.jbock.validate.ValidateScope;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
-import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ErrorType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -92,10 +87,9 @@ public class AnnotatedMethodsFactory {
         Set<String> enumNames = new HashSet<>(methods.size());
         Map<Name, String> result = new HashMap<>(methods.size());
         for (Executable method : methods) {
-            String simpleName = method.simpleName().toString();
-            String enumName = "_".equals(simpleName) ?
+            String enumName = "_".contentEquals(method.simpleName()) ?
                     "_1" : // avoid potential keyword issue
-                    SnakeName.create(simpleName).snake('_').toUpperCase(Locale.US);
+                    SnakeName.create(method.simpleName()).snake('_').toUpperCase(Locale.US);
             while (!enumNames.add(enumName)) {
                 String suffix = enumName.endsWith("1") ? "1" : "_1";
                 enumName = enumName + suffix;
@@ -137,37 +131,5 @@ public class AnnotatedMethodsFactory {
                 .map(AS_DECLARED::visit)
                 .flatMap(Optional::stream)
                 .anyMatch(this::isInaccessible);
-    }
-
-    /* Left-Optional
-     */
-    private Optional<TypeNotPresentFailure> checkTypePresent(TypeMirror type) {
-        return type.accept(CheckTypePresentVisitor.INSTANCE, null);
-    }
-
-    private static final class CheckTypePresentVisitor
-            extends SimpleTypeVisitor8<Optional<TypeNotPresentFailure>, Void> {
-        private static final CheckTypePresentVisitor INSTANCE = new CheckTypePresentVisitor();
-
-        @Override
-        public Optional<TypeNotPresentFailure> visitArray(ArrayType arrayType, Void p) {
-            return arrayType.getComponentType().accept(this, p);
-        }
-
-        @Override
-        public Optional<TypeNotPresentFailure> visitDeclared(DeclaredType declaredType, Void p) {
-            for (TypeMirror typeArgument : declaredType.getTypeArguments()) {
-                Optional<TypeNotPresentFailure> result = typeArgument.accept(this, p);
-                if (result.isPresent()) {
-                    return result;
-                }
-            }
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<TypeNotPresentFailure> visitError(ErrorType errorType, Void p) {
-            return Optional.of(TypeNotPresentFailure.create(errorType.toString()));
-        }
     }
 }

@@ -70,7 +70,9 @@ public class ExecutableElementsFinder {
                 .flatMap(AS_TYPE_ELEMENT::visit)
                 .flatMap(superClass -> superClass.getSuperclass().getKind() == TypeKind.NONE ?
                         Optional.empty() :
-                        Optional.of(sourceElement.fail("invalid superclass: expecting java.lang.Object, but found: " + superClass.getQualifiedName())));
+                        Optional.of(sourceElement.fail(
+                                "invalid superclass: expecting java.lang.Object, but found: "
+                                + superClass.getQualifiedName())));
     }
 
     private Optional<ValidationFailure> checkNoInterfaces() {
@@ -85,7 +87,6 @@ public class ExecutableElementsFinder {
                         .flatMap(Optional::stream)
                         .map(DeclaredType::asElement)
                         .map(Element::getSimpleName)
-                        .map(Name::toString)
                         .collect(toList())));
     }
 

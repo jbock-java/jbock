@@ -88,14 +88,14 @@ abstract class Executable {
         Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues =
                 annotationMirror.getElementValues();
         return elementValues.entrySet().stream()
-                .filter(e -> "converter".equals(e.getKey().getSimpleName().toString()))
+                .filter(e -> "converter".contentEquals(e.getKey().getSimpleName()))
                 .map(Map.Entry::getValue)
                 .findFirst()
                 .flatMap(ANNOTATION_VALUE_AS_TYPE::visit)
                 .flatMap(AS_DECLARED::visit)
                 .map(DeclaredType::asElement)
                 .flatMap(AS_TYPE_ELEMENT::visit)
-                .filter(element -> !"java.lang.Void".equals(element.getQualifiedName().toString()));
+                .filter(element -> !"java.lang.Void".contentEquals(element.getQualifiedName()));
     }
 
     final Optional<TypeElement> converter() {

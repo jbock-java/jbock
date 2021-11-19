@@ -44,7 +44,7 @@ public class SourceElement {
                 List.of(Modifier.PUBLIC) :
                 List.of();
         String programName = optionalString(command.name())
-                .orElseGet(() -> SnakeName.create(typeElement.getSimpleName().toString()).snake('-'));
+                .orElseGet(() -> SnakeName.create(typeElement.getSimpleName()).snake('-'));
         String generatedClassName = String.join("_", ClassName.get(typeElement).simpleNames()) + "Parser";
         ClassName generatedClass = ClassName.get(typeElement)
                 .topLevelClassName()
