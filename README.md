@@ -13,7 +13,7 @@ jbock requires Java 11.
 
 Create an abstract class, or alternatively a Java interface,
 and add the `@Command` annotation.
-In this class or interface, each abstract method must be parameterless,
+In this class, each abstract method must be parameterless,
 and corresponds either to a *named option* or a *positional parameter*.
 
 ````java
