@@ -10,6 +10,8 @@ import io.jbock.util.Eithers;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public final class Constants {
 
@@ -32,5 +34,9 @@ public final class Constants {
             return Optional.empty();
         }
         return Optional.of(s);
+    }
+
+    public static <T> Function<Object, Stream<T>> instancesOf(Class<T> to) {
+        return f -> to.isInstance(f) ? Stream.of(to.cast(f)) : Stream.empty();
     }
 }

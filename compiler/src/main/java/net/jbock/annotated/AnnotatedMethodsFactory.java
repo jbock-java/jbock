@@ -27,6 +27,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.element.NestingKind.MEMBER;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
+import static net.jbock.common.Constants.instancesOf;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
@@ -60,14 +61,14 @@ public class AnnotatedMethodsFactory {
                         .collect(toValidListAll()))
                 .map(AnnotatedMethods::builder)
                 .map(builder -> builder.withNamedOptions(builder.annotatedMethods()
-                        .flatMap(AnnotatedMethod::asAnnotatedOption)
+                        .flatMap(instancesOf(AnnotatedOption.class))
                         .collect(toList())))
                 .map(builder -> builder.withPositionalParameters(builder.annotatedMethods()
-                        .flatMap(AnnotatedMethod::asAnnotatedParameter)
+                        .flatMap(instancesOf(AnnotatedParameter.class))
                         .sorted(indexComparator)
                         .collect(toList())))
                 .map(builder -> builder.withRepeatablePositionalParameters(builder.annotatedMethods()
-                        .flatMap(AnnotatedMethod::asAnnotatedParameters)
+                        .flatMap(instancesOf(AnnotatedParameters.class))
                         .collect(toList())))
                 .filter(this::validateAtLeastOneParameterInSuperCommand);
     }

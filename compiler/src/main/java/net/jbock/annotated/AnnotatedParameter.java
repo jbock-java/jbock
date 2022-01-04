@@ -3,7 +3,6 @@ package net.jbock.annotated;
 import net.jbock.common.SnakeName;
 
 import java.util.Locale;
-import java.util.stream.Stream;
 
 public final class AnnotatedParameter extends AnnotatedMethod {
 
@@ -41,21 +40,6 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     @Override
     public boolean isParameters() {
         return false;
-    }
-
-    @Override
-    Stream<AnnotatedOption> asAnnotatedOption() {
-        return Stream.empty();
-    }
-
-    @Override
-    Stream<AnnotatedParameter> asAnnotatedParameter() {
-        return Stream.of(this);
-    }
-
-    @Override
-    Stream<AnnotatedParameters> asAnnotatedParameters() {
-        return Stream.empty();
     }
 
     public int index() {

@@ -5,7 +5,6 @@ import net.jbock.common.SnakeName;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -67,20 +66,5 @@ public final class AnnotatedOption extends AnnotatedMethod {
 
     public List<String> names() {
         return names;
-    }
-
-    @Override
-    Stream<AnnotatedOption> asAnnotatedOption() {
-        return Stream.of(this);
-    }
-
-    @Override
-    Stream<AnnotatedParameter> asAnnotatedParameter() {
-        return Stream.empty();
-    }
-
-    @Override
-    Stream<AnnotatedParameters> asAnnotatedParameters() {
-        return Stream.empty();
     }
 }
