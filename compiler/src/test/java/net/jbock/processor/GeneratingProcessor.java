@@ -16,9 +16,6 @@
 
 package net.jbock.processor;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -30,36 +27,36 @@ import java.util.Set;
 
 /** A simple {@link Processor} that generates one source file. */
 final class GeneratingProcessor extends AbstractProcessor {
-  private final String generatedClassName;
-  private final String generatedSource;
-  private boolean processed;
+    private final String generatedClassName;
+    private final String generatedSource;
+    private boolean processed;
 
-  GeneratingProcessor(String generatedClassName, String... source) {
-    this.generatedClassName = generatedClassName;
-    this.generatedSource = Joiner.on("\n").join(source);
-  }
-
-  @Override
-  public SourceVersion getSupportedSourceVersion() {
-    return SourceVersion.latestSupported();
-  }
-
-  @Override
-  public Set<String> getSupportedAnnotationTypes() {
-    return ImmutableSet.of("*");
-  }
-
-  @Override
-  public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-    if (!processed) {
-      processed = true;
-      try (Writer writer =
-          processingEnv.getFiler().createSourceFile(generatedClassName).openWriter()) {
-        writer.append(generatedSource);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+    GeneratingProcessor(String generatedClassName, String... source) {
+        this.generatedClassName = generatedClassName;
+        this.generatedSource = String.join("\n", source);
     }
-    return false;
-  }
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
+
+    @Override
+    public Set<String> getSupportedAnnotationTypes() {
+        return Set.of("*");
+    }
+
+    @Override
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        if (!processed) {
+            processed = true;
+            try (Writer writer =
+                         processingEnv.getFiler().createSourceFile(generatedClassName).openWriter()) {
+                writer.append(generatedSource);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return false;
+    }
 }

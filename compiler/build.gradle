@@ -1,6 +1,6 @@
 plugins {
     id('java')
-    id('com.github.johnrengelman.shadow') version('6.1.0')
+    id('com.github.johnrengelman.shadow') version('7.1.2')
     id('maven-publish')
     id('signing')
 }
@@ -23,6 +23,7 @@ compileJava {
 
 repositories {
     mavenCentral()
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1135' }
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -37,23 +38,22 @@ tasks.withType(GenerateModuleMetadata) {
 shadowJar {
     minimize()
     archiveClassifier.set('')
-    relocate('dagger', 'net.jbock.dagger')
-    relocate('com.squareup.javapoet', 'net.jbock.javapoet')
-    relocate('jakarta.inject', 'net.jbock.jakarta.inject')
 }
 
 dependencies {
     def core = 'io.github.jbock-java:jbock:5.12'
-    implementation('io.github.jbock-java:javapoet:1.14')
-    implementation('io.github.jbock-java:auto-common:1.2.0')
+    shadow('io.github.jbock-java:javapoet:1.14')
+    shadow('io.github.jbock-java:auto-common:1.2.1')
     shadow('io.github.jbock-java:either:1.5')
     shadow(core)
-    implementation('io.github.jbock-java:dapper:1.2')
-    annotationProcessor('io.github.jbock-java:dapper-compiler:1.2')
+    shadow('io.github.jbock-java:dapper:1.2.1')
+    annotationProcessor('io.github.jbock-java:dapper-compiler:1.2.1')
     testImplementation(core)
-    testImplementation('io.github.jbock-java:compile-testing:0.19.10')
+    testImplementation('io.github.jbock-java:javapoet:1.14')
+    testImplementation('io.github.jbock-java:compile-testing:0.19.11')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.1')
     testImplementation('org.mockito:mockito-core:3.12.4')
+    testImplementation('io.github.jbock-java:dapper:1.2.1')
 }
 
 jar {
