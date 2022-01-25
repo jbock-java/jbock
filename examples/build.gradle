@@ -23,7 +23,7 @@ dependencies {
     implementation(core)
     annotationProcessor project(':compiler')
     annotationProcessor(core)
-    testImplementation 'io.github.jbock-java:auto-common:1.2.1'
+    annotationProcessor 'io.github.jbock-java:auto-common:1.2.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 }
 
