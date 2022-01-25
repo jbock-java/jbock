@@ -1,36 +1,29 @@
 #!/bin/bash
-set -e
 
 die () {
     echo "$*"
     exit 1
 }
 
-usage="Usage: release [core|compiler] <version>"
+usage="Usage: release <version>"
 
 if [[ `git status --porcelain` ]]; then
   die "dirty workspace"
 fi
 
-MODULE="$1"
-VERSION="$2"
+VERSION="$1"
 
 if [[ -z "$VERSION" ]]; then
   die "$usage"
 fi
 
-git pull origin $(git rev-parse --abbrev-ref HEAD)
-./gradlew clean compiler:test examples:test
-./gradlew -Pversion=${VERSION} ${MODULE}:publish
-
-if [[ "compiler" != "$MODULE" ]]; then
-  echo "Upload successful."
-  exit
-fi
+git pull origin $(git rev-parse --abbrev-ref HEAD) || die "pull failed"
+./gradlew clean -Pversion=${VERSION} jbock:publish || die "build failed"
+./gradlew clean -Pversion=${VERSION} compiler:publish || die "build failed"
 
 read -e -p "Upload successful. Also tag? [y/N]"
 if [[ "$REPLY" == [Yy]* ]]; then
-  git tag "v${VERSION}"
+  git tag "${VERSION}"
   git push origin --tags
 fi
 

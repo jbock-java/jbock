@@ -40,16 +40,16 @@ shadowJar {
 }
 
 dependencies {
-    def core = 'io.github.jbock-java:jbock:5.12'
+    def jbock = project(':jbock')
     def dapper = 'io.github.jbock-java:dapper:1.2.1'
     def javapoet = 'io.github.jbock-java:javapoet:1.14'
     shadow(javapoet)
     shadow('io.github.jbock-java:auto-common:1.2.1')
     shadow('io.github.jbock-java:either:1.5')
-    shadow(core)
+    shadow(jbock)
     shadow(dapper)
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2.1')
-    testImplementation(core)
+    testImplementation(jbock)
     testImplementation(javapoet)
     testImplementation('io.github.jbock-java:compile-testing:0.19.11')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')

@@ -19,10 +19,10 @@ compileJava {
 }
 
 dependencies {
-    def core = project(':core')
-    implementation(core)
+    def jbock = project(':jbock')
+    implementation(jbock)
     annotationProcessor project(':compiler')
-    annotationProcessor(core)
+    annotationProcessor(jbock)
     annotationProcessor 'io.github.jbock-java:dapper:1.2.1'
     annotationProcessor 'io.github.jbock-java:javapoet:1.14'
     annotationProcessor 'io.github.jbock-java:auto-common:1.2.1'
