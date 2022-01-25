@@ -38,8 +38,7 @@ public class OptionalMatcher implements Matcher {
             M sourceMethod) {
         TypeMirror returnType = sourceMethod.returnType();
         return getOptionalPrimitive(sourceMethod, returnType)
-                .or(() -> matchOptional(sourceMethod, returnType))
-                .or(() -> matchVavr(sourceMethod, returnType));
+                .or(() -> matchOptional(sourceMethod, returnType));
     }
 
     private <M extends AnnotatedMethod> Optional<Match<M>>
@@ -47,14 +46,6 @@ public class OptionalMatcher implements Matcher {
         return elements.getTypeElement("java.util.Optional")
                 .flatMap(el -> tool.getSingleTypeArgument(returnType, el))
                 .map(typeArg -> Match.create(typeArg, OPTIONAL, sourceMethod));
-    }
-
-    private <M extends AnnotatedMethod> Optional<Match<M>>
-    matchVavr(M sourceMethod, TypeMirror returnType) {
-        return elements.getTypeElement("io.vavr.control.Option")
-                .flatMap(el -> tool.getSingleTypeArgument(returnType, el)
-                        .map(typeArg -> createWithExtract(typeArg,
-                                CodeBlock.of(".map($1T::of).orElse($1T.none())", types.erasure(el.asType())), sourceMethod)));
     }
 
     private <M extends AnnotatedMethod>

@@ -3,10 +3,8 @@ package net.jbock.processor;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
-import java.util.List;
 
 import static com.google.common.truth.Truth.assertAbout;
-import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 import static java.util.Collections.singletonList;
 import static net.jbock.processor.Processor.fromSource;
@@ -23,27 +21,6 @@ class PositionalTest {
                 "  abstract Optional<String> a();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .compilesWithoutError();
-    }
-
-    @Test
-    void vavrOption() {
-        JavaFileObject option = forSourceLines(
-                "io.vavr.control.Option",
-                "package io.vavr.control;",
-                "public class Option<T> {",
-                "  public static <T> Option<T> of(T value) { return null; }",
-                "  public static <T> Option<T> none() { return null; }",
-                "}");
-        JavaFileObject javaFile = fromSource(
-                "@Command",
-                "abstract class Arguments {",
-                "",
-                "  @Parameter(index = 0)",
-                "  abstract io.vavr.control.Option<String> a();",
-                "}");
-        assertAbout(javaSources()).that(List.of(option, javaFile))
                 .processedWith(Processor.testInstance())
                 .compilesWithoutError();
     }

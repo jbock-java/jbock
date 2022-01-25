@@ -4,7 +4,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1092' }
 }
 
 java {
@@ -22,10 +21,10 @@ compileJava {
 dependencies {
     def core = project(':core')
     implementation(core)
-    implementation 'io.vavr:vavr:1.0.0-alpha-3'
     annotationProcessor project(':compiler')
     annotationProcessor(core)
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    testImplementation 'io.github.jbock-java:auto-common:1.2.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 }
 
 test {
