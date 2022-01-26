@@ -5,21 +5,28 @@ die () {
     exit 1
 }
 
-usage="Usage: release <version>"
-
-if [[ `git status --porcelain` ]]; then
+if [[ $(git status --porcelain) ]]; then
   die "dirty workspace"
 fi
 
 VERSION="$1"
 
 if [[ -z "$VERSION" ]]; then
-  die "$usage"
+  die "Usage: release <version>"
 fi
 
-git pull origin $(git rev-parse --abbrev-ref HEAD) || die "pull failed"
-./gradlew clean -Pversion=${VERSION} jbock:publish || die "build failed"
-./gradlew clean -Pversion=${VERSION} compiler:publish || die "build failed"
+if ! git pull origin $(git rev-parse --abbrev-ref HEAD); then
+  die "pull failed"
+fi
+
+if ! ./gradlew clean -Pversion=${VERSION} jbock:publish; then
+  die "build failed"
+fi
+
+
+if ! ./gradlew clean -Pversion=${VERSION} compiler:publish; then
+  die "build failed"
+fi
 
 read -e -p "Upload successful. Also tag? [y/N]"
 if [[ "$REPLY" == [Yy]* ]]; then
