@@ -45,7 +45,6 @@ dependencies {
     def javapoet = 'io.github.jbock-java:javapoet:1.14'
     shadow(javapoet)
     shadow('io.github.jbock-java:auto-common:1.2.1')
-    shadow('io.github.jbock-java:either:1.5')
     shadow(jbock)
     shadow(dapper)
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2.1')
