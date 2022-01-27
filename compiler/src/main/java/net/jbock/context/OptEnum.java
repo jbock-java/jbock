@@ -1,6 +1,6 @@
 package net.jbock.context;
 
-import com.squareup.javapoet.TypeSpec;
+import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;

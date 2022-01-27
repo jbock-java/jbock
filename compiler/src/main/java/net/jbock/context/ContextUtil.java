@@ -1,6 +1,6 @@
 package net.jbock.context;
 
-import com.squareup.javapoet.CodeBlock;
+import io.jbock.javapoet.CodeBlock;
 import jakarta.inject.Inject;
 
 import java.util.List;

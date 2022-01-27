@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
 
-import static com.google.common.truth.Truth.assertAbout;
-import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
+import static io.jbock.common.truth.Truth.assertAbout;
+import static io.jbock.testing.compile.JavaSourcesSubjectFactory.javaSources;
 import static java.util.Collections.singletonList;
 import static net.jbock.processor.Processor.fromSource;
 

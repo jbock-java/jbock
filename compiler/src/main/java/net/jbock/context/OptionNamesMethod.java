@@ -1,8 +1,8 @@
 package net.jbock.context;
 
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.ParameterSpec;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;

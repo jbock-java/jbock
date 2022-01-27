@@ -1,6 +1,6 @@
 package net.jbock.processor;
 
-import com.google.auto.common.BasicAnnotationProcessor.Step;
+import io.jbock.auto.common.BasicAnnotationProcessor.Step;
 import jakarta.inject.Inject;
 import net.jbock.Command;
 import net.jbock.common.Util;

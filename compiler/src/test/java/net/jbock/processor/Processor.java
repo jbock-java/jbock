@@ -1,14 +1,14 @@
 package net.jbock.processor;
 
-import com.google.testing.compile.Compiler;
+import io.jbock.testing.compile.Compiler;
 
 import javax.tools.JavaFileObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.google.testing.compile.Compiler.javac;
-import static com.google.testing.compile.JavaFileObjects.forSourceLines;
+import static io.jbock.testing.compile.Compiler.javac;
+import static io.jbock.testing.compile.JavaFileObjects.forSourceLines;
 
 class Processor {
 

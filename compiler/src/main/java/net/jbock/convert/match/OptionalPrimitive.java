@@ -1,6 +1,6 @@
 package net.jbock.convert.match;
 
-import com.squareup.javapoet.CodeBlock;
+import io.jbock.javapoet.CodeBlock;
 
 import java.util.OptionalDouble;
 import java.util.OptionalInt;

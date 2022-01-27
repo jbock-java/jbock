@@ -1,6 +1,6 @@
 package net.jbock.convert.map;
 
-import com.squareup.javapoet.CodeBlock;
+import io.jbock.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;

@@ -1,7 +1,7 @@
 package net.jbock.processor;
 
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeSpec;
+import io.jbock.javapoet.JavaFile;
+import io.jbock.javapoet.TypeSpec;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
 import net.jbock.Command;
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.google.auto.common.BasicAnnotationProcessor.Step;
+import static io.jbock.auto.common.BasicAnnotationProcessor.Step;
 import static io.jbock.util.Either.right;
 
 /**

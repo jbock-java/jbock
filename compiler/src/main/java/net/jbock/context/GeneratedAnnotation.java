@@ -1,7 +1,7 @@
 package net.jbock.context;
 
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.CodeBlock;
+import io.jbock.javapoet.AnnotationSpec;
+import io.jbock.javapoet.CodeBlock;
 import jakarta.inject.Inject;
 import net.jbock.processor.JbockProcessor;
 

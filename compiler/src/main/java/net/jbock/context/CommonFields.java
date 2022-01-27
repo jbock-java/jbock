@@ -1,7 +1,7 @@
 package net.jbock.context;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.FieldSpec;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;

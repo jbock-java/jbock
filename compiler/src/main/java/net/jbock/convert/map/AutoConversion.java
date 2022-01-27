@@ -1,6 +1,6 @@
 package net.jbock.convert.map;
 
-import com.squareup.javapoet.CodeBlock;
+import io.jbock.javapoet.CodeBlock;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;

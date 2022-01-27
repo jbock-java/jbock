@@ -1,6 +1,6 @@
 package net.jbock.convert.match;
 
-import com.squareup.javapoet.CodeBlock;
+import io.jbock.javapoet.CodeBlock;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.ValidationFailure;
 import net.jbock.model.Multiplicity;

@@ -1,6 +1,6 @@
 package net.jbock.processor;
 
-import com.squareup.javapoet.JavaFile;
+import io.jbock.javapoet.JavaFile;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.processing.Filer;

@@ -1,7 +1,7 @@
 package net.jbock.processor;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.TypeName;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.TypeName;
 import net.jbock.Command;
 import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;

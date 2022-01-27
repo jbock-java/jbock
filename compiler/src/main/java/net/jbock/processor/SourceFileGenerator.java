@@ -1,6 +1,6 @@
 package net.jbock.processor;
 
-import com.squareup.javapoet.JavaFile;
+import io.jbock.javapoet.JavaFile;
 import jakarta.inject.Inject;
 
 import javax.annotation.processing.Filer;

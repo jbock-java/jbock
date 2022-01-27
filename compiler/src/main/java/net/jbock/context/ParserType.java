@@ -1,8 +1,8 @@
 package net.jbock.context;
 
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.ParameterSpec;
+import io.jbock.javapoet.TypeName;
 
 final class ParserType {
 

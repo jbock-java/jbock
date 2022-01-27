@@ -1,8 +1,8 @@
 package net.jbock.context;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
+import io.jbock.javapoet.ClassName;
+import io.jbock.javapoet.ParameterizedTypeName;
+import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ParsingFailed;

@@ -1,12 +1,12 @@
 package net.jbock.processor;
 
-import com.google.testing.compile.Compilation;
+import io.jbock.testing.compile.Compilation;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
 import java.util.List;
 
-import static com.google.testing.compile.CompilationSubject.assertThat;
+import static io.jbock.testing.compile.CompilationSubject.assertThat;
 import static net.jbock.processor.Processor.fromSource;
 
 class BasicFullTest {

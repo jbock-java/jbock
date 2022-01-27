@@ -1,13 +1,13 @@
 package net.jbock.context;
 
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.MethodSpec;
+import io.jbock.javapoet.ParameterSpec;
 import jakarta.inject.Inject;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ExFailure;
 
-import static com.squareup.javapoet.ParameterSpec.builder;
+import static io.jbock.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 

@@ -1,7 +1,7 @@
 package net.jbock.context;
 
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
+import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.MethodSpec;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.squareup.javapoet.MethodSpec.methodBuilder;
+import static io.jbock.javapoet.MethodSpec.methodBuilder;
 
 @ContextScope
 public final class CreateModelMethod extends Cached<MethodSpec> {
