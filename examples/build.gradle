@@ -24,8 +24,8 @@ dependencies {
     annotationProcessor project(':compiler')
     annotationProcessor(jbock)
     annotationProcessor 'io.github.jbock-java:dapper:1.2.1'
-    annotationProcessor 'io.github.jbock-java:javapoet:1.14'
-    annotationProcessor 'io.github.jbock-java:auto-common:1.2.1'
+    annotationProcessor 'io.github.jbock-java:javapoet:1.15'
+    annotationProcessor 'io.github.jbock-java:auto-common:1.2.2'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 }
 
