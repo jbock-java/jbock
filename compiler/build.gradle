@@ -1,6 +1,5 @@
 plugins {
     id('java')
-    id('com.github.johnrengelman.shadow') version('7.1.2')
     id('maven-publish')
     id('signing')
 }
@@ -9,7 +8,7 @@ group = 'io.github.jbock-java'
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(16))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 
@@ -34,26 +33,18 @@ tasks.withType(GenerateModuleMetadata) {
     enabled = true
 }
 
-shadowJar {
-    minimize()
-    archiveClassifier.set('')
-}
-
 dependencies {
     def jbock = project(':jbock')
     def dapper = 'io.github.jbock-java:dapper:1.2.1'
     def javapoet = 'io.github.jbock-java:javapoet:1.15'
-    shadow(javapoet)
-    shadow('io.github.jbock-java:auto-common:1.2.3')
-    shadow(jbock)
-    shadow(dapper)
+    implementation(javapoet)
+    implementation('io.github.jbock-java:auto-common:1.2.3')
+    implementation(jbock)
+    implementation(dapper)
     annotationProcessor('io.github.jbock-java:dapper-compiler:1.2.1')
-    testImplementation(jbock)
-    testImplementation(javapoet)
     testImplementation('io.github.jbock-java:compile-testing:0.19.12')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
     testImplementation('org.mockito:mockito-core:3.12.4')
-    testImplementation(dapper)
 }
 
 jar {
@@ -66,7 +57,6 @@ jar {
 
 test {
     useJUnitPlatform()
-    jvmArgs = ['--add-opens', 'jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED']
     testLogging {
         events('failed')
     }
@@ -89,8 +79,7 @@ artifacts {
 // https://central.sonatype.org/pages/gradle.html
 publishing {
     publications {
-        mavenJava(MavenPublication) { publication ->
-            project.shadow.component(publication)
+        mavenJava(MavenPublication) {
             artifactId = 'jbock-compiler'
 
             artifact sourcesJar

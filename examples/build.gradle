@@ -8,24 +8,20 @@ repositories {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(16)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
 compileJava {
     options.encoding = 'UTF-8'
-    sourceCompatibility = '16'
-    targetCompatibility = '16'
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
 }
 
 dependencies {
     def jbock = project(':jbock')
     implementation(jbock)
     annotationProcessor project(':compiler')
-    annotationProcessor(jbock)
-    annotationProcessor 'io.github.jbock-java:dapper:1.2.1'
-    annotationProcessor 'io.github.jbock-java:javapoet:1.15'
-    annotationProcessor 'io.github.jbock-java:auto-common:1.2.2'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 }
 
