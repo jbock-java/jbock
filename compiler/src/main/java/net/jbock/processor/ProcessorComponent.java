@@ -8,8 +8,8 @@ import javax.annotation.processing.ProcessingEnvironment;
 /**
  * @see ProcessorScope
  */
-@Component(modules = ProcessorModule.class)
 @ProcessorScope
+@Component(modules = ProcessorModule.class)
 interface ProcessorComponent {
 
     MethodStep methodStep();
