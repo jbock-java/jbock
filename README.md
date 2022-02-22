@@ -27,7 +27,8 @@ abstract class DeleteCommand {
              description = "A positional parameter.")
   abstract Path path();
 
-  /* `OptionalInt` (or alternatively `Optional<Integer>`), but not `int` or `Integer`:
+  /* `OptionalInt` (or alternatively `Optional<Integer>`),
+   * but not `int` or `Integer`:
    * This named option is optional (multiplicity = 0..1).
    */
   @Option(names = {"-v", "--verbosity"},
