@@ -134,7 +134,7 @@ public final class HarvestMethod extends Cached<MethodSpec> {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.rest()", parser));
         code.add(CodeBlock.of(".map($L)", m.mapper()));
-        code.add(CodeBlock.of(".collect($T.toValidList())", EITHERS));
+        code.add(CodeBlock.of(".collect($T.firstFailure())", EITHERS));
         code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.size()));
         return contextUtil.joinByNewline(code);
     }
@@ -152,7 +152,7 @@ public final class HarvestMethod extends Cached<MethodSpec> {
                         orElseThrowConverterError(ItemType.OPTION, i));
             case OPTIONAL:
                 return List.of(
-                        CodeBlock.of(".collect($T.toValidList())", EITHERS),
+                        CodeBlock.of(".collect($T.firstFailure())", EITHERS),
                         orElseThrowConverterError(ItemType.OPTION, i),
                         CodeBlock.of(".stream().findAny()"));
             default: {
@@ -160,7 +160,7 @@ public final class HarvestMethod extends Cached<MethodSpec> {
                     throw new AssertionError();
                 }
                 return List.of(
-                        CodeBlock.of(".collect($T.toValidList())", EITHERS),
+                        CodeBlock.of(".collect($T.firstFailure())", EITHERS),
                         orElseThrowConverterError(ItemType.OPTION, i));
             }
         }
@@ -177,7 +177,7 @@ public final class HarvestMethod extends Cached<MethodSpec> {
         }
         return List.of(
                 CodeBlock.of(".stream()"),
-                CodeBlock.of(".collect($T.toValidList())", EITHERS),
+                CodeBlock.of(".collect($T.firstFailure())", EITHERS),
                 orElseThrowConverterError(ItemType.PARAMETER, i),
                 CodeBlock.of(".stream().findAny()"));
     }
