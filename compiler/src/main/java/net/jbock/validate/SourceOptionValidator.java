@@ -16,8 +16,8 @@ import java.util.Set;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
+import static io.jbock.util.Eithers.allFailures;
 import static io.jbock.util.Eithers.toOptionalList;
-import static io.jbock.util.Eithers.toValidListAll;
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
 
@@ -39,11 +39,11 @@ public class SourceOptionValidator {
             ContextBuilder.Step3 step) {
         return step.namedOptions().stream()
                 .map(this::checkOptionNames)
-                .collect(toValidListAll())
+                .collect(allFailures())
                 .filter(this::validateUniqueOptionNames)
                 .flatMap(sourceOptions -> sourceOptions.stream()
                         .map(this::wrapOption)
-                        .collect(toValidListAll()))
+                        .collect(allFailures()))
                 .map(step::accept);
     }
 

@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static io.jbock.util.Either.left;
-import static io.jbock.util.Eithers.toValidListAll;
+import static io.jbock.util.Eithers.allFailures;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
@@ -58,7 +58,7 @@ public class ExecutableElementsFinder {
     private Either<List<ValidationFailure>, List<Executable>> validParameterlessAbstract() {
         return abstractMethods().stream()
                 .map(this::validateAbstractMethod)
-                .collect(toValidListAll());
+                .collect(allFailures());
     }
 
     private Optional<ValidationFailure> checkInterfaceOrSimpleClass() {
@@ -72,7 +72,7 @@ public class ExecutableElementsFinder {
                         Optional.empty() :
                         Optional.of(sourceElement.fail(
                                 "invalid superclass: expecting java.lang.Object, but found: "
-                                + superClass.getQualifiedName())));
+                                        + superClass.getQualifiedName())));
     }
 
     private Optional<ValidationFailure> checkNoInterfaces() {

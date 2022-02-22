@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.jbock.util.Either.right;
+import static io.jbock.util.Eithers.allFailures;
 import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
-import static io.jbock.util.Eithers.toValidListAll;
 
 @ValidateScope
 public class SourceParameterValidator {
@@ -31,7 +31,7 @@ public class SourceParameterValidator {
         return validatePositions(step.positionalParameters())
                 .flatMap(positionalParameters -> positionalParameters.stream()
                         .map(mappingFinder::findMapping)
-                        .collect(toValidListAll()))
+                        .collect(allFailures()))
                 .filter(this::checkNoRequiredAfterOptional)
                 .map(step::accept);
     }
