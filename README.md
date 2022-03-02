@@ -20,14 +20,15 @@ and corresponds either to a *named option* or a *positional parameter*.
 @Command
 abstract class DeleteCommand {
 
-  /* Path, not Optional<Path>:
+  /* `Path`, not `Optional<Path>`:
    * This positional parameter is required (multiplicity = 1).
    */
   @Parameter(index = 0,
              description = "A positional parameter.")
   abstract Path path();
 
-  /* OptionalInt, not int or Integer:
+  /* `OptionalInt` (or alternatively `Optional<Integer>`),
+   * but not `int` or `Integer`:
    * This named option is optional (multiplicity = 0..1).
    */
   @Option(names = {"-v", "--verbosity"},

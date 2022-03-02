@@ -10,7 +10,7 @@ import java.util.List;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
-import static io.jbock.util.Eithers.toValidList;
+import static io.jbock.util.Eithers.firstFailure;
 
 final class ParseRequestExpand extends ParseRequest {
 
@@ -48,7 +48,7 @@ final class ParseRequestExpand extends ParseRequest {
         while (it.hasNext()) {
             tokens.add(readTokenFromAtFile(it));
         }
-        return tokens.stream().collect(toValidList());
+        return tokens.stream().collect(firstFailure());
     }
 
     private Either<NumberedLineResult, String> readTokenFromAtFile(Iterator<NumberedLine> it) {

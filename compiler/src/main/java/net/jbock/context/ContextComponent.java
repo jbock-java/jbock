@@ -10,8 +10,8 @@ import net.jbock.processor.SourceElement;
 
 import java.util.List;
 
-@Component(modules = ContextModule.class)
 @ContextScope
+@Component(modules = ContextModule.class)
 public interface ContextComponent {
 
     ParserClass parserClass();

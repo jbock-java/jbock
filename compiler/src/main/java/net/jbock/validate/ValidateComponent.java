@@ -6,8 +6,8 @@ import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
 import net.jbock.processor.SourceElement;
 
-@Component(modules = ValidateModule.class)
 @ValidateScope
+@Component(modules = ValidateModule.class)
 public interface ValidateComponent {
 
     CommandProcessor processor();

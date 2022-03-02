@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.jbock.util.Either.right;
-import static io.jbock.util.Eithers.toValidListAll;
+import static io.jbock.util.Eithers.allFailures;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -58,7 +58,7 @@ public class AnnotatedMethodsFactory {
                 .flatMap(builder -> builder.methods().stream()
                         .map(sourceMethod -> createAnnotatedMethod(sourceMethod,
                                 builder.enumNames().get(sourceMethod.simpleName())))
-                        .collect(toValidListAll()))
+                        .collect(allFailures()))
                 .map(AnnotatedMethods::builder)
                 .map(builder -> builder.withNamedOptions(builder.annotatedMethods()
                         .flatMap(instancesOf(AnnotatedOption.class))

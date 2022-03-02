@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.jbock.util.Either.right;
+import static io.jbock.util.Eithers.allFailures;
 import static io.jbock.util.Eithers.toOptionalList;
-import static io.jbock.util.Eithers.toValidListAll;
 
 @ValidateScope
 public class SourceParametersValidator {
@@ -35,7 +35,7 @@ public class SourceParametersValidator {
                 .filter(this::validateNoRepeatableParameterInSuperCommand)
                 .flatMap(repeatablePositionalParameters -> repeatablePositionalParameters.stream()
                         .map(mappingFinder::findMapping)
-                        .collect(toValidListAll()))
+                        .collect(allFailures()))
                 .map(step::accept);
     }
 
