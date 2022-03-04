@@ -1,6 +1,7 @@
 plugins {
     id('java')
     id('maven-publish')
+    id('com.github.johnrengelman.shadow') version('7.1.2')
     id('signing')
 }
 
@@ -20,8 +21,17 @@ compileJava {
     options.compilerArgs << '11'
 }
 
+javadoc {
+    options.encoding = 'UTF-8'
+}
+
 repositories {
     mavenCentral()
+}
+
+shadowJar {
+    minimize()
+    archiveClassifier.set('')
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -33,18 +43,26 @@ tasks.withType(GenerateModuleMetadata) {
     enabled = true
 }
 
+shadowJar {
+    minimize()
+    archiveClassifier.set('')
+    relocate('io.jbock.auto.common', 'io.jbock.shadow.auto.common')
+    relocate('io.jbock.javapoet', 'io.jbock.shadow.javapoet')
+}
+
 dependencies {
     def jbock = project(':jbock')
     def dapper = 'io.github.jbock-java:dapper:2.41.1'
     def javapoet = 'io.github.jbock-java:javapoet:1.15'
     implementation(javapoet)
     implementation('io.github.jbock-java:auto-common:1.2.3')
-    implementation(jbock)
-    implementation(dapper)
+    shadow(jbock)
+    compileOnly(dapper)
     annotationProcessor('io.github.jbock-java:dapper-compiler:2.41.1')
     testImplementation('io.github.jbock-java:compile-testing:0.19.12')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
     testImplementation('org.mockito:mockito-core:3.12.4')
+    testImplementation(jbock)
 }
 
 jar {
@@ -79,7 +97,8 @@ artifacts {
 // https://central.sonatype.org/pages/gradle.html
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
             artifactId = 'jbock-compiler'
 
             artifact sourcesJar
@@ -128,5 +147,5 @@ signing {
     def signingKey = findProperty('signingKey')
     def signingPassword = findProperty('signingPassword')
     useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
+    sign publishing.publications.shadow
 }
