@@ -20,8 +20,11 @@ compileJava {
 
 dependencies {
     def jbock = project(':jbock')
+    def dapper = 'io.github.jbock-java:dapper:2.41.1'
     implementation(jbock)
     annotationProcessor project(':compiler')
+    annotationProcessor project(':jbock')
+    annotationProcessor dapper
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 }
 
