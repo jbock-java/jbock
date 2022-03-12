@@ -7,7 +7,6 @@ However it does not use reflection.
 It is an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
 that generates a custom parser at compile time.
-jbock requires Java 11.
 
 ### Quick start
 
