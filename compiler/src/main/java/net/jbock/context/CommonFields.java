@@ -13,7 +13,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.mapOf;
 
-public class CommonFields {
+class CommonFields {
 
     private final FieldSpec optionNames;
     private final ClassName optType;

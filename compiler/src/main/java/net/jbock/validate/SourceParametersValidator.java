@@ -16,7 +16,7 @@ import static io.jbock.util.Eithers.allFailures;
 import static io.jbock.util.Eithers.toOptionalList;
 
 @ValidateScope
-public class SourceParametersValidator {
+class SourceParametersValidator {
 
     private final MappingFinder mappingFinder;
     private final SourceElement sourceElement;

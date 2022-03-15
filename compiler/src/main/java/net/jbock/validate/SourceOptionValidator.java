@@ -22,7 +22,7 @@ import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
 
 @ValidateScope
-public class SourceOptionValidator {
+class SourceOptionValidator {
 
     private final MappingFinder mappingFinder;
     private final MatchFinder matchFinder;

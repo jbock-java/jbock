@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 
 @ContextScope
-public final class CreateModelMethod extends Cached<MethodSpec> {
+final class CreateModelMethod extends Cached<MethodSpec> {
 
     private final ContextUtil contextUtil;
     private final SourceElement sourceElement;

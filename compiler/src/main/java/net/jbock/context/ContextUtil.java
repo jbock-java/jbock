@@ -6,7 +6,7 @@ import jakarta.inject.Inject;
 import java.util.List;
 
 @ContextScope
-public class ContextUtil {
+class ContextUtil {
 
     @Inject
     ContextUtil() {

@@ -25,7 +25,7 @@ import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
 @ContextScope
-public final class HarvestMethod extends Cached<MethodSpec> {
+final class HarvestMethod extends Cached<MethodSpec> {
 
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;

@@ -20,7 +20,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.mapOf;
 
 @ContextScope
-public final class OptionStatesMethod extends Cached<MethodSpec> {
+final class OptionStatesMethod extends Cached<MethodSpec> {
 
     private final List<Mapping<AnnotatedOption>> namedOptions;
     private final SourceElement sourceElement;

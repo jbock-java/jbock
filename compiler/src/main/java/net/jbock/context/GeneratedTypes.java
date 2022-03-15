@@ -13,7 +13,7 @@ import java.util.Optional;
 import static net.jbock.common.Constants.EITHER;
 
 @ContextScope
-public class GeneratedTypes {
+class GeneratedTypes {
 
     private final SourceElement sourceElement;
     private final ClassName generatedClass;

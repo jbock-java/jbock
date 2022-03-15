@@ -15,7 +15,7 @@ import javax.annotation.processing.ProcessingEnvironment;
  * @see ProcessorScope
  */
 @Module
-public interface ProcessorModule {
+interface ProcessorModule {
 
     @ProcessorScope
     @Provides

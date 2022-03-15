@@ -8,7 +8,7 @@ import net.jbock.processor.JbockProcessor;
 import javax.annotation.processing.Generated;
 
 @ContextScope
-public class GeneratedAnnotation {
+class GeneratedAnnotation {
 
     @Inject
     GeneratedAnnotation() {

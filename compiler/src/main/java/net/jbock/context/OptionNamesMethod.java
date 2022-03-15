@@ -15,7 +15,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 
 @ContextScope
-public final class OptionNamesMethod extends Cached<MethodSpec> {
+final class OptionNamesMethod extends Cached<MethodSpec> {
 
     private final List<Mapping<AnnotatedOption>> namedOptions;
     private final SourceElement sourceElement;

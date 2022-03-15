@@ -13,7 +13,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public final class ConverterType<M extends AnnotatedMethod> {
+final class ConverterType<M extends AnnotatedMethod> {
 
     private final TypeElement converter;
     private final Match<M> match;

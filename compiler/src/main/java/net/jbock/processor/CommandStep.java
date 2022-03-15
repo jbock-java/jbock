@@ -32,7 +32,7 @@ import static io.jbock.util.Either.right;
  * @see ProcessorScope
  */
 @ProcessorScope
-public class CommandStep implements Step {
+class CommandStep implements Step {
 
     private final Messager messager;
     private final Util util;

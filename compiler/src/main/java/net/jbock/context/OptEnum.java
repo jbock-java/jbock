@@ -16,7 +16,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
  * @see ParserClass
  */
 @ContextScope
-public class OptEnum {
+class OptEnum {
 
     private final List<Mapping<AnnotatedOption>> options;
     private final SourceElement sourceElement;

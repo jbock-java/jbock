@@ -12,7 +12,7 @@ import java.io.StringWriter;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 @ProcessorScope
-public class SourceFileGenerator {
+class SourceFileGenerator {
 
     private final Filer filer;
     private final Messager messager;

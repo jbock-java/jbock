@@ -14,7 +14,7 @@ import static io.jbock.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
 @ContextScope
-public class ParseOrExitMethod {
+class ParseOrExitMethod {
 
     private final SourceElement sourceElement;
     private final GeneratedTypes generatedTypes;

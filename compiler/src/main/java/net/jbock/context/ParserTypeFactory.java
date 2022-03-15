@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @ContextScope
-public final class ParserTypeFactory extends Cached<ParserType> {
+final class ParserTypeFactory extends Cached<ParserType> {
 
     private final SourceElement sourceElement;
     private final List<Mapping<AnnotatedParameter>> positionalParameters;

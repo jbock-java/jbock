@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.toList;
  * @see ContextScope
  */
 @Module
-public interface ContextModule {
+interface ContextModule {
 
     @ContextScope
     @Provides

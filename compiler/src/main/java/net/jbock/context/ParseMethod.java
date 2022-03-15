@@ -12,7 +12,7 @@ import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 
 @ContextScope
-public final class ParseMethod extends Cached<MethodSpec> {
+final class ParseMethod extends Cached<MethodSpec> {
 
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;

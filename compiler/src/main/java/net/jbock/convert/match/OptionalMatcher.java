@@ -4,7 +4,6 @@ import io.jbock.javapoet.CodeBlock;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeElements;
-import net.jbock.common.SafeTypes;
 import net.jbock.common.TypeTool;
 import net.jbock.validate.ValidateScope;
 
@@ -20,16 +19,13 @@ public class OptionalMatcher implements Matcher {
 
     private final TypeTool tool;
     private final SafeElements elements;
-    private final SafeTypes types;
 
     @Inject
     OptionalMatcher(
             TypeTool tool,
-            SafeElements elements,
-            SafeTypes types) {
+            SafeElements elements) {
         this.tool = tool;
         this.elements = elements;
-        this.types = types;
     }
 
     @Override
