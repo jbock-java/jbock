@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.CodeBlock;
@@ -24,7 +24,7 @@ import static net.jbock.common.Constants.EITHERS;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
-@ContextScope
+@WritingScope
 final class HarvestMethod extends Cached<MethodSpec> {
 
     private final GeneratedTypes generatedTypes;

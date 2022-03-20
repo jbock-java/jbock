@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
@@ -13,7 +13,7 @@ import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
-@ContextScope
+@WritingScope
 class ParseOrExitMethod {
 
     private final SourceElement sourceElement;

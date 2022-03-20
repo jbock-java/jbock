@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import dagger.Module;
 import dagger.Provides;
@@ -14,12 +14,12 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 
 /**
- * @see ContextScope
+ * @see WritingScope
  */
 @Module
 interface ContextModule {
 
-    @ContextScope
+    @WritingScope
     @Provides
     static List<Mapping<?>> allMappings(
             List<Mapping<AnnotatedParameter>> positionalParams,
@@ -30,7 +30,7 @@ interface ContextModule {
                 .collect(toList());
     }
 
-    @ContextScope
+    @WritingScope
     @Provides
     static CommonFields commonFields(
             SourceElement sourceElement,

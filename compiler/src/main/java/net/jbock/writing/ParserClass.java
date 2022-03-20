@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Generates the *Parser class.
  */
-@ContextScope
+@WritingScope
 public final class ParserClass {
 
     private final ParseMethod parseMethod;

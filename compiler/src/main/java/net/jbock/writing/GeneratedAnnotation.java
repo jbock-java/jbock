@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import io.jbock.javapoet.AnnotationSpec;
 import io.jbock.javapoet.CodeBlock;
@@ -7,7 +7,7 @@ import net.jbock.processor.JbockProcessor;
 
 import javax.annotation.processing.Generated;
 
-@ContextScope
+@WritingScope
 class GeneratedAnnotation {
 
     @Inject

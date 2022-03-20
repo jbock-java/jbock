@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
@@ -19,7 +19,7 @@ import java.util.List;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.mapOf;
 
-@ContextScope
+@WritingScope
 final class OptionStatesMethod extends Cached<MethodSpec> {
 
     private final List<Mapping<AnnotatedOption>> namedOptions;

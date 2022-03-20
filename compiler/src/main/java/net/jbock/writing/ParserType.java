@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.ParameterSpec;

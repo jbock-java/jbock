@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import dagger.BindsInstance;
 import dagger.Component;
@@ -10,7 +10,7 @@ import net.jbock.processor.SourceElement;
 
 import java.util.List;
 
-@ContextScope
+@WritingScope
 @Component(modules = ContextModule.class)
 public interface ContextComponent {
 

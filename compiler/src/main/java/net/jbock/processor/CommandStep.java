@@ -9,7 +9,7 @@ import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
-import net.jbock.context.ContextComponent;
+import net.jbock.writing.ContextComponent;
 import net.jbock.validate.CommandProcessor;
 import net.jbock.validate.ValidateComponent;
 

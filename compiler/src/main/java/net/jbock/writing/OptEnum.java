@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
@@ -15,7 +15,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
  *
  * @see ParserClass
  */
-@ContextScope
+@WritingScope
 class OptEnum {
 
     private final List<Mapping<AnnotatedOption>> options;

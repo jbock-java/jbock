@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import jakarta.inject.Scope;
 
@@ -14,5 +14,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 @Scope
 @Retention(RUNTIME)
-@interface ContextScope {
+@interface WritingScope {
 }

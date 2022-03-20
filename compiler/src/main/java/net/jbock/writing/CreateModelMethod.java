@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 
-@ContextScope
+@WritingScope
 final class CreateModelMethod extends Cached<MethodSpec> {
 
     private final ContextUtil contextUtil;

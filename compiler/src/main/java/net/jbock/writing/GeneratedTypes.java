@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.ParameterizedTypeName;
@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import static net.jbock.common.Constants.EITHER;
 
-@ContextScope
+@WritingScope
 class GeneratedTypes {
 
     private final SourceElement sourceElement;

@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
@@ -16,7 +16,7 @@ import net.jbock.processor.SourceElement;
 import java.util.List;
 import java.util.Map;
 
-@ContextScope
+@WritingScope
 final class ParserTypeFactory extends Cached<ParserType> {
 
     private final SourceElement sourceElement;

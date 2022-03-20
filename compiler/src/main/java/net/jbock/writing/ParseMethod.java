@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
@@ -11,7 +11,7 @@ import static io.jbock.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 
-@ContextScope
+@WritingScope
 final class ParseMethod extends Cached<MethodSpec> {
 
     private final GeneratedTypes generatedTypes;

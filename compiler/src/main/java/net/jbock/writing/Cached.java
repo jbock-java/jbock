@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 abstract class Cached<E> {
 

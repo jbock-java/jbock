@@ -1,4 +1,4 @@
-package net.jbock.context;
+package net.jbock.writing;
 
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.MethodSpec;
@@ -21,7 +21,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
  *
  * @see ParserClass
  */
-@ContextScope
+@WritingScope
 public class ImplClass {
 
     private final GeneratedTypes generatedTypes;
