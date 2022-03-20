@@ -19,7 +19,7 @@ public final class ParserClass {
     private final OptEnum optionEnum;
     private final SourceElement sourceElement;
     private final List<Mapping<AnnotatedOption>> namedOptions;
-    private final ParseOrExitMethod parseOrExitMethod;
+    private final ParseOrExitMethod.Factory parseOrExitMethodFactory;
     private final CreateModelMethod createModelMethod;
     private final GeneratedAnnotation generatedAnnotation;
     private final HarvestMethod harvestMethod;
@@ -33,7 +33,7 @@ public final class ParserClass {
             SourceElement sourceElement,
             OptEnum optionEnum,
             List<Mapping<AnnotatedOption>> namedOptions,
-            ParseOrExitMethod parseOrExitMethod,
+            ParseOrExitMethod.Factory parseOrExitMethodFactory,
             CreateModelMethod createModelMethod,
             GeneratedAnnotation generatedAnnotation,
             HarvestMethod harvestMethod,
@@ -44,7 +44,7 @@ public final class ParserClass {
         this.sourceElement = sourceElement;
         this.optionEnum = optionEnum;
         this.namedOptions = namedOptions;
-        this.parseOrExitMethod = parseOrExitMethod;
+        this.parseOrExitMethodFactory = parseOrExitMethodFactory;
         this.createModelMethod = createModelMethod;
         this.generatedAnnotation = generatedAnnotation;
         this.harvestMethod = harvestMethod;
@@ -62,7 +62,7 @@ public final class ParserClass {
         TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass());
         spec.addMethod(parseMethod.get());
         if (!sourceElement.skipGeneratingParseOrExitMethod()) {
-            spec.addMethod(parseOrExitMethod.define());
+            spec.addMethod(parseOrExitMethodFactory.create(sourceElement).define());
         }
         spec.addMethod(harvestMethod.get());
         if (!namedOptions.isEmpty()) {
