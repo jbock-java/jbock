@@ -32,13 +32,13 @@ final class ParserTypeFactory extends Cached<ParserType> {
             List<Mapping<AnnotatedParameter>> positionalParameters,
             List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
             List<Mapping<AnnotatedOption>> namedOptions,
-            CommonFields commonFields,
+            CommonFields.Factory commonFieldsFactory,
             OptionStatesMethod optionStatesMethod) {
         this.sourceElement = sourceElement;
         this.positionalParameters = positionalParameters;
         this.repeatablePositionalParameters = repeatablePositionalParameters;
         this.namedOptions = namedOptions;
-        this.commonFields = commonFields;
+        this.commonFields = commonFieldsFactory.create(sourceElement, namedOptions);
         this.optionStatesMethod = optionStatesMethod;
     }
 

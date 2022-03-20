@@ -30,10 +30,10 @@ final class OptionStatesMethod extends Cached<MethodSpec> {
     OptionStatesMethod(
             List<Mapping<AnnotatedOption>> namedOptions,
             SourceElement sourceElement,
-            CommonFields commonFields) {
+            CommonFields.Factory commonFieldsFactory) {
         this.namedOptions = namedOptions;
         this.sourceElement = sourceElement;
-        this.commonFields = commonFields;
+        this.commonFields = commonFieldsFactory.create(sourceElement, namedOptions);
     }
 
     @Override

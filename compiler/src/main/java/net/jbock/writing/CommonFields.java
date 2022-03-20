@@ -1,5 +1,8 @@
 package net.jbock.writing;
 
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.FieldSpec;
 import net.jbock.annotated.AnnotatedOption;
@@ -15,33 +18,30 @@ import static net.jbock.common.Constants.mapOf;
 
 class CommonFields {
 
-    private final FieldSpec optionNames;
     private final ClassName optType;
 
-    private CommonFields(
-            FieldSpec optionNames,
-            ClassName optType) {
-        this.optionNames = optionNames;
-        this.optType = optType;
-    }
-
-    static CommonFields create(
-            SourceElement sourceElement,
-            List<Mapping<AnnotatedOption>> namedOptions) {
-        ClassName optType = namedOptions.isEmpty() ?
-                ClassName.get(Void.class) :
+    @AssistedInject
+    CommonFields(
+            @Assisted SourceElement sourceElement,
+            @Assisted List<Mapping<AnnotatedOption>> namedOptions) {
+        optType = namedOptions.isEmpty() ?
+                ClassName.get(Void.class) : // javapoet #739
                 sourceElement.optionEnumType();
-        FieldSpec optionNames = FieldSpec.builder(
-                        mapOf(STRING, optType), "optionNames")
-                .addModifiers(PRIVATE, FINAL).build();
-        return new CommonFields(optionNames, optType);
     }
 
     FieldSpec optionNames() {
-        return optionNames;
+        return FieldSpec.builder(
+                        mapOf(STRING, optType), "optionNames")
+                .addModifiers(PRIVATE, FINAL).build();
     }
 
+    /** Returns the type of the option enum. */
     ClassName optType() {
         return optType;
+    }
+
+    @AssistedFactory
+    interface Factory {
+        CommonFields create(SourceElement sourceElement, List<Mapping<AnnotatedOption>> namedOptions);
     }
 }

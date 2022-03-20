@@ -39,7 +39,7 @@ public final class ParserClass {
             HarvestMethod harvestMethod,
             OptionNamesMethod optionNamesMethod,
             OptionStatesMethod optionStatesMethod,
-            CommonFields commonFields) {
+            CommonFields.Factory commonFieldsFactory) {
         this.parseMethod = parseMethod;
         this.sourceElement = sourceElement;
         this.optionEnum = optionEnum;
@@ -50,7 +50,7 @@ public final class ParserClass {
         this.harvestMethod = harvestMethod;
         this.optionNamesMethod = optionNamesMethod;
         this.optionStatesMethod = optionStatesMethod;
-        this.commonFields = commonFields;
+        this.commonFields = commonFieldsFactory.create(sourceElement, namedOptions);
     }
 
     /**

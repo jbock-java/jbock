@@ -6,7 +6,6 @@ import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapping;
-import net.jbock.processor.SourceElement;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -28,15 +27,5 @@ interface ContextModule {
         return Stream.of(namedOptions, positionalParams, repeatablePositionalParameters)
                 .flatMap(List::stream)
                 .collect(toList());
-    }
-
-    @WritingScope
-    @Provides
-    static CommonFields commonFields(
-            SourceElement sourceElement,
-            List<Mapping<AnnotatedOption>> namedOptions) {
-        return CommonFields.create(
-                sourceElement,
-                namedOptions);
     }
 }
