@@ -5,6 +5,8 @@ import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapping;
+import net.jbock.processor.SourceElement;
+import net.jbock.writing.CommandRepresentation;
 
 import java.util.List;
 
@@ -87,5 +89,9 @@ public final class ContextBuilder {
 
     public List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
         return step3.repeatablePositionalParameters;
+    }
+
+    public CommandRepresentation build(SourceElement sourceElement) {
+        return new CommandRepresentation(this, sourceElement);
     }
 }

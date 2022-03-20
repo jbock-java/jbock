@@ -1,5 +1,6 @@
 package net.jbock.writing;
 
+import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
@@ -25,32 +26,30 @@ public final class ParserClass {
     private final HarvestMethod harvestMethod;
     private final OptionNamesMethod optionNamesMethod;
     private final OptionStatesMethod optionStatesMethod;
-    private final CommonFields commonFields;
+    private final FieldSpec optionNames;
 
     @Inject
     ParserClass(
             ParseMethod parseMethod,
-            SourceElement sourceElement,
+            CommandRepresentation commandRepresentation,
             OptEnum optionEnum,
-            List<Mapping<AnnotatedOption>> namedOptions,
             ParseOrExitMethod.Factory parseOrExitMethodFactory,
             CreateModelMethod createModelMethod,
             GeneratedAnnotation generatedAnnotation,
             HarvestMethod harvestMethod,
             OptionNamesMethod optionNamesMethod,
-            OptionStatesMethod optionStatesMethod,
-            CommonFields.Factory commonFieldsFactory) {
+            OptionStatesMethod optionStatesMethod) {
         this.parseMethod = parseMethod;
-        this.sourceElement = sourceElement;
+        this.sourceElement = commandRepresentation.sourceElement();
         this.optionEnum = optionEnum;
-        this.namedOptions = namedOptions;
+        this.namedOptions = commandRepresentation.namedOptions();
         this.parseOrExitMethodFactory = parseOrExitMethodFactory;
         this.createModelMethod = createModelMethod;
         this.generatedAnnotation = generatedAnnotation;
         this.harvestMethod = harvestMethod;
         this.optionNamesMethod = optionNamesMethod;
         this.optionStatesMethod = optionStatesMethod;
-        this.commonFields = commonFieldsFactory.create(sourceElement, namedOptions);
+        this.optionNames = commandRepresentation.optionNames();
     }
 
     /**
@@ -66,7 +65,7 @@ public final class ParserClass {
         }
         spec.addMethod(harvestMethod.get());
         if (!namedOptions.isEmpty()) {
-            spec.addField(commonFields.optionNames().toBuilder()
+            spec.addField(optionNames.toBuilder()
                     .initializer("$N()", optionNamesMethod.get()).build());
             spec.addMethod(optionNamesMethod.get());
             spec.addMethod(optionStatesMethod.get());

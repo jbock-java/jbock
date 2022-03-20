@@ -9,9 +9,9 @@ import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
-import net.jbock.writing.ContextComponent;
 import net.jbock.validate.CommandProcessor;
 import net.jbock.validate.ValidateComponent;
+import net.jbock.writing.ContextComponent;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
@@ -81,10 +81,7 @@ class CommandStep implements Step {
                 .processor();
         processor.generate()
                 .map(items -> ContextComponent.builder()
-                        .sourceElement(sourceElement)
-                        .namedOptions(items.namedOptions())
-                        .repeatablePositionalParameters(items.repeatablePositionalParameters())
-                        .positionalParams(items.positionalParameters())
+                        .commandRepresentation(items.build(sourceElement))
                         .build())
                 .ifLeftOrElse(
                         this::printFailures,

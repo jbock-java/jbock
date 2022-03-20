@@ -22,10 +22,9 @@ class OptEnum {
     private final SourceElement sourceElement;
 
     @Inject
-    OptEnum(List<Mapping<AnnotatedOption>> options,
-            SourceElement sourceElement) {
-        this.options = options;
-        this.sourceElement = sourceElement;
+    OptEnum(CommandRepresentation commandRepresentation) {
+        this.options = commandRepresentation.namedOptions();
+        this.sourceElement = commandRepresentation.sourceElement();
     }
 
     TypeSpec define() {

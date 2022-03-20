@@ -19,9 +19,9 @@ class GeneratedTypes {
     private final ClassName generatedClass;
 
     @Inject
-    GeneratedTypes(SourceElement sourceElement) {
-        this.sourceElement = sourceElement;
-        this.generatedClass = sourceElement.generatedClass();
+    GeneratedTypes(CommandRepresentation commandRepresentation) {
+        this.sourceElement = commandRepresentation.sourceElement();
+        this.generatedClass = commandRepresentation.sourceElement().generatedClass();
     }
 
     TypeName parseSuccessType() {

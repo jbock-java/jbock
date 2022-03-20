@@ -18,11 +18,12 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static net.jbock.writing.CodeBlocks.joinByComma;
+import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 @WritingScope
 final class CreateModelMethod extends Cached<MethodSpec> {
 
-    private final ContextUtil contextUtil;
     private final SourceElement sourceElement;
     private final List<Mapping<AnnotatedOption>> namedOptions;
     private final List<Mapping<AnnotatedParameter>> positionalParameters;
@@ -30,16 +31,11 @@ final class CreateModelMethod extends Cached<MethodSpec> {
 
     @Inject
     CreateModelMethod(
-            ContextUtil contextUtil,
-            SourceElement sourceElement,
-            List<Mapping<AnnotatedOption>> namedOptions,
-            List<Mapping<AnnotatedParameter>> positionalParameters,
-            List<Mapping<AnnotatedParameters>> repeatablePositionalParameters) {
-        this.contextUtil = contextUtil;
-        this.sourceElement = sourceElement;
-        this.namedOptions = namedOptions;
-        this.positionalParameters = positionalParameters;
-        this.repeatablePositionalParameters = repeatablePositionalParameters;
+            CommandRepresentation commandRepresentation) {
+        this.sourceElement = commandRepresentation.sourceElement();
+        this.namedOptions = commandRepresentation.namedOptions();
+        this.positionalParameters = commandRepresentation.positionalParameters();
+        this.repeatablePositionalParameters = commandRepresentation.repeatablePositionalParameters();
     }
 
     @Override
@@ -63,7 +59,7 @@ final class CreateModelMethod extends Cached<MethodSpec> {
                 .forEach(c -> code.add(CodeBlock.of(".addParameter($L)", parameterBlock(c))));
         code.add(CodeBlock.of(".build()"));
         return methodBuilder("createModel")
-                .addStatement(contextUtil.joinByNewline(code))
+                .addStatement(joinByNewline(code))
                 .returns(CommandModel.class)
                 .addModifiers(sourceElement.accessModifiers())
                 .build();
@@ -82,12 +78,12 @@ final class CreateModelMethod extends Cached<MethodSpec> {
         }
         code.add(CodeBlock.of(".withParamLabel($S)", m.paramLabel()));
         m.sourceMethod().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
-        code.add(CodeBlock.of(".withNames($T.of($L))", List.class, contextUtil.joinByComma(names)));
+        code.add(CodeBlock.of(".withNames($T.of($L))", List.class, joinByComma(names)));
         for (String line : m.sourceMethod().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
-        return contextUtil.joinByNewline(code);
+        return joinByNewline(code);
     }
 
     private CodeBlock parameterBlock(Mapping<?> m) {
@@ -99,6 +95,6 @@ final class CreateModelMethod extends Cached<MethodSpec> {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
-        return contextUtil.joinByNewline(code);
+        return joinByNewline(code);
     }
 }

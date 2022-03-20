@@ -24,22 +24,20 @@ final class OptionStatesMethod extends Cached<MethodSpec> {
 
     private final List<Mapping<AnnotatedOption>> namedOptions;
     private final SourceElement sourceElement;
-    private final CommonFields commonFields;
+    private final ClassName optType;
 
     @Inject
     OptionStatesMethod(
-            List<Mapping<AnnotatedOption>> namedOptions,
-            SourceElement sourceElement,
-            CommonFields.Factory commonFieldsFactory) {
-        this.namedOptions = namedOptions;
-        this.sourceElement = sourceElement;
-        this.commonFields = commonFieldsFactory.create(sourceElement, namedOptions);
+            CommandRepresentation commandRepresentation) {
+        this.namedOptions = commandRepresentation.namedOptions();
+        this.sourceElement = commandRepresentation.sourceElement();
+        this.optType = commandRepresentation.optType();
     }
 
     @Override
     MethodSpec define() {
         ParameterSpec result = ParameterSpec.builder(
-                mapOf(commonFields.optType(), ClassName.get(OptionState.class)), "result").build();
+                mapOf(optType, ClassName.get(OptionState.class)), "result").build();
         CodeBlock.Builder code = CodeBlock.builder();
         code.addStatement("$T $N = new $T<>($T.class)", result.type, result, EnumMap.class, sourceElement.optionEnumType());
         for (Mapping<AnnotatedOption> namedOption : namedOptions) {

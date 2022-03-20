@@ -1,18 +1,12 @@
 package net.jbock.writing;
 
 import io.jbock.javapoet.CodeBlock;
-import jakarta.inject.Inject;
 
 import java.util.List;
 
-@WritingScope
-class ContextUtil {
+final class CodeBlocks {
 
-    @Inject
-    ContextUtil() {
-    }
-
-    CodeBlock joinByNewline(List<CodeBlock> code) {
+    static CodeBlock joinByNewline(List<CodeBlock> code) {
         boolean indent = false;
         CodeBlock.Builder result = CodeBlock.builder();
         for (int i = 0; i < code.size(); i++) {
@@ -31,7 +25,7 @@ class ContextUtil {
         return result.build();
     }
 
-    CodeBlock joinByComma(List<CodeBlock> code) {
+    static CodeBlock joinByComma(List<CodeBlock> code) {
         CodeBlock.Builder args = CodeBlock.builder();
         for (int i = 0; i < code.size(); i++) {
             if (i != 0) {
@@ -40,5 +34,8 @@ class ContextUtil {
             args.add(code.get(i));
         }
         return args.build();
+    }
+
+    private CodeBlocks() {
     }
 }

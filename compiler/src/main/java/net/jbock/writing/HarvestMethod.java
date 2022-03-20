@@ -23,6 +23,8 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.EITHERS;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
+import static net.jbock.writing.CodeBlocks.joinByComma;
+import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 @WritingScope
 final class HarvestMethod extends Cached<MethodSpec> {
@@ -32,25 +34,19 @@ final class HarvestMethod extends Cached<MethodSpec> {
     private final List<Mapping<AnnotatedOption>> namedOptions;
     private final List<Mapping<AnnotatedParameter>> positionalParameters;
     private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
-    private final ContextUtil contextUtil;
     private final ParserTypeFactory parserTypeFactory;
     private final ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
 
     @Inject
     HarvestMethod(
             GeneratedTypes generatedTypes,
-            SourceElement sourceElement,
-            List<Mapping<AnnotatedOption>> namedOptions,
-            List<Mapping<AnnotatedParameter>> positionalParameters,
-            List<Mapping<AnnotatedParameters>> repeatablePositionalParameters,
-            ContextUtil contextUtil,
+            CommandRepresentation commandRepresentation,
             ParserTypeFactory parserTypeFactory) {
         this.generatedTypes = generatedTypes;
-        this.sourceElement = sourceElement;
-        this.namedOptions = namedOptions;
-        this.positionalParameters = positionalParameters;
-        this.repeatablePositionalParameters = repeatablePositionalParameters;
-        this.contextUtil = contextUtil;
+        this.sourceElement = commandRepresentation.sourceElement();
+        this.namedOptions = commandRepresentation.namedOptions();
+        this.positionalParameters = commandRepresentation.positionalParameters();
+        this.repeatablePositionalParameters = commandRepresentation.repeatablePositionalParameters();
         this.parserTypeFactory = parserTypeFactory;
     }
 
@@ -102,7 +98,7 @@ final class HarvestMethod extends Cached<MethodSpec> {
         repeatablePositionalParameters.stream()
                 .map(m -> CodeBlock.of("$N", asParam(m)))
                 .forEach(code::add);
-        return contextUtil.joinByComma(code);
+        return joinByComma(code);
     }
 
     private CodeBlock convertExpressionOption(Mapping<AnnotatedOption> m, int i) {
@@ -115,7 +111,7 @@ final class HarvestMethod extends Cached<MethodSpec> {
         }
         code.addAll(tailExpressionOption(m, i));
         m.extractExpr().ifPresent(code::add);
-        return contextUtil.joinByNewline(code);
+        return joinByNewline(code);
     }
 
     private CodeBlock convertExpressionRegularParameter(Mapping<AnnotatedParameter> m, int i) {
@@ -126,7 +122,7 @@ final class HarvestMethod extends Cached<MethodSpec> {
         code.add(CodeBlock.of(".map($L)", m.mapper()));
         code.addAll(tailExpressionParameter(m, i));
         m.extractExpr().ifPresent(code::add);
-        return contextUtil.joinByNewline(code);
+        return joinByNewline(code);
     }
 
     private CodeBlock convertExpressionRepeatableParameter(Mapping<AnnotatedParameters> m) {
@@ -136,7 +132,7 @@ final class HarvestMethod extends Cached<MethodSpec> {
         code.add(CodeBlock.of(".map($L)", m.mapper()));
         code.add(CodeBlock.of(".collect($T.firstFailure())", EITHERS));
         code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.size()));
-        return contextUtil.joinByNewline(code);
+        return joinByNewline(code);
     }
 
     private List<CodeBlock> tailExpressionOption(Mapping<AnnotatedOption> m, int i) {

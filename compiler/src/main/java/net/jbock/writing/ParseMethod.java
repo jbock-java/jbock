@@ -23,12 +23,12 @@ final class ParseMethod extends Cached<MethodSpec> {
     @Inject
     ParseMethod(
             GeneratedTypes generatedTypes,
-            SourceElement sourceElement,
+            CommandRepresentation commandRepresentation,
             CreateModelMethod createModelMethod,
             HarvestMethod harvestMethod,
             ParserTypeFactory parserTypeFactory) {
         this.generatedTypes = generatedTypes;
-        this.sourceElement = sourceElement;
+        this.sourceElement = commandRepresentation.sourceElement();
         this.createModelMethod = createModelMethod;
         this.harvestMethod = harvestMethod;
         this.parserTypeFactory = parserTypeFactory;

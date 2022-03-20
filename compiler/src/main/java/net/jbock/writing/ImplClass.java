@@ -31,12 +31,11 @@ public class ImplClass {
 
     @Inject
     ImplClass(GeneratedTypes generatedTypes,
-              SourceElement sourceElement,
-              List<Mapping<?>> allMappings,
+              CommandRepresentation commandRepresentation,
               GeneratedAnnotation generatedAnnotation) {
         this.generatedTypes = generatedTypes;
-        this.sourceElement = sourceElement;
-        this.allMappings = allMappings;
+        this.sourceElement = commandRepresentation.sourceElement();
+        this.allMappings = commandRepresentation.allMappings();
         this.generatedAnnotation = generatedAnnotation;
     }
 

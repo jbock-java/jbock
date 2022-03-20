@@ -2,16 +2,9 @@ package net.jbock.writing;
 
 import dagger.BindsInstance;
 import dagger.Component;
-import net.jbock.annotated.AnnotatedOption;
-import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.annotated.AnnotatedParameters;
-import net.jbock.convert.Mapping;
-import net.jbock.processor.SourceElement;
-
-import java.util.List;
 
 @WritingScope
-@Component(modules = ContextModule.class)
+@Component
 public interface ContextComponent {
 
     ParserClass parserClass();
@@ -26,16 +19,7 @@ public interface ContextComponent {
     interface Builder {
 
         @BindsInstance
-        Builder sourceElement(SourceElement sourceElement);
-
-        @BindsInstance
-        Builder repeatablePositionalParameters(List<Mapping<AnnotatedParameters>> repeatablePositionalParameters);
-
-        @BindsInstance
-        Builder positionalParams(List<Mapping<AnnotatedParameter>> positionalParams);
-
-        @BindsInstance
-        Builder namedOptions(List<Mapping<AnnotatedOption>> namedOptions);
+        Builder commandRepresentation(CommandRepresentation commandRepresentation);
 
         ContextComponent build();
     }
