@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
+import net.jbock.common.Suppliers;
 import net.jbock.convert.Mapping;
 import net.jbock.model.ItemType;
 import net.jbock.processor.SourceElement;
@@ -18,16 +19,18 @@ import net.jbock.util.ExMissingItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.EITHERS;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
+import static net.jbock.common.Suppliers.memoize;
 import static net.jbock.writing.CodeBlocks.joinByComma;
 import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 @WritingScope
-final class HarvestMethod extends Cached<MethodSpec> {
+final class HarvestMethod {
 
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
@@ -50,41 +53,68 @@ final class HarvestMethod extends Cached<MethodSpec> {
         this.parserTypeFactory = parserTypeFactory;
     }
 
-    @Override
-    MethodSpec define() {
-        ParameterSpec parser = parserTypeFactory.define().asParam();
+    private ParserTypeFactory parserTypeFactory() {
+        return parserTypeFactory;
+    }
+
+    private List<Mapping<AnnotatedOption>> namedOptions() {
+        return namedOptions;
+    }
+
+    private List<Mapping<AnnotatedParameter>> positionalParameters() {
+        return positionalParameters;
+    }
+
+    private List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
+        return repeatablePositionalParameters;
+    }
+
+    private GeneratedTypes generatedTypes() {
+        return generatedTypes;
+    }
+
+    private SourceElement sourceElement() {
+        return sourceElement;
+    }
+
+    private final Supplier<MethodSpec> harvestMethod = memoize(() -> {
+        ParameterSpec parser = parserTypeFactory().define().asParam();
         CodeBlock constructorArguments = getConstructorArguments();
         MethodSpec.Builder spec = MethodSpec.methodBuilder("harvest");
-        for (int i = 0; i < namedOptions.size(); i++) {
-            Mapping<AnnotatedOption> m = namedOptions.get(i);
+        for (int i = 0; i < namedOptions().size(); i++) {
+            Mapping<AnnotatedOption> m = namedOptions().get(i);
             ParameterSpec p = asParam(m);
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionOption(m, i));
         }
-        for (int i = 0; i < positionalParameters.size(); i++) {
-            Mapping<AnnotatedParameter> m = positionalParameters.get(i);
+        for (int i = 0; i < positionalParameters().size(); i++) {
+            Mapping<AnnotatedParameter> m = positionalParameters().get(i);
             ParameterSpec p = asParam(m);
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionRegularParameter(m, i));
         }
-        repeatablePositionalParameters.forEach(m -> {
+        repeatablePositionalParameters().forEach(m -> {
             ParameterSpec p = asParam(m);
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionRepeatableParameter(m));
         });
-        generatedTypes.superResultType().ifPresentOrElse(parseResultWithRestType -> {
-                    ParameterSpec result = ParameterSpec.builder(sourceElement.typeName(), "result").build();
-                    ParameterSpec restArgs = ParameterSpec.builder(sourceElement.typeName(), "restArgs").build();
-                    spec.addStatement("$T $N = new $T($L)", result.type, result, generatedTypes.implType(),
+        generatedTypes().superResultType().ifPresentOrElse(parseResultWithRestType -> {
+                    ParameterSpec result = ParameterSpec.builder(sourceElement().typeName(), "result").build();
+                    ParameterSpec restArgs = ParameterSpec.builder(sourceElement().typeName(), "restArgs").build();
+                    spec.addStatement("$T $N = new $T($L)", result.type, result, generatedTypes().implType(),
                             constructorArguments);
                     spec.addStatement("$T $N = $N.rest().toArray($T::new)", STRING_ARRAY, restArgs,
                             parser, ArrayTypeName.of(String.class));
                     spec.addStatement("return new $T($N, $N)", parseResultWithRestType,
                             result, restArgs);
                 },
-                () -> spec.addStatement("return new $T($L)", generatedTypes.implType(), constructorArguments));
-        return spec.returns(generatedTypes.parseSuccessType())
+                () -> spec.addStatement("return new $T($L)", generatedTypes().implType(), constructorArguments));
+        return spec.returns(generatedTypes().parseSuccessType())
                 .addParameter(parser)
                 .addException(ExFailure.class)
                 .addModifiers(PRIVATE)
                 .build();
+    });
+
+    MethodSpec get() {
+        return harvestMethod.get();
     }
 
     private CodeBlock getConstructorArguments() {
