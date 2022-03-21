@@ -15,54 +15,68 @@ import net.jbock.processor.SourceElement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static net.jbock.common.Suppliers.memoize;
 import static net.jbock.writing.CodeBlocks.joinByComma;
 import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 @WritingScope
-final class CreateModelMethod extends Cached<MethodSpec> {
+final class CreateModelMethod {
 
-    private final SourceElement sourceElement;
-    private final List<Mapping<AnnotatedOption>> namedOptions;
-    private final List<Mapping<AnnotatedParameter>> positionalParameters;
-    private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
+    private final CommandRepresentation commandRepresentation;
 
     @Inject
-    CreateModelMethod(
-            CommandRepresentation commandRepresentation) {
-        this.sourceElement = commandRepresentation.sourceElement();
-        this.namedOptions = commandRepresentation.namedOptions();
-        this.positionalParameters = commandRepresentation.positionalParameters();
-        this.repeatablePositionalParameters = commandRepresentation.repeatablePositionalParameters();
+    CreateModelMethod(CommandRepresentation commandRepresentation) {
+        this.commandRepresentation = commandRepresentation;
     }
 
-    @Override
-    MethodSpec define() {
+    private final Supplier<MethodSpec> define = memoize(() -> {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("return $T.builder()", CommandModel.class));
-        sourceElement.descriptionKey().ifPresent(key ->
+        sourceElement().descriptionKey().ifPresent(key ->
                 code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
-        for (String descriptionLine : sourceElement.description()) {
+        for (String descriptionLine : sourceElement().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", descriptionLine));
         }
-        code.add(CodeBlock.of(".withProgramName($S)", sourceElement.programName()));
-        if (sourceElement.isSuperCommand()) {
+        code.add(CodeBlock.of(".withProgramName($S)", sourceElement().programName()));
+        if (sourceElement().isSuperCommand()) {
             code.add(CodeBlock.of(".withSuperCommand($L)", true));
         }
-        for (Mapping<AnnotatedOption> c : namedOptions) {
+        for (Mapping<AnnotatedOption> c : namedOptions()) {
             code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
         }
-        Stream.of(positionalParameters, repeatablePositionalParameters)
+        Stream.of(positionalParameters(), repeatablePositionalParameters())
                 .flatMap(List::stream)
                 .forEach(c -> code.add(CodeBlock.of(".addParameter($L)", parameterBlock(c))));
         code.add(CodeBlock.of(".build()"));
         return methodBuilder("createModel")
                 .addStatement(joinByNewline(code))
                 .returns(CommandModel.class)
-                .addModifiers(sourceElement.accessModifiers())
+                .addModifiers(sourceElement().accessModifiers())
                 .build();
+    });
+
+    MethodSpec get() {
+        return define.get();
+    }
+
+    private SourceElement sourceElement() {
+        return commandRepresentation.sourceElement();
+    }
+
+    private List<Mapping<AnnotatedOption>> namedOptions() {
+        return commandRepresentation.namedOptions();
+    }
+
+    private List<Mapping<AnnotatedParameter>> positionalParameters() {
+        return commandRepresentation.positionalParameters();
+    }
+
+    private List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
+        return commandRepresentation.repeatablePositionalParameters();
     }
 
     private CodeBlock optionBlock(Mapping<AnnotatedOption> m) {
