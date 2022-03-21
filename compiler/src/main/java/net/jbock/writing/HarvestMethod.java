@@ -9,10 +9,8 @@ import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedParameters;
-import net.jbock.common.Suppliers;
 import net.jbock.convert.Mapping;
 import net.jbock.model.ItemType;
-import net.jbock.processor.SourceElement;
 import net.jbock.util.ExConvert;
 import net.jbock.util.ExFailure;
 import net.jbock.util.ExMissingItem;
@@ -30,13 +28,9 @@ import static net.jbock.writing.CodeBlocks.joinByComma;
 import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 @WritingScope
-final class HarvestMethod {
+final class HarvestMethod extends HasCommandRepresentation {
 
     private final GeneratedTypes generatedTypes;
-    private final SourceElement sourceElement;
-    private final List<Mapping<AnnotatedOption>> namedOptions;
-    private final List<Mapping<AnnotatedParameter>> positionalParameters;
-    private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
     private final ParserTypeFactory parserTypeFactory;
     private final ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
 
@@ -45,11 +39,8 @@ final class HarvestMethod {
             GeneratedTypes generatedTypes,
             CommandRepresentation commandRepresentation,
             ParserTypeFactory parserTypeFactory) {
+        super(commandRepresentation);
         this.generatedTypes = generatedTypes;
-        this.sourceElement = commandRepresentation.sourceElement();
-        this.namedOptions = commandRepresentation.namedOptions();
-        this.positionalParameters = commandRepresentation.positionalParameters();
-        this.repeatablePositionalParameters = commandRepresentation.repeatablePositionalParameters();
         this.parserTypeFactory = parserTypeFactory;
     }
 
@@ -57,28 +48,12 @@ final class HarvestMethod {
         return parserTypeFactory;
     }
 
-    private List<Mapping<AnnotatedOption>> namedOptions() {
-        return namedOptions;
-    }
-
-    private List<Mapping<AnnotatedParameter>> positionalParameters() {
-        return positionalParameters;
-    }
-
-    private List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
-        return repeatablePositionalParameters;
-    }
-
     private GeneratedTypes generatedTypes() {
         return generatedTypes;
     }
 
-    private SourceElement sourceElement() {
-        return sourceElement;
-    }
-
     private final Supplier<MethodSpec> harvestMethod = memoize(() -> {
-        ParameterSpec parser = parserTypeFactory().define().asParam();
+        ParameterSpec parser = parserTypeFactory().get().asParam();
         CodeBlock constructorArguments = getConstructorArguments();
         MethodSpec.Builder spec = MethodSpec.methodBuilder("harvest");
         for (int i = 0; i < namedOptions().size(); i++) {
@@ -119,23 +94,23 @@ final class HarvestMethod {
 
     private CodeBlock getConstructorArguments() {
         List<CodeBlock> code = new ArrayList<>();
-        for (Mapping<AnnotatedOption> m : namedOptions) {
+        for (Mapping<AnnotatedOption> m : namedOptions()) {
             code.add(CodeBlock.of("$N", asParam(m)));
         }
-        for (Mapping<AnnotatedParameter> m : positionalParameters) {
+        for (Mapping<AnnotatedParameter> m : positionalParameters()) {
             code.add(CodeBlock.of("$N", asParam(m)));
         }
-        repeatablePositionalParameters.stream()
+        repeatablePositionalParameters().stream()
                 .map(m -> CodeBlock.of("$N", asParam(m)))
                 .forEach(code::add);
         return joinByComma(code);
     }
 
     private CodeBlock convertExpressionOption(Mapping<AnnotatedOption> m, int i) {
-        ParameterSpec parser = parserTypeFactory.define().asParam();
+        ParameterSpec parser = parserTypeFactory.get().asParam();
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.option($T.$N)", parser,
-                sourceElement.optionEnumType(), m.enumName()));
+                sourceElement().optionEnumType(), m.enumName()));
         if (!m.isModeFlag()) {
             code.add(CodeBlock.of(".map($L)", m.mapper()));
         }
@@ -145,7 +120,7 @@ final class HarvestMethod {
     }
 
     private CodeBlock convertExpressionRegularParameter(Mapping<AnnotatedParameter> m, int i) {
-        ParameterSpec parser = parserTypeFactory.define().asParam();
+        ParameterSpec parser = parserTypeFactory.get().asParam();
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.param($L)", parser,
                 m.sourceMethod().index()));
@@ -156,12 +131,12 @@ final class HarvestMethod {
     }
 
     private CodeBlock convertExpressionRepeatableParameter(Mapping<AnnotatedParameters> m) {
-        ParameterSpec parser = parserTypeFactory.define().asParam();
+        ParameterSpec parser = parserTypeFactory.get().asParam();
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.rest()", parser));
         code.add(CodeBlock.of(".map($L)", m.mapper()));
         code.add(CodeBlock.of(".collect($T.firstFailure())", EITHERS));
-        code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.size()));
+        code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters().size()));
         return joinByNewline(code);
     }
 
