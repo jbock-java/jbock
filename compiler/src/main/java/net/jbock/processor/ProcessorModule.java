@@ -6,6 +6,7 @@ import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
+import net.jbock.validate.ValidateComponent;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -14,7 +15,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 /**
  * @see ProcessorScope
  */
-@Module
+@Module(subcomponents = ValidateComponent.class)
 interface ProcessorModule {
 
     @ProcessorScope

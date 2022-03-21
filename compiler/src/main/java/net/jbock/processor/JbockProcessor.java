@@ -11,7 +11,6 @@ import java.util.List;
  */
 public final class JbockProcessor extends BasicAnnotationProcessor {
 
-
     @Override
     protected List<Step> steps() {
         ProcessorComponent component = ProcessorComponent.create(processingEnv);

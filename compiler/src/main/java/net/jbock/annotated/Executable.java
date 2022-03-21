@@ -1,11 +1,14 @@
 package net.jbock.annotated;
 
+import jakarta.inject.Inject;
 import net.jbock.Option;
 import net.jbock.Parameter;
+import net.jbock.Parameters;
 import net.jbock.VarargsParameter;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 
+import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
@@ -23,6 +26,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.tools.Diagnostic.Kind.WARNING;
 import static net.jbock.common.TypeTool.ANNOTATION_VALUE_AS_TYPE;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
@@ -39,29 +43,73 @@ abstract class Executable {
         this.converter = converter;
     }
 
-    static Executable create(
-            ExecutableElement method,
-            Annotation annotation) {
-        String canonicalName = annotation.annotationType().getCanonicalName();
-        AnnotationMirror annotationMirror = method.getAnnotationMirrors().stream()
-                .filter(mirror -> AS_TYPE_ELEMENT.visit(mirror.getAnnotationType().asElement())
-                        .map(TypeElement::getQualifiedName)
-                        .map(Name::toString)
-                        .filter(canonicalName::equals)
-                        .isPresent())
-                .findFirst()
-                .orElseThrow(AssertionError::new);
-        Optional<TypeElement> converter = findConverterAttribute(annotationMirror);
-        if (annotation instanceof Option) {
-            return new ExecutableOption(method, (Option) annotation, converter);
+    static class Factory {
+        private final Messager messager;
+
+        @Inject
+        Factory(Messager messager) {
+            this.messager = messager;
         }
-        if (annotation instanceof Parameter) {
-            return new ExecutableParameter(method, (Parameter) annotation, converter);
+
+        Executable create(
+                ExecutableElement method,
+                Annotation annotation) {
+            String canonicalName = annotation.annotationType().getCanonicalName();
+            AnnotationMirror annotationMirror = method.getAnnotationMirrors().stream()
+                    .filter(mirror -> AS_TYPE_ELEMENT.visit(mirror.getAnnotationType().asElement())
+                            .map(TypeElement::getQualifiedName)
+                            .map(Name::toString)
+                            .filter(canonicalName::equals)
+                            .isPresent())
+                    .findFirst()
+                    .orElseThrow(AssertionError::new);
+            Optional<TypeElement> converter = findConverterAttribute(annotationMirror);
+            if (annotation instanceof Option) {
+                return new ExecutableOption(method, (Option) annotation, converter);
+            }
+            if (annotation instanceof Parameter) {
+                return new ExecutableParameter(method, (Parameter) annotation, converter);
+            }
+            if (annotation instanceof VarargsParameter) {
+                return new ExecutableParameters(method, (VarargsParameter) annotation, converter);
+            }
+            if (annotation instanceof Parameters) {
+                messager.printMessage(WARNING,
+                        "@Parameters has been deprecated, use @VarargsParameter instead", method);
+                return new ExecutableParameters(method, convertLegacyParameters((Parameters) annotation), converter);
+            }
+            throw new AssertionError();
         }
-        if (annotation instanceof VarargsParameter) {
-            return new ExecutableParameters(method, (VarargsParameter) annotation, converter);
-        }
-        throw new AssertionError();
+    }
+
+    private static VarargsParameter convertLegacyParameters(Parameters parameters) {
+        return new VarargsParameter() {
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return parameters.annotationType();
+            }
+
+            @Override
+            public Class<?> converter() {
+                return parameters.converter();
+            }
+
+            @Override
+            public String descriptionKey() {
+                return parameters.descriptionKey();
+            }
+
+            @Override
+            public String[] description() {
+                return parameters.description();
+            }
+
+            @Override
+            public String paramLabel() {
+                return parameters.paramLabel();
+            }
+        };
     }
 
     abstract AnnotatedMethod annotatedMethod(SourceElement sourceElement, String enumName);

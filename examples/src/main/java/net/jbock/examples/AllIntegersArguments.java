@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Option;
-import net.jbock.VarargsParameter;
+import net.jbock.Parameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +11,7 @@ import java.util.OptionalInt;
 @Command
 abstract class AllIntegersArguments {
 
-    @VarargsParameter
+    @Parameters
     abstract List<Integer> positional();
 
     @Option(names = {"--i", "-i"})

@@ -11,7 +11,7 @@ import net.jbock.writing.CommandRepresentation;
 import java.util.List;
 
 /**
- * A telescoping builder that creates the context module.
+ * A telescoping builder that creates the command representation.
  */
 public final class ContextBuilder {
 
@@ -23,15 +23,29 @@ public final class ContextBuilder {
         this.namedOptions = namedOptions;
     }
 
-    static Step1 builder(AnnotatedMethods abstractMethods) {
-        return new Step1(abstractMethods);
+    static Step0 builder(AnnotatedMethods abstractMethods) {
+        return new Step0(abstractMethods);
+    }
+
+    static final class Step0 {
+        private final AnnotatedMethods abstractMethods;
+
+        Step0(AnnotatedMethods abstractMethods) {
+            this.abstractMethods = abstractMethods;
+        }
+
+        Step1 accept(SourceElement sourceElement) {
+            return new Step1(this, sourceElement);
+        }
     }
 
     static final class Step1 {
-        private final AnnotatedMethods abstractMethods;
+        private final Step0 step0;
+        private final SourceElement sourceElement;
 
-        private Step1(AnnotatedMethods abstractMethods) {
-            this.abstractMethods = abstractMethods;
+        private Step1(Step0 step0, SourceElement sourceElement) {
+            this.step0 = step0;
+            this.sourceElement = sourceElement;
         }
 
         Step2 accept(List<Mapping<AnnotatedParameter>> positionalParameters) {
@@ -39,7 +53,7 @@ public final class ContextBuilder {
         }
 
         List<AnnotatedParameter> positionalParameters() {
-            return abstractMethods.positionalParameters();
+            return step0.abstractMethods.positionalParameters();
         }
     }
 
@@ -53,7 +67,7 @@ public final class ContextBuilder {
         }
 
         List<AnnotatedParameters> repeatablePositionalParameters() {
-            return step1.abstractMethods.repeatablePositionalParameters();
+            return step1.step0.abstractMethods.repeatablePositionalParameters();
         }
 
         Step3 accept(List<Mapping<AnnotatedParameters>> repeatablePositionalParameters) {
@@ -71,7 +85,7 @@ public final class ContextBuilder {
         }
 
         List<AnnotatedOption> namedOptions() {
-            return step2.step1.abstractMethods.namedOptions();
+            return step2.step1.step0.abstractMethods.namedOptions();
         }
 
         ContextBuilder accept(List<Mapping<AnnotatedOption>> namedOptions) {
@@ -91,7 +105,7 @@ public final class ContextBuilder {
         return step3.repeatablePositionalParameters;
     }
 
-    public CommandRepresentation build(SourceElement sourceElement) {
-        return new CommandRepresentation(this, sourceElement);
+    public CommandRepresentation build() {
+        return new CommandRepresentation(this, step3.step2.step1.sourceElement);
     }
 }

@@ -142,7 +142,7 @@ public class Util {
                 .collect(toList());
         if (present.size() >= 2) {
             return Optional.of(new ValidationFailure("annotate with either @" + present.get(0).getSimpleName() +
-                    " or @" + present.get(1).getSimpleName() + " but not both", element));
+                    " or @" + present.get(1).getSimpleName() + ", but not both", element));
         }
         return Optional.empty();
     }

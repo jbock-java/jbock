@@ -7,7 +7,6 @@ import net.jbock.annotated.AnnotatedMethodsFactory;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 import net.jbock.writing.CommandRepresentation;
-import net.jbock.writing.ContextComponent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,10 +48,11 @@ public class CommandProcessor {
         return methodsFactory.createAnnotatedMethods()
                 .filter(this::checkDuplicateDescriptionKeys)
                 .map(ContextBuilder::builder)
+                .map(builder -> builder.accept(sourceElement))
                 .flatMap(parameterValidator::wrapPositionalParams)
                 .flatMap(parametersValidator::wrapRepeatablePositionalParams)
                 .flatMap(optionValidator::wrapOptions)
-                .map(items -> items.build(sourceElement));
+                .map(ContextBuilder::build);
     }
 
     /* Left-Optional

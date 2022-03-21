@@ -4,9 +4,8 @@ import io.jbock.javapoet.JavaFile;
 import io.jbock.javapoet.TypeSpec;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import net.jbock.Command;
-import net.jbock.common.SafeElements;
-import net.jbock.common.SafeTypes;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.validate.CommandProcessor;
@@ -36,22 +35,19 @@ class CommandStep implements Step {
 
     private final Messager messager;
     private final Util util;
-    private final SafeTypes types;
-    private final SafeElements elements;
     private final SourceFileGenerator sourceFileGenerator;
+    private final Provider<ValidateComponent.Builder> validateComponentProvider;
 
     @Inject
     CommandStep(
             Messager messager,
             Util util,
-            SafeTypes types,
-            SafeElements elements,
-            SourceFileGenerator sourceFileGenerator) {
+            SourceFileGenerator sourceFileGenerator,
+            Provider<ValidateComponent.Builder> validateComponentProvider) {
         this.messager = messager;
         this.util = util;
-        this.types = types;
-        this.elements = elements;
         this.sourceFileGenerator = sourceFileGenerator;
+        this.validateComponentProvider = validateComponentProvider;
     }
 
     @Override
@@ -73,10 +69,8 @@ class CommandStep implements Step {
     }
 
     private void processSourceElement(SourceElement sourceElement) {
-        CommandProcessor processor = ValidateComponent.builder()
+        CommandProcessor processor = validateComponentProvider.get()
                 .sourceElement(sourceElement)
-                .types(types)
-                .elements(elements)
                 .build()
                 .processor();
         processor.generate()
