@@ -163,7 +163,7 @@ class ConverterTest {
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Parameters(converter = BooleanMapper.class)",
+                "  @VarargsParameter(converter = BooleanMapper.class)",
                 "  abstract List<Boolean> booleanList();",
                 "",
                 "  static class BooleanMapper implements Supplier<StringConverter<Boolean>> {",
@@ -181,7 +181,7 @@ class ConverterTest {
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Parameters(converter = MyConverter.class)",
+                "  @VarargsParameter(converter = MyConverter.class)",
                 "  abstract Integer something();",
                 "",
                 "  static class MyConverter extends StringConverter<Integer> {",
@@ -191,7 +191,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");
+                .withErrorContaining("method 'something' is annotated with @VarargsParameter, so it must return java.util.List");
     }
 
     @Test
@@ -201,13 +201,13 @@ class ConverterTest {
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Parameters",
+                "  @VarargsParameter",
                 "  abstract MyEnum something();",
                 "}");
         assertAbout(javaSources()).that(List.of(myEnum, javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");
+                .withErrorContaining("method 'something' is annotated with @VarargsParameter, so it must return java.util.List");
     }
 
     @Test
@@ -217,7 +217,7 @@ class ConverterTest {
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Parameters(converter = MyConverter.class)",
+                "  @VarargsParameter(converter = MyConverter.class)",
                 "  abstract MyEnum something();",
                 "",
                 "  static class MyConverter extends StringConverter<MyEnum> {",
@@ -227,7 +227,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(List.of(myEnum, javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");
+                .withErrorContaining("method 'something' is annotated with @VarargsParameter, so it must return java.util.List");
     }
 
     @Test
@@ -236,7 +236,7 @@ class ConverterTest {
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Parameters(converter = MyConverter.class)",
+                "  @VarargsParameter(converter = MyConverter.class)",
                 "  abstract Optional<Integer> something();",
                 "",
                 "  static class MyConverter extends StringConverter<Integer> {",
@@ -246,7 +246,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");
+                .withErrorContaining("method 'something' is annotated with @VarargsParameter, so it must return java.util.List");
     }
 
     @Test
@@ -284,7 +284,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("method 'something' returns a list-based type, so it must be annotated with @Option or @Parameters");
+                .withErrorContaining("method 'something' returns a list-based type, so it must be annotated with @Option or @VarargsParameter");
     }
 
     @Test

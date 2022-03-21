@@ -11,16 +11,13 @@ public interface ContextComponent {
 
     ImplClass implClass();
 
-    static ContextComponent.Builder builder() {
-        return DaggerContextComponent.builder();
+    static ContextComponent create(CommandRepresentation commandRepresentation) {
+        return DaggerContextComponent.factory().create(commandRepresentation);
     }
 
-    @Component.Builder
-    interface Builder {
+    @Component.Factory
+    interface Factory {
 
-        @BindsInstance
-        Builder commandRepresentation(CommandRepresentation commandRepresentation);
-
-        ContextComponent build();
+        ContextComponent create(@BindsInstance CommandRepresentation commandRepresentation);
     }
 }

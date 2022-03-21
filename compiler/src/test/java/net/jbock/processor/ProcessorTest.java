@@ -571,7 +571,7 @@ class ProcessorTest {
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("missing annotation: add one of these annotations:" +
-                        " [Option, Parameter, Parameters] to method 'parameterized'");
+                        " [Option, Parameter, VarargsParameter] to method 'parameterized'");
     }
 
     @Test
@@ -659,7 +659,7 @@ class ProcessorTest {
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("missing annotation: add one of these annotations:" +
-                        " [Option, Parameter, Parameters] to method 'a'");
+                        " [Option, Parameter, VarargsParameter] to method 'a'");
     }
 
     @Test
@@ -703,7 +703,7 @@ class ProcessorTest {
                 "  @Option(names = \"--x\")",
                 "  abstract List<String> a();",
                 "",
-                "  @Parameters",
+                "  @VarargsParameter",
                 "  abstract List<String> b();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))

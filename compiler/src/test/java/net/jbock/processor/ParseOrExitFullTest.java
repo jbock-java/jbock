@@ -17,7 +17,7 @@ class ParseOrExitFullTest {
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Parameters",
+                "  @VarargsParameter",
                 "  abstract List<String> hello();",
                 "}");
         List<String> expectedParser =
@@ -44,7 +44,7 @@ class ParseOrExitFullTest {
                         "",
                         "@Generated(",
                         "    value = \"net.jbock.processor.JbockProcessor\",",
-                        "    comments = \"https://github.com/jbock-java\"",
+                        "    comments = \"https://github.com/jbock-java/jbock\"",
                         ")",
                         "final class ArgumentsParser {",
                         "  Either<ParsingFailed, Arguments> parse(List<String> tokens) {",
@@ -99,7 +99,7 @@ class ParseOrExitFullTest {
                         "",
                         "@Generated(",
                         "    value = \"net.jbock.processor.JbockProcessor\",",
-                        "    comments = \"https://github.com/jbock-java\"",
+                        "    comments = \"https://github.com/jbock-java/jbock\"",
                         ")",
                         "final class Arguments_Impl extends Arguments {",
                         "  private final List<String> hello;",
@@ -116,13 +116,9 @@ class ParseOrExitFullTest {
         Compilation compilation = Processor.compiler().compile(javaFile);
         assertThat(compilation).succeeded();
         assertThat(compilation).generatedSourceFile("test.ArgumentsParser")
-                .contentsAsUtf8Iterable()
-                .containsExactlyElementsIn(expectedParser)
-                .inOrder();
+                .containsLines(expectedParser);
         assertThat(compilation).generatedSourceFile("test.Arguments_Impl")
-                .contentsAsUtf8Iterable()
-                .containsExactlyElementsIn(expectedImpl)
-                .inOrder();
+                .containsLines(expectedImpl);
     }
 
     @Test
@@ -131,7 +127,7 @@ class ParseOrExitFullTest {
                 "@Command(publicParser = true)",
                 "abstract class Arguments {",
                 "",
-                "  @Parameters",
+                "  @VarargsParameter",
                 "  abstract List<String> hello();",
                 "}");
         List<String> expectedParser =
@@ -158,7 +154,7 @@ class ParseOrExitFullTest {
                         "",
                         "@Generated(",
                         "    value = \"net.jbock.processor.JbockProcessor\",",
-                        "    comments = \"https://github.com/jbock-java\"",
+                        "    comments = \"https://github.com/jbock-java/jbock\"",
                         ")",
                         "public final class ArgumentsParser {",
                         "  public Either<ParsingFailed, Arguments> parse(List<String> tokens) {",
@@ -213,7 +209,7 @@ class ParseOrExitFullTest {
                         "",
                         "@Generated(",
                         "    value = \"net.jbock.processor.JbockProcessor\",",
-                        "    comments = \"https://github.com/jbock-java\"",
+                        "    comments = \"https://github.com/jbock-java/jbock\"",
                         ")",
                         "final class Arguments_Impl extends Arguments {",
                         "  private final List<String> hello;",
@@ -230,12 +226,8 @@ class ParseOrExitFullTest {
         Compilation compilation = Processor.compiler().compile(javaFile);
         assertThat(compilation).succeeded();
         assertThat(compilation).generatedSourceFile("test.ArgumentsParser")
-                .contentsAsUtf8Iterable()
-                .containsExactlyElementsIn(expectedParser)
-                .inOrder();
+                .containsLines(expectedParser);
         assertThat(compilation).generatedSourceFile("test.Arguments_Impl")
-                .contentsAsUtf8Iterable()
-                .containsExactlyElementsIn(expectedImpl)
-                .inOrder();
+                .containsLines(expectedImpl);
     }
 }

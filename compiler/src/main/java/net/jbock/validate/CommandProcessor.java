@@ -6,6 +6,8 @@ import net.jbock.annotated.AnnotatedMethods;
 import net.jbock.annotated.AnnotatedMethodsFactory;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
+import net.jbock.writing.CommandRepresentation;
+import net.jbock.writing.ContextComponent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,7 +20,7 @@ import static io.jbock.util.Eithers.optionalList;
 
 /**
  * This class is responsible for item validation.
- * If validation succeeds, a {@link ContextBuilder} instance is created.
+ * If validation succeeds, a {@link CommandRepresentation} is created.
  */
 @ValidateScope
 public class CommandProcessor {
@@ -43,13 +45,14 @@ public class CommandProcessor {
         this.parametersValidator = parametersValidator;
     }
 
-    public Either<List<ValidationFailure>, ContextBuilder> generate() {
+    public Either<List<ValidationFailure>, CommandRepresentation> generate() {
         return methodsFactory.createAnnotatedMethods()
                 .filter(this::checkDuplicateDescriptionKeys)
                 .map(ContextBuilder::builder)
                 .flatMap(parameterValidator::wrapPositionalParams)
                 .flatMap(parametersValidator::wrapRepeatablePositionalParams)
-                .flatMap(optionValidator::wrapOptions);
+                .flatMap(optionValidator::wrapOptions)
+                .map(items -> items.build(sourceElement));
     }
 
     /* Left-Optional

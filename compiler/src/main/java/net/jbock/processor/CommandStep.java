@@ -80,9 +80,7 @@ class CommandStep implements Step {
                 .build()
                 .processor();
         processor.generate()
-                .map(items -> ContextComponent.builder()
-                        .commandRepresentation(items.build(sourceElement))
-                        .build())
+                .map(ContextComponent::create)
                 .ifLeftOrElse(
                         this::printFailures,
                         component -> writeSpecs(sourceElement, List.of(

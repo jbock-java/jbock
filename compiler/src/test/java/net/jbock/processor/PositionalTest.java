@@ -65,13 +65,13 @@ class PositionalTest {
                 "  @Parameter(index = 0)",
                 "  abstract String p();",
                 "",
-                "  @Parameters",
+                "  @VarargsParameter",
                 "  abstract List<String> a();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("@Parameters cannot be used when superCommand=true");
+                .withErrorContaining("@VarargsParameter cannot be used when superCommand=true");
     }
 
     @Test
@@ -198,7 +198,7 @@ class PositionalTest {
                 "abstract class Arguments {",
                 "  @Parameter(index = 0) abstract String b();",
                 "  @Parameter(index = 1) abstract Optional<String> c();",
-                "  @Parameters abstract List<String> a();",
+                "  @VarargsParameter abstract List<String> a();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
@@ -210,13 +210,13 @@ class PositionalTest {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
-                "  @Parameters abstract List<String> a();",
-                "  @Parameters abstract List<String> b();",
+                "  @VarargsParameter abstract List<String> a();",
+                "  @VarargsParameter abstract List<String> b();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("duplicate @Parameters annotation");
+                .withErrorContaining("duplicate @VarargsParameter annotation");
     }
 
     @Test
@@ -224,7 +224,7 @@ class PositionalTest {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
-                "  @Parameters abstract List<String> a();",
+                "  @VarargsParameter abstract List<String> a();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
@@ -263,13 +263,13 @@ class PositionalTest {
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Parameters",
+                "  @VarargsParameter",
                 "  abstract Integer something();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");
+                .withErrorContaining("method 'something' is annotated with @VarargsParameter, so it must return java.util.List");
     }
 
     @Test
@@ -278,13 +278,13 @@ class PositionalTest {
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @Parameters",
+                "  @VarargsParameter",
                 "  abstract Optional<Integer> something();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("method 'something' is annotated with @Parameters, so it must return java.util.List");
+                .withErrorContaining("method 'something' is annotated with @VarargsParameter, so it must return java.util.List");
     }
 
     @Test
@@ -299,6 +299,6 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("method 'something' returns a list-based type, so it must be annotated with @Option or @Parameters");
+                .withErrorContaining("method 'something' returns a list-based type, so it must be annotated with @Option or @VarargsParameter");
     }
 }
