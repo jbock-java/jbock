@@ -13,7 +13,7 @@ public final class ParserClass extends HasCommandRepresentation {
 
     private final ParseMethod parseMethod;
     private final OptEnum optionEnum;
-    private final ParseOrExitMethod.Factory parseOrExitMethodFactory;
+    private final ParseOrExitMethod parseOrExitMethod;
     private final CreateModelMethod createModelMethod;
     private final GeneratedAnnotation generatedAnnotation;
     private final HarvestMethod harvestMethod;
@@ -25,7 +25,7 @@ public final class ParserClass extends HasCommandRepresentation {
             ParseMethod parseMethod,
             CommandRepresentation commandRepresentation,
             OptEnum optionEnum,
-            ParseOrExitMethod.Factory parseOrExitMethodFactory,
+            ParseOrExitMethod parseOrExitMethod,
             CreateModelMethod createModelMethod,
             GeneratedAnnotation generatedAnnotation,
             HarvestMethod harvestMethod,
@@ -34,7 +34,7 @@ public final class ParserClass extends HasCommandRepresentation {
         super(commandRepresentation);
         this.parseMethod = parseMethod;
         this.optionEnum = optionEnum;
-        this.parseOrExitMethodFactory = parseOrExitMethodFactory;
+        this.parseOrExitMethod = parseOrExitMethod;
         this.createModelMethod = createModelMethod;
         this.generatedAnnotation = generatedAnnotation;
         this.harvestMethod = harvestMethod;
@@ -51,7 +51,7 @@ public final class ParserClass extends HasCommandRepresentation {
         TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement().generatedClass());
         spec.addMethod(parseMethod.get());
         if (!sourceElement().skipGeneratingParseOrExitMethod()) {
-            spec.addMethod(parseOrExitMethodFactory.create(commandRepresentation()).define());
+            spec.addMethod(parseOrExitMethod.define());
         }
         spec.addMethod(harvestMethod.get());
         if (!namedOptions().isEmpty()) {

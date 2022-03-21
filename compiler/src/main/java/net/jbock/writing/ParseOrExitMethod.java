@@ -1,11 +1,9 @@
 package net.jbock.writing;
 
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedFactory;
-import dagger.assisted.AssistedInject;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
+import jakarta.inject.Inject;
 import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.util.AtFileError;
 import net.jbock.util.ParseRequest;
@@ -14,15 +12,16 @@ import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
+@WritingScope
 class ParseOrExitMethod extends HasCommandRepresentation {
 
     private final GeneratedTypes generatedTypes;
     private final ParseMethod parseMethod;
     private final CreateModelMethod createModelMethod;
 
-    @AssistedInject
+    @Inject
     ParseOrExitMethod(
-            @Assisted CommandRepresentation commandRepresentation,
+            CommandRepresentation commandRepresentation,
             GeneratedTypes generatedTypes,
             ParseMethod parseMethod,
             CreateModelMethod createModelMethod) {
@@ -59,10 +58,5 @@ class ParseOrExitMethod extends HasCommandRepresentation {
                 .returns(generatedTypes.parseSuccessType())
                 .addCode(code.build())
                 .build();
-    }
-
-    @AssistedFactory
-    interface Factory {
-        ParseOrExitMethod create(CommandRepresentation commandRepresentation);
     }
 }
