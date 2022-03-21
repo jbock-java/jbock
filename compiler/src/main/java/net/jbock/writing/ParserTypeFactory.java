@@ -16,58 +16,82 @@ import net.jbock.processor.SourceElement;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
+
+import static net.jbock.common.Suppliers.memoize;
 
 @WritingScope
-final class ParserTypeFactory extends Cached<ParserType> {
+final class ParserTypeFactory {
 
-    private final SourceElement sourceElement;
-    private final List<Mapping<AnnotatedParameter>> positionalParameters;
-    private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
-    private final List<Mapping<AnnotatedOption>> namedOptions;
-    private final FieldSpec optionNames;
-    private final ClassName optType;
+    private final CommandRepresentation commandRepresentation;
     private final OptionStatesMethod optionStatesMethod;
 
     @Inject
     ParserTypeFactory(
             CommandRepresentation commandRepresentation,
             OptionStatesMethod optionStatesMethod) {
-        this.sourceElement = commandRepresentation.sourceElement();
-        this.positionalParameters = commandRepresentation.positionalParameters();
-        this.repeatablePositionalParameters = commandRepresentation.repeatablePositionalParameters();
-        this.namedOptions = commandRepresentation.namedOptions();
-        this.optionNames = commandRepresentation.optionNames();
-        this.optType = commandRepresentation.optType();
+        this.commandRepresentation = commandRepresentation;
         this.optionStatesMethod = optionStatesMethod;
     }
 
-    @Override
-    ParserType define() {
-        CodeBlock optionNames = namedOptions.isEmpty() ?
+    private final Supplier<ParserType> define = memoize(() -> {
+        CodeBlock optionNames = namedOptions().isEmpty() ?
                 CodeBlock.of("$T.of()", Map.class) :
-                CodeBlock.of("$N", this.optionNames);
-        CodeBlock optionStates = namedOptions.isEmpty() ?
+                CodeBlock.of("$N", optionNames());
+        CodeBlock optionStates = namedOptions().isEmpty() ?
                 CodeBlock.of("$T.of()", Map.class) :
-                CodeBlock.of("$N()", optionStatesMethod.get());
-        int numParams = positionalParameters.size();
-        if (sourceElement.isSuperCommand()) {
+                CodeBlock.of("$N()", optionStatesMethod().get());
+        int numParams = positionalParameters().size();
+        if (sourceElement().isSuperCommand()) {
             ClassName parserClass = ClassName.get(SuperParser.class);
             CodeBlock init = CodeBlock.of("$T.create($L, $L, $L)",
                     ClassName.get(SuperParser.class),
                     optionNames, optionStates, numParams);
-            return ParserType.create(ParameterizedTypeName.get(parserClass, optType), init);
+            return new ParserType(ParameterizedTypeName.get(parserClass, optType()), init);
         }
-        if (!repeatablePositionalParameters.isEmpty()) {
+        if (!repeatablePositionalParameters().isEmpty()) {
             ClassName parserClass = ClassName.get(RestParser.class);
             CodeBlock init = CodeBlock.of("$T.create($L, $L, $L)",
                     ClassName.get(RestParser.class),
                     optionNames, optionStates, numParams);
-            return ParserType.create(ParameterizedTypeName.get(parserClass, optType), init);
+            return new ParserType(ParameterizedTypeName.get(parserClass, optType()), init);
         }
         ClassName parserClass = ClassName.get(RestlessParser.class);
         CodeBlock init = CodeBlock.of("$T.create($L, $L, $L)",
                 ClassName.get(RestlessParser.class),
                 optionNames, optionStates, numParams);
-        return ParserType.create(ParameterizedTypeName.get(parserClass, optType), init);
+        return new ParserType(ParameterizedTypeName.get(parserClass, optType()), init);
+    });
+
+    ParserType get() {
+        return define.get();
+    }
+
+    private OptionStatesMethod optionStatesMethod() {
+        return optionStatesMethod;
+    }
+
+    private SourceElement sourceElement() {
+        return commandRepresentation.sourceElement();
+    }
+
+    private List<Mapping<AnnotatedParameter>> positionalParameters() {
+        return commandRepresentation.positionalParameters();
+    }
+
+    private List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
+        return commandRepresentation.repeatablePositionalParameters();
+    }
+
+    private List<Mapping<AnnotatedOption>> namedOptions() {
+        return commandRepresentation.namedOptions();
+    }
+
+    private FieldSpec optionNames() {
+        return commandRepresentation.optionNames();
+    }
+
+    private ClassName optType() {
+        return commandRepresentation.optType();
     }
 }
