@@ -16,7 +16,7 @@ class GeneratedAnnotation {
     AnnotationSpec define() {
         return AnnotationSpec.builder(Generated.class)
                 .addMember("value", CodeBlock.of("$S", JbockProcessor.class.getCanonicalName()))
-                .addMember("comments", CodeBlock.of("$S", "https://github.com/jbock-java"))
+                .addMember("comments", CodeBlock.of("$S", "https://github.com/jbock-java/jbock"))
                 .build();
     }
 }

@@ -4,14 +4,11 @@ import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
-import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.convert.Mapping;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Multiplicity;
 import net.jbock.model.Option;
 import net.jbock.model.Parameter;
-import net.jbock.processor.SourceElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,13 +21,11 @@ import static net.jbock.writing.CodeBlocks.joinByComma;
 import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 @WritingScope
-final class CreateModelMethod {
-
-    private final CommandRepresentation commandRepresentation;
+final class CreateModelMethod extends HasCommandRepresentation {
 
     @Inject
     CreateModelMethod(CommandRepresentation commandRepresentation) {
-        this.commandRepresentation = commandRepresentation;
+        super(commandRepresentation);
     }
 
     private final Supplier<MethodSpec> define = memoize(() -> {
@@ -61,22 +56,6 @@ final class CreateModelMethod {
 
     MethodSpec get() {
         return define.get();
-    }
-
-    private SourceElement sourceElement() {
-        return commandRepresentation.sourceElement();
-    }
-
-    private List<Mapping<AnnotatedOption>> namedOptions() {
-        return commandRepresentation.namedOptions();
-    }
-
-    private List<Mapping<AnnotatedParameter>> positionalParameters() {
-        return commandRepresentation.positionalParameters();
-    }
-
-    private List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
-        return commandRepresentation.repeatablePositionalParameters();
     }
 
     private CodeBlock optionBlock(Mapping<AnnotatedOption> m) {

@@ -4,8 +4,6 @@ import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
 import jakarta.inject.Inject;
-import net.jbock.common.Suppliers;
-import net.jbock.processor.SourceElement;
 import net.jbock.util.ExFailure;
 
 import java.util.function.Supplier;
@@ -16,10 +14,9 @@ import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Suppliers.memoize;
 
 @WritingScope
-final class ParseMethod {
+final class ParseMethod extends HasCommandRepresentation {
 
     private final GeneratedTypes generatedTypes;
-    private final CommandRepresentation commandRepresentation;
     private final CreateModelMethod createModelMethod;
     private final HarvestMethod harvestMethod;
     private final ParserTypeFactory parserTypeFactory;
@@ -31,8 +28,8 @@ final class ParseMethod {
             CreateModelMethod createModelMethod,
             HarvestMethod harvestMethod,
             ParserTypeFactory parserTypeFactory) {
+        super(commandRepresentation);
         this.generatedTypes = generatedTypes;
-        this.commandRepresentation = commandRepresentation;
         this.createModelMethod = createModelMethod;
         this.harvestMethod = harvestMethod;
         this.parserTypeFactory = parserTypeFactory;
@@ -84,9 +81,5 @@ final class ParseMethod {
 
     private GeneratedTypes generatedTypes() {
         return generatedTypes;
-    }
-
-    private SourceElement sourceElement() {
-        return commandRepresentation.sourceElement();
     }
 }

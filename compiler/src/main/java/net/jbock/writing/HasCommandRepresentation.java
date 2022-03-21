@@ -41,4 +41,8 @@ abstract class HasCommandRepresentation {
     final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
         return commandRepresentation.repeatablePositionalParameters();
     }
+
+    final CommandRepresentation commandRepresentation() {
+        return commandRepresentation;
+    }
 }

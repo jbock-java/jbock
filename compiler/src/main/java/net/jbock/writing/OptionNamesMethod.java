@@ -1,13 +1,11 @@
 package net.jbock.writing;
 
 import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
-import net.jbock.processor.SourceElement;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,14 +16,12 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.common.Suppliers.memoize;
 
 @WritingScope
-final class OptionNamesMethod {
-
-    private final CommandRepresentation commandRepresentation;
+final class OptionNamesMethod extends HasCommandRepresentation {
 
     @Inject
     OptionNamesMethod(
             CommandRepresentation commandRepresentation) {
-        this.commandRepresentation = commandRepresentation;
+        super(commandRepresentation);
     }
 
     private final Supplier<MethodSpec> define = memoize(() -> {
@@ -56,17 +52,5 @@ final class OptionNamesMethod {
 
     MethodSpec get() {
         return define.get();
-    }
-
-    private List<Mapping<AnnotatedOption>> namedOptions() {
-        return commandRepresentation.namedOptions();
-    }
-
-    private FieldSpec optionNames() {
-        return commandRepresentation.optionNames();
-    }
-
-    private SourceElement sourceElement() {
-        return commandRepresentation.sourceElement();
     }
 }

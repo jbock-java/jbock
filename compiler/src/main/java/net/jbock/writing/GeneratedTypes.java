@@ -4,7 +4,6 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
-import net.jbock.processor.SourceElement;
 import net.jbock.util.ParsingFailed;
 import net.jbock.util.SuperResult;
 
@@ -13,33 +12,29 @@ import java.util.Optional;
 import static net.jbock.common.Constants.EITHER;
 
 @WritingScope
-class GeneratedTypes {
-
-    private final SourceElement sourceElement;
-    private final ClassName generatedClass;
+class GeneratedTypes extends HasCommandRepresentation {
 
     @Inject
     GeneratedTypes(CommandRepresentation commandRepresentation) {
-        this.sourceElement = commandRepresentation.sourceElement();
-        this.generatedClass = commandRepresentation.sourceElement().generatedClass();
+        super(commandRepresentation);
     }
 
     TypeName parseSuccessType() {
-        return superResultType().orElse(sourceElement.typeName());
+        return superResultType().orElse(sourceElement().typeName());
     }
 
     Optional<TypeName> superResultType() {
-        if (!sourceElement.isSuperCommand()) {
+        if (!sourceElement().isSuperCommand()) {
             return Optional.empty();
         }
         ParameterizedTypeName type = ParameterizedTypeName.get(
                 ClassName.get(SuperResult.class),
-                sourceElement.typeName());
+                sourceElement().typeName());
         return Optional.of(type);
     }
 
     ClassName implType() {
-        return generatedClass.peerClass(sourceElement.element().getSimpleName() + "_Impl");
+        return sourceElement().generatedClass().peerClass(sourceElement().element().getSimpleName() + "_Impl");
     }
 
     TypeName parseResultType() {

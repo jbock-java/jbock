@@ -7,7 +7,6 @@ import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
 import net.jbock.contrib.StandardErrorHandler;
-import net.jbock.processor.SourceElement;
 import net.jbock.util.AtFileError;
 import net.jbock.util.ParseRequest;
 
@@ -15,20 +14,19 @@ import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
-class ParseOrExitMethod {
+class ParseOrExitMethod extends HasCommandRepresentation {
 
-    private final SourceElement sourceElement;
     private final GeneratedTypes generatedTypes;
     private final ParseMethod parseMethod;
     private final CreateModelMethod createModelMethod;
 
     @AssistedInject
     ParseOrExitMethod(
-            @Assisted SourceElement sourceElement,
+            @Assisted CommandRepresentation commandRepresentation,
             GeneratedTypes generatedTypes,
             ParseMethod parseMethod,
             CreateModelMethod createModelMethod) {
-        this.sourceElement = sourceElement;
+        super(commandRepresentation);
         this.generatedTypes = generatedTypes;
         this.parseMethod = parseMethod;
         this.createModelMethod = createModelMethod;
@@ -57,7 +55,7 @@ class ParseOrExitMethod {
                 .addStatement("return new $T()", RuntimeException.class).unindent()
                 .addStatement("})").unindent();
         return methodBuilder("parseOrExit").addParameter(args)
-                .addModifiers(sourceElement.accessModifiers())
+                .addModifiers(sourceElement().accessModifiers())
                 .returns(generatedTypes.parseSuccessType())
                 .addCode(code.build())
                 .build();
@@ -65,6 +63,6 @@ class ParseOrExitMethod {
 
     @AssistedFactory
     interface Factory {
-        ParseOrExitMethod create(SourceElement sourceElement);
+        ParseOrExitMethod create(CommandRepresentation commandRepresentation);
     }
 }

@@ -4,9 +4,6 @@ import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
-import net.jbock.processor.SourceElement;
-
-import java.util.List;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 
@@ -16,20 +13,16 @@ import static javax.lang.model.element.Modifier.PRIVATE;
  * @see ParserClass
  */
 @WritingScope
-class OptEnum {
-
-    private final List<Mapping<AnnotatedOption>> options;
-    private final SourceElement sourceElement;
+class OptEnum extends HasCommandRepresentation {
 
     @Inject
     OptEnum(CommandRepresentation commandRepresentation) {
-        this.options = commandRepresentation.namedOptions();
-        this.sourceElement = commandRepresentation.sourceElement();
+        super(commandRepresentation);
     }
 
     TypeSpec define() {
-        TypeSpec.Builder spec = TypeSpec.enumBuilder(sourceElement.optionEnumType());
-        for (Mapping<AnnotatedOption> option : options) {
+        TypeSpec.Builder spec = TypeSpec.enumBuilder(sourceElement().optionEnumType());
+        for (Mapping<AnnotatedOption> option : namedOptions()) {
             spec.addEnumConstant(option.enumName());
         }
         return spec.addModifiers(PRIVATE)
