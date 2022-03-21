@@ -55,9 +55,8 @@ public class AnnotatedMethodsFactory {
         return executableElementsFinder.findExecutableElements()
                 .map(EnumNames::builder)
                 .map(builder -> builder.withEnumNames(createEnumNames(builder.methods())))
-                .flatMap(builder -> builder.methods().stream()
-                        .map(sourceMethod -> createAnnotatedMethod(sourceMethod,
-                                builder.enumNames().get(sourceMethod.simpleName())))
+                .flatMap(names -> names.methods().stream()
+                        .map(sourceMethod -> createAnnotatedMethod(sourceMethod, names))
                         .collect(allFailures()))
                 .map(AnnotatedMethods::builder)
                 .map(builder -> builder.withNamedOptions(builder.annotatedMethods()
@@ -68,7 +67,7 @@ public class AnnotatedMethodsFactory {
                         .sorted(indexComparator)
                         .collect(toList())))
                 .map(builder -> builder.withRepeatablePositionalParameters(builder.annotatedMethods()
-                        .flatMap(instancesOf(AnnotatedParameters.class))
+                        .flatMap(instancesOf(AnnotatedVarargsParameter.class))
                         .collect(toList())))
                 .filter(this::validateAtLeastOneParameterInSuperCommand);
     }
@@ -102,7 +101,8 @@ public class AnnotatedMethodsFactory {
 
     private Either<ValidationFailure, AnnotatedMethod> createAnnotatedMethod(
             Executable sourceMethod,
-            String enumName) {
+            EnumNames enumNames) {
+        String enumName = enumNames.enumNameFor(sourceMethod.simpleName());
         ExecutableElement method = sourceMethod.method();
         return util.checkNoDuplicateAnnotations(method, methodLevelAnnotations())
                 .<Either<ValidationFailure, AnnotatedMethod>>map(Either::left)

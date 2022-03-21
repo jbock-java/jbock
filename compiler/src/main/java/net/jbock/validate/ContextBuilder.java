@@ -3,7 +3,7 @@ package net.jbock.validate;
 import net.jbock.annotated.AnnotatedMethods;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.annotated.AnnotatedParameters;
+import net.jbock.annotated.AnnotatedVarargsParameter;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.writing.CommandRepresentation;
@@ -66,20 +66,20 @@ public final class ContextBuilder {
             this.positionalParameters = positionalParameters;
         }
 
-        List<AnnotatedParameters> repeatablePositionalParameters() {
+        List<AnnotatedVarargsParameter> repeatablePositionalParameters() {
             return step1.step0.abstractMethods.repeatablePositionalParameters();
         }
 
-        Step3 accept(List<Mapping<AnnotatedParameters>> repeatablePositionalParameters) {
+        Step3 accept(List<Mapping<AnnotatedVarargsParameter>> repeatablePositionalParameters) {
             return new Step3(this, repeatablePositionalParameters);
         }
     }
 
     static final class Step3 {
         private final Step2 step2;
-        private final List<Mapping<AnnotatedParameters>> repeatablePositionalParameters;
+        private final List<Mapping<AnnotatedVarargsParameter>> repeatablePositionalParameters;
 
-        private Step3(Step2 step2, List<Mapping<AnnotatedParameters>> repeatablePositionalParameters) {
+        private Step3(Step2 step2, List<Mapping<AnnotatedVarargsParameter>> repeatablePositionalParameters) {
             this.step2 = step2;
             this.repeatablePositionalParameters = repeatablePositionalParameters;
         }
@@ -101,7 +101,7 @@ public final class ContextBuilder {
         return step3.step2.positionalParameters;
     }
 
-    public List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
+    public List<Mapping<AnnotatedVarargsParameter>> repeatablePositionalParameters() {
         return step3.repeatablePositionalParameters;
     }
 

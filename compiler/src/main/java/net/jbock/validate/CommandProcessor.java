@@ -26,17 +26,17 @@ public class CommandProcessor {
 
     private final AnnotatedMethodsFactory methodsFactory;
     private final SourceElement sourceElement;
-    private final SourceOptionValidator optionValidator;
-    private final SourceParameterValidator parameterValidator;
-    private final SourceParametersValidator parametersValidator;
+    private final OptionValidator optionValidator;
+    private final ParameterValidator parameterValidator;
+    private final VarargsParameterValidator parametersValidator;
 
     @Inject
     CommandProcessor(
             AnnotatedMethodsFactory methodsFactory,
             SourceElement sourceElement,
-            SourceOptionValidator optionValidator,
-            SourceParameterValidator parameterValidator,
-            SourceParametersValidator parametersValidator) {
+            OptionValidator optionValidator,
+            ParameterValidator parameterValidator,
+            VarargsParameterValidator parametersValidator) {
         this.methodsFactory = methodsFactory;
         this.sourceElement = sourceElement;
         this.optionValidator = optionValidator;

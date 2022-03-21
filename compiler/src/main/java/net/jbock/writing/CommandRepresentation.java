@@ -4,7 +4,7 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.FieldSpec;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.annotated.AnnotatedParameters;
+import net.jbock.annotated.AnnotatedVarargsParameter;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.validate.ContextBuilder;
@@ -36,7 +36,7 @@ public final class CommandRepresentation {
         return sourceElement;
     }
 
-    List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
+    List<Mapping<AnnotatedVarargsParameter>> repeatablePositionalParameters() {
         return contextBuilder.repeatablePositionalParameters();
     }
 

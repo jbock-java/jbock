@@ -22,13 +22,13 @@ import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
 
 @ValidateScope
-class SourceOptionValidator {
+class OptionValidator {
 
     private final MappingFinder mappingFinder;
     private final MatchFinder matchFinder;
 
     @Inject
-    SourceOptionValidator(
+    OptionValidator(
             MappingFinder mappingFinder,
             MatchFinder matchFinder) {
         this.mappingFinder = mappingFinder;

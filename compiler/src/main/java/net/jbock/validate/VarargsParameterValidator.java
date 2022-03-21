@@ -3,7 +3,7 @@ package net.jbock.validate;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
 import net.jbock.VarargsParameter;
-import net.jbock.annotated.AnnotatedParameters;
+import net.jbock.annotated.AnnotatedVarargsParameter;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.MappingFinder;
 import net.jbock.processor.SourceElement;
@@ -16,13 +16,13 @@ import static io.jbock.util.Eithers.allFailures;
 import static io.jbock.util.Eithers.toOptionalList;
 
 @ValidateScope
-class SourceParametersValidator {
+class VarargsParameterValidator {
 
     private final MappingFinder mappingFinder;
     private final SourceElement sourceElement;
 
     @Inject
-    SourceParametersValidator(
+    VarargsParameterValidator(
             MappingFinder mappingFinder,
             SourceElement sourceElement) {
         this.mappingFinder = mappingFinder;
@@ -33,30 +33,30 @@ class SourceParametersValidator {
             ContextBuilder.Step2 step) {
         return validateDuplicateParametersAnnotation(step.repeatablePositionalParameters())
                 .filter(this::validateNoRepeatableParameterInSuperCommand)
-                .flatMap(repeatablePositionalParameters -> repeatablePositionalParameters.stream()
+                .flatMap(parameters -> parameters.stream()
                         .map(mappingFinder::findMapping)
                         .collect(allFailures()))
                 .map(step::accept);
     }
 
-    private Either<List<ValidationFailure>, List<AnnotatedParameters>> validateDuplicateParametersAnnotation(
-            List<AnnotatedParameters> repeatablePositionalParameters) {
-        return repeatablePositionalParameters.stream()
+    private Either<List<ValidationFailure>, List<AnnotatedVarargsParameter>> validateDuplicateParametersAnnotation(
+            List<AnnotatedVarargsParameter> parameters) {
+        return parameters.stream()
                 .skip(1)
                 .map(param -> param.fail("duplicate @" + VarargsParameter.class.getSimpleName() + " annotation"))
                 .collect(toOptionalList())
-                .<Either<List<ValidationFailure>, List<AnnotatedParameters>>>map(Either::left)
-                .orElseGet(() -> right(repeatablePositionalParameters));
+                .<Either<List<ValidationFailure>, List<AnnotatedVarargsParameter>>>map(Either::left)
+                .orElseGet(() -> right(parameters));
     }
 
     /* Left-Optional
      */
     private Optional<List<ValidationFailure>> validateNoRepeatableParameterInSuperCommand(
-            List<AnnotatedParameters> repeatablePositionalParameters) {
+            List<AnnotatedVarargsParameter> parameters) {
         if (!sourceElement.isSuperCommand()) {
             return Optional.empty();
         }
-        return repeatablePositionalParameters.stream()
+        return parameters.stream()
                 .map(param -> param.fail("@" + VarargsParameter.class.getSimpleName() +
                         " cannot be used when superCommand=true"))
                 .collect(toOptionalList());

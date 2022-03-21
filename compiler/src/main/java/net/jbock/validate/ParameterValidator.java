@@ -17,19 +17,19 @@ import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
 
 @ValidateScope
-class SourceParameterValidator {
+class ParameterValidator {
 
     private final MappingFinder mappingFinder;
 
     @Inject
-    SourceParameterValidator(MappingFinder mappingFinder) {
+    ParameterValidator(MappingFinder mappingFinder) {
         this.mappingFinder = mappingFinder;
     }
 
     Either<List<ValidationFailure>, ContextBuilder.Step2> wrapPositionalParams(
             ContextBuilder.Step1 step) {
         return validatePositions(step.positionalParameters())
-                .flatMap(positionalParameters -> positionalParameters.stream()
+                .flatMap(parameters -> parameters.stream()
                         .map(mappingFinder::findMapping)
                         .collect(allFailures()))
                 .filter(this::checkNoRequiredAfterOptional)
@@ -37,18 +37,18 @@ class SourceParameterValidator {
     }
 
     private Either<List<ValidationFailure>, List<AnnotatedParameter>> validatePositions(
-            List<AnnotatedParameter> positionalParameters) {
+            List<AnnotatedParameter> parameters) {
         List<ValidationFailure> failures = new ArrayList<>();
-        for (int i = 0; i < positionalParameters.size(); i++) {
-            AnnotatedParameter sourceParameter = positionalParameters.get(i);
-            int index = sourceParameter.index();
+        for (int i = 0; i < parameters.size(); i++) {
+            AnnotatedParameter parameter = parameters.get(i);
+            int index = parameter.index();
             if (index != i) {
-                failures.add(sourceParameter.fail("invalid position: expecting " + i + " but found " + index));
+                failures.add(parameter.fail("invalid position: expecting " + i + " but found " + index));
             }
         }
         return optionalList(failures)
                 .<Either<List<ValidationFailure>, List<AnnotatedParameter>>>map(Either::left)
-                .orElseGet(() -> right(positionalParameters));
+                .orElseGet(() -> right(parameters));
     }
 
     /* Left-Optional

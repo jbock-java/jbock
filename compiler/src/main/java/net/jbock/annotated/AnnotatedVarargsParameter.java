@@ -4,26 +4,26 @@ import net.jbock.common.SnakeName;
 
 import java.util.Locale;
 
-public final class AnnotatedParameters extends AnnotatedMethod {
+public final class AnnotatedVarargsParameter extends AnnotatedMethod {
 
-    private final ExecutableParameters parameters;
+    private final ExecutableVarargsParameter parameters;
 
-    private AnnotatedParameters(
+    private AnnotatedVarargsParameter(
             String enumName,
-            ExecutableParameters parameters,
+            ExecutableVarargsParameter parameters,
             String paramLabel) {
         super(enumName, paramLabel);
         this.parameters = parameters;
     }
 
-    static AnnotatedParameters createParameters(
-            ExecutableParameters parameters,
+    static AnnotatedVarargsParameter createVarargsParameter(
+            ExecutableVarargsParameter parameters,
             String enumName) {
         String paramLabel = parameters.paramLabel()
                 .orElseGet(() -> SnakeName.create(parameters.simpleName())
                         .snake('_')
                         .toUpperCase(Locale.US));
-        return new AnnotatedParameters(enumName, parameters, paramLabel);
+        return new AnnotatedVarargsParameter(enumName, parameters, paramLabel);
     }
 
     @Override

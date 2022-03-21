@@ -6,11 +6,11 @@ import java.util.stream.Stream;
 public final class AnnotatedMethods {
 
     private final Step3 step3;
-    private final List<AnnotatedParameters> repeatablePositionalParameters;
+    private final List<AnnotatedVarargsParameter> repeatablePositionalParameters;
 
     private AnnotatedMethods(
             Step3 step3,
-            List<AnnotatedParameters> repeatablePositionalParameters) {
+            List<AnnotatedVarargsParameter> repeatablePositionalParameters) {
         this.step3 = step3;
         this.repeatablePositionalParameters = repeatablePositionalParameters;
     }
@@ -23,7 +23,7 @@ public final class AnnotatedMethods {
         return step3.positionalParameters;
     }
 
-    public List<AnnotatedParameters> repeatablePositionalParameters() {
+    public List<AnnotatedVarargsParameter> repeatablePositionalParameters() {
         return repeatablePositionalParameters;
     }
 
@@ -81,7 +81,7 @@ public final class AnnotatedMethods {
             return step2.step1.annotatedMethods.stream();
         }
 
-        AnnotatedMethods withRepeatablePositionalParameters(List<AnnotatedParameters> repeatablePositionalParameters) {
+        AnnotatedMethods withRepeatablePositionalParameters(List<AnnotatedVarargsParameter> repeatablePositionalParameters) {
             return new AnnotatedMethods(this, repeatablePositionalParameters);
         }
     }

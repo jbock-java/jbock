@@ -8,7 +8,7 @@ import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.annotated.AnnotatedParameters;
+import net.jbock.annotated.AnnotatedVarargsParameter;
 import net.jbock.convert.Mapping;
 import net.jbock.model.ItemType;
 import net.jbock.util.ExConvert;
@@ -130,7 +130,7 @@ final class HarvestMethod extends HasCommandRepresentation {
         return joinByNewline(code);
     }
 
-    private CodeBlock convertExpressionRepeatableParameter(Mapping<AnnotatedParameters> m) {
+    private CodeBlock convertExpressionRepeatableParameter(Mapping<AnnotatedVarargsParameter> m) {
         ParameterSpec parser = parserTypeFactory.get().asParam();
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.rest()", parser));

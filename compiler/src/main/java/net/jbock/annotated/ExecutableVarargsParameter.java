@@ -8,39 +8,39 @@ import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
 
-import static net.jbock.annotated.AnnotatedParameters.createParameters;
+import static net.jbock.annotated.AnnotatedVarargsParameter.createVarargsParameter;
 import static net.jbock.common.Constants.optionalString;
 
-final class ExecutableParameters extends Executable {
+final class ExecutableVarargsParameter extends Executable {
 
-    private final VarargsParameter parameters;
+    private final VarargsParameter parameter;
 
-    ExecutableParameters(
+    ExecutableVarargsParameter(
             ExecutableElement method,
-            VarargsParameter parameters,
+            VarargsParameter parameter,
             Optional<TypeElement> converter) {
         super(method, converter);
-        this.parameters = parameters;
+        this.parameter = parameter;
     }
 
     @Override
     AnnotatedMethod annotatedMethod(
             SourceElement sourceElement,
             String enumName) {
-        return createParameters(this, enumName);
+        return createVarargsParameter(this, enumName);
     }
 
     @Override
     Optional<String> descriptionKey() {
-        return optionalString(parameters.descriptionKey());
+        return optionalString(parameter.descriptionKey());
     }
 
     @Override
     List<String> description() {
-        return List.of(parameters.description());
+        return List.of(parameter.description());
     }
 
     Optional<String> paramLabel() {
-        return optionalString(parameters.paramLabel());
+        return optionalString(parameter.paramLabel());
     }
 }

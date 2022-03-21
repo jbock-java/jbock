@@ -6,23 +6,23 @@ import java.util.Map;
 
 final class EnumNames {
 
-    private final Step1 step1;
+    private final Builder builder;
     private final Map<Name, String> enumNames;
 
-    private EnumNames(Step1 step1, Map<Name, String> enumNames) {
-        this.step1 = step1;
+    private EnumNames(Builder builder, Map<Name, String> enumNames) {
+        this.builder = builder;
         this.enumNames = enumNames;
     }
 
-    static Step1 builder(List<Executable> methods) {
-        return new Step1(methods);
+    static Builder builder(List<Executable> methods) {
+        return new Builder(methods);
     }
 
-    static final class Step1 {
+    static final class Builder {
 
         private final List<Executable> methods;
 
-        private Step1(List<Executable> methods) {
+        private Builder(List<Executable> methods) {
             this.methods = methods;
         }
 
@@ -35,11 +35,11 @@ final class EnumNames {
         }
     }
 
-    Map<Name, String> enumNames() {
-        return enumNames;
+    String enumNameFor(Name sourceMethodName) {
+        return enumNames.get(sourceMethodName);
     }
 
     List<Executable> methods() {
-        return step1.methods;
+        return builder.methods;
     }
 }

@@ -71,12 +71,12 @@ abstract class Executable {
                 return new ExecutableParameter(method, (Parameter) annotation, converter);
             }
             if (annotation instanceof VarargsParameter) {
-                return new ExecutableParameters(method, (VarargsParameter) annotation, converter);
+                return new ExecutableVarargsParameter(method, (VarargsParameter) annotation, converter);
             }
             if (annotation instanceof Parameters) {
                 messager.printMessage(WARNING,
                         "@Parameters has been deprecated, use @VarargsParameter instead", method);
-                return new ExecutableParameters(method, convertLegacyParameters((Parameters) annotation), converter);
+                return new ExecutableVarargsParameter(method, convertLegacyParameters((Parameters) annotation), converter);
             }
             throw new AssertionError();
         }
