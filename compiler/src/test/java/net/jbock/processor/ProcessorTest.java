@@ -691,7 +691,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("annotate with either @Option or @Parameter but not both");
+                .withErrorContaining("annotate with either @Option or @Parameter, but not both");
     }
 
     @Test
