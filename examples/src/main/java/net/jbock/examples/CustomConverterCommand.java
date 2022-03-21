@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Option;
-import net.jbock.Parameters;
+import net.jbock.VarargsParameter;
 import net.jbock.util.StringConverter;
 
 import java.math.BigInteger;
@@ -50,7 +50,7 @@ abstract class CustomConverterCommand {
     @Option(names = "--enumSet", converter = EnumSetConverter.class)
     abstract Optional<Set<MyEnum>> enumSet();
 
-    @Parameters(converter = BooleanConverter.class)
+    @VarargsParameter(converter = BooleanConverter.class)
     abstract List<Boolean> booleanList();
 
     @Option(names = "--optionalInts", converter = OptionalIntMapper.class)

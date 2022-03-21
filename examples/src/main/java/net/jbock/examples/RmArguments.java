@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Option;
-import net.jbock.Parameters;
+import net.jbock.VarargsParameter;
 
 import java.util.List;
 
@@ -26,6 +26,6 @@ abstract class RmArguments {
             description = "Use the force, Luke.")
     abstract boolean force();
 
-    @Parameters(description = "This is a list that may be empty.")
+    @VarargsParameter(description = "This is a list that may be empty.")
     abstract List<String> otherTokens();
 }

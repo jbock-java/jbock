@@ -3,7 +3,7 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
-import net.jbock.Parameters;
+import net.jbock.VarargsParameter;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ abstract class GitArguments {
     /**
      * More ignored text
      */
-    @Parameters(description = {
+    @VarargsParameter(description = {
             "You were a hit!",
             "Everyone loves you, now."})
     abstract List<String> remainingArgs();

@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Option;
-import net.jbock.Parameters;
+import net.jbock.VarargsParameter;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +32,6 @@ abstract class CurlArguments {
     @Option(names = {"--include", "-i"})
     abstract boolean include();
 
-    @Parameters
+    @VarargsParameter
     abstract List<String> url();
 }

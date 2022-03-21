@@ -1,6 +1,6 @@
 package net.jbock.annotated;
 
-import net.jbock.Parameters;
+import net.jbock.VarargsParameter;
 import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
@@ -13,11 +13,11 @@ import static net.jbock.common.Constants.optionalString;
 
 final class ExecutableParameters extends Executable {
 
-    private final Parameters parameters;
+    private final VarargsParameter parameters;
 
     ExecutableParameters(
             ExecutableElement method,
-            Parameters parameters,
+            VarargsParameter parameters,
             Optional<TypeElement> converter) {
         super(method, converter);
         this.parameters = parameters;

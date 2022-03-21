@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Option;
-import net.jbock.Parameters;
+import net.jbock.VarargsParameter;
 
 import java.util.List;
 
@@ -14,6 +14,6 @@ abstract class RestArguments {
             descriptionKey = "the.file")
     abstract List<String> file();
 
-    @Parameters(descriptionKey = "the.rest")
+    @VarargsParameter(descriptionKey = "the.rest")
     abstract List<String> rest();
 }

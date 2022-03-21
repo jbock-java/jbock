@@ -16,7 +16,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * <ul>
  *   <li>{@link Option}
  *   <li>{@link Parameter}
- *   <li>{@link Parameters}
+ *   <li>{@link VarargsParameter}
  * </ul>
  */
 @Target(TYPE)

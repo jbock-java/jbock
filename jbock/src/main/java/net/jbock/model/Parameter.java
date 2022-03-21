@@ -1,6 +1,6 @@
 package net.jbock.model;
 
-import net.jbock.Parameters;
+import net.jbock.VarargsParameter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.Locale;
  * It represents a positional parameter.
  *
  * @see net.jbock.Parameter
- * @see net.jbock.Parameters
+ * @see VarargsParameter
  * @see CommandModel
  */
 public final class Parameter extends Item {
@@ -52,7 +52,7 @@ public final class Parameter extends Item {
          * Sets the param label.
          *
          * @see Parameter#paramLabel()
-         * @see Parameters#paramLabel()
+         * @see VarargsParameter#paramLabel()
          * @param paramLabel a non-empty string
          * @return the builder instance
          */
@@ -65,7 +65,7 @@ public final class Parameter extends Item {
          * Sets the description key.
          *
          * @see Parameter#descriptionKey()
-         * @see Parameters#descriptionKey()
+         * @see VarargsParameter#descriptionKey()
          * @param descriptionKey a string, possibly empty
          * @return the builder instance
          */
@@ -78,7 +78,7 @@ public final class Parameter extends Item {
          * Adds a line of description text.
          *
          * @see Parameter#description()
-         * @see Parameters#description()
+         * @see VarargsParameter#description()
          * @param descriptionLine a string, possibly empty
          * @return the builder instance
          */

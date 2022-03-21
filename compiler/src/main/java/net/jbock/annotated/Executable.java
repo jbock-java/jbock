@@ -2,7 +2,7 @@ package net.jbock.annotated;
 
 import net.jbock.Option;
 import net.jbock.Parameter;
-import net.jbock.Parameters;
+import net.jbock.VarargsParameter;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 
@@ -58,8 +58,8 @@ abstract class Executable {
         if (annotation instanceof Parameter) {
             return new ExecutableParameter(method, (Parameter) annotation, converter);
         }
-        if (annotation instanceof Parameters) {
-            return new ExecutableParameters(method, (Parameters) annotation, converter);
+        if (annotation instanceof VarargsParameter) {
+            return new ExecutableParameters(method, (VarargsParameter) annotation, converter);
         }
         throw new AssertionError();
     }

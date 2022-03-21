@@ -8,14 +8,14 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  * Marker annotation for a <em>repeatable</em> positional parameter.
- * This parameter will capture the remaining tokens,
- * after all non-repeatable positional parameters have been read.
+ * This will capture the remaining non-option tokens,
+ * <em>after</em> any non-repeatable non-option tokens have been captured.
  *
  * <ul>
  *   <li>The annotated method must be {@code abstract} and have an empty argument list.
- *   <li>The annotated method must return {@link java.util.List List&lt;E&gt;},
+ *   <li>The annotated method <em>must</em> return {@link java.util.List List&lt;E&gt;},
  *       where {@code E} is a converted type.
- *   <li>There cannot be more than one repeatable positional parameter per command.
+ *   <li>There can only be one varargs parameter per command.
  *   <li>Cannot be used when the {@link Command#superCommand()} attribute is set.
  * </ul>
  *
@@ -23,7 +23,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  */
 @Target(METHOD)
 @Retention(SOURCE)
-public @interface Parameters {
+public @interface VarargsParameter {
 
     /**
      * Class of a custom converter for this repeatable parameter.
@@ -55,11 +55,10 @@ public @interface Parameters {
     String[] description() default {};
 
     /**
-     * A label for these repeatable parameters, to address them in the usage documentation.
+     * A label for the varargs parameter, to address them in the usage documentation.
      * If empty, a label will be chosen based on the method name.
      *
-     * @return description label for these parameters
+     * @return description label for the varargs parameter
      */
     String paramLabel() default "";
 }
-

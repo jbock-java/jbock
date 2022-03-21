@@ -4,7 +4,7 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
-import net.jbock.Parameters;
+import net.jbock.VarargsParameter;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +39,7 @@ abstract class GradleArguments {
             description = "some token")
     abstract Optional<String> mainToken();
 
-    @Parameters(paramLabel = "moreTokens",
+    @VarargsParameter(paramLabel = "moreTokens",
             description = "some more tokens")
     abstract List<String> otherTokens();
 

@@ -3,7 +3,7 @@ package net.jbock.convert.match;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
 import net.jbock.Option;
-import net.jbock.Parameters;
+import net.jbock.VarargsParameter;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.ValidationFailure;
@@ -86,14 +86,14 @@ public class MatchFinder {
                     "' returns a list-based type, so it must be annotated with @" +
                     Option.class.getSimpleName() +
                     " or @" +
-                    Parameters.class.getSimpleName()));
+                    VarargsParameter.class.getSimpleName()));
         }
         if (sourceMethod.isParameters()
                 && match.multiplicity() != Multiplicity.REPEATABLE) {
             return Optional.of(sourceMethod.fail("method '" +
                     sourceMethod.method().getSimpleName() +
                     "' is annotated with @" +
-                    Parameters.class.getSimpleName() +
+                    VarargsParameter.class.getSimpleName() +
                     ", so it must return java.util.List"));
         }
         return Optional.empty();

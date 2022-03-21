@@ -2,7 +2,7 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
-import net.jbock.Parameters;
+import net.jbock.VarargsParameter;
 import net.jbock.annotated.AnnotatedParameters;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.MappingFinder;
@@ -43,7 +43,7 @@ class SourceParametersValidator {
             List<AnnotatedParameters> repeatablePositionalParameters) {
         return repeatablePositionalParameters.stream()
                 .skip(1)
-                .map(param -> param.fail("duplicate @" + Parameters.class.getSimpleName() + " annotation"))
+                .map(param -> param.fail("duplicate @" + VarargsParameter.class.getSimpleName() + " annotation"))
                 .collect(toOptionalList())
                 .<Either<List<ValidationFailure>, List<AnnotatedParameters>>>map(Either::left)
                 .orElseGet(() -> right(repeatablePositionalParameters));
@@ -57,7 +57,7 @@ class SourceParametersValidator {
             return Optional.empty();
         }
         return repeatablePositionalParameters.stream()
-                .map(param -> param.fail("@" + Parameters.class.getSimpleName() +
+                .map(param -> param.fail("@" + VarargsParameter.class.getSimpleName() +
                         " cannot be used when superCommand=true"))
                 .collect(toOptionalList());
     }
