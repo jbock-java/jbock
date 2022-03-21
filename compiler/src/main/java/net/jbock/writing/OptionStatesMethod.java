@@ -11,38 +11,35 @@ import net.jbock.parse.OptionState;
 import net.jbock.parse.OptionStateModeFlag;
 import net.jbock.parse.OptionStateNonRepeatable;
 import net.jbock.parse.OptionStateRepeatable;
-import net.jbock.processor.SourceElement;
 
 import java.util.EnumMap;
-import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.mapOf;
+import static net.jbock.common.Suppliers.memoize;
 
 @WritingScope
-final class OptionStatesMethod extends Cached<MethodSpec> {
-
-    private final List<Mapping<AnnotatedOption>> namedOptions;
-    private final SourceElement sourceElement;
-    private final ClassName optType;
+final class OptionStatesMethod extends HasCommandRepresentation {
 
     @Inject
-    OptionStatesMethod(
-            CommandRepresentation commandRepresentation) {
-        this.namedOptions = commandRepresentation.namedOptions();
-        this.sourceElement = commandRepresentation.sourceElement();
-        this.optType = commandRepresentation.optType();
+    OptionStatesMethod(CommandRepresentation commandRepresentation) {
+        super(commandRepresentation);
     }
 
-    @Override
-    MethodSpec define() {
+    private final Supplier<MethodSpec> define = memoize(() -> {
         ParameterSpec result = ParameterSpec.builder(
-                mapOf(optType, ClassName.get(OptionState.class)), "result").build();
+                mapOf(optType(), ClassName.get(OptionState.class)), "result").build();
         CodeBlock.Builder code = CodeBlock.builder();
-        code.addStatement("$T $N = new $T<>($T.class)", result.type, result, EnumMap.class, sourceElement.optionEnumType());
-        for (Mapping<AnnotatedOption> namedOption : namedOptions) {
+        if (namedOptions().isEmpty()) {
+            code.addStatement("$T $N = $T.of()", result.type, result, Map.class);
+        } else {
+            code.addStatement("$T $N = new $T<>($T.class)", result.type, result, EnumMap.class, sourceElement().optionEnumType());
+        }
+        for (Mapping<AnnotatedOption> namedOption : namedOptions()) {
             code.addStatement("$N.put($T.$L, new $T())",
-                    result, sourceElement.optionEnumType(),
+                    result, sourceElement().optionEnumType(),
                     namedOption.enumName(), optionParserType(namedOption));
         }
         code.addStatement("return $N", result);
@@ -51,6 +48,10 @@ final class OptionStatesMethod extends Cached<MethodSpec> {
                 .returns(result.type)
                 .addModifiers(PRIVATE)
                 .build();
+    });
+
+    MethodSpec get() {
+        return define.get();
     }
 
     private ClassName optionParserType(Mapping<AnnotatedOption> param) {

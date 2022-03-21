@@ -11,30 +11,27 @@ import net.jbock.processor.SourceElement;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.common.Suppliers.memoize;
 
 @WritingScope
-final class OptionNamesMethod extends Cached<MethodSpec> {
+final class OptionNamesMethod {
 
-    private final List<Mapping<AnnotatedOption>> namedOptions;
-    private final SourceElement sourceElement;
-    private final FieldSpec optionNames;
+    private final CommandRepresentation commandRepresentation;
 
     @Inject
     OptionNamesMethod(
             CommandRepresentation commandRepresentation) {
-        this.namedOptions = commandRepresentation.namedOptions();
-        this.sourceElement = commandRepresentation.sourceElement();
-        this.optionNames = commandRepresentation.optionNames();
+        this.commandRepresentation = commandRepresentation;
     }
 
-    @Override
-    MethodSpec define() {
+    private final Supplier<MethodSpec> define = memoize(() -> {
         ParameterSpec result = ParameterSpec.builder(
-                optionNames.type, "result").build();
-        long mapSize = namedOptions.stream()
+                optionNames().type, "result").build();
+        long mapSize = namedOptions().stream()
                 .map(Mapping::sourceMethod)
                 .map(AnnotatedOption::names)
                 .map(List::size)
@@ -42,10 +39,10 @@ final class OptionNamesMethod extends Cached<MethodSpec> {
                 .sum();
         CodeBlock.Builder code = CodeBlock.builder();
         code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
-        for (Mapping<AnnotatedOption> namedOption : namedOptions) {
+        for (Mapping<AnnotatedOption> namedOption : namedOptions()) {
             for (String dashedName : namedOption.sourceMethod().names()) {
                 code.addStatement("$N.put($S, $T.$L)",
-                        result, dashedName, sourceElement.optionEnumType(),
+                        result, dashedName, sourceElement().optionEnumType(),
                         namedOption.enumName());
             }
         }
@@ -55,5 +52,21 @@ final class OptionNamesMethod extends Cached<MethodSpec> {
                 .returns(result.type)
                 .addModifiers(PRIVATE, STATIC)
                 .build();
+    });
+
+    MethodSpec get() {
+        return define.get();
+    }
+
+    private List<Mapping<AnnotatedOption>> namedOptions() {
+        return commandRepresentation.namedOptions();
+    }
+
+    private FieldSpec optionNames() {
+        return commandRepresentation.optionNames();
+    }
+
+    private SourceElement sourceElement() {
+        return commandRepresentation.sourceElement();
     }
 }

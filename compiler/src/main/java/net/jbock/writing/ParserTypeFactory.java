@@ -2,35 +2,27 @@ package net.jbock.writing;
 
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.ParameterizedTypeName;
 import jakarta.inject.Inject;
-import net.jbock.annotated.AnnotatedOption;
-import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.annotated.AnnotatedParameters;
-import net.jbock.convert.Mapping;
 import net.jbock.parse.RestParser;
 import net.jbock.parse.RestlessParser;
 import net.jbock.parse.SuperParser;
-import net.jbock.processor.SourceElement;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import static net.jbock.common.Suppliers.memoize;
 
 @WritingScope
-final class ParserTypeFactory {
+final class ParserTypeFactory extends HasCommandRepresentation {
 
-    private final CommandRepresentation commandRepresentation;
     private final OptionStatesMethod optionStatesMethod;
 
     @Inject
     ParserTypeFactory(
             CommandRepresentation commandRepresentation,
             OptionStatesMethod optionStatesMethod) {
-        this.commandRepresentation = commandRepresentation;
+        super(commandRepresentation);
         this.optionStatesMethod = optionStatesMethod;
     }
 
@@ -69,29 +61,5 @@ final class ParserTypeFactory {
 
     private OptionStatesMethod optionStatesMethod() {
         return optionStatesMethod;
-    }
-
-    private SourceElement sourceElement() {
-        return commandRepresentation.sourceElement();
-    }
-
-    private List<Mapping<AnnotatedParameter>> positionalParameters() {
-        return commandRepresentation.positionalParameters();
-    }
-
-    private List<Mapping<AnnotatedParameters>> repeatablePositionalParameters() {
-        return commandRepresentation.repeatablePositionalParameters();
-    }
-
-    private List<Mapping<AnnotatedOption>> namedOptions() {
-        return commandRepresentation.namedOptions();
-    }
-
-    private FieldSpec optionNames() {
-        return commandRepresentation.optionNames();
-    }
-
-    private ClassName optType() {
-        return commandRepresentation.optType();
     }
 }
