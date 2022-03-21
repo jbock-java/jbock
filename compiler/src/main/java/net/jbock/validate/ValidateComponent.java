@@ -4,6 +4,7 @@ import dagger.BindsInstance;
 import dagger.Subcomponent;
 import net.jbock.processor.SourceElement;
 
+/* subcomponent of ProcessorComponent */
 @ValidateScope
 @Subcomponent
 public interface ValidateComponent {
