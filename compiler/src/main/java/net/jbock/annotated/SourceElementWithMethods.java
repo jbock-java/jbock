@@ -1,6 +1,7 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
+import net.jbock.common.SnakeName;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
@@ -9,7 +10,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.type.DeclaredType;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 import java.util.Optional;
 
 import static io.jbock.util.Either.right;
@@ -22,18 +23,19 @@ import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 import static net.jbock.common.Util.checkNoDuplicateAnnotations;
 
-final class EnumNames {
+final class SourceElementWithMethods {
 
-    private final EnumNamesBuilder.Step2 step2;
-    private final Map<Name, String> enumNames;
+    private final SourceElement sourceElement;
+    private final List<Executable> methods;
+    private final UniqueNameSet uniqueNameSet = new UniqueNameSet();
 
-    EnumNames(EnumNamesBuilder.Step2 step2, Map<Name, String> enumNames) {
-        this.step2 = step2;
-        this.enumNames = enumNames;
+    SourceElementWithMethods(SourceElement sourceElement, List<Executable> methods) {
+        this.methods = methods;
+        this.sourceElement = sourceElement;
     }
 
-    Either<List<ValidationFailure>, List<AnnotatedMethod>> createAnnotatedMethods() {
-        return methods().stream()
+    Either<List<ValidationFailure>, List<AnnotatedMethod>> validListOfAnnotatedMethods() {
+        return methods.stream()
                 .map(this::createAnnotatedMethod)
                 .collect(allFailures());
     }
@@ -44,7 +46,7 @@ final class EnumNames {
         ExecutableElement method = sourceMethod.method();
         return checkNoDuplicateAnnotations(method, methodLevelAnnotations())
                 .<Either<ValidationFailure, AnnotatedMethod>>map(Either::left)
-                .orElseGet(() -> right(sourceMethod.annotatedMethod(sourceElement(), enumName)))
+                .orElseGet(() -> right(sourceMethod.annotatedMethod(sourceElement, enumName)))
                 .filter(this::checkAccessibleReturnType);
     }
 
@@ -72,15 +74,10 @@ final class EnumNames {
                 .anyMatch(this::isInaccessible);
     }
 
-    private SourceElement sourceElement() {
-        return step2.sourceElement;
-    }
-
     private String enumNameFor(Name sourceMethodName) {
-        return enumNames.get(sourceMethodName);
-    }
-
-    private List<Executable> methods() {
-        return step2.methods();
+        String enumName = "_".contentEquals(sourceMethodName) ?
+                "_1" : // avoid potential keyword issue
+                SnakeName.create(sourceMethodName).snake('_').toUpperCase(Locale.ROOT);
+        return uniqueNameSet.getUniqueName(enumName);
     }
 }
