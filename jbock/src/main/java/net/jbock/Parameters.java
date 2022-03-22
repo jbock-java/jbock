@@ -7,11 +7,11 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * @deprecated this is getting renamed, use {@link VarargsParameter} instead
+ * @deprecated use {@link VarargsParameter} instead
  */
 @Target(METHOD)
 @Retention(SOURCE)
-@Deprecated
+@Deprecated(forRemoval = true)
 public @interface Parameters {
 
     /**
