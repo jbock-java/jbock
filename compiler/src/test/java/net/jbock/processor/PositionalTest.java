@@ -299,6 +299,6 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("method 'something' returns a list-based type, so it must be annotated with @Option or @VarargsParameter");
+                .withErrorContaining("define a converter class that extends StringConverter<List<Integer>> or implements Supplier<StringConverter<List<Integer>>>");
     }
 }

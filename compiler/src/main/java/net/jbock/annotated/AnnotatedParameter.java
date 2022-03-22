@@ -38,7 +38,7 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     }
 
     @Override
-    public boolean isParameters() {
+    public boolean isVarargsParameter() {
         return false;
     }
 

@@ -269,6 +269,24 @@ class ConverterTest {
     }
 
     @Test
+    void validConvertToList() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @Parameter(converter = MyConverter.class, index = 0)",
+                "  abstract List<Integer> something();",
+                "",
+                "  static class MyConverter extends StringConverter<List<Integer>> {",
+                "    public List<Integer> convert(String token) { return null; }",
+                "  }",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .compilesWithoutError();
+    }
+
+    @Test
     void parameterInvalidList() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
@@ -284,7 +302,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("method 'something' returns a list-based type, so it must be annotated with @Option or @VarargsParameter");
+                .withErrorContaining("invalid converter class: should extend StringConverter<List<Integer>> or implement Supplier<StringConverter<List<Integer>>>");
     }
 
     @Test

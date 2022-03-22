@@ -60,7 +60,7 @@ public final class AnnotatedOption extends AnnotatedMethod {
     }
 
     @Override
-    public boolean isParameters() {
+    public boolean isVarargsParameter() {
         return false;
     }
 

@@ -29,6 +29,9 @@ public class ListMatcher implements Matcher {
     public <M extends AnnotatedMethod>
     Optional<Match<M>> tryMatch(
             M sourceMethod) {
+        if (sourceMethod.isParameter()) {
+            return Optional.empty(); // Not a VarargsParameter, so definitely not repeatable.
+        }
         TypeMirror returnType = sourceMethod.returnType();
         return elements.getTypeElement("java.util.List")
                 .flatMap(utilList -> tool.getSingleTypeArgument(returnType, utilList))

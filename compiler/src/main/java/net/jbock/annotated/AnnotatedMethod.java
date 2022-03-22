@@ -25,7 +25,7 @@ public abstract class AnnotatedMethod {
 
     public abstract boolean isParameter();
 
-    public abstract boolean isParameters();
+    public abstract boolean isVarargsParameter();
 
     public final String enumName() {
         return enumName;

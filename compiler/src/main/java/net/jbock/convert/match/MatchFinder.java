@@ -2,7 +2,6 @@ package net.jbock.convert.match;
 
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
-import net.jbock.Option;
 import net.jbock.VarargsParameter;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeTypes;
@@ -43,7 +42,7 @@ public class MatchFinder {
     Either<ValidationFailure, Match<M>> findMatch(
             M sourceMethod) {
         Match<M> match = findMatchInternal(sourceMethod);
-        return validateParameterVsParameters(match)
+        return validateVarargsIsList(match)
                 .<Either<ValidationFailure, Match<M>>>map(Either::left)
                 .orElseGet(() -> right(match));
     }
@@ -54,7 +53,7 @@ public class MatchFinder {
             M sourceMethod) {
         PrimitiveType bool = types.getPrimitiveType(BOOLEAN);
         Match<M> match = Match.create(bool, OPTIONAL, sourceMethod);
-        return validateParameterVsParameters(match)
+        return validateVarargsIsList(match)
                 .<Either<ValidationFailure, Match<M>>>map(Either::left)
                 .orElseGet(() -> right(match));
     }
@@ -76,19 +75,10 @@ public class MatchFinder {
     }
 
     private <M extends AnnotatedMethod>
-    Optional<ValidationFailure> validateParameterVsParameters(
+    Optional<ValidationFailure> validateVarargsIsList(
             Match<M> match) {
         M sourceMethod = match.sourceMethod();
-        if (sourceMethod.isParameter()
-                && match.multiplicity() == Multiplicity.REPEATABLE) {
-            return Optional.of(sourceMethod.fail("method '" +
-                    sourceMethod.method().getSimpleName() +
-                    "' returns a list-based type, so it must be annotated with @" +
-                    Option.class.getSimpleName() +
-                    " or @" +
-                    VarargsParameter.class.getSimpleName()));
-        }
-        if (sourceMethod.isParameters()
+        if (sourceMethod.isVarargsParameter()
                 && match.multiplicity() != Multiplicity.REPEATABLE) {
             return Optional.of(sourceMethod.fail("method '" +
                     sourceMethod.method().getSimpleName() +
