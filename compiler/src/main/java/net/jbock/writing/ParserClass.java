@@ -16,7 +16,7 @@ public final class ParserClass extends HasCommandRepresentation {
     private final ParseOrExitMethod parseOrExitMethod;
     private final CreateModelMethod createModelMethod;
     private final GeneratedAnnotation generatedAnnotation;
-    private final HarvestMethod harvestMethod;
+    private final ExtractMethod extractMethod;
     private final OptionNamesMethod optionNamesMethod;
     private final OptionStatesMethod optionStatesMethod;
 
@@ -28,7 +28,7 @@ public final class ParserClass extends HasCommandRepresentation {
             ParseOrExitMethod parseOrExitMethod,
             CreateModelMethod createModelMethod,
             GeneratedAnnotation generatedAnnotation,
-            HarvestMethod harvestMethod,
+            ExtractMethod extractMethod,
             OptionNamesMethod optionNamesMethod,
             OptionStatesMethod optionStatesMethod) {
         super(commandRepresentation);
@@ -37,7 +37,7 @@ public final class ParserClass extends HasCommandRepresentation {
         this.parseOrExitMethod = parseOrExitMethod;
         this.createModelMethod = createModelMethod;
         this.generatedAnnotation = generatedAnnotation;
-        this.harvestMethod = harvestMethod;
+        this.extractMethod = extractMethod;
         this.optionNamesMethod = optionNamesMethod;
         this.optionStatesMethod = optionStatesMethod;
     }
@@ -53,7 +53,7 @@ public final class ParserClass extends HasCommandRepresentation {
         if (!sourceElement().skipGeneratingParseOrExitMethod()) {
             spec.addMethod(parseOrExitMethod.define());
         }
-        spec.addMethod(harvestMethod.get());
+        spec.addMethod(extractMethod.get());
         if (!namedOptions().isEmpty()) {
             spec.addField(optionNames().toBuilder()
                     .initializer("$N()", optionNamesMethod.get()).build());

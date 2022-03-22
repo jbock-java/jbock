@@ -28,14 +28,14 @@ import static net.jbock.writing.CodeBlocks.joinByComma;
 import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 @WritingScope
-final class HarvestMethod extends HasCommandRepresentation {
+final class ExtractMethod extends HasCommandRepresentation {
 
     private final GeneratedTypes generatedTypes;
     private final ParserTypeFactory parserTypeFactory;
     private final ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
 
     @Inject
-    HarvestMethod(
+    ExtractMethod(
             GeneratedTypes generatedTypes,
             CommandRepresentation commandRepresentation,
             ParserTypeFactory parserTypeFactory) {
@@ -55,7 +55,7 @@ final class HarvestMethod extends HasCommandRepresentation {
     private final Supplier<MethodSpec> harvestMethod = memoize(() -> {
         ParameterSpec parser = parserTypeFactory().get().asParam();
         CodeBlock constructorArguments = getConstructorArguments();
-        MethodSpec.Builder spec = MethodSpec.methodBuilder("harvest");
+        MethodSpec.Builder spec = MethodSpec.methodBuilder("extract");
         for (int i = 0; i < namedOptions().size(); i++) {
             Mapping<AnnotatedOption> m = namedOptions().get(i);
             ParameterSpec p = asParam(m);

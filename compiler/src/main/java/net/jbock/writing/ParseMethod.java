@@ -18,7 +18,7 @@ final class ParseMethod extends HasCommandRepresentation {
 
     private final GeneratedTypes generatedTypes;
     private final CreateModelMethod createModelMethod;
-    private final HarvestMethod harvestMethod;
+    private final ExtractMethod extractMethod;
     private final ParserTypeFactory parserTypeFactory;
 
     @Inject
@@ -26,12 +26,12 @@ final class ParseMethod extends HasCommandRepresentation {
             GeneratedTypes generatedTypes,
             CommandRepresentation commandRepresentation,
             CreateModelMethod createModelMethod,
-            HarvestMethod harvestMethod,
+            ExtractMethod extractMethod,
             ParserTypeFactory parserTypeFactory) {
         super(commandRepresentation);
         this.generatedTypes = generatedTypes;
         this.createModelMethod = createModelMethod;
-        this.harvestMethod = harvestMethod;
+        this.extractMethod = extractMethod;
         this.parserTypeFactory = parserTypeFactory;
     }
 
@@ -71,8 +71,8 @@ final class ParseMethod extends HasCommandRepresentation {
         return parserTypeFactory;
     }
 
-    private HarvestMethod harvestMethod() {
-        return harvestMethod;
+    private ExtractMethod harvestMethod() {
+        return extractMethod;
     }
 
     private CreateModelMethod createModelMethod() {
