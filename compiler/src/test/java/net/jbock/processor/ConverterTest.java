@@ -287,6 +287,25 @@ class ConverterTest {
     }
 
     @Test
+    void invalidVarargsConverterReturnsList() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @VarargsParameter(converter = MyConverter.class)",
+                "  abstract List<Integer> something();",
+                "",
+                "  static class MyConverter extends StringConverter<List<Integer>> {",
+                "    public List<Integer> convert(String token) { return null; }",
+                "  }",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("invalid converter class: should extend StringConverter<Integer>");
+    }
+
+    @Test
     void parameterInvalidList() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
