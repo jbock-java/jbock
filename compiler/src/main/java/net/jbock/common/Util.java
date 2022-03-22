@@ -120,21 +120,21 @@ public class Util {
         return new ArrayList<>(result);
     }
 
-    public String typeToString(TypeMirror type) {
+    public static String typeToString(TypeMirror type) {
         return TypeTool.AS_DECLARED.visit(type).flatMap(declared ->
                 TypeTool.AS_TYPE_ELEMENT.visit(declared.asElement()).map(t -> {
                     String base = t.getSimpleName().toString();
                     if (declared.getTypeArguments().isEmpty()) {
                         return base;
                     }
-                    return base + declared.getTypeArguments().stream().map(this::typeToString)
+                    return base + declared.getTypeArguments().stream().map(Util::typeToString)
                             .collect(joining(", ", "<", ">"));
                 })).orElseGet(type::toString);
     }
 
     /* Left-Optional
      */
-    public Optional<ValidationFailure> checkNoDuplicateAnnotations(
+    public static Optional<ValidationFailure> checkNoDuplicateAnnotations(
             ExecutableElement element,
             List<Class<? extends Annotation>> annotations) {
         List<Class<? extends Annotation>> present = annotations.stream()
