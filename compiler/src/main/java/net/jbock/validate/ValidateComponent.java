@@ -6,7 +6,7 @@ import net.jbock.processor.SourceElement;
 
 /* subcomponent of ProcessorComponent */
 @ValidateScope
-@Subcomponent
+@Subcomponent(modules = ValidateModule.class)
 public interface ValidateComponent {
 
     CommandProcessor processor();
