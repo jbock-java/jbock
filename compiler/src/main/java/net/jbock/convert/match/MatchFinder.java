@@ -13,7 +13,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.Set;
 
 import static io.jbock.util.Either.right;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
@@ -24,17 +24,14 @@ import static net.jbock.model.Multiplicity.REQUIRED;
 @ValidateScope
 public class MatchFinder {
 
-    private final OptionalMatcher optionalMatcher;
-    private final ListMatcher listMatcher;
+    private final Set<Matcher> matchers;
     private final SafeTypes types;
 
     @Inject
     MatchFinder(
-            OptionalMatcher optionalMatcher,
-            ListMatcher listMatcher,
+            Set<Matcher> matchers,
             SafeTypes types) {
-        this.optionalMatcher = optionalMatcher;
-        this.listMatcher = listMatcher;
+        this.matchers = matchers;
         this.types = types;
     }
 
@@ -61,7 +58,7 @@ public class MatchFinder {
     private <M extends AnnotatedMethod> Match<M>
     findMatchInternal(
             M sourceMethod) {
-        return Stream.of(optionalMatcher, listMatcher)
+        return matchers.stream()
                 .map(matcher -> matcher.tryMatch(sourceMethod))
                 .flatMap(Optional::stream)
                 .findFirst()
