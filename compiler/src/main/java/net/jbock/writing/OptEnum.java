@@ -1,7 +1,7 @@
 package net.jbock.writing;
 
 import io.jbock.javapoet.TypeSpec;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
 

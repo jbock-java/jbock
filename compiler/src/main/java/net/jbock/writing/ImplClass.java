@@ -5,7 +5,7 @@ import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;

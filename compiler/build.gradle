@@ -52,13 +52,13 @@ shadowJar {
 
 dependencies {
     def jbock = project(':jbock')
-    def dapper = 'io.github.jbock-java:dapper:2.41.2'
+    def dapper = 'com.google.dagger:dagger:2.41'
     def javapoet = 'io.github.jbock-java:javapoet:1.15'
     implementation(javapoet)
     implementation('io.github.jbock-java:auto-common:1.2.3')
     shadow(jbock)
     compileOnly(dapper)
-    annotationProcessor('io.github.jbock-java:dapper-compiler:2.41.2')
+    annotationProcessor('com.google.dagger:dagger-compiler:2.41')
     testImplementation('io.github.jbock-java:compile-testing:0.19.12')
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
     testImplementation('org.mockito:mockito-core:3.12.4')

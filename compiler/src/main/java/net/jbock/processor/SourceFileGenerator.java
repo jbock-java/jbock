@@ -1,7 +1,7 @@
 package net.jbock.processor;
 
 import io.jbock.javapoet.JavaFile;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;

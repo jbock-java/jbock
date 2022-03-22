@@ -1,6 +1,6 @@
 package net.jbock.annotated;
 
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;

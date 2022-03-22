@@ -1,7 +1,7 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;

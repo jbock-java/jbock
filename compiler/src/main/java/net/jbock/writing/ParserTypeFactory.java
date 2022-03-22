@@ -3,7 +3,7 @@ package net.jbock.writing;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.ParameterizedTypeName;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import net.jbock.parse.RestParser;
 import net.jbock.parse.RestlessParser;
 import net.jbock.parse.SuperParser;

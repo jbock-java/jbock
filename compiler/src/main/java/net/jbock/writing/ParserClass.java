@@ -1,7 +1,7 @@
 package net.jbock.writing;
 
 import io.jbock.javapoet.TypeSpec;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 import javax.lang.model.element.Modifier;
 

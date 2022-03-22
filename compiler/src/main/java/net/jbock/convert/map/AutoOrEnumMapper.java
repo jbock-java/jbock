@@ -2,7 +2,7 @@ package net.jbock.convert.map;
 
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;

@@ -1,7 +1,7 @@
 package net.jbock.convert.match;
 
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import net.jbock.VarargsParameter;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeTypes;

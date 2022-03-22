@@ -2,7 +2,7 @@ package net.jbock.convert;
 
 import dagger.Lazy;
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;

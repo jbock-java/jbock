@@ -1,6 +1,6 @@
 package net.jbock.convert.match;
 
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;

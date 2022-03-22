@@ -2,7 +2,7 @@ package net.jbock.writing;
 
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.convert.Mapping;
 import net.jbock.model.CommandModel;

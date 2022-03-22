@@ -3,7 +3,7 @@ package net.jbock.writing;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import net.jbock.util.ExFailure;
 
 import java.util.function.Supplier;

@@ -1,6 +1,6 @@
 package net.jbock.processor;
 
-import jakarta.inject.Scope;
+import javax.inject.Scope;
 
 import java.lang.annotation.Retention;
 

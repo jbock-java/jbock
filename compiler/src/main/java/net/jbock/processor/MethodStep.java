@@ -1,7 +1,7 @@
 package net.jbock.processor;
 
 import io.jbock.auto.common.BasicAnnotationProcessor.Step;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import net.jbock.Command;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
