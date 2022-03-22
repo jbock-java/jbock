@@ -66,22 +66,22 @@ public final class ContextBuilder {
             this.positionalParameters = positionalParameters;
         }
 
-        List<AnnotatedVarargsParameter> repeatablePositionalParameters() {
-            return step1.step0.abstractMethods.repeatablePositionalParameters();
+        List<AnnotatedVarargsParameter> varargsParameters() {
+            return step1.step0.abstractMethods.varargsParameters();
         }
 
-        Step3 accept(List<Mapping<AnnotatedVarargsParameter>> repeatablePositionalParameters) {
-            return new Step3(this, repeatablePositionalParameters);
+        Step3 accept(List<Mapping<AnnotatedVarargsParameter>> varargsParameters) {
+            return new Step3(this, varargsParameters);
         }
     }
 
     static final class Step3 {
         private final Step2 step2;
-        private final List<Mapping<AnnotatedVarargsParameter>> repeatablePositionalParameters;
+        private final List<Mapping<AnnotatedVarargsParameter>> varargsParameters;
 
-        private Step3(Step2 step2, List<Mapping<AnnotatedVarargsParameter>> repeatablePositionalParameters) {
+        private Step3(Step2 step2, List<Mapping<AnnotatedVarargsParameter>> varargsParameters) {
             this.step2 = step2;
-            this.repeatablePositionalParameters = repeatablePositionalParameters;
+            this.varargsParameters = varargsParameters;
         }
 
         List<AnnotatedOption> namedOptions() {
@@ -101,8 +101,8 @@ public final class ContextBuilder {
         return step3.step2.positionalParameters;
     }
 
-    public List<Mapping<AnnotatedVarargsParameter>> repeatablePositionalParameters() {
-        return step3.repeatablePositionalParameters;
+    public List<Mapping<AnnotatedVarargsParameter>> varargsParameters() {
+        return step3.varargsParameters;
     }
 
     public CommandRepresentation build() {

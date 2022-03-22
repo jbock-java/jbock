@@ -43,7 +43,7 @@ final class CreateModelMethod extends HasCommandRepresentation {
         for (Mapping<AnnotatedOption> c : namedOptions()) {
             code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
         }
-        Stream.of(positionalParameters(), repeatablePositionalParameters())
+        Stream.of(positionalParameters(), varargsParameters())
                 .flatMap(List::stream)
                 .forEach(c -> code.add(CodeBlock.of(".addParameter($L)", parameterBlock(c))));
         code.add(CodeBlock.of(".build()"));

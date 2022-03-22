@@ -51,7 +51,7 @@ public class AnnotatedMethodsFactory {
                         .flatMap(instancesOf(AnnotatedParameter.class))
                         .sorted(indexComparator)
                         .collect(toList())))
-                .map(builder -> builder.withRepeatablePositionalParameters(builder.annotatedMethods()
+                .map(builder -> builder.withVarargsParameters(builder.annotatedMethods()
                         .flatMap(instancesOf(AnnotatedVarargsParameter.class))
                         .collect(toList())))
                 .filter(this::validateAtLeastOneParameterInSuperCommand);

@@ -31,7 +31,7 @@ class VarargsParameterValidator {
 
     Either<List<ValidationFailure>, ContextBuilder.Step3> wrapRepeatablePositionalParams(
             ContextBuilder.Step2 step) {
-        return validateDuplicateParametersAnnotation(step.repeatablePositionalParameters())
+        return validateDuplicateParametersAnnotation(step.varargsParameters())
                 .filter(this::validateNoRepeatableParameterInSuperCommand)
                 .flatMap(parameters -> parameters.stream()
                         .map(mappingFinder::findMapping)

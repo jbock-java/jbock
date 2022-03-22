@@ -36,8 +36,8 @@ public final class CommandRepresentation {
         return sourceElement;
     }
 
-    List<Mapping<AnnotatedVarargsParameter>> repeatablePositionalParameters() {
-        return contextBuilder.repeatablePositionalParameters();
+    List<Mapping<AnnotatedVarargsParameter>> varargsParameters() {
+        return contextBuilder.varargsParameters();
     }
 
     List<Mapping<AnnotatedParameter>> positionalParameters() {
@@ -66,7 +66,7 @@ public final class CommandRepresentation {
     }
 
     private final Supplier<List<Mapping<?>>> allMappings = memoize(() ->
-            Stream.of(namedOptions(), positionalParameters(), repeatablePositionalParameters())
+            Stream.of(namedOptions(), positionalParameters(), varargsParameters())
                     .flatMap(List::stream)
                     .collect(toList()));
 

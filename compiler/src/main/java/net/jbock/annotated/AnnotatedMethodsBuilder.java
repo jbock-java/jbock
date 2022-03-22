@@ -62,8 +62,8 @@ final class AnnotatedMethodsBuilder {
             return step2.step1.annotatedMethods.stream();
         }
 
-        AnnotatedMethods withRepeatablePositionalParameters(List<AnnotatedVarargsParameter> repeatablePositionalParameters) {
-            return new AnnotatedMethods(this, repeatablePositionalParameters);
+        AnnotatedMethods withVarargsParameters(List<AnnotatedVarargsParameter> varargsParameters) {
+            return new AnnotatedMethods(this, varargsParameters);
         }
     }
 }

@@ -41,7 +41,7 @@ final class ParserTypeFactory extends HasCommandRepresentation {
                     optionNames, optionStates, numParams);
             return new ParserType(ParameterizedTypeName.get(parserClass, optType()), init);
         }
-        if (!repeatablePositionalParameters().isEmpty()) {
+        if (!varargsParameters().isEmpty()) {
             ClassName parserClass = ClassName.get(RestParser.class);
             CodeBlock init = CodeBlock.of("$T.create($L, $L, $L)",
                     ClassName.get(RestParser.class),

@@ -5,13 +5,13 @@ import java.util.List;
 public final class AnnotatedMethods {
 
     private final AnnotatedMethodsBuilder.Step3 step3;
-    private final List<AnnotatedVarargsParameter> repeatablePositionalParameters;
+    private final List<AnnotatedVarargsParameter> varargsParameters;
 
     AnnotatedMethods(
             AnnotatedMethodsBuilder.Step3 step3,
-            List<AnnotatedVarargsParameter> repeatablePositionalParameters) {
+            List<AnnotatedVarargsParameter> varargsParameters) {
         this.step3 = step3;
-        this.repeatablePositionalParameters = repeatablePositionalParameters;
+        this.varargsParameters = varargsParameters;
     }
 
     public List<AnnotatedOption> namedOptions() {
@@ -22,7 +22,7 @@ public final class AnnotatedMethods {
         return step3.positionalParameters;
     }
 
-    public List<AnnotatedVarargsParameter> repeatablePositionalParameters() {
-        return repeatablePositionalParameters;
+    public List<AnnotatedVarargsParameter> varargsParameters() {
+        return varargsParameters;
     }
 }

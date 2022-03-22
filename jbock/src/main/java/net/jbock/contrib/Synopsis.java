@@ -63,7 +63,7 @@ final class Synopsis {
                     throw new IllegalArgumentException("unexpected skew: " + skew);
             }
         }
-        repeatableParameter().ifPresent(param -> result.add(param.paramLabel() + "..."));
+        varargsParameter().ifPresent(param -> result.add(param.paramLabel() + "..."));
         return result;
     }
 
@@ -79,7 +79,7 @@ final class Synopsis {
         return filterBySkew(parameters, sk -> sk != REPEATABLE).collect(toList());
     }
 
-    private Optional<Parameter> repeatableParameter() {
+    private Optional<Parameter> varargsParameter() {
         return filterBySkew(parameters, REPEATABLE).findAny();
     }
 

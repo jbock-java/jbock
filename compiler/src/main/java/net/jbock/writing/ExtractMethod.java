@@ -66,7 +66,7 @@ final class ExtractMethod extends HasCommandRepresentation {
             ParameterSpec p = asParam(m);
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionRegularParameter(m, i));
         }
-        repeatablePositionalParameters().forEach(m -> {
+        varargsParameters().forEach(m -> {
             ParameterSpec p = asParam(m);
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionRepeatableParameter(m));
         });
@@ -100,7 +100,7 @@ final class ExtractMethod extends HasCommandRepresentation {
         for (Mapping<AnnotatedParameter> m : positionalParameters()) {
             code.add(CodeBlock.of("$N", asParam(m)));
         }
-        repeatablePositionalParameters().stream()
+        varargsParameters().stream()
                 .map(m -> CodeBlock.of("$N", asParam(m)))
                 .forEach(code::add);
         return joinByComma(code);

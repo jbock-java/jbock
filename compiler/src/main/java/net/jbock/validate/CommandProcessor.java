@@ -64,7 +64,7 @@ public class CommandProcessor {
         sourceElement.descriptionKey().ifPresent(keys::add);
         Stream.of(methods.namedOptions(),
                         methods.positionalParameters(),
-                        methods.repeatablePositionalParameters())
+                        methods.varargsParameters())
                 .flatMap(List::stream)
                 .forEach(m -> m.descriptionKey().ifPresent(key -> {
                     if (!keys.add(key)) {
