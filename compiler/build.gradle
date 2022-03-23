@@ -48,6 +48,7 @@ shadowJar {
     archiveClassifier.set('')
     relocate('io.jbock.auto.common', 'io.jbock.shadow.auto.common')
     relocate('io.jbock.javapoet', 'io.jbock.shadow.javapoet')
+    relocate('jakarta.inject', 'io.jbock.shadow.jakarta.inject')
 }
 
 dependencies {
@@ -56,6 +57,7 @@ dependencies {
     def javapoet = 'io.github.jbock-java:javapoet:1.15'
     implementation(javapoet)
     implementation('io.github.jbock-java:auto-common:1.2.3')
+    implementation('jakarta.inject:jakarta.inject-api:2.0.1')
     shadow(jbock)
     compileOnly(dapper)
     annotationProcessor('io.github.jbock-java:dapper-compiler:2.41.2')
