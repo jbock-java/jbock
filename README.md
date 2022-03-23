@@ -59,11 +59,7 @@ abstract class DeleteCommand {
 }
 ````
 
-The following two classes will be generated:
-[DeleteCommandParser](https://github.com/jbock-java/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommandParser.java),
-[DeleteCommand_Impl](https://github.com/jbock-java/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommand_Impl.java).
-
-The `*Parser` class can be used directly in a `main` method:
+The generated `DeleteCommandParser` can be used directly in a `main` method:
 
 ````java
 public static void main(String[] args) {
