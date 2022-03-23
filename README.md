@@ -66,8 +66,8 @@ The generated `DeleteCommandParser` converts a string array to an instance of `D
 
 ````java
 public static void main(String[] args) {
-    DeleteCommand command = new DeleteCommandParser().parseOrExit(args);
-    // ...
+  DeleteCommand command = new DeleteCommandParser().parseOrExit(args);
+  // ...
 }
 
 ````
