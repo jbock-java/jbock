@@ -35,7 +35,8 @@ abstract class DeleteCommand {
   abstract Optional<Path> anotherPath();
 
   @VarargsParameter(
-          description = "A varargs parameter. Only one per command allowed. The return type must be List.")
+          description = {"A varargs parameter. Only one per command allowed.",
+                         "The return type must be List.")
   abstract List<Path> morePaths();
   
   @Option(names = "--dry-run",
