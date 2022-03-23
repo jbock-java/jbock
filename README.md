@@ -3,7 +3,7 @@
 
 jbock is a command line parser, which uses the same annotation names as [JCommander](https://jcommander.org/)
 and [picocli](https://github.com/remkop/picocli).
-However it does not use reflection.
+However it does not use *reflection*.
 It is an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
 that generates a custom parser at compile time.
