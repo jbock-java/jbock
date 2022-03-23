@@ -58,7 +58,7 @@ public static void main(String[] args) {
 
 In addition to `parseOrExit`, a basic `parse` method is generated
 that you can build upon to fine-tune the help and error messages for your users.
-Custom converters can be defined.
+If you need more types, custom String-converters can be defined.
 Please see the [wiki](https://github.com/h908714124/jbock/wiki) for details.
 
 ### Sample projects
