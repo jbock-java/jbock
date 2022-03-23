@@ -37,7 +37,7 @@ abstract class DeleteCommand {
              description = "A positional parameter.")
   abstract Path path();
 
-  @VarargsParameter(description = "This must be a list.")
+  @VarargsParameter(description = "Must return a List.")
   abstract List<Path> morePaths();
 }
 ````
