@@ -27,7 +27,8 @@ abstract class DeleteCommand {
 
   @Parameter(
           index = 0,
-          description = "A required positional parameter. Return type is non-optional.")
+          description = {"A required positional parameter. Return type is non-optional.",
+                         "Path is a standard type, so no custom converter is needed."})
   abstract Path path();
 
   @Parameter(
