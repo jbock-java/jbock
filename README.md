@@ -20,25 +20,42 @@ The *multiplicity* of options and parameters is determined by their return type.
 @Command
 abstract class DeleteCommand {
 
-
-  /* `OptionalInt` (or alternatively `Optional<Integer>`),
-   * but not `int` or `Integer`:
-   * This named option is optional (multiplicity = 0..1).
-   * Note: List<Integer> for multiplicity = 0..n.
-   */
   @Option(names = {"-v", "--verbosity"},
-          description = "A named option.")
+          description = "A named option. The return type reflects optionality.")
   abstract OptionalInt verbosity();
 
-  /* `Path`, not `Optional<Path>`:
-   * This positional parameter is required (multiplicity = 1).
-   */
-  @Parameter(index = 0,
-             description = "A positional parameter.")
+  @Parameter(
+          index = 0,
+          description = "A required positional parameter. Return type is non-optional.")
   abstract Path path();
 
-  @VarargsParameter(description = "Must return a List.")
+  @Parameter(
+          index = 1,
+          description = "An optional positional parameter.")
+  abstract Optional<Path> anotherPath();
+
+  @VarargsParameter(
+          description = "A varargs parameter. Only one per command allowed. The return type must be List.")
   abstract List<Path> morePaths();
+  
+  @Option(names = "--dry-run",
+          description = "A nullary option, a.k.a. mode flag. Return type is boolean.")
+  abstract boolean dryRun();
+  
+  @Option(names = "-h",
+          description = "A repeatable option. Return type is List.")
+  abstract List<String> headers(); 
+  
+  @Option(names = "--charset",
+          description = "Named option with a custom converter",
+          converter = CharsetConverter.class)
+  abstract Optional<Charset> charset();
+  
+  // sample converter class
+  static class CharsetConverter extends StringConverter<Charset> {
+    @Override
+    protected Charset convert(String token) { return StandardCharsets.UTF_8; }
+  }
 }
 ````
 
