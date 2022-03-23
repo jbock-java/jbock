@@ -12,7 +12,7 @@ that generates a custom parser at compile time.
 
 Create an abstract class, or alternatively a Java interface,
 and add the `@Command` annotation.
-In this class, each abstract method must have *no* arguments,
+In your command class, each abstract method must have *no* arguments,
 and be annotated with either `@Option`, `@Parameter` or `@VarargsParameter`.
 
 The *multiplicity* of options and parameters is determined by their return type. `List` and `Optional` are "special".
