@@ -20,6 +20,16 @@ The *multiplicity* of options and parameters is determined by their return type.
 @Command
 abstract class DeleteCommand {
 
+
+  /* `OptionalInt` (or alternatively `Optional<Integer>`),
+   * but not `int` or `Integer`:
+   * This named option is optional (multiplicity = 0..1).
+   * Note: List<Integer> for multiplicity = 0..n.
+   */
+  @Option(names = {"-v", "--verbosity"},
+          description = "A named option.")
+  abstract OptionalInt verbosity();
+
   /* `Path`, not `Optional<Path>`:
    * This positional parameter is required (multiplicity = 1).
    */
@@ -27,13 +37,8 @@ abstract class DeleteCommand {
              description = "A positional parameter.")
   abstract Path path();
 
-  /* `OptionalInt` (or alternatively `Optional<Integer>`),
-   * but not `int` or `Integer`:
-   * This named option is optional (multiplicity = 0..1).
-   */
-  @Option(names = {"-v", "--verbosity"},
-          description = "A named option.")
-  abstract OptionalInt verbosity();
+  @VarargsParameter(description = "This must be a list.")
+  abstract List<Path> morePaths();
 }
 ````
 
@@ -52,6 +57,7 @@ public static void main(String[] args) {
 ````
 
 In addition to `parseOrExit`, there is also a basic `parse` method with no side effects.
+It is possible to define custom converters.
 Please see the [wiki](https://github.com/h908714124/jbock/wiki) for details.
 
 ### Sample projects
