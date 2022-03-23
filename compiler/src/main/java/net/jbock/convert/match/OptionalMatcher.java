@@ -32,6 +32,9 @@ public class OptionalMatcher implements Matcher {
     public <M extends AnnotatedMethod>
     Optional<Match<M>> tryMatch(
             M sourceMethod) {
+        if (sourceMethod.isVarargsParameter()) {
+            return Optional.empty(); // A VarargsParameter cannot match as an Optional.
+        }
         TypeMirror returnType = sourceMethod.returnType();
         return getOptionalPrimitive(sourceMethod, returnType)
                 .or(() -> matchOptional(sourceMethod, returnType));
