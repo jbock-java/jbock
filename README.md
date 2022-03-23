@@ -59,7 +59,7 @@ abstract class DeleteCommand {
 }
 ````
 
-The generated `DeleteCommandParser` can be used directly in a `main` method:
+The generated `DeleteCommandParser` converts a string array to an instance of `DeleteCommand`:
 
 ````java
 public static void main(String[] args) {
