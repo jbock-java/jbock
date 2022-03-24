@@ -22,7 +22,9 @@ The *multiplicity* of options is determined by their return type. `List`, `Optio
 abstract class DeleteCommand {
 
   @Option(names = {"-v", "--verbosity"},
-          description = "A named option. The return type reflects optionality.")
+          description = {"A named option. The return type reflects optionality.",
+                         "Could use Optional<Integer> too, but using int or Integer",
+                         "would make it a 'required option'."})
   abstract OptionalInt verbosity();
 
   @Parameter(
