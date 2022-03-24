@@ -76,7 +76,7 @@ public class Util {
                     if (constructors.stream().anyMatch(c -> c.getParameters().isEmpty())) {
                         return Optional.empty();
                     }
-                    return Optional.of(new ValidationFailure("invalid converter class:" +
+                    return Optional.of(new ValidationFailure("invalid class:" +
                             " default constructor not found", classToCheck));
                 });
     }
