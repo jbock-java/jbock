@@ -57,7 +57,7 @@ abstract class DeleteCommand {
   // sample converter class
   static class CharsetConverter extends StringConverter<Charset> {
     @Override
-    protected Charset convert(String token) { return StandardCharsets.UTF_8; }
+    protected Charset convert(String token) { return Charset.forName(token); }
   }
 }
 ````
