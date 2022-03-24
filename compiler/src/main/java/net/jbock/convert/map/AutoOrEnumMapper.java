@@ -24,14 +24,11 @@ import static io.jbock.util.Either.left;
 public class AutoOrEnumMapper {
 
     private final AutoMappings autoMapper;
-    private final Util util;
 
     @Inject
     AutoOrEnumMapper(
-            AutoMappings autoMapper,
-            Util util) {
+            AutoMappings autoMapper) {
         this.autoMapper = autoMapper;
-        this.util = util;
     }
 
     public <M extends AnnotatedMethod>
@@ -59,7 +56,7 @@ public class AutoOrEnumMapper {
 
     private ValidationFailure noConverterError(Match<?> match) {
         String expectedType = StringConverter.class.getSimpleName() +
-                "<" + util.typeToString(match.baseType()) + ">";
+                "<" + Util.typeToString(match.baseType()) + ">";
         return match.fail("define a converter class that extends " + expectedType +
                 " or implements " +
                 Supplier.class.getSimpleName() +

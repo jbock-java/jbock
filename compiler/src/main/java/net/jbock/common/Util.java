@@ -6,7 +6,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -110,14 +109,14 @@ public class Util {
     }
 
     public List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
-        LinkedList<TypeElement> result = new LinkedList<>();
+        List<TypeElement> result = new ArrayList<>();
         result.add(sourceElement);
-        while (result.getLast().getNestingKind() == MEMBER) {
-            Element enclosingElement = result.getLast().getEnclosingElement();
+        while (result.get(result.size() - 1).getNestingKind() == MEMBER) {
+            Element enclosingElement = result.get(result.size() - 1).getEnclosingElement();
             TypeTool.AS_TYPE_ELEMENT.visit(enclosingElement)
                     .ifPresent(result::add);
         }
-        return new ArrayList<>(result);
+        return result;
     }
 
     public static String typeToString(TypeMirror type) {

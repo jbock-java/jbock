@@ -35,7 +35,7 @@ final class ConverterType<M extends AnnotatedMethod> {
             Util util) {
         if (!util.types().isSameType(outputType, match.baseType())) {
             String expectedType = StringConverter.class.getSimpleName() +
-                    "<" + util.typeToString(match.baseType()) + ">";
+                    "<" + Util.typeToString(match.baseType()) + ">";
             return Optional.of(match.fail("invalid converter class: should extend " +
                     expectedType + " or implement " +
                     Supplier.class.getSimpleName() + "<" + expectedType + ">"));
