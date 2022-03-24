@@ -406,7 +406,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid converter class: default constructor not found");
+                .withErrorContaining("invalid class: default constructor not found");
     }
 
     @Test
