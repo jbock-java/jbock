@@ -58,7 +58,6 @@ public class MappingFinder {
                         .or(() -> util.commonTypeChecks(converter))
                         .or(() -> checkNotAbstract(sourceMethod, converter))
                         .or(() -> checkNoTypeVars(sourceMethod, converter))
-                        .or(() -> checkConverterIsInnerClass(sourceMethod, converter))
                         .map(failure -> failure.prepend("invalid converter class: "))
                         .<Either<ValidationFailure, TypeElement>>map(Either::left)
                         .orElseGet(() -> right(converter))
@@ -72,8 +71,8 @@ public class MappingFinder {
     Optional<ValidationFailure> checkConverterIsInnerClass(
             M sourceMethod,
             TypeElement converter) {
-        boolean nestedMapper = util.getEnclosingElements(converter).contains(sourceElement.element());
-        if (!nestedMapper) {
+        boolean nested = util.getEnclosingElements(converter).contains(sourceElement.element());
+        if (!nested) {
             return Optional.of(sourceMethod.fail("converter of '" +
                     sourceMethod.methodName() +
                     "' must be an inner class of the command class '" +
