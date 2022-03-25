@@ -7,7 +7,7 @@ import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.map.AutoOrEnumMapper;
-import net.jbock.convert.map.ConverterMapper;
+import net.jbock.convert.map.ConverterValidator;
 import net.jbock.convert.match.Match;
 import net.jbock.convert.match.MatchFinder;
 import net.jbock.processor.SourceElement;
@@ -23,7 +23,7 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 public class MappingFinder {
 
     private final Lazy<AutoOrEnumMapper> autoOrEnumMapper;
-    private final Lazy<ConverterMapper> converterValidator;
+    private final Lazy<ConverterValidator> converterValidator;
     private final SourceElement sourceElement;
     private final Util util;
     private final MatchFinder matchFinder;
@@ -31,7 +31,7 @@ public class MappingFinder {
     @Inject
     MappingFinder(
             Lazy<AutoOrEnumMapper> autoOrEnumMapper,
-            Lazy<ConverterMapper> converterValidator,
+            Lazy<ConverterValidator> converterValidator,
             SourceElement sourceElement,
             Util util,
             MatchFinder matchFinder) {
