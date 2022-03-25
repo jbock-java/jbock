@@ -25,7 +25,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 @ValidateScope
-public class AutoMappings {
+class AutoMappings {
 
     private enum FactoryMethod {
         NEW("new"),
