@@ -40,45 +40,48 @@ class AutoMappings {
             this.methodName = methodName;
         }
 
-        AutoConversion create(Class<?> autoType) {
+        AutoMapping create(Class<?> autoType) {
             CodeBlock mapper = CodeBlock.of("$T::" + methodName, autoType);
             return AutoMappings.wrap(autoType, mapper);
         }
     }
 
     private final TypeTool tool;
-    private final List<AutoConversion> conversions;
+    private final List<AutoMapping> mappings;
 
     @Inject
     AutoMappings(TypeTool tool) {
         this.tool = tool;
-        this.conversions = autoConversions();
+        this.mappings = autoMappings();
     }
 
     <M extends AnnotatedMethod>
     Optional<Mapping<M>> findAutoMapping(
             Match<M> match) {
         TypeMirror baseType = match.baseType();
-        for (AutoConversion conversion : conversions) {
-            if (tool.isSameType(baseType, conversion.qualifiedName())) {
-                return Optional.of(conversion.toMapping(match));
+        for (AutoMapping conversion : mappings) {
+            if (tool.isSameType(baseType, conversion.qualifiedName)) {
+                Mapping<M> mapping = Mapping.create(conversion.createConverterExpression, match);
+                return Optional.of(mapping);
             }
         }
         return Optional.empty();
     }
 
-    private static AutoConversion wrap(Class<?> autoType, CodeBlock mapper) {
-        return create(autoType, CodeBlock.of("$T.create($L)", StringConverter.class, mapper));
-    }
-
-    private static AutoConversion create(
+    private static AutoMapping wrap(
             Class<?> autoType,
-            CodeBlock mapper) {
-        String canonicalName = autoType.getCanonicalName();
-        return new AutoConversion(canonicalName, mapper);
+            CodeBlock innerExpression) {
+        return create(autoType, CodeBlock.of("$T.create($L)", StringConverter.class, innerExpression));
     }
 
-    private List<AutoConversion> autoConversions() {
+    private static AutoMapping create(
+            Class<?> autoType,
+            CodeBlock createConverterExpression) {
+        String canonicalName = autoType.getCanonicalName();
+        return new AutoMapping(canonicalName, createConverterExpression);
+    }
+
+    private static List<AutoMapping> autoMappings() {
         return List.of(
                 wrap(String.class, CodeBlock.of("$T.identity()", Function.class)),
                 FactoryMethod.VALUE_OF.create(Integer.class),
@@ -95,5 +98,15 @@ class AutoMappings {
                 create(Character.class, CodeBlock.of("$T.create()", CharConverter.class)),
                 FactoryMethod.NEW.create(BigInteger.class),
                 FactoryMethod.NEW.create(BigDecimal.class));
+    }
+
+    private static final class AutoMapping {
+        final String qualifiedName;
+        final CodeBlock createConverterExpression;
+
+        AutoMapping(String qualifiedName, CodeBlock createConverterExpression) {
+            this.qualifiedName = qualifiedName;
+            this.createConverterExpression = createConverterExpression;
+        }
     }
 }

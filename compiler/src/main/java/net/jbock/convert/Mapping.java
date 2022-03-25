@@ -34,9 +34,9 @@ public final class Mapping<M extends AnnotatedMethod> {
 
     public static <M extends AnnotatedMethod>
     Mapping<M> create(
-            CodeBlock mapper,
+            CodeBlock createConverterExpression,
             Match<M> match) {
-        return new Mapping<>(mapper, match, false);
+        return new Mapping<>(createConverterExpression, match, false);
     }
 
     public static <M extends AnnotatedMethod>
