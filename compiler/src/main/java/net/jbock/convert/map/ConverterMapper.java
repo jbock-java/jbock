@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
-import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
@@ -27,13 +26,11 @@ public class ConverterMapper {
 
     private final SafeTypes types;
     private final SafeElements elements;
-    private final Util util;
 
     @Inject
-    ConverterMapper(SafeTypes types, SafeElements elements, Util util) {
+    ConverterMapper(SafeTypes types, SafeElements elements) {
         this.types = types;
         this.elements = elements;
-        this.util = util;
     }
 
     public <M extends AnnotatedMethod>
@@ -54,7 +51,7 @@ public class ConverterMapper {
                         .map(stringConverterType ->
                                 handleStringConverter(converter, match, stringConverterType, false)))
                 .orElseGet(() -> left(match.fail(errorConverterType())))
-                .filter(referencedType -> referencedType.checkMatchingMatch(util));
+                .filter(referencedType -> referencedType.checkMatchingMatch(types));
     }
 
     private <M extends AnnotatedMethod>

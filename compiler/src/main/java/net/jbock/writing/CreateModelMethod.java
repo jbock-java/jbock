@@ -64,7 +64,7 @@ final class CreateModelMethod extends HasCommandRepresentation {
             names.add(CodeBlock.of("$S", name));
         }
         List<CodeBlock> code = new ArrayList<>();
-        if (m.isModeFlag()) {
+        if (m.isNullary()) {
             code.add(CodeBlock.of("$T.nullary()", Option.class));
         } else {
             code.add(CodeBlock.of("$T.unary($T.$L)", Option.class, Multiplicity.class, m.multiplicity().name()));

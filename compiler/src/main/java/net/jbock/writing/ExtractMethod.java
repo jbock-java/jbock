@@ -111,8 +111,8 @@ final class ExtractMethod extends HasCommandRepresentation {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.option($T.$N)", parser,
                 sourceElement().optionEnumType(), m.enumName()));
-        if (!m.isModeFlag()) {
-            code.add(CodeBlock.of(".map($L)", m.mapper()));
+        if (!m.isNullary()) {
+            code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
         }
         code.addAll(tailExpressionOption(m, i));
         m.extractExpr().ifPresent(code::add);
@@ -124,7 +124,7 @@ final class ExtractMethod extends HasCommandRepresentation {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.param($L)", parser,
                 m.sourceMethod().index()));
-        code.add(CodeBlock.of(".map($L)", m.mapper()));
+        code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
         code.addAll(tailExpressionParameter(m, i));
         m.extractExpr().ifPresent(code::add);
         return joinByNewline(code);
@@ -134,14 +134,14 @@ final class ExtractMethod extends HasCommandRepresentation {
         ParameterSpec parser = parserTypeFactory.get().asParam();
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.rest()", parser));
-        code.add(CodeBlock.of(".map($L)", m.mapper()));
+        code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
         code.add(CodeBlock.of(".collect($T.firstFailure())", EITHERS));
         code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters().size()));
         return joinByNewline(code);
     }
 
     private List<CodeBlock> tailExpressionOption(Mapping<AnnotatedOption> m, int i) {
-        if (m.isModeFlag()) {
+        if (m.isNullary()) {
             return List.of(CodeBlock.of(".findAny().isPresent()"));
         }
         switch (m.multiplicity()) {

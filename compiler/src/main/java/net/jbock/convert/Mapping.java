@@ -19,17 +19,17 @@ import static net.jbock.model.Multiplicity.OPTIONAL;
  */
 public final class Mapping<M extends AnnotatedMethod> {
 
-    private final CodeBlock mapper;
+    private final CodeBlock createConverterExpression;
     private final Match<M> match;
-    private final boolean modeFlag;
+    private final boolean nullary;
 
     private Mapping(
-            CodeBlock mapper,
+            CodeBlock createConverterExpression,
             Match<M> match,
-            boolean modeFlag) {
-        this.mapper = mapper;
+            boolean nullary) {
+        this.createConverterExpression = createConverterExpression;
         this.match = match;
-        this.modeFlag = modeFlag;
+        this.nullary = nullary;
     }
 
     public static <M extends AnnotatedMethod>
@@ -42,13 +42,13 @@ public final class Mapping<M extends AnnotatedMethod> {
     public static <M extends AnnotatedMethod>
     Mapping<M> createModeFlag(
             Match<M> match) {
-        CodeBlock mapper = CodeBlock.of("$T.create($T.identity())",
+        CodeBlock createConverterExpression = CodeBlock.of("$T.create($T.identity())",
                 StringConverter.class, Function.class);
-        return new Mapping<>(mapper, match, true);
+        return new Mapping<>(createConverterExpression, match, true);
     }
 
-    public CodeBlock mapper() {
-        return mapper;
+    public CodeBlock createConverterExpression() {
+        return createConverterExpression;
     }
 
     public Optional<CodeBlock> extractExpr() {
@@ -75,8 +75,8 @@ public final class Mapping<M extends AnnotatedMethod> {
         return multiplicity() == OPTIONAL;
     }
 
-    public boolean isModeFlag() {
-        return modeFlag;
+    public boolean isNullary() {
+        return nullary;
     }
 
     public M sourceMethod() {

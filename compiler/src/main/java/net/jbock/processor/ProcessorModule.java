@@ -5,7 +5,6 @@ import dagger.Provides;
 import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.TypeTool;
-import net.jbock.common.Util;
 import net.jbock.validate.ValidateComponent;
 
 import javax.annotation.processing.Filer;
@@ -46,11 +45,5 @@ interface ProcessorModule {
     @Provides
     static TypeTool tool(SafeElements elements, SafeTypes types) {
         return new TypeTool(elements, types);
-    }
-
-    @ProcessorScope
-    @Provides
-    static Util util(SafeTypes types, TypeTool tool) {
-        return new Util(types, tool);
     }
 }

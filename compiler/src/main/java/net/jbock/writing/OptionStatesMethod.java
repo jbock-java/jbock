@@ -58,7 +58,7 @@ final class OptionStatesMethod extends HasCommandRepresentation {
         if (param.isRepeatable()) {
             return ClassName.get(OptionStateRepeatable.class);
         }
-        if (param.isModeFlag()) {
+        if (param.isNullary()) {
             return ClassName.get(OptionStateModeFlag.class);
         }
         return ClassName.get(OptionStateNonRepeatable.class);

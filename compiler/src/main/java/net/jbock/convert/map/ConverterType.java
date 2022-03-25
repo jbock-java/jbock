@@ -2,6 +2,7 @@ package net.jbock.convert.map;
 
 import io.jbock.javapoet.CodeBlock;
 import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.common.SafeTypes;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
@@ -31,9 +32,11 @@ final class ConverterType<M extends AnnotatedMethod> {
         this.supplier = supplier;
     }
 
+    /* Left-Optional
+     */
     Optional<ValidationFailure> checkMatchingMatch(
-            Util util) {
-        if (!util.types().isSameType(outputType, match.baseType())) {
+            SafeTypes types) {
+        if (!types.isSameType(outputType, match.baseType())) {
             String expectedType = StringConverter.class.getSimpleName() +
                     "<" + Util.typeToString(match.baseType()) + ">";
             return Optional.of(match.fail("invalid converter class: should extend " +
@@ -43,15 +46,12 @@ final class ConverterType<M extends AnnotatedMethod> {
         return Optional.empty();
     }
 
-    private CodeBlock asMapper() {
-        TypeMirror type = converter.asType();
-        if (supplier) {
-            return CodeBlock.of("new $T().get()", type);
-        }
-        return CodeBlock.of("new $T()", type);
-    }
-
     Mapping<M> toMapping() {
-        return Mapping.create(asMapper(), match);
+        CodeBlock.Builder createConverterExpression = CodeBlock.builder();
+        createConverterExpression.add("new $T()", converter.asType());
+        if (supplier) {
+            createConverterExpression.add(".get()");
+        }
+        return Mapping.create(createConverterExpression.build(), match);
     }
 }
