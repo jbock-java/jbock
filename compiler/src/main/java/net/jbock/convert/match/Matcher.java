@@ -4,7 +4,7 @@ import net.jbock.annotated.AnnotatedMethod;
 
 import java.util.Optional;
 
-public interface Matcher {
+interface Matcher {
 
     <M extends AnnotatedMethod>
     Optional<Match<M>> tryMatch(

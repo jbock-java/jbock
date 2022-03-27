@@ -12,7 +12,7 @@ import java.util.Optional;
 import static net.jbock.model.Multiplicity.REPEATABLE;
 
 @ValidateScope
-public class ListMatcher implements Matcher {
+class ListMatcher implements Matcher {
 
     private final SafeElements elements;
     private final TypeTool tool;

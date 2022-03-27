@@ -23,18 +23,18 @@ import static io.jbock.util.Either.left;
 @ValidateScope
 public class AutoOrEnumMapper {
 
-    private final AutoMappings autoMapper;
+    private final AutoMappings autoMappings;
 
     @Inject
     AutoOrEnumMapper(
-            AutoMappings autoMapper) {
-        this.autoMapper = autoMapper;
+            AutoMappings autoMappings) {
+        this.autoMappings = autoMappings;
     }
 
     public <M extends AnnotatedMethod>
     Either<ValidationFailure, Mapping<M>> findMapping(
             Match<M> match) {
-        return autoMapper.findAutoMapping(match)
+        return autoMappings.findAutoMapping(match)
                 .or(() -> findEnumMapping(match))
                 .<Either<ValidationFailure, Mapping<M>>>map(Either::right)
                 .orElseGet(() -> left(noConverterError(match)));

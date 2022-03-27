@@ -15,7 +15,7 @@ import static net.jbock.convert.match.Match.createWithExtract;
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
 @ValidateScope
-public class OptionalMatcher implements Matcher {
+class OptionalMatcher implements Matcher {
 
     private final TypeTool tool;
     private final SafeElements elements;
