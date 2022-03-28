@@ -46,7 +46,7 @@ public class MatchFinder {
 
     public <M extends AnnotatedMethod>
     Either<ValidationFailure, Match<M>>
-    validateModeFlag(
+    createNullaryMatch(
             M sourceMethod) {
         PrimitiveType bool = types.getPrimitiveType(BOOLEAN);
         Match<M> match = Match.create(bool, OPTIONAL, sourceMethod);

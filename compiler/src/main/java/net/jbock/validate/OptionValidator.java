@@ -6,7 +6,6 @@ import net.jbock.annotated.AnnotatedOption;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
-import net.jbock.convert.match.MatchFinder;
 
 import java.util.HashSet;
 import java.util.List;
@@ -25,14 +24,10 @@ import static javax.lang.model.type.TypeKind.BOOLEAN;
 class OptionValidator {
 
     private final MappingFinder mappingFinder;
-    private final MatchFinder matchFinder;
 
     @Inject
-    OptionValidator(
-            MappingFinder mappingFinder,
-            MatchFinder matchFinder) {
+    OptionValidator(MappingFinder mappingFinder) {
         this.mappingFinder = mappingFinder;
-        this.matchFinder = matchFinder;
     }
 
     Either<List<ValidationFailure>, ContextBuilder> wrapOptions(
@@ -49,13 +44,12 @@ class OptionValidator {
 
     private Either<ValidationFailure, Mapping<AnnotatedOption>> wrapOption(
             AnnotatedOption option) {
-        return checkFlag(option)
-                .map(m -> matchFinder.validateModeFlag(m)
-                        .map(Mapping::createModeFlag))
+        return checkNullary(option)
+                .map(mappingFinder::findNullaryMapping)
                 .orElseGet(() -> mappingFinder.findMapping(option));
     }
 
-    private Optional<AnnotatedOption> checkFlag(
+    private Optional<AnnotatedOption> checkNullary(
             AnnotatedOption option) {
         if (option.converter().isPresent()) {
             return Optional.empty();

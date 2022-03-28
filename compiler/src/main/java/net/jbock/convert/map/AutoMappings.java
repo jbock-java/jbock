@@ -21,7 +21,6 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 @ValidateScope
@@ -83,7 +82,7 @@ class AutoMappings {
 
     private static List<AutoMapping> autoMappings() {
         return List.of(
-                wrap(String.class, CodeBlock.of("$T.identity()", Function.class)),
+                create(String.class, CodeBlock.of("$T.identity()", StringConverter.class)),
                 FactoryMethod.VALUE_OF.create(Integer.class),
                 wrap(Path.class, CodeBlock.of("$T::get", Paths.class)),
                 create(File.class, CodeBlock.of("$T.create()", FileConverter.class)),

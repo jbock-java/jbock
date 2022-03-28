@@ -15,7 +15,7 @@ import static net.jbock.convert.match.Match.createWithExtract;
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
 @ValidateScope
-class OptionalMatcher implements Matcher {
+class OptionalMatcher extends Matcher {
 
     private final TypeTool tool;
     private final SafeElements elements;
@@ -29,7 +29,7 @@ class OptionalMatcher implements Matcher {
     }
 
     @Override
-    public <M extends AnnotatedMethod>
+    <M extends AnnotatedMethod>
     Optional<Match<M>> tryMatch(
             M sourceMethod) {
         if (sourceMethod.isVarargsParameter()) {

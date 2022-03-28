@@ -148,8 +148,4 @@ public class Util {
         }
         return Optional.empty();
     }
-
-    public SafeTypes types() {
-        return types;
-    }
 }

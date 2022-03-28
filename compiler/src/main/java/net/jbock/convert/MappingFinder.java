@@ -1,8 +1,10 @@
 package net.jbock.convert;
 
 import dagger.Lazy;
+import io.jbock.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
+import net.jbock.VarargsParameter;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
@@ -10,7 +12,9 @@ import net.jbock.convert.map.AutoOrEnumMapper;
 import net.jbock.convert.map.ConverterValidator;
 import net.jbock.convert.match.Match;
 import net.jbock.convert.match.MatchFinder;
+import net.jbock.model.Multiplicity;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
 import javax.lang.model.element.TypeElement;
@@ -47,6 +51,14 @@ public class MappingFinder {
             M sourceMethod) {
         return matchFinder.findMatch(sourceMethod)
                 .flatMap(this::findMappingWithMatch);
+    }
+
+    public <M extends AnnotatedMethod>
+    Either<ValidationFailure, Mapping<M>> findNullaryMapping(
+            M sourceMethod) {
+        return matchFinder.createNullaryMatch(sourceMethod)
+                .map(match -> Mapping.create(
+                        CodeBlock.of("$T.identity())", StringConverter.class), match, true));
     }
 
     private <M extends AnnotatedMethod>

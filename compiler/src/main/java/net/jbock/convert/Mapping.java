@@ -4,10 +4,8 @@ import io.jbock.javapoet.CodeBlock;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.convert.match.Match;
 import net.jbock.model.Multiplicity;
-import net.jbock.util.StringConverter;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
@@ -36,15 +34,15 @@ public final class Mapping<M extends AnnotatedMethod> {
     Mapping<M> create(
             CodeBlock createConverterExpression,
             Match<M> match) {
-        return new Mapping<>(createConverterExpression, match, false);
+        return create(createConverterExpression, match, false);
     }
 
     public static <M extends AnnotatedMethod>
-    Mapping<M> createModeFlag(
-            Match<M> match) {
-        CodeBlock createConverterExpression = CodeBlock.of("$T.create($T.identity())",
-                StringConverter.class, Function.class);
-        return new Mapping<>(createConverterExpression, match, true);
+    Mapping<M> create(
+            CodeBlock createConverterExpression,
+            Match<M> match,
+            boolean nullary) {
+        return new Mapping<>(createConverterExpression, match, nullary);
     }
 
     public CodeBlock createConverterExpression() {
