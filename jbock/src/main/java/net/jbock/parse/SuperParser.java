@@ -11,7 +11,7 @@ import java.util.stream.Stream;
  *
  * <p>The parser rejects suspicious tokens, but allows them after
  * the last positional parameter has been read.
- * Double-dash escape is <em>not</em> supported.
+ * The generated parser does not support double-dash escape.
  *
  * @param <T> type of keys that identify named options
  */
