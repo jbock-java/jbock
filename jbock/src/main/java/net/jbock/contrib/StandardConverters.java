@@ -20,29 +20,6 @@ public final class StandardConverters {
 
     private static final Map<String, WeakReference<StringConverter<?>>> CONVERTERS_BY_CLASS = new HashMap<>();
 
-    private static <T> StringConverter<T> get(
-            Class<T> clazz,
-            Function<String, T> f) {
-        return get(clazz, () -> StringConverter.create(f));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> StringConverter<T> get(
-            Class<T> clazz,
-            Supplier<StringConverter<T>> converterSupplier) {
-        String canonicalName = clazz.getCanonicalName();
-        WeakReference<StringConverter<?>> ref = CONVERTERS_BY_CLASS.get(canonicalName);
-        if (ref != null) {
-            StringConverter<?> cached = ref.get();
-            if (cached != null) {
-                return (StringConverter<T>) cached;
-            }
-        }
-        StringConverter<T> newInstance = converterSupplier.get();
-        CONVERTERS_BY_CLASS.put(canonicalName, new WeakReference<>(newInstance));
-        return newInstance;
-    }
-
     public static StringConverter<String> asString() {
         return get(String.class, Function.identity());
     }
@@ -101,5 +78,28 @@ public final class StandardConverters {
 
     public static StringConverter<File> asExistingFile() {
         return get(File.class, FileConverter::new);
+    }
+
+    private static <T> StringConverter<T> get(
+            Class<T> clazz,
+            Function<String, T> f) {
+        return get(clazz, () -> StringConverter.create(f));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> StringConverter<T> get(
+            Class<T> clazz,
+            Supplier<StringConverter<T>> converterSupplier) {
+        String canonicalName = clazz.getCanonicalName();
+        WeakReference<StringConverter<?>> ref = CONVERTERS_BY_CLASS.get(canonicalName);
+        if (ref != null) {
+            StringConverter<?> cached = ref.get();
+            if (cached != null) {
+                return (StringConverter<T>) cached;
+            }
+        }
+        StringConverter<T> newInstance = converterSupplier.get();
+        CONVERTERS_BY_CLASS.put(canonicalName, new WeakReference<>(newInstance));
+        return newInstance;
     }
 }
