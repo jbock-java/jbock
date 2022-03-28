@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
 import net.jbock.contrib.CharConverter;
-import net.jbock.contrib.FileConverter;
+import net.jbock.contrib.StandardConverters;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
 import net.jbock.util.StringConverter;
@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -82,10 +81,10 @@ class AutoMappings {
 
     private static List<AutoMapping> autoMappings() {
         return List.of(
-                create(String.class, CodeBlock.of("$T.identity()", StringConverter.class)),
+                create(String.class, CodeBlock.of("$T.asString()", StandardConverters.class)),
                 FactoryMethod.VALUE_OF.create(Integer.class),
-                wrap(Path.class, CodeBlock.of("$T::get", Paths.class)),
-                create(File.class, CodeBlock.of("$T.create()", FileConverter.class)),
+                create(Path.class, CodeBlock.of("$T.asPath()", StandardConverters.class)),
+                create(File.class, CodeBlock.of("$T.asExistingFile()", StandardConverters.class)),
                 FactoryMethod.CREATE.create(URI.class),
                 FactoryMethod.COMPILE.create(Pattern.class),
                 FactoryMethod.PARSE.create(LocalDate.class),

@@ -16,17 +16,6 @@ import static io.jbock.util.Either.right;
  */
 public abstract class StringConverter<T> implements Function<String, Either<ConverterFailure, T>> {
 
-    private static final StringConverter<String> IDENTITY = new StringConverter<>() {
-        @Override
-        protected String convert(String token) {
-            return token;
-        }
-    };
-
-    public static StringConverter<String> identity() {
-        return IDENTITY;
-    }
-
     /**
      * Converts a single command line token.
      * For options, the token is the option argument.

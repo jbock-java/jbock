@@ -14,15 +14,7 @@ import java.nio.file.Paths;
  */
 public final class FileConverter extends StringConverter<File> {
 
-    private FileConverter() {
-    }
-
-    /**
-     * Creates an instance of {@code FileConverter}.
-     * @return an instance of {@code FileConverter}
-     */
-    public static StringConverter<File> create() {
-        return new FileConverter();
+    FileConverter() {
     }
 
     @Override
