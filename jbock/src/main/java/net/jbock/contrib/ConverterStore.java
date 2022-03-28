@@ -34,5 +34,4 @@ final class ConverterStore {
         convertersByClass.put(canonicalName, new WeakReference<>(newInstance));
         return newInstance;
     }
-
 }
