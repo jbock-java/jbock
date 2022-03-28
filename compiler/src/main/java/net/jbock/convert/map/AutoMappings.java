@@ -4,11 +4,9 @@ import io.jbock.javapoet.CodeBlock;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedMethod;
 import net.jbock.common.TypeTool;
-import net.jbock.contrib.CharConverter;
 import net.jbock.contrib.StandardConverters;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
-import net.jbock.util.StringConverter;
 import net.jbock.validate.ValidateScope;
 
 import javax.lang.model.type.TypeMirror;
@@ -24,25 +22,6 @@ import java.util.regex.Pattern;
 
 @ValidateScope
 class AutoMappings {
-
-    private enum FactoryMethod {
-        NEW("new"),
-        CREATE("create"),
-        VALUE_OF("valueOf"),
-        COMPILE("compile"),
-        PARSE("parse");
-
-        final String methodName;
-
-        FactoryMethod(String methodName) {
-            this.methodName = methodName;
-        }
-
-        AutoMapping create(Class<?> autoType) {
-            CodeBlock mapper = CodeBlock.of("$T::" + methodName, autoType);
-            return AutoMappings.wrap(autoType, mapper);
-        }
-    }
 
     private final TypeTool tool;
     private final List<AutoMapping> mappings;
@@ -66,36 +45,31 @@ class AutoMappings {
         return Optional.empty();
     }
 
-    private static AutoMapping wrap(
-            Class<?> autoType,
-            CodeBlock innerExpression) {
-        return create(autoType, CodeBlock.of("$T.create($L)", StringConverter.class, innerExpression));
-    }
-
     private static AutoMapping create(
             Class<?> autoType,
-            CodeBlock createConverterExpression) {
+            String methodName) {
         String canonicalName = autoType.getCanonicalName();
+        CodeBlock createConverterExpression = CodeBlock.of("$T.$L()", StandardConverters.class, methodName);
         return new AutoMapping(canonicalName, createConverterExpression);
     }
 
     private static List<AutoMapping> autoMappings() {
         return List.of(
-                create(String.class, CodeBlock.of("$T.asString()", StandardConverters.class)),
-                FactoryMethod.VALUE_OF.create(Integer.class),
-                create(Path.class, CodeBlock.of("$T.asPath()", StandardConverters.class)),
-                create(File.class, CodeBlock.of("$T.asExistingFile()", StandardConverters.class)),
-                FactoryMethod.CREATE.create(URI.class),
-                FactoryMethod.COMPILE.create(Pattern.class),
-                FactoryMethod.PARSE.create(LocalDate.class),
-                FactoryMethod.VALUE_OF.create(Long.class),
-                FactoryMethod.VALUE_OF.create(Short.class),
-                FactoryMethod.VALUE_OF.create(Byte.class),
-                FactoryMethod.VALUE_OF.create(Float.class),
-                FactoryMethod.VALUE_OF.create(Double.class),
-                create(Character.class, CodeBlock.of("$T.create()", CharConverter.class)),
-                FactoryMethod.NEW.create(BigInteger.class),
-                FactoryMethod.NEW.create(BigDecimal.class));
+                create(String.class, "asString"),
+                create(Integer.class, "asInteger"),
+                create(Path.class, "asPath"),
+                create(File.class, "asExistingFile"),
+                create(URI.class, "asURI"),
+                create(Pattern.class, "asPattern"),
+                create(LocalDate.class, "asLocalDate"),
+                create(Long.class, "asLong"),
+                create(Short.class, "asShort"),
+                create(Byte.class, "asByte"),
+                create(Float.class, "asFloat"),
+                create(Double.class, "asDouble"),
+                create(Character.class, "asCharacter"),
+                create(BigInteger.class, "asBigInteger"),
+                create(BigDecimal.class, "asBigDecimal"));
     }
 
     private static final class AutoMapping {

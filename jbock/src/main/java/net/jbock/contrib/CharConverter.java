@@ -8,15 +8,7 @@ import net.jbock.util.StringConverter;
  */
 public final class CharConverter extends StringConverter<Character> {
 
-    private CharConverter() {
-    }
-
-    /**
-     * Creates an instance of {@code CharConverter}.
-     * @return an instance of {@code CharConverter}
-     */
-    public static StringConverter<Character> create() {
-        return new CharConverter();
+    CharConverter() {
     }
 
     @Override
