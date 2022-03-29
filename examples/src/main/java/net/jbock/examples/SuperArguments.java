@@ -1,10 +1,10 @@
 package net.jbock.examples;
 
-import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
+import net.jbock.SuperCommand;
 
-@Command(superCommand = true)
+@SuperCommand
 abstract class SuperArguments {
 
     @Option(names = {"--quiet", "-q"})

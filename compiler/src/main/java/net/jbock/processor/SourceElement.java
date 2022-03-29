@@ -3,6 +3,7 @@ package net.jbock.processor;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
 import net.jbock.Command;
+import net.jbock.SuperCommand;
 import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;
 
@@ -21,7 +22,10 @@ public class SourceElement {
     private final String programName;
     private final ClassName generatedClass;
     private final ClassName optionEnumType;
-    private final Command command;
+    private final String descriptionKey;
+    private final boolean skipGeneratingParseOrExitMethod;
+    private final List<String> description;
+    private final boolean superCommand;
 
     private SourceElement(
             TypeElement sourceElement,
@@ -29,29 +33,87 @@ public class SourceElement {
             String programName,
             ClassName generatedClass,
             ClassName optionEnumType,
-            Command command) {
+            String descriptionKey,
+            boolean skipGeneratingParseOrExitMethod,
+            List<String> description,
+            boolean superCommand) {
         this.sourceElement = sourceElement;
         this.accessModifiers = accessModifiers;
         this.programName = programName;
         this.generatedClass = generatedClass;
         this.optionEnumType = optionEnumType;
-        this.command = command;
+        this.descriptionKey = descriptionKey;
+        this.skipGeneratingParseOrExitMethod = skipGeneratingParseOrExitMethod;
+        this.description = description;
+        this.superCommand = superCommand;
     }
 
     static SourceElement create(TypeElement typeElement) {
-        Command command = typeElement.getAnnotation(Command.class);
-        List<Modifier> accessModifiers = command.publicParser() ?
+        List<Modifier> accessModifiers = isPublicParser(typeElement) ?
                 List.of(Modifier.PUBLIC) :
                 List.of();
-        String programName = optionalString(command.name())
+        String programName = optionalString(getName(typeElement))
                 .orElseGet(() -> SnakeName.create(typeElement.getSimpleName()).snake('-'));
         String generatedClassName = String.join("_", ClassName.get(typeElement).simpleNames()) + "Parser";
         ClassName generatedClass = ClassName.get(typeElement)
                 .topLevelClassName()
                 .peerClass(generatedClassName);
         ClassName optionEnumType = generatedClass.nestedClass("Opt");
+        String descriptionKey = getDescriptionKey(typeElement);
+        boolean skipGeneratingParseOrExitMethod = isSkipGeneratingParseOrExitMethod(typeElement);
+        List<String> description = List.of(getDescription(typeElement));
+        boolean superCommand = isSuperCommand(typeElement);
         return new SourceElement(typeElement, accessModifiers,
-                programName, generatedClass, optionEnumType, command);
+                programName, generatedClass, optionEnumType,
+                descriptionKey, skipGeneratingParseOrExitMethod, description, superCommand);
+    }
+
+    private static String getDescriptionKey(TypeElement typeElement) {
+        Command command = typeElement.getAnnotation(Command.class);
+        if (command != null) {
+            return command.descriptionKey();
+        }
+        return typeElement.getAnnotation(SuperCommand.class).descriptionKey();
+    }
+
+    private static String getName(TypeElement typeElement) {
+        Command command = typeElement.getAnnotation(Command.class);
+        if (command != null) {
+            return command.name();
+        }
+        return typeElement.getAnnotation(SuperCommand.class).name();
+    }
+
+    private static boolean isPublicParser(TypeElement typeElement) {
+        Command command = typeElement.getAnnotation(Command.class);
+        if (command != null) {
+            return command.publicParser();
+        }
+        return typeElement.getAnnotation(SuperCommand.class).publicParser();
+    }
+
+    private static boolean isSkipGeneratingParseOrExitMethod(TypeElement typeElement) {
+        Command command = typeElement.getAnnotation(Command.class);
+        if (command != null) {
+            return command.skipGeneratingParseOrExitMethod();
+        }
+        return typeElement.getAnnotation(SuperCommand.class).skipGeneratingParseOrExitMethod();
+    }
+
+    private static String[] getDescription(TypeElement typeElement) {
+        Command command = typeElement.getAnnotation(Command.class);
+        if (command != null) {
+            return command.description();
+        }
+        return typeElement.getAnnotation(SuperCommand.class).description();
+    }
+
+    private static boolean isSuperCommand(TypeElement typeElement) {
+        Command command = typeElement.getAnnotation(Command.class);
+        if (command != null) {
+            return command.superCommand();
+        }
+        return true; // SuperCommand annotation present
     }
 
     public TypeElement element() {
@@ -67,7 +129,7 @@ public class SourceElement {
     }
 
     public boolean isSuperCommand() {
-        return command.superCommand();
+        return superCommand;
     }
 
     public List<Modifier> accessModifiers() {
@@ -91,14 +153,14 @@ public class SourceElement {
     }
 
     public Optional<String> descriptionKey() {
-        return optionalString(command.descriptionKey());
+        return optionalString(descriptionKey);
     }
 
     public List<String> description() {
-        return List.of(command.description());
+        return description;
     }
 
     public boolean skipGeneratingParseOrExitMethod() {
-        return command.skipGeneratingParseOrExitMethod();
+        return skipGeneratingParseOrExitMethod;
     }
 }

@@ -6,6 +6,7 @@ import io.jbock.util.Either;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import net.jbock.Command;
+import net.jbock.SuperCommand;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.validate.CommandProcessor;
@@ -23,9 +24,12 @@ import java.util.stream.Collectors;
 
 import static io.jbock.auto.common.BasicAnnotationProcessor.Step;
 import static io.jbock.util.Either.right;
+import static java.util.stream.Collectors.toSet;
+import static net.jbock.common.Annotations.typeLevelAnnotations;
+import static net.jbock.common.Util.checkNoDuplicateAnnotations;
 
 /**
- * This step handles the {@link Command} annotation.
+ * This step handles the {@link Command} and {@link SuperCommand} annotations.
  * It performs validation and source generation.
  *
  * @see ProcessorScope
@@ -52,7 +56,9 @@ class CommandStep implements Step {
 
     @Override
     public Set<String> annotations() {
-        return Set.of(Command.class.getCanonicalName());
+        return typeLevelAnnotations().stream()
+                .map(Class::getCanonicalName)
+                .collect(toSet());
     }
 
     @Override
@@ -102,7 +108,9 @@ class CommandStep implements Step {
         return util.commonTypeChecks(element)
                 .map(List::of)
                 .<Either<List<ValidationFailure>, SourceElement>>map(Either::left)
-                .orElseGet(() -> right(SourceElement.create(element)));
+                .orElseGet(() -> right(SourceElement.create(element)))
+                .filter(sourceElement -> checkNoDuplicateAnnotations(
+                        sourceElement.element(), typeLevelAnnotations()).map(List::of));
     }
 
     private void printFailures(List<ValidationFailure> failures) {
