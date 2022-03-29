@@ -8,21 +8,19 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  * Marker annotation for an abstract class or interface
- * that defines a command line API.
+ * that defines a command line API, similar to {@link Command},
+ * with some differences as explained below.
  *
  * <p>Each abstract method of the command class must have an empty
- * argument list, and either an {@link Option} or a {@link Parameter} annotation.
+ * argument list, and either the {@link Option} or the {@link Parameter} annotation.
  * There must be at least one {@code Parameter}. The {@link VarargsParameter} annotation
- * is not allowed.
+ * is not allowed on a super-command.
  *
  * <p>The generated parser will stop parsing after the
- * last {@code Parameter} was read. On the command line,
- * the user has to make sure that all options are passed before the last {@code Parameter}.
- *
- * <p>The generated methods {@code parse} and {@code parseOrExit}
- * will return the remaining tokens, after the last {@code Parameter},
- * as an array of strings, ready to be passed on to
- * another command line parser.
+ * last {@code Parameter} has been read.
+ * The generated methods {@code parse} and {@code parseOrExit}
+ * will return the command instance and also the remaining tokens,
+ * after the last {@code Parameter}, as an array of strings.
  *
  * <p>The generated parser will not recognize the double-dash escape sequence.
  */
@@ -31,26 +29,31 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public @interface SuperCommand {
 
     /**
+     * @return program name
      * @see Command#name()
      */
     String name() default "";
 
     /**
+     * @return introductory text for the usage documentation
      * @see Command#description()
      */
     String[] description() default {};
 
     /**
+     * @return internationalization key
      * @see Command#descriptionKey()
      */
     String descriptionKey() default "";
 
     /**
+     * @return {@code true} to skip generating the {@code parseOrExit} method
      * @see Command#skipGeneratingParseOrExitMethod()
      */
     boolean skipGeneratingParseOrExitMethod() default false;
 
     /**
+     * @return {@code true} if public parser should be generated
      * @see Command#publicParser()
      */
     boolean publicParser() default false;
