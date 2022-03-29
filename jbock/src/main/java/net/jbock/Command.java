@@ -11,7 +11,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * that defines a command line API.
  *
  * <p>Each abstract method of the command class must have an empty
- * argument list, and carry exactly one of these annotations:
+ * argument list, and carry one of the following annotations:
  *
  * <ul>
  *   <li>{@link Option}
@@ -48,7 +48,7 @@ public @interface Command {
     String descriptionKey() default "";
 
     /**
-     * If {@code true}, the generated parser will stop parsing after the
+     * The generated parser will stop parsing after the
      * last positional parameter was read, and return the remaining tokens
      * as an array of strings.
      *
@@ -62,7 +62,10 @@ public @interface Command {
      * </ul>
      *
      * @return {@code true} to make this a SuperCommand
+     *
+     * @deprecated use the {@link SuperCommand} annotation instead
      */
+    @Deprecated
     boolean superCommand() default false;
 
     /**
