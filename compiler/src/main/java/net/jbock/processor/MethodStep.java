@@ -24,7 +24,6 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 
-@ProcessorScope
 class MethodStep implements Step {
 
     private static final Set<TypeKind> FORBIDDEN_KINDS = EnumSet.of(

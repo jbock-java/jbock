@@ -1,5 +1,6 @@
 package net.jbock.processor;
 
+import dagger.Reusable;
 import io.jbock.javapoet.JavaFile;
 import jakarta.inject.Inject;
 
@@ -11,7 +12,7 @@ import java.io.StringWriter;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-@ProcessorScope
+@Reusable
 class SourceFileGenerator {
 
     private final Filer filer;

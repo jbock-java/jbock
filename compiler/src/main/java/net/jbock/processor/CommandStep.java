@@ -31,27 +31,27 @@ import static net.jbock.common.Util.checkNoDuplicateAnnotations;
 /**
  * This step handles the {@link Command} and {@link SuperCommand} annotations.
  * It performs validation and source generation.
- *
- * @see ProcessorScope
  */
-@ProcessorScope
 class CommandStep implements Step {
 
     private final Messager messager;
     private final Util util;
     private final SourceFileGenerator sourceFileGenerator;
     private final Provider<ValidateComponent.Builder> validateComponentProvider;
+    private final Provider<ContextComponent.Factory> contextComponentProvider;
 
     @Inject
     CommandStep(
             Messager messager,
             Util util,
             SourceFileGenerator sourceFileGenerator,
-            Provider<ValidateComponent.Builder> validateComponentProvider) {
+            Provider<ValidateComponent.Builder> validateComponentProvider,
+            Provider<ContextComponent.Factory> contextComponentProvider) {
         this.messager = messager;
         this.util = util;
         this.sourceFileGenerator = sourceFileGenerator;
         this.validateComponentProvider = validateComponentProvider;
+        this.contextComponentProvider = contextComponentProvider;
     }
 
     @Override
@@ -80,7 +80,7 @@ class CommandStep implements Step {
                 .build()
                 .processor();
         processor.generate()
-                .map(ContextComponent::create)
+                .map(commandRepresentation -> contextComponentProvider.get().create(commandRepresentation))
                 .ifLeftOrElse(
                         this::printFailures,
                         component -> writeSpecs(sourceElement, List.of(

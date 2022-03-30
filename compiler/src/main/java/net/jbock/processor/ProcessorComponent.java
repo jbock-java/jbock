@@ -5,10 +5,6 @@ import dagger.Component;
 
 import javax.annotation.processing.ProcessingEnvironment;
 
-/**
- * @see ProcessorScope
- */
-@ProcessorScope
 @Component(modules = ProcessorModule.class)
 interface ProcessorComponent {
 
