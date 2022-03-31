@@ -15,6 +15,7 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.STATIC;
 
 /**
  * Defines the *_Impl class, which extends the command class.
@@ -46,8 +47,7 @@ public class ImplClass {
         } else {
             spec.superclass(sourceElement.typeName());
         }
-        return spec.addModifiers(FINAL)
-                .addOriginatingElement(sourceElement.element())
+        return spec.addModifiers(PRIVATE, STATIC, FINAL)
                 .addMethod(implConstructor())
                 .addAnnotation(generatedAnnotation.define())
                 .addFields(allMappings.stream()
@@ -85,6 +85,6 @@ public class ImplClass {
         TypeName fieldType = TypeName.get(mapping.sourceMethod().returnType());
         String fieldName = mapping.sourceMethod().methodName();
         return FieldSpec.builder(fieldType, fieldName)
-                .addModifiers(PRIVATE, FINAL).build();
+                .build();
     }
 }

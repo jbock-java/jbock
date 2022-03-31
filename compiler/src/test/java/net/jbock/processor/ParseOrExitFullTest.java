@@ -88,36 +88,24 @@ class ParseOrExitFullTest {
                         "            .build())",
                         "          .build();",
                         "  }",
-                        "}");
-        List<String> expectedImpl =
-                List.of(
-                        "package test;",
                         "",
-                        "import java.util.List;",
-                        "import javax.annotation.processing.Generated;",
+                        "  private static final class Arguments_Impl extends Arguments {",
+                        "    List<String> hello;",
                         "",
-                        "@Generated(",
-                        "    value = \"net.jbock.processor.JbockProcessor\",",
-                        "    comments = \"https://github.com/jbock-java/jbock\"",
-                        ")",
-                        "final class Arguments_Impl extends Arguments {",
-                        "  private final List<String> hello;",
+                        "    Arguments_Impl(List<String> hello) {",
+                        "      this.hello = hello;",
+                        "    }",
                         "",
-                        "  Arguments_Impl(List<String> hello) {",
-                        "    this.hello = hello;",
-                        "  }",
-                        "",
-                        "  @Override",
-                        "  List<String> hello() {",
-                        "    return hello;",
+                        "    @Override",
+                        "    List<String> hello() {",
+                        "      return hello;",
+                        "    }",
                         "  }",
                         "}");
         Compilation compilation = Processor.compiler().compile(javaFile);
         assertThat(compilation).succeeded();
         assertThat(compilation).generatedSourceFile("test.ArgumentsParser")
                 .containsLines(expectedParser);
-        assertThat(compilation).generatedSourceFile("test.Arguments_Impl")
-                .containsLines(expectedImpl);
     }
 
     @Test
@@ -197,35 +185,23 @@ class ParseOrExitFullTest {
                         "            .build())",
                         "          .build();",
                         "  }",
-                        "}");
-        List<String> expectedImpl =
-                List.of(
-                        "package test;",
                         "",
-                        "import java.util.List;",
-                        "import javax.annotation.processing.Generated;",
+                        "  private static final class Arguments_Impl extends Arguments {",
+                        "    List<String> hello;",
                         "",
-                        "@Generated(",
-                        "    value = \"net.jbock.processor.JbockProcessor\",",
-                        "    comments = \"https://github.com/jbock-java/jbock\"",
-                        ")",
-                        "final class Arguments_Impl extends Arguments {",
-                        "  private final List<String> hello;",
+                        "    Arguments_Impl(List<String> hello) {",
+                        "      this.hello = hello;",
+                        "    }",
                         "",
-                        "  Arguments_Impl(List<String> hello) {",
-                        "    this.hello = hello;",
-                        "  }",
-                        "",
-                        "  @Override",
-                        "  List<String> hello() {",
-                        "    return hello;",
+                        "    @Override",
+                        "    List<String> hello() {",
+                        "      return hello;",
+                        "    }",
                         "  }",
                         "}");
         Compilation compilation = Processor.compiler().compile(javaFile);
         assertThat(compilation).succeeded();
         assertThat(compilation).generatedSourceFile("test.ArgumentsParser")
                 .containsLines(expectedParser);
-        assertThat(compilation).generatedSourceFile("test.Arguments_Impl")
-                .containsLines(expectedImpl);
     }
 }

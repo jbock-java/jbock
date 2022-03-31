@@ -19,6 +19,7 @@ public final class ParserClass extends HasCommandRepresentation {
     private final ExtractMethod extractMethod;
     private final OptionNamesMethod optionNamesMethod;
     private final OptionStatesMethod optionStatesMethod;
+    private final ImplClass implClass;
 
     @Inject
     ParserClass(
@@ -30,7 +31,8 @@ public final class ParserClass extends HasCommandRepresentation {
             GeneratedAnnotation generatedAnnotation,
             ExtractMethod extractMethod,
             OptionNamesMethod optionNamesMethod,
-            OptionStatesMethod optionStatesMethod) {
+            OptionStatesMethod optionStatesMethod,
+            ImplClass implClass) {
         super(commandRepresentation);
         this.parseMethod = parseMethod;
         this.optionEnum = optionEnum;
@@ -40,6 +42,7 @@ public final class ParserClass extends HasCommandRepresentation {
         this.extractMethod = extractMethod;
         this.optionNamesMethod = optionNamesMethod;
         this.optionStatesMethod = optionStatesMethod;
+        this.implClass = implClass;
     }
 
     /**
@@ -67,6 +70,7 @@ public final class ParserClass extends HasCommandRepresentation {
         return spec.addOriginatingElement(sourceElement().element())
                 .addModifiers(sourceElement().accessModifiers().toArray(new Modifier[0]))
                 .addModifiers(Modifier.FINAL)
+                .addType(implClass.define())
                 .addAnnotation(generatedAnnotation.define()).build();
     }
 }

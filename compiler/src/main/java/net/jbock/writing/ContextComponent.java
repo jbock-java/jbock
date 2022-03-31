@@ -9,8 +9,6 @@ public interface ContextComponent {
 
     ParserClass parserClass();
 
-    ImplClass implClass();
-
     @Subcomponent.Factory
     interface Factory {
 

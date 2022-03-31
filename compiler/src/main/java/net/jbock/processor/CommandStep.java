@@ -83,13 +83,7 @@ class CommandStep implements Step {
                 .map(commandRepresentation -> contextComponentProvider.get().create(commandRepresentation))
                 .ifLeftOrElse(
                         this::printFailures,
-                        component -> writeSpecs(sourceElement, List.of(
-                                component.parserClass().define(),
-                                component.implClass().define())));
-    }
-
-    private void writeSpecs(SourceElement sourceElement, List<TypeSpec> typeSpecs) {
-        typeSpecs.forEach(typeSpec -> writeSpec(sourceElement, typeSpec));
+                        component -> writeSpec(sourceElement, component.parserClass().define()));
     }
 
     private void writeSpec(SourceElement sourceElement, TypeSpec typeSpec) {

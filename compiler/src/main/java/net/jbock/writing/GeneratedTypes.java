@@ -34,7 +34,7 @@ class GeneratedTypes extends HasCommandRepresentation {
     }
 
     ClassName implType() {
-        return sourceElement().generatedClass().peerClass(sourceElement().element().getSimpleName() + "_Impl");
+        return sourceElement().generatedClass().nestedClass(sourceElement().element().getSimpleName() + "_Impl");
     }
 
     TypeName parseResultType() {
