@@ -4,7 +4,6 @@ import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
-import io.jbock.javapoet.TypeName;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
@@ -24,7 +23,6 @@ import static net.jbock.common.Constants.EITHERS;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
 import static net.jbock.common.Suppliers.memoize;
-import static net.jbock.writing.CodeBlocks.joinByComma;
 import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 @WritingScope
@@ -52,28 +50,22 @@ final class ExtractMethod extends HasCommandRepresentation {
         return generatedTypes;
     }
 
-    private final Supplier<MethodSpec> harvestMethod = memoize(() -> {
+    private final Supplier<MethodSpec> extractMethod = memoize(() -> {
         ParameterSpec parser = parserTypeFactory().get().asParam();
         ParameterSpec result = ParameterSpec.builder(generatedTypes().implType(), "result").build();
-        CodeBlock constructorArguments = getConstructorArguments();
         MethodSpec.Builder spec = MethodSpec.methodBuilder("extract");
+        spec.addStatement("$T $N = new $T()", result.type, result, result.type);
         for (int i = 0; i < namedOptions().size(); i++) {
             Mapping<AnnotatedOption> m = namedOptions().get(i);
-            ParameterSpec p = asParam(m);
-            spec.addStatement("$T $N = $L", p.type, p, convertExpressionOption(m, i));
+            spec.addStatement("$N.$N = $L", result, m.field(), convertExpressionOption(m, i));
         }
         for (int i = 0; i < positionalParameters().size(); i++) {
             Mapping<AnnotatedParameter> m = positionalParameters().get(i);
-            ParameterSpec p = asParam(m);
-            spec.addStatement("$T $N = $L", p.type, p, convertExpressionRegularParameter(m, i));
+            spec.addStatement("$N.$N = $L", result, m.field(), convertExpressionRegularParameter(m, i));
         }
         varargsParameters().forEach(m -> {
-            ParameterSpec p = asParam(m);
-            spec.addStatement("$T $N = $L", p.type, p, convertExpressionRepeatableParameter(m));
+            spec.addStatement("$N.$N = $L", result, m.field(), convertExpressionRepeatableParameter(m));
         });
-        spec.addStatement("$T $N", result.type, result);
-        spec.addStatement("$N = new $T($L)", result, generatedTypes().implType(),
-                constructorArguments);
         generatedTypes().superResultType().ifPresentOrElse(parseResultWithRestType -> {
                     ParameterSpec restArgs = ParameterSpec.builder(sourceElement().typeName(), "restArgs").build();
                     spec.addStatement("$T $N = $N.rest().toArray($T::new)", STRING_ARRAY, restArgs,
@@ -90,21 +82,7 @@ final class ExtractMethod extends HasCommandRepresentation {
     });
 
     MethodSpec get() {
-        return harvestMethod.get();
-    }
-
-    private CodeBlock getConstructorArguments() {
-        List<CodeBlock> code = new ArrayList<>();
-        for (Mapping<AnnotatedOption> m : namedOptions()) {
-            code.add(CodeBlock.of("$N", asParam(m)));
-        }
-        for (Mapping<AnnotatedParameter> m : positionalParameters()) {
-            code.add(CodeBlock.of("$N", asParam(m)));
-        }
-        varargsParameters().stream()
-                .map(m -> CodeBlock.of("$N", asParam(m)))
-                .forEach(code::add);
-        return joinByComma(code);
+        return extractMethod.get();
     }
 
     private CodeBlock convertExpressionOption(Mapping<AnnotatedOption> m, int i) {
@@ -187,11 +165,5 @@ final class ExtractMethod extends HasCommandRepresentation {
     private CodeBlock orElseThrowConverterError(ItemType itemType, int i) {
         return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5L))",
                 left, ExConvert.class, ItemType.class, itemType, i);
-    }
-
-    private ParameterSpec asParam(Mapping<?> mapping) {
-        TypeName type = TypeName.get(mapping.sourceMethod().returnType());
-        String name = mapping.sourceMethod().methodName();
-        return ParameterSpec.builder(type, '_' + name).build();
     }
 }

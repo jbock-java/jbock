@@ -1,8 +1,6 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.MethodSpec;
-import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
@@ -48,10 +46,9 @@ public class ImplClass {
             spec.superclass(sourceElement.typeName());
         }
         return spec.addModifiers(PRIVATE, STATIC, FINAL)
-                .addMethod(implConstructor())
                 .addAnnotation(generatedAnnotation.define())
                 .addFields(allMappings.stream()
-                        .map(this::asField)
+                        .map(Mapping::field)
                         .collect(toList()))
                 .addMethods(allMappings.stream()
                         .map(this::parameterMethodOverride)
@@ -64,27 +61,8 @@ public class ImplClass {
         return MethodSpec.methodBuilder(sourceMethod.methodName())
                 .returns(TypeName.get(sourceMethod.returnType()))
                 .addModifiers(sourceMethod.accessModifiers())
-                .addStatement("return $N", asField(m))
+                .addStatement("return $N", m.field())
                 .addAnnotation(Override.class)
-                .build();
-    }
-
-    private MethodSpec implConstructor() {
-        MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-        for (Mapping<?> m : allMappings) {
-            FieldSpec field = asField(m);
-            ParameterSpec param = ParameterSpec.builder(field.type,
-                    m.sourceMethod().methodName()).build();
-            spec.addStatement("this.$N = $N", field, param);
-            spec.addParameter(param);
-        }
-        return spec.build();
-    }
-
-    private FieldSpec asField(Mapping<?> mapping) {
-        TypeName fieldType = TypeName.get(mapping.sourceMethod().returnType());
-        String fieldName = mapping.sourceMethod().methodName();
-        return FieldSpec.builder(fieldType, fieldName)
                 .build();
     }
 }

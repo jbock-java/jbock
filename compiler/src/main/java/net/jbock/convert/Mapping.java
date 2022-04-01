@@ -1,11 +1,15 @@
 package net.jbock.convert;
 
 import io.jbock.javapoet.CodeBlock;
+import io.jbock.javapoet.FieldSpec;
+import io.jbock.javapoet.TypeName;
 import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.common.Suppliers;
 import net.jbock.convert.match.Match;
 import net.jbock.model.Multiplicity;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
@@ -83,5 +87,15 @@ public final class Mapping<M extends AnnotatedMethod> {
 
     public String paramLabel() {
         return sourceMethod().paramLabel();
+    }
+
+    private final Supplier<FieldSpec> fieldSupplier = Suppliers.memoize(() -> {
+        TypeName fieldType = TypeName.get(sourceMethod().returnType());
+        String fieldName = sourceMethod().methodName();
+        return FieldSpec.builder(fieldType, fieldName).build();
+    });
+
+    public FieldSpec field() {
+        return fieldSupplier.get();
     }
 }
