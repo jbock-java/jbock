@@ -54,6 +54,7 @@ final class ExtractMethod extends HasCommandRepresentation {
 
     private final Supplier<MethodSpec> harvestMethod = memoize(() -> {
         ParameterSpec parser = parserTypeFactory().get().asParam();
+        ParameterSpec result = ParameterSpec.builder(generatedTypes().implType(), "result").build();
         CodeBlock constructorArguments = getConstructorArguments();
         MethodSpec.Builder spec = MethodSpec.methodBuilder("extract");
         for (int i = 0; i < namedOptions().size(); i++) {
@@ -70,17 +71,17 @@ final class ExtractMethod extends HasCommandRepresentation {
             ParameterSpec p = asParam(m);
             spec.addStatement("$T $N = $L", p.type, p, convertExpressionRepeatableParameter(m));
         });
+        spec.addStatement("$T $N", result.type, result);
+        spec.addStatement("$N = new $T($L)", result, generatedTypes().implType(),
+                constructorArguments);
         generatedTypes().superResultType().ifPresentOrElse(parseResultWithRestType -> {
-                    ParameterSpec result = ParameterSpec.builder(sourceElement().typeName(), "result").build();
                     ParameterSpec restArgs = ParameterSpec.builder(sourceElement().typeName(), "restArgs").build();
-                    spec.addStatement("$T $N = new $T($L)", result.type, result, generatedTypes().implType(),
-                            constructorArguments);
                     spec.addStatement("$T $N = $N.rest().toArray($T::new)", STRING_ARRAY, restArgs,
                             parser, ArrayTypeName.of(String.class));
                     spec.addStatement("return new $T($N, $N)", parseResultWithRestType,
                             result, restArgs);
                 },
-                () -> spec.addStatement("return new $T($L)", generatedTypes().implType(), constructorArguments));
+                () -> spec.addStatement("return $N", result));
         return spec.returns(generatedTypes().parseSuccessType())
                 .addParameter(parser)
                 .addException(ExFailure.class)

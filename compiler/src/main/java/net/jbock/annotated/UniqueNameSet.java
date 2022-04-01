@@ -20,18 +20,22 @@ import java.util.HashSet;
 import java.util.Set;
 
 /** A collector for names to be used in the same namespace that should not conflict. */
-final class UniqueNameSet {
+public final class UniqueNameSet {
   private final Set<String> uniqueNames = new HashSet<>();
 
   /**
    * Generates a unique name using {@code base}. If {@code base} has not yet been added, it will be
    * returned as-is. If your {@code base} is healthy, this will always return {@code base}.
    */
-  String getUniqueName(CharSequence base) {
+  public String getUniqueName(CharSequence base) {
     String name = base.toString();
     for (int differentiator = 2; !uniqueNames.add(name); differentiator++) {
       name = base.toString() + differentiator;
     }
     return name;
+  }
+
+  public void claim(CharSequence name) {
+    uniqueNames.add(name.toString());
   }
 }
