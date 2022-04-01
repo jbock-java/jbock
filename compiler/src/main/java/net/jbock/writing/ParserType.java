@@ -1,12 +1,7 @@
 package net.jbock.writing;
 
 import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.TypeName;
-
-import java.util.function.Supplier;
-
-import static net.jbock.common.Suppliers.memoize;
 
 final class ParserType {
 
@@ -24,12 +19,5 @@ final class ParserType {
 
     CodeBlock init() {
         return init;
-    }
-
-    private final Supplier<ParameterSpec> asParamSupplier = memoize(() ->
-            ParameterSpec.builder(type(), "parser").build());
-
-    ParameterSpec asParam() {
-        return asParamSupplier.get();
     }
 }

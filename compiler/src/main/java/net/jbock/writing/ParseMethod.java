@@ -44,7 +44,7 @@ final class ParseMethod extends HasCommandRepresentation {
         ParserType parserType = parserTypeFactory().get();
 
         ParameterSpec e = builder(Exception.class, "e").build();
-        ParameterSpec parser = parserType.asParam();
+        ParameterSpec parser = ParameterSpec.builder(parserType.type(), "parser").build();
         code.addStatement("$T $N = $L", parserType.type(), parser, parserType.init());
         code.add("try {\n").indent()
                 .addStatement("$N.parse($N)", parser, tokens)

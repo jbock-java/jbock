@@ -4,6 +4,7 @@ import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Mutable command line parser that does not allow additional
@@ -44,5 +45,10 @@ public final class RestlessParser<T> extends SubParser<T> {
     @Override
     void handleExcessParam(String token) throws ExToken {
         throw new ExToken(ErrTokenType.EXCESS_PARAM, token);
+    }
+
+    @Override
+    public Stream<String> rest() {
+        return Stream.empty();
     }
 }

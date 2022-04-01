@@ -1,15 +1,19 @@
 package net.jbock.writing;
 
 import io.jbock.javapoet.ArrayTypeName;
+import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
+import io.jbock.javapoet.ParameterizedTypeName;
 import jakarta.inject.Inject;
 import net.jbock.annotated.AnnotatedOption;
 import net.jbock.annotated.AnnotatedParameter;
 import net.jbock.annotated.AnnotatedVarargsParameter;
+import net.jbock.common.Suppliers;
 import net.jbock.convert.Mapping;
 import net.jbock.model.ItemType;
+import net.jbock.parse.ParseResult;
 import net.jbock.util.ExConvert;
 import net.jbock.util.ExFailure;
 import net.jbock.util.ExMissingItem;
@@ -29,21 +33,24 @@ import static net.jbock.writing.CodeBlocks.joinByNewline;
 final class ExtractMethod extends HasCommandRepresentation {
 
     private final GeneratedTypes generatedTypes;
-    private final ParserTypeFactory parserTypeFactory;
     private final ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
 
     @Inject
     ExtractMethod(
             GeneratedTypes generatedTypes,
-            CommandRepresentation commandRepresentation,
-            ParserTypeFactory parserTypeFactory) {
+            CommandRepresentation commandRepresentation) {
         super(commandRepresentation);
         this.generatedTypes = generatedTypes;
-        this.parserTypeFactory = parserTypeFactory;
     }
 
-    private ParserTypeFactory parserTypeFactory() {
-        return parserTypeFactory;
+    private final Supplier<ParameterSpec> parserSupplier = Suppliers.memoize(() -> {
+        ParameterizedTypeName parserType = ParameterizedTypeName.get(ClassName.get(ParseResult.class),
+                optType());
+        return ParameterSpec.builder(parserType, "result").build();
+    });
+
+    private ParameterSpec parser() {
+        return parserSupplier.get();
     }
 
     private GeneratedTypes generatedTypes() {
@@ -51,8 +58,7 @@ final class ExtractMethod extends HasCommandRepresentation {
     }
 
     private final Supplier<MethodSpec> extractMethod = memoize(() -> {
-        ParameterSpec parser = parserTypeFactory().get().asParam();
-        ParameterSpec result = ParameterSpec.builder(generatedTypes().implType(), "result").build();
+        ParameterSpec result = ParameterSpec.builder(generatedTypes().implType(), "impl").build();
         MethodSpec.Builder spec = MethodSpec.methodBuilder("extract");
         spec.addStatement("$T $N = new $T()", result.type, result, result.type);
         for (int i = 0; i < namedOptions().size(); i++) {
@@ -69,13 +75,13 @@ final class ExtractMethod extends HasCommandRepresentation {
         generatedTypes().superResultType().ifPresentOrElse(parseResultWithRestType -> {
                     ParameterSpec restArgs = ParameterSpec.builder(sourceElement().typeName(), "restArgs").build();
                     spec.addStatement("$T $N = $N.rest().toArray($T::new)", STRING_ARRAY, restArgs,
-                            parser, ArrayTypeName.of(String.class));
+                            parser(), ArrayTypeName.of(String.class));
                     spec.addStatement("return new $T($N, $N)", parseResultWithRestType,
                             result, restArgs);
                 },
                 () -> spec.addStatement("return $N", result));
         return spec.returns(generatedTypes().parseSuccessType())
-                .addParameter(parser)
+                .addParameter(parser())
                 .addException(ExFailure.class)
                 .addModifiers(PRIVATE)
                 .build();
@@ -86,9 +92,8 @@ final class ExtractMethod extends HasCommandRepresentation {
     }
 
     private CodeBlock convertExpressionOption(Mapping<AnnotatedOption> m, int i) {
-        ParameterSpec parser = parserTypeFactory.get().asParam();
         List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$N.option($T.$N)", parser,
+        code.add(CodeBlock.of("$N.option($T.$N)", parser(),
                 sourceElement().optionEnumType(), m.enumName()));
         if (!m.isNullary()) {
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
@@ -99,9 +104,8 @@ final class ExtractMethod extends HasCommandRepresentation {
     }
 
     private CodeBlock convertExpressionRegularParameter(Mapping<AnnotatedParameter> m, int i) {
-        ParameterSpec parser = parserTypeFactory.get().asParam();
         List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$N.param($L)", parser,
+        code.add(CodeBlock.of("$N.param($L)", parser(),
                 m.sourceMethod().index()));
         code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
         code.addAll(tailExpressionParameter(m, i));
@@ -110,9 +114,8 @@ final class ExtractMethod extends HasCommandRepresentation {
     }
 
     private CodeBlock convertExpressionRepeatableParameter(Mapping<AnnotatedVarargsParameter> m) {
-        ParameterSpec parser = parserTypeFactory.get().asParam();
         List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$N.rest()", parser));
+        code.add(CodeBlock.of("$N.rest()", parser()));
         code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
         code.add(CodeBlock.of(".collect($T.firstFailure())", EITHERS));
         code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters().size()));

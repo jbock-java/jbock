@@ -20,7 +20,7 @@ import static net.jbock.util.ErrTokenType.INVALID_OPTION;
  *
  * @param <T> type of keys that identify named options
  */
-abstract class AbstractParser<T> {
+abstract class AbstractParser<T> implements ParseResult<T> {
 
     private static final Pattern SUSPICIOUS = Pattern.compile("-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+");
 

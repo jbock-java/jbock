@@ -26,16 +26,13 @@ public class ImplClass {
     private final GeneratedTypes generatedTypes;
     private final SourceElement sourceElement;
     private final List<Mapping<?>> allMappings;
-    private final GeneratedAnnotation generatedAnnotation;
 
     @Inject
     ImplClass(GeneratedTypes generatedTypes,
-              CommandRepresentation commandRepresentation,
-              GeneratedAnnotation generatedAnnotation) {
+              CommandRepresentation commandRepresentation) {
         this.generatedTypes = generatedTypes;
         this.sourceElement = commandRepresentation.sourceElement();
         this.allMappings = commandRepresentation.allMappings();
-        this.generatedAnnotation = generatedAnnotation;
     }
 
     public TypeSpec define() {
@@ -46,7 +43,6 @@ public class ImplClass {
             spec.superclass(sourceElement.typeName());
         }
         return spec.addModifiers(PRIVATE, STATIC, FINAL)
-                .addAnnotation(generatedAnnotation.define())
                 .addFields(allMappings.stream()
                         .map(Mapping::field)
                         .collect(toList()))
