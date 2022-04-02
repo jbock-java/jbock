@@ -79,7 +79,7 @@ that you can build upon to fine-tune the help and error messages for your users.
 
 ### Standard types
 
-Some types don't need a custom converter. See [JbockAutoTypes.java](https://github.com/jbock-java/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java).
+Some types don't need a custom converter. See [StandardConverters.java](https://github.com/jbock-java/jbock/blob/master/jbock/src/main/java/net/jbock/contrib/StandardConverters.java).
 
 ### Sample projects
 
