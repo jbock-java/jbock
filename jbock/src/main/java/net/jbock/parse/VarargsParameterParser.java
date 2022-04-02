@@ -13,11 +13,11 @@ import java.util.stream.Stream;
  *
  * @param <T> type of keys that identify named options
  */
-public final class RestParser<T> extends SubParser<T> {
+public final class VarargsParameterParser<T> extends SubParser<T> {
 
     private final List<String> rest = new ArrayList<>();
 
-    private RestParser(
+    private VarargsParameterParser(
             Map<String, T> optionNames,
             Map<T, OptionState> optionStates,
             int numParams) {
@@ -34,11 +34,11 @@ public final class RestParser<T> extends SubParser<T> {
      *
      * @return a parser instance
      */
-    public static <T> RestParser<T> create(
+    public static <T> VarargsParameterParser<T> create(
             Map<String, T> optionNames,
             Map<T, OptionState> optionStates,
             int numParams) {
-        return new RestParser<>(optionNames, optionStates, numParams);
+        return new VarargsParameterParser<>(optionNames, optionStates, numParams);
     }
 
     @Override

@@ -13,7 +13,7 @@ import static io.jbock.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
 @WritingScope
-class ParseOrExitMethod extends HasCommandRepresentation {
+final class ParseOrExitMethod extends HasCommandRepresentation {
 
     private final GeneratedTypes generatedTypes;
     private final ParseMethod parseMethod;

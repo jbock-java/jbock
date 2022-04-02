@@ -9,6 +9,7 @@ import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 
 import java.util.List;
+import java.util.Optional;
 
 abstract class HasCommandRepresentation {
 
@@ -38,11 +39,15 @@ abstract class HasCommandRepresentation {
         return commandRepresentation.positionalParameters();
     }
 
-    final List<Mapping<AnnotatedVarargsParameter>> varargsParameters() {
-        return commandRepresentation.varargsParameters();
+    final Optional<Mapping<AnnotatedVarargsParameter>> varargsParameter() {
+        return commandRepresentation.varargsParameters().stream().findAny();
     }
 
-    List<Mapping<?>> allMappings() {
+    final List<Mapping<?>> allMappings() {
         return commandRepresentation.allMappings();
+    }
+
+    final boolean isSuperCommand() {
+        return commandRepresentation.sourceElement().isSuperCommand();
     }
 }

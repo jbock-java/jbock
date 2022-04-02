@@ -7,7 +7,7 @@ import net.jbock.processor.JbockProcessor;
 
 import javax.annotation.processing.Generated;
 
-class GeneratedAnnotation {
+final class GeneratedAnnotation {
 
     @Inject
     GeneratedAnnotation() {

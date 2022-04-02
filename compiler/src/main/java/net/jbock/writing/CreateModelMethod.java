@@ -37,14 +37,13 @@ final class CreateModelMethod extends HasCommandRepresentation {
             code.add(CodeBlock.of(".addDescriptionLine($S)", descriptionLine));
         }
         code.add(CodeBlock.of(".withProgramName($S)", sourceElement().programName()));
-        if (sourceElement().isSuperCommand()) {
+        if (isSuperCommand()) {
             code.add(CodeBlock.of(".withSuperCommand($L)", true));
         }
         for (Mapping<AnnotatedOption> c : namedOptions()) {
             code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
         }
-        Stream.of(positionalParameters(), varargsParameters())
-                .flatMap(List::stream)
+        Stream.concat(positionalParameters().stream(), varargsParameter().stream())
                 .forEach(c -> code.add(CodeBlock.of(".addParameter($L)", parameterBlock(c))));
         code.add(CodeBlock.of(".build()"));
         return methodBuilder("createModel")

@@ -12,7 +12,7 @@ import java.util.Optional;
 import static net.jbock.common.Constants.EITHER;
 
 @WritingScope
-class GeneratedTypes extends HasCommandRepresentation {
+final class GeneratedTypes extends HasCommandRepresentation {
 
     @Inject
     GeneratedTypes(CommandRepresentation commandRepresentation) {
@@ -24,7 +24,7 @@ class GeneratedTypes extends HasCommandRepresentation {
     }
 
     Optional<TypeName> superResultType() {
-        if (!sourceElement().isSuperCommand()) {
+        if (!isSuperCommand()) {
             return Optional.empty();
         }
         ParameterizedTypeName type = ParameterizedTypeName.get(

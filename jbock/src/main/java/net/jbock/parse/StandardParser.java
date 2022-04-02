@@ -16,9 +16,9 @@ import java.util.stream.Stream;
  *
  * @param <T> type of keys that identify named options
  */
-public final class RestlessParser<T> extends SubParser<T> {
+public final class StandardParser<T> extends SubParser<T> {
 
-    private RestlessParser(
+    private StandardParser(
             Map<String, T> optionNames,
             Map<T, OptionState> optionStates,
             int numParams) {
@@ -35,11 +35,11 @@ public final class RestlessParser<T> extends SubParser<T> {
      *
      * @return a parser instance
      */
-    public static <T> RestlessParser<T> create(
+    public static <T> StandardParser<T> create(
             Map<String, T> optionNames,
             Map<T, OptionState> optionStates,
             int numParams) {
-        return new RestlessParser<>(optionNames, optionStates, numParams);
+        return new StandardParser<>(optionNames, optionStates, numParams);
     }
 
     @Override

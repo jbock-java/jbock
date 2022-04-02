@@ -33,12 +33,10 @@ import static net.jbock.common.Constants.STRING;
 import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 /**
- * Defines the *_Impl class, which extends the command class.
- *
- * @see ParserClass
+ * Implementation of the command class.
  */
 @WritingScope
-public class ImplClass extends HasCommandRepresentation {
+final class ImplClass extends HasCommandRepresentation {
 
     private final GeneratedTypes generatedTypes;
 
@@ -49,7 +47,7 @@ public class ImplClass extends HasCommandRepresentation {
         this.generatedTypes = generatedTypes;
     }
 
-    public TypeSpec define() {
+    TypeSpec define() {
         TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType());
         if (sourceElement().isInterface()) {
             spec.addSuperinterface(sourceElement().typeName());
@@ -97,9 +95,8 @@ public class ImplClass extends HasCommandRepresentation {
             Mapping<AnnotatedParameter> m = positionalParameters().get(i);
             spec.addStatement("this.$N = $L", m.field(), convertExpressionParameter(m, i));
         }
-        varargsParameters().forEach(m -> {
-            spec.addStatement("this.$N = $L", m.field(), convertExpressionVarargsParameter(m));
-        });
+        varargsParameter().ifPresent(m ->
+                spec.addStatement("this.$N = $L", m.field(), convertExpressionVarargsParameter(m)));
         return spec.addParameter(result())
                 .addException(ExFailure.class)
                 .build();

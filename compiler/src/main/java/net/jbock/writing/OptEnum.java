@@ -13,7 +13,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
  * @see ParserClass
  */
 @WritingScope
-class OptEnum extends HasCommandRepresentation {
+final class OptEnum extends HasCommandRepresentation {
 
     @Inject
     OptEnum(CommandRepresentation commandRepresentation) {

@@ -14,23 +14,23 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class RestlessParserTest {
+class StandardParserTest {
 
     @Test
     void testZeroParamsExcess() {
-        RestlessParser<String> parser = RestlessParser.create(Map.of(), Map.of(), 0);
+        StandardParser<String> parser = StandardParser.create(Map.of(), Map.of(), 0);
         assertThrows(ExToken.class, () -> parser.parse(List.of("1")));
     }
 
     @Test
     void testZeroParamsSuspicious() {
-        RestlessParser<String> parser = RestlessParser.create(Map.of(), Map.of(), 0);
+        StandardParser<String> parser = StandardParser.create(Map.of(), Map.of(), 0);
         assertThrows(ExToken.class, () -> parser.parse(List.of("-a")));
     }
 
     @Test
     void testZeroParamsSuccessEmpty() throws ExToken {
-        RestlessParser<String> parser = RestlessParser.create(Map.of(), Map.of(), 0);
+        StandardParser<String> parser = StandardParser.create(Map.of(), Map.of(), 0);
         parser.parse(List.of());
         assertTrue(parser.option("a").findAny().isEmpty());
         assertTrue(parser.param(0).isEmpty());
@@ -38,7 +38,7 @@ class RestlessParserTest {
 
     @Test
     void testZeroParamsSuccessEscape() throws ExToken {
-        RestlessParser<String> parser = RestlessParser.create(Map.of(), Map.of(), 0);
+        StandardParser<String> parser = StandardParser.create(Map.of(), Map.of(), 0);
         parser.parse(List.of("--"));
         assertTrue(parser.option("a").findAny().isEmpty());
         assertTrue(parser.param(0).isEmpty());
@@ -46,13 +46,13 @@ class RestlessParserTest {
 
     @Test
     void testOneParamExcess() {
-        RestlessParser<String> parser = RestlessParser.create(Map.of(), Map.of(), 1);
+        StandardParser<String> parser = StandardParser.create(Map.of(), Map.of(), 1);
         assertThrows(ExToken.class, () -> parser.parse(List.of("1", "2")));
     }
 
     @Test
     void testOneParamSuccess() throws ExToken {
-        RestlessParser<String> parser = RestlessParser.create(Map.of(), Map.of(), 1);
+        StandardParser<String> parser = StandardParser.create(Map.of(), Map.of(), 1);
         parser.parse(List.of("1"));
         assertTrue(parser.option("a").findAny().isEmpty());
         assertEquals(Optional.of("1"), parser.param(0));
@@ -62,7 +62,7 @@ class RestlessParserTest {
     void testOneUnixOptionAttached() throws ExToken {
         Map<String, String> optionNames = Map.of("-a", "A");
         Map<String, OptionState> optionStates = Map.of("A", new OptionStateNonRepeatable());
-        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
         parser.parse(List.of("-a1"));
         assertEquals(List.of("1"), parser.option("A").toList());
     }
@@ -71,7 +71,7 @@ class RestlessParserTest {
     void testOneUnixOptionDetached() throws ExToken {
         Map<String, String> optionNames = Map.of("-a", "A");
         Map<String, OptionState> optionStates = Map.of("A", new OptionStateNonRepeatable());
-        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
         parser.parse(List.of("-a", "1"));
         assertEquals(List.of("1"), parser.option("A").toList());
     }
@@ -80,7 +80,7 @@ class RestlessParserTest {
     void testOneUnixOptionClusterFail() {
         Map<String, String> optionNames = Map.of("-a", "A");
         Map<String, OptionState> optionStates = Map.of("A", new OptionStateModeFlag());
-        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
         assertThrows(ExToken.class, () -> parser.parse(List.of("-ab")));
     }
 
@@ -91,7 +91,7 @@ class RestlessParserTest {
         when(optionState.read(any(), any()))
                 .thenReturn("readOptionName_invalid_input");
         Map<String, OptionState> optionStates = Map.of("A", optionState);
-        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
         assertThrows(ExToken.class, () -> parser.parse(List.of("-a-")));
     }
 
@@ -99,7 +99,7 @@ class RestlessParserTest {
     void testOneGnuOptionAttached() throws ExToken {
         Map<String, String> optionNames = Map.of("--alpha", "A");
         Map<String, OptionState> optionStates = Map.of("A", new OptionStateNonRepeatable());
-        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
         parser.parse(List.of("--alpha=1"));
         assertEquals(List.of("1"), parser.option("A").toList());
     }
@@ -108,7 +108,7 @@ class RestlessParserTest {
     void testOneGnuOptionDetached() throws ExToken {
         Map<String, String> optionNames = Map.of("--alpha", "A");
         Map<String, OptionState> optionStates = Map.of("A", new OptionStateNonRepeatable());
-        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
         parser.parse(List.of("--alpha", "1"));
         assertEquals(List.of("1"), parser.option("A").toList());
     }
@@ -119,7 +119,7 @@ class RestlessParserTest {
         Map<String, OptionState> optionStates = Map.of(
                 "A", new OptionStateModeFlag(),
                 "B", new OptionStateNonRepeatable());
-        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
         parser.parse(List.of("-a", "-b1"));
         assertTrue(parser.option("A").findAny().isPresent());
         assertEquals(List.of("1"), parser.option("B").toList());
@@ -131,7 +131,7 @@ class RestlessParserTest {
         Map<String, OptionState> optionStates = Map.of(
                 "A", new OptionStateModeFlag(),
                 "B", new OptionStateNonRepeatable());
-        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
         parser.parse(List.of("-a", "-b", "1"));
         assertTrue(parser.option("A").findAny().isPresent());
         assertEquals(List.of("1"), parser.option("B").toList());
@@ -143,7 +143,7 @@ class RestlessParserTest {
         Map<String, OptionState> optionStates = Map.of(
                 "A", new OptionStateModeFlag(),
                 "B", new OptionStateNonRepeatable());
-        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
         parser.parse(List.of("-ab1"));
         assertTrue(parser.option("A").findAny().isPresent());
         assertEquals(List.of("1"), parser.option("B").toList());
@@ -155,7 +155,7 @@ class RestlessParserTest {
         Map<String, OptionState> optionStates = Map.of(
                 "A", new OptionStateModeFlag(),
                 "B", new OptionStateNonRepeatable());
-        RestlessParser<String> parser = RestlessParser.create(optionNames, optionStates, 0);
+        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
         parser.parse(List.of("-ab", "1"));
         assertTrue(parser.option("A").findAny().isPresent());
         assertEquals(List.of("1"), parser.option("B").toList());

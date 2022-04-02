@@ -9,7 +9,7 @@ import javax.lang.model.element.Modifier;
  * Generates the *Parser class.
  */
 @WritingScope
-public final class ParserClass extends HasCommandRepresentation {
+final class ParserClass extends HasCommandRepresentation {
 
     private final ParseMethod parseMethod;
     private final OptEnum optionEnum;

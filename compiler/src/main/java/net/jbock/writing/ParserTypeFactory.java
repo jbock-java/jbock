@@ -4,8 +4,8 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.ParameterizedTypeName;
 import jakarta.inject.Inject;
-import net.jbock.parse.RestParser;
-import net.jbock.parse.RestlessParser;
+import net.jbock.parse.VarargsParameterParser;
+import net.jbock.parse.StandardParser;
 import net.jbock.parse.SuperParser;
 
 import java.util.Map;
@@ -34,23 +34,23 @@ final class ParserTypeFactory extends HasCommandRepresentation {
                 CodeBlock.of("$T.of()", Map.class) :
                 CodeBlock.of("$N()", optionStatesMethod().get());
         int numParams = positionalParameters().size();
-        if (sourceElement().isSuperCommand()) {
+        if (isSuperCommand()) {
             ClassName parserClass = ClassName.get(SuperParser.class);
             CodeBlock init = CodeBlock.of("$T.create($L, $L, $L)",
                     ClassName.get(SuperParser.class),
                     optionNames, optionStates, numParams);
             return new ParserType(ParameterizedTypeName.get(parserClass, optType()), init);
         }
-        if (!varargsParameters().isEmpty()) {
-            ClassName parserClass = ClassName.get(RestParser.class);
+        if (varargsParameter().isPresent()) {
+            ClassName parserClass = ClassName.get(VarargsParameterParser.class);
             CodeBlock init = CodeBlock.of("$T.create($L, $L, $L)",
-                    ClassName.get(RestParser.class),
+                    ClassName.get(VarargsParameterParser.class),
                     optionNames, optionStates, numParams);
             return new ParserType(ParameterizedTypeName.get(parserClass, optType()), init);
         }
-        ClassName parserClass = ClassName.get(RestlessParser.class);
+        ClassName parserClass = ClassName.get(StandardParser.class);
         CodeBlock init = CodeBlock.of("$T.create($L, $L, $L)",
-                ClassName.get(RestlessParser.class),
+                ClassName.get(StandardParser.class),
                 optionNames, optionStates, numParams);
         return new ParserType(ParameterizedTypeName.get(parserClass, optType()), init);
     });
