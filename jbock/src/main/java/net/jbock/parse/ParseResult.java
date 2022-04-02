@@ -14,11 +14,6 @@ public interface ParseResult<T> {
      * Get all option values for the given option key,
      * in the order in which they were passed on the command line.
      *
-     * <p>For a non-repeatable option, the stream will not contain more than
-     * one element.
-     *
-     * <p>For a required option, the stream will contain exactly one element.
-     *
      * @param optionKey a key that represents a named option
      * @return stream of tokens
      */
@@ -40,10 +35,9 @@ public interface ParseResult<T> {
 
     /**
      * Returns the remaining tokens.
-     *
-     * <p>This stream may be nonempty if there is a {@linkplain net.jbock.VarargsParameter},
-     * or if the command is a {@linkplain net.jbock.SuperCommand}.
-     * Otherwise it will be an empty stream.
+     * This can be nonempty if there is a varargs parameter,
+     * or if this is a supercommand where parsing stops after the
+     * last positional parameter was read.
      *
      * @return remaining tokens
      */

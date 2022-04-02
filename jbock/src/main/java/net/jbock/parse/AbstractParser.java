@@ -114,21 +114,7 @@ abstract class AbstractParser<T> implements ParseResult<T> {
         return token.substring(0, token.indexOf('='));
     }
 
-    /**
-     * Returns the arguments of the given option.
-     * If the option was not present on the command line,
-     * an empty stream is returned. If the option is not
-     * repeatable, the stream will contain exactly one element.
-     * For nullary options, an empty stream
-     * represents absence, and any nonempty stream represents presence
-     * of the option.
-     *
-     * <p>This method should be not be invoked before {@link #parse(List)}
-     * was invoked.
-     *
-     * @param option the option key
-     * @return a stream of strings
-     */
+    @Override
     public final Stream<String> option(T option) {
         OptionState optionState = optionStates.get(option);
         if (optionState == null) {
@@ -137,16 +123,7 @@ abstract class AbstractParser<T> implements ParseResult<T> {
         return optionState.stream();
     }
 
-    /**
-     * Returns the value of the positional parameter at the given position,
-     * if any.
-     *
-     * <p>This method should be not be invoked before {@link #parse(List)}
-     * was invoked.
-     *
-     * @param index the parameter position
-     * @return an optional string
-     */
+    @Override
     public final Optional<String> param(int index) {
         if (index < 0 || index >= params.length) {
             return Optional.empty();

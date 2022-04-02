@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Mutable command line parser that allows additional
- * non-option tokens after the last positional parameter.
- * This parser rejects suspicious tokens, and allows
+ * Mutable command line parser that allows an arbitrary number of additional
+ * tokens after the last positional parameter.
+ * The parser rejects unknown option-like tokens, and recognizes
  * double-dash escape.
  *
  * @param <T> type of keys that identify named options
