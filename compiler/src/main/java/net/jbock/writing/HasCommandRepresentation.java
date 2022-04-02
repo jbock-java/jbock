@@ -41,4 +41,8 @@ abstract class HasCommandRepresentation {
     final List<Mapping<AnnotatedVarargsParameter>> varargsParameters() {
         return commandRepresentation.varargsParameters();
     }
+
+    List<Mapping<?>> allMappings() {
+        return commandRepresentation.allMappings();
+    }
 }

@@ -1,5 +1,6 @@
 package net.jbock.writing;
 
+import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
@@ -11,6 +12,7 @@ import java.util.function.Supplier;
 import static io.jbock.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.LIST_OF_STRING;
+import static net.jbock.common.Constants.STRING_ARRAY;
 import static net.jbock.common.Suppliers.memoize;
 
 @WritingScope
@@ -18,7 +20,6 @@ final class ParseMethod extends HasCommandRepresentation {
 
     private final GeneratedTypes generatedTypes;
     private final CreateModelMethod createModelMethod;
-    private final ExtractMethod extractMethod;
     private final ParserTypeFactory parserTypeFactory;
 
     @Inject
@@ -26,12 +27,10 @@ final class ParseMethod extends HasCommandRepresentation {
             GeneratedTypes generatedTypes,
             CommandRepresentation commandRepresentation,
             CreateModelMethod createModelMethod,
-            ExtractMethod extractMethod,
             ParserTypeFactory parserTypeFactory) {
         super(commandRepresentation);
         this.generatedTypes = generatedTypes;
         this.createModelMethod = createModelMethod;
-        this.extractMethod = extractMethod;
         this.parserTypeFactory = parserTypeFactory;
     }
 
@@ -47,10 +46,21 @@ final class ParseMethod extends HasCommandRepresentation {
         ParameterSpec parser = ParameterSpec.builder(parserType.type(), "parser").build();
         code.addStatement("$T $N = $L", parserType.type(), parser, parserType.init());
         code.add("try {\n").indent()
-                .addStatement("$N.parse($N)", parser, tokens)
-                .addStatement("return $T.right($N($N))", EITHER,
-                        harvestMethod().get(), parser)
-                .unindent().add("} catch ($T $N) {\n", ExFailure.class, e).indent()
+                .addStatement("$N.parse($N)", parser, tokens);
+        generatedTypes().superResultType().ifPresentOrElse(parseResultWithRestType -> {
+            ParameterSpec restArgs = ParameterSpec.builder(sourceElement().typeName(), "restArgs").build();
+            ParameterSpec impl = ParameterSpec.builder(generatedTypes().implType(), "impl").build();
+            code.addStatement("$T $N = new $T($N)", impl.type, impl, impl.type, parser);
+            code.addStatement("$T $N = $N.rest().toArray($T::new)", STRING_ARRAY, restArgs,
+                    parser, ArrayTypeName.of(String.class));
+            code.addStatement("return $T.right(new $T($N, $N))", EITHER, parseResultWithRestType,
+                    impl, restArgs);
+        }, () -> {
+            ParameterSpec impl = ParameterSpec.builder(generatedTypes().implType(), "impl").build();
+            code.addStatement("return $T.right(new $T($N))", EITHER,
+                    impl.type, parser);
+        });
+        code.unindent().add("} catch ($T $N) {\n", ExFailure.class, e).indent()
                 .addStatement("return $T.left($N.toError($N()))",
                         EITHER, e, createModelMethod().get())
                 .unindent().add("}\n");
@@ -69,10 +79,6 @@ final class ParseMethod extends HasCommandRepresentation {
 
     private ParserTypeFactory parserTypeFactory() {
         return parserTypeFactory;
-    }
-
-    private ExtractMethod harvestMethod() {
-        return extractMethod;
     }
 
     private CreateModelMethod createModelMethod() {
