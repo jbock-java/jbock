@@ -12,6 +12,10 @@ import java.time.LocalDate;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+/**
+ * This class contains converters for all "auto types"
+ * that can be used without a custom converter.
+ */
 public final class StandardConverters {
 
     private static final ConverterStore STORE = new ConverterStore();
@@ -74,5 +78,8 @@ public final class StandardConverters {
 
     public static StringConverter<File> asExistingFile() {
         return STORE.get(File.class, MoreConverters::existingFile);
+    }
+
+    private StandardConverters() {
     }
 }
