@@ -1,6 +1,5 @@
 package net.jbock.common;
 
-import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
@@ -18,8 +17,6 @@ public final class Constants {
     public static final ClassName STRING = ClassName.get(String.class);
 
     public static final TypeName LIST_OF_STRING = ParameterizedTypeName.get(ClassName.get(List.class), STRING);
-
-    public static final TypeName STRING_ARRAY = ArrayTypeName.of(STRING);
 
     public static final ClassName EITHER = ClassName.get(Either.class);
 

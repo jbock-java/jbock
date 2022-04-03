@@ -1,5 +1,6 @@
 package net.jbock.writing;
 
+import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
@@ -10,7 +11,7 @@ import net.jbock.util.ParseRequest;
 
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.ParameterSpec.builder;
-import static net.jbock.common.Constants.STRING_ARRAY;
+import static net.jbock.common.Constants.STRING;
 
 @WritingScope
 final class ParseOrExitMethod extends HasCommandRepresentation {
@@ -33,7 +34,7 @@ final class ParseOrExitMethod extends HasCommandRepresentation {
 
     MethodSpec define() {
 
-        ParameterSpec args = builder(STRING_ARRAY, "args").build();
+        ParameterSpec args = builder(ArrayTypeName.of(STRING), "args").build();
         ParameterSpec notSuccess = builder(generatedTypes.parseResultType(), "failure").build();
         ParameterSpec err = builder(AtFileError.class, "err").build();
 

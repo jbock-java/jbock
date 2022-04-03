@@ -1,6 +1,5 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
@@ -8,11 +7,11 @@ import jakarta.inject.Inject;
 import net.jbock.util.ExFailure;
 
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static io.jbock.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.LIST_OF_STRING;
-import static net.jbock.common.Constants.STRING_ARRAY;
 import static net.jbock.common.Suppliers.memoize;
 
 @WritingScope
@@ -48,11 +47,11 @@ final class ParseMethod extends HasCommandRepresentation {
         code.add("try {\n").indent()
                 .addStatement("$N.parse($N)", parser, tokens);
         generatedTypes().superResultType().ifPresentOrElse(parseResultWithRestType -> {
-            ParameterSpec restArgs = ParameterSpec.builder(sourceElement().typeName(), "restArgs").build();
+            ParameterSpec restArgs = ParameterSpec.builder(sourceElement().typeName(), "rest").build();
             ParameterSpec impl = ParameterSpec.builder(generatedTypes().implType(), "impl").build();
             code.addStatement("$T $N = new $T($N)", impl.type, impl, impl.type, parser);
-            code.addStatement("$T $N = $N.rest().toArray($T::new)", STRING_ARRAY, restArgs,
-                    parser, ArrayTypeName.of(String.class));
+            code.addStatement("$T $N = $N.rest().collect($T.toList())", LIST_OF_STRING, restArgs,
+                    parser, Collectors.class);
             code.addStatement("return $T.right(new $T($N, $N))", EITHER, parseResultWithRestType,
                     impl, restArgs);
         }, () -> {

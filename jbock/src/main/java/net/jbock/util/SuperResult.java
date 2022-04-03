@@ -1,46 +1,69 @@
 package net.jbock.util;
 
-import net.jbock.Command;
+import java.util.List;
 
 /**
- * This class represents successful parsing when the
- * {@link Command#superCommand()} attribute is set.
+ * Success result of parsing a SuperCommand.
  *
- * @param <C> command type
+ * @param <S> type of the SuperCommand
  */
-public final class SuperResult<C> {
+public final class SuperResult<S> {
 
-    private final C command;
-    private final String[] rest;
+    private final S superCommand;
+    private final List<String> rest;
 
     /**
-     * Public constructor.
+     * Constructor to be used by generated code.
      *
-     * @param command command instance
-     * @param rest remaining tokens from the input array
+     * @param superCommand command instance
+     * @param rest remaining tokens ignored by the SuperCommand,
+     *             to be used by a subcommand
      */
-    public SuperResult(C command, String[] rest) {
-        this.command = command;
+    public SuperResult(S superCommand, List<String> rest) {
+        this.superCommand = superCommand;
         this.rest = rest;
     }
 
     /**
-     * Get the result of parsing.
+     * Returns the command instance.
      *
-     * @return the result
+     * @return an instance of the SuperCommand type
+     *
+     * @deprecated use {@link #getCommand()}
      */
-    public C result() {
-        return command;
+    @Deprecated(forRemoval = true)
+    public S result() {
+        return superCommand;
     }
 
     /**
-     * Get the remaining tokens from the input array,
-     * after the last known parameter was read by
-     * the SuperCommand parser.
+     * Returns the command instance.
      *
-     * @return remaining tokens
+     * @return an instance of the SuperCommand type
      */
+    public S getCommand() {
+        return superCommand;
+    }
+
+
+    /**
+     * Returns the remaining tokens, after the SuperCommand's last parameter.
+     *
+     * @return remaining tokens, suitable for further parsing
+     *
+     * @deprecated use {@link #getRest()} instead
+     */
+    @Deprecated(forRemoval = true)
     public String[] rest() {
-        return rest;
+        return rest.toArray(new String[0]);
+    }
+
+    /**
+     * Returns the remaining tokens, after the SuperCommand's last parameter.
+     *
+     * @return remaining tokens, suitable for further parsing
+     */
+    public String[] getRest() {
+        return rest.toArray(new String[0]);
     }
 }

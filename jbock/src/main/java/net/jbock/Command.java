@@ -65,7 +65,7 @@ public @interface Command {
      *
      * @deprecated use the {@link SuperCommand} annotation instead
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     boolean superCommand() default false;
 
     /**

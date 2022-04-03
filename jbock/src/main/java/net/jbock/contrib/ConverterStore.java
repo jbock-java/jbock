@@ -6,22 +6,15 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 final class ConverterStore {
 
     private final Map<String, WeakReference<StringConverter<?>>> convertersByClass = new HashMap<>();
 
+    @SuppressWarnings("unchecked")
     <T> StringConverter<T> get(
             Class<T> clazz,
             Function<String, T> function) {
-        return getCached(clazz, () -> StringConverter.create(function));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> StringConverter<T> getCached(
-            Class<T> clazz,
-            Supplier<StringConverter<T>> converterSupplier) {
         String canonicalName = clazz.getCanonicalName();
         WeakReference<StringConverter<?>> ref = convertersByClass.get(canonicalName);
         if (ref != null) {
@@ -30,7 +23,7 @@ final class ConverterStore {
                 return (StringConverter<T>) cached;
             }
         }
-        StringConverter<T> newInstance = converterSupplier.get();
+        StringConverter<T> newInstance = StringConverter.create(function);
         convertersByClass.put(canonicalName, new WeakReference<>(newInstance));
         return newInstance;
     }
