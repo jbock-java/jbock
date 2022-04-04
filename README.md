@@ -81,6 +81,10 @@ that you can build upon to fine-tune the help and error messages for your users.
 
 Some types don't need a custom converter. See [StandardConverters.java](https://github.com/jbock-java/jbock/blob/master/jbock/src/main/java/net/jbock/contrib/StandardConverters.java).
 
+### Subcommands
+
+Use `@SuperCommand` to define a git-like subcommand structure.
+
 ### Sample projects
 
 * [jbock-maven-example](https://github.com/jbock-java/jbock-maven-example)
