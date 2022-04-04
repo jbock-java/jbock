@@ -64,7 +64,7 @@ abstract class DeleteCommand {
 }
 ````
 
-The generated `DeleteCommandParser` converts a string array to an instance of `DeleteCommand`:
+The generated class is called `DeleteCommandParser`. It converts a string array to an instance of `DeleteCommand`:
 
 ````java
 public static void main(String[] args) {
