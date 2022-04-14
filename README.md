@@ -16,6 +16,7 @@ In your command class, each abstract method must have *no* arguments,
 and be annotated with either `@Option`, `@Parameter` or `@VarargsParameter`.
 
 The *multiplicity* of options and parameters is determined by their return type. `List`, `Optional` and `boolean` are "special".
+See examples below.
 
 ````java
 @Command
