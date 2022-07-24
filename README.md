@@ -83,7 +83,7 @@ Some types don't need a custom converter. See [StandardConverters.java](https://
 
 ### Subcommands
 
-Use `@SuperCommand` to define a git-like subcommand structure.
+The `@SuperCommand` annotation can be used to define a git-like subcommand structure.
 
 ### Sample projects
 
