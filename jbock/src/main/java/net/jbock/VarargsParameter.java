@@ -16,7 +16,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  *   <li>The annotated method <em>must</em> return {@link java.util.List List&lt;E&gt;},
  *       where {@code E} is a converted type.
  *   <li>There can only be one varargs parameter per command.
- *   <li>Cannot be used when the {@link Command#superCommand()} attribute is set.
+ *   <li>Cannot be used in a {@link SuperCommand}.
  * </ul>
  *
  * @see Parameter

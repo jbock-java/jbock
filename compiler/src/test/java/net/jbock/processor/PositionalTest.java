@@ -28,7 +28,7 @@ class PositionalTest {
     @Test
     void superSimpleOptional() {
         JavaFileObject javaFile = fromSource(
-                "@Command(superCommand = true, description = \"y\", descriptionKey = \"y\")",
+                "@SuperCommand(description = \"y\", descriptionKey = \"y\")",
                 "abstract class Arguments {",
                 "",
                 "  @Parameter(index = 0, description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
@@ -42,7 +42,7 @@ class PositionalTest {
     @Test
     void superComplexOptional() {
         JavaFileObject javaFile = fromSource(
-                "@Command(superCommand = true)",
+                "@SuperCommand",
                 "abstract class Arguments {",
                 "",
                 "  @Parameter(index = 0)",
@@ -59,7 +59,7 @@ class PositionalTest {
     @Test
     void repeatableSuperCommand() {
         JavaFileObject javaFile = fromSource(
-                "@Command(superCommand = true)",
+                "@SuperCommand",
                 "abstract class Arguments {",
                 "",
                 "  @Parameter(index = 0)",
@@ -77,7 +77,7 @@ class PositionalTest {
     @Test
     void missingParamSuperCommand() {
         JavaFileObject javaFile = fromSource(
-                "@Command(superCommand = true)",
+                "@SuperCommand",
                 "abstract class Arguments {",
                 "",
                 "  @Option(names = \"--a\")",

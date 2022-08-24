@@ -42,6 +42,7 @@ class Processor {
                 "",
                 "import net.jbock.util.StringConverter;",
                 "import net.jbock.Command;",
+                "import net.jbock.SuperCommand;",
                 "import net.jbock.Parameter;",
                 "import net.jbock.VarargsParameter;",
                 "import net.jbock.Option;",

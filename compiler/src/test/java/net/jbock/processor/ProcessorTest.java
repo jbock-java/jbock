@@ -571,7 +571,7 @@ class ProcessorTest {
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("missing annotation: add one of these annotations:" +
-                        " [Option, Parameter, Parameters, VarargsParameter] to method 'parameterized'");
+                        " [Option, Parameter, VarargsParameter] to method 'parameterized'");
     }
 
     @Test
@@ -659,7 +659,7 @@ class ProcessorTest {
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("missing annotation: add one of these annotations:" +
-                        " [Option, Parameter, Parameters, VarargsParameter] to method 'a'");
+                        " [Option, Parameter, VarargsParameter] to method 'a'");
     }
 
     @Test

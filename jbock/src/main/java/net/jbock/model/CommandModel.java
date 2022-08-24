@@ -1,6 +1,7 @@
 package net.jbock.model;
 
 import net.jbock.Command;
+import net.jbock.SuperCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +97,7 @@ public final class CommandModel {
         /**
          * Sets the supercommand property.
          *
-         * @see Command#superCommand()
+         * @see SuperCommand
          * @param superCommand whether this is a supercommand
          * @return the builder instance
          */
@@ -194,7 +195,7 @@ public final class CommandModel {
     }
 
     /**
-     * Returns the value of the {@link Command#superCommand()} attribute.
+     * Returns {@code true} if this is a {@link SuperCommand}.
      *
      * @return {@code true} if the command is a "super command",
      *         {@code false} if it is a regular command
