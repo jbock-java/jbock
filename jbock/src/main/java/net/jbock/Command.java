@@ -48,27 +48,6 @@ public @interface Command {
     String descriptionKey() default "";
 
     /**
-     * The generated parser will stop parsing after the
-     * last positional parameter was read, and return the remaining tokens
-     * as an array of strings.
-     *
-     * <p>The following additional rules apply when
-     * {@code superCommand = true}:
-     *
-     * <ul>
-     *   <li>There must be at least one positional parameter.
-     *   <li>{@code @Parameters} is not allowed.
-     *   <li>The parser will not recognize the double-dash escape sequence.
-     * </ul>
-     *
-     * @return {@code true} to make this a SuperCommand
-     *
-     * @deprecated use the {@link SuperCommand} annotation instead
-     */
-    @Deprecated(forRemoval = true)
-    boolean superCommand() default false;
-
-    /**
      * If {@code true}, the generated parser will not contain
      * the {@code parseOrExit} method.
      *

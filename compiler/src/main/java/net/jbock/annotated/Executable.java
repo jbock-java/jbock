@@ -3,7 +3,6 @@ package net.jbock.annotated;
 import jakarta.inject.Inject;
 import net.jbock.Option;
 import net.jbock.Parameter;
-import net.jbock.Parameters;
 import net.jbock.VarargsParameter;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
@@ -26,7 +25,6 @@ import java.util.Set;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.tools.Diagnostic.Kind.WARNING;
 import static net.jbock.common.TypeTool.ANNOTATION_VALUE_AS_TYPE;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
@@ -73,43 +71,8 @@ abstract class Executable {
             if (annotation instanceof VarargsParameter) {
                 return new ExecutableVarargsParameter(method, (VarargsParameter) annotation, converter);
             }
-            if (annotation instanceof Parameters) {
-                messager.printMessage(WARNING,
-                        "@Parameters has been deprecated, use @VarargsParameter instead", method);
-                return new ExecutableVarargsParameter(method, convertLegacyParameters((Parameters) annotation), converter);
-            }
             throw new AssertionError();
         }
-    }
-
-    private static VarargsParameter convertLegacyParameters(Parameters parameters) {
-        return new VarargsParameter() {
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return parameters.annotationType();
-            }
-
-            @Override
-            public Class<?> converter() {
-                return parameters.converter();
-            }
-
-            @Override
-            public String descriptionKey() {
-                return parameters.descriptionKey();
-            }
-
-            @Override
-            public String[] description() {
-                return parameters.description();
-            }
-
-            @Override
-            public String paramLabel() {
-                return parameters.paramLabel();
-            }
-        };
     }
 
     abstract AnnotatedMethod annotatedMethod(SourceElement sourceElement, String enumName);
