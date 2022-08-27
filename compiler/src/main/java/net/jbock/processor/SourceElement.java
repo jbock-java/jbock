@@ -2,6 +2,7 @@ package net.jbock.processor;
 
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.TypeName;
+import io.jbock.util.Either;
 import net.jbock.Command;
 import net.jbock.SuperCommand;
 import net.jbock.common.SnakeName;
@@ -13,6 +14,8 @@ import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
 
+import static io.jbock.util.Either.left;
+import static io.jbock.util.Either.right;
 import static net.jbock.common.Constants.optionalString;
 
 public class SourceElement {
@@ -49,69 +52,73 @@ public class SourceElement {
     }
 
     static SourceElement create(TypeElement t) {
-        AnyCommand typeElement = new AnyCommand(t);
-        List<Modifier> accessModifiers = typeElement.isPublicParser() ?
+        AnyCommand command = new AnyCommand(t);
+        List<Modifier> accessModifiers = command.isPublicParser() ?
                 List.of(Modifier.PUBLIC) :
                 List.of();
-        String programName = optionalString(typeElement.getName())
+        String programName = optionalString(command.getName())
                 .orElseGet(() -> SnakeName.create(t.getSimpleName()).snake('-'));
-        String generatedClassName = String.join("_", ClassName.get(t).simpleNames()) + "Parser";
-        ClassName generatedClass = ClassName.get(t)
-                .topLevelClassName()
-                .peerClass(generatedClassName);
-        ClassName optionEnumType = generatedClass.nestedClass("Opt");
-        String descriptionKey = typeElement.getDescriptionKey();
-        boolean skipGeneratingParseOrExitMethod = typeElement.isSkipGeneratingParseOrExitMethod();
-        List<String> description = List.of(typeElement.getDescription());
-        boolean superCommand = typeElement.isSuperCommand();
+        ClassName optionEnumType = command.generatedClass().nestedClass("Opt");
+        String descriptionKey = command.getDescriptionKey();
+        boolean skipGeneratingParseOrExitMethod = command.isSkipGeneratingParseOrExitMethod();
+        List<String> description = List.of(command.getDescription());
+        boolean superCommand = command.isSuperCommand();
         return new SourceElement(t, accessModifiers,
-                programName, generatedClass, optionEnumType,
+                programName, command.generatedClass(), optionEnumType,
                 descriptionKey, skipGeneratingParseOrExitMethod, description, superCommand);
     }
 
     private static class AnyCommand {
-        final TypeElement typeElement;
-        final Optional<Command> command;
-        final Optional<SuperCommand> superCommand;
+        final Either<Command, SuperCommand> command;
+        final ClassName commandClass;
 
         AnyCommand(TypeElement typeElement) {
-            this.typeElement = typeElement;
-            this.command = Optional.ofNullable(typeElement.getAnnotation(Command.class));
-            this.superCommand = Optional.ofNullable(typeElement.getAnnotation(SuperCommand.class));
+            Command command = typeElement.getAnnotation(Command.class);
+            this.command = command != null ?
+                    left(command) :
+                    right(typeElement.getAnnotation(SuperCommand.class));
+            this.commandClass = ClassName.get(typeElement);
         }
 
         String getDescriptionKey() {
-            return command.map(Command::descriptionKey)
-                    .or(() -> superCommand.map(SuperCommand::descriptionKey))
-                    .orElseThrow();
+            return command.fold(
+                    Command::descriptionKey,
+                    SuperCommand::descriptionKey);
         }
 
         String getName() {
-            return command.map(Command::name)
-                    .or(() -> superCommand.map(SuperCommand::name))
-                    .orElseThrow();
+            return command.fold(
+                    Command::name,
+                    SuperCommand::name);
         }
 
         boolean isPublicParser() {
-            return command.map(Command::publicParser)
-                    .or(() -> superCommand.map(SuperCommand::publicParser))
-                    .orElseThrow();
+            return command.fold(
+                    Command::publicParser,
+                    SuperCommand::publicParser);
         }
 
         boolean isSkipGeneratingParseOrExitMethod() {
-            return command.map(Command::skipGeneratingParseOrExitMethod)
-                    .or(() -> superCommand.map(SuperCommand::skipGeneratingParseOrExitMethod))
-                    .orElseThrow();
+            return command.fold(
+                    Command::skipGeneratingParseOrExitMethod,
+                    SuperCommand::skipGeneratingParseOrExitMethod);
         }
 
         String[] getDescription() {
-            return command.map(Command::description)
-                    .or(() -> superCommand.map(SuperCommand::description))
-                    .orElseThrow();
+            return command.fold(
+                    Command::description,
+                    SuperCommand::description);
         }
 
         boolean isSuperCommand() {
-            return typeElement.getAnnotation(SuperCommand.class) != null;
+            return command.isRight();
+        }
+
+        ClassName generatedClass() {
+            String generatedClassName = String.join("_", commandClass.simpleNames()) + "Parser";
+            return commandClass
+                    .topLevelClassName()
+                    .peerClass(generatedClassName);
         }
     }
 
