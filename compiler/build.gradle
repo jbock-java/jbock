@@ -63,8 +63,8 @@ dependencies {
     implementation(dapper)
     annotationProcessor('io.github.jbock-java:dapper-compiler:2.41.2')
     testImplementation('io.github.jbock-java:compile-testing:0.19.12')
-    testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
-    testImplementation('org.mockito:mockito-core:3.12.4')
+    testImplementation('org.junit.jupiter:junit-jupiter:5.9.0')
+    testImplementation('org.mockito:mockito-core:4.7.0')
     testImplementation(jbock)
     testImplementation(dapper)
 }
