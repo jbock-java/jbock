@@ -12,7 +12,8 @@ import static net.jbock.model.Multiplicity.OPTIONAL;
 
 public final class Match<M extends AnnotatedMethod> {
 
-    /* baseType ({List<A>, Optional<A>}) == A
+    /* baseType (List<A>) == A
+    /* baseType (Optional<A>) == A
      * baseType (OptionalInt) == Integer
      * baseType (int) == Integer
      */
