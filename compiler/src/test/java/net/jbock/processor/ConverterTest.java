@@ -176,6 +176,26 @@ class ConverterTest {
     }
 
     @Test
+    void validRecord() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "abstract class Arguments {",
+                "",
+                "  @VarargsParameter(converter = CoCo.class)",
+                "  abstract List<Color> colors();",
+                "",
+                "  record Color(String rgb) {}",
+                "",
+                "  static class CoCo implements Supplier<StringConverter<Color>> {",
+                "    public StringConverter<Color> get() { return null; }",
+                "  }",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .compilesWithoutError();
+    }
+
+    @Test
     void parametersInvalidNotList() {
         JavaFileObject javaFile = fromSource(
                 "@Command",

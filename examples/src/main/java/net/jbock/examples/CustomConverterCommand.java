@@ -62,6 +62,12 @@ abstract class CustomConverterCommand {
     @Option(names = "--notFlag", converter = BooleanConverter.class)
     abstract Boolean notFlag();
 
+    @Option(names = "--color", converter = CoCo.class)
+    abstract Optional<Color> color();
+
+    record Color(String rgb) {
+    }
+
     static class DateConverter implements Supplier<StringConverter<Date>> {
 
         @Override
@@ -117,6 +123,14 @@ abstract class CustomConverterCommand {
         @Override
         public StringConverter<Boolean> get() {
             return StringConverter.create(Boolean::valueOf);
+        }
+    }
+
+    static class CoCo implements Supplier<StringConverter<Color>> {
+
+        @Override
+        public StringConverter<Color> get() {
+            return StringConverter.create(Color::new);
         }
     }
 

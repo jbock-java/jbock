@@ -41,7 +41,8 @@ class CustomConverterCommandTest {
                 "--enumSet", "FOO",
                 "true", "false", "true",
                 "--stringArray", "A",
-                "--aRequiredInt", "51");
+                "--aRequiredInt", "51",
+                "--color", "234");
         assertEquals(1500000000000L, parsed.date().getTime());
         assertEquals(Optional.of(1500000000000L), parsed.optDate().map(Date::getTime));
         assertEquals(1500000000000L, parsed.dateList().get(0).getTime());
@@ -55,6 +56,7 @@ class CustomConverterCommandTest {
         assertEquals(Optional.of(singletonList("foo")), parsed.listWrapper());
         assertArrayEquals(new String[]{"A"}, parsed.stringArray().orElseThrow(AssertionFailedError::new));
         assertTrue(parsed.notFlag());
+        assertEquals(Optional.of(new CustomConverterCommand.Color("234")), parsed.color());
     }
 
     @Test
