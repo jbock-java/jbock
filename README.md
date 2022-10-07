@@ -7,7 +7,7 @@ Being an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
 means it doesn't use reflection, but generates a custom parser at compile time instead.
 
-### Quick start
+### Quick rundown
 
 Create an abstract class, or alternatively a Java interface,
 and add the `@Command` annotation.
