@@ -1,13 +1,11 @@
 package net.jbock.annotated;
 
-import jakarta.inject.Inject;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.VarargsParameter;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
@@ -41,38 +39,29 @@ abstract class Executable {
         this.converter = converter;
     }
 
-    static class Factory {
-        private final Messager messager;
-
-        @Inject
-        Factory(Messager messager) {
-            this.messager = messager;
+    static Executable create(
+            ExecutableElement method,
+            Annotation annotation) {
+        String canonicalName = annotation.annotationType().getCanonicalName();
+        AnnotationMirror annotationMirror = method.getAnnotationMirrors().stream()
+                .filter(mirror -> AS_TYPE_ELEMENT.visit(mirror.getAnnotationType().asElement())
+                        .map(TypeElement::getQualifiedName)
+                        .map(Name::toString)
+                        .filter(canonicalName::equals)
+                        .isPresent())
+                .findFirst()
+                .orElseThrow(AssertionError::new);
+        Optional<TypeElement> converter = findConverterAttribute(annotationMirror);
+        if (annotation instanceof Option) {
+            return new ExecutableOption(method, (Option) annotation, converter);
         }
-
-        Executable create(
-                ExecutableElement method,
-                Annotation annotation) {
-            String canonicalName = annotation.annotationType().getCanonicalName();
-            AnnotationMirror annotationMirror = method.getAnnotationMirrors().stream()
-                    .filter(mirror -> AS_TYPE_ELEMENT.visit(mirror.getAnnotationType().asElement())
-                            .map(TypeElement::getQualifiedName)
-                            .map(Name::toString)
-                            .filter(canonicalName::equals)
-                            .isPresent())
-                    .findFirst()
-                    .orElseThrow(AssertionError::new);
-            Optional<TypeElement> converter = findConverterAttribute(annotationMirror);
-            if (annotation instanceof Option) {
-                return new ExecutableOption(method, (Option) annotation, converter);
-            }
-            if (annotation instanceof Parameter) {
-                return new ExecutableParameter(method, (Parameter) annotation, converter);
-            }
-            if (annotation instanceof VarargsParameter) {
-                return new ExecutableVarargsParameter(method, (VarargsParameter) annotation, converter);
-            }
-            throw new AssertionError();
+        if (annotation instanceof Parameter) {
+            return new ExecutableParameter(method, (Parameter) annotation, converter);
         }
+        if (annotation instanceof VarargsParameter) {
+            return new ExecutableVarargsParameter(method, (VarargsParameter) annotation, converter);
+        }
+        throw new AssertionError();
     }
 
     abstract AnnotatedMethod annotatedMethod(SourceElement sourceElement, String enumName);

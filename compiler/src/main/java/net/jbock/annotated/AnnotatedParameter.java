@@ -3,32 +3,34 @@ package net.jbock.annotated;
 import net.jbock.common.SnakeName;
 
 import java.util.Locale;
+import java.util.function.Supplier;
+
+import static net.jbock.common.Suppliers.memoize;
 
 public final class AnnotatedParameter extends AnnotatedMethod {
 
     private final ExecutableParameter parameter;
 
+    private final Supplier<String> paramLabel = memoize(() -> executable().paramLabel()
+            .orElseGet(() -> SnakeName.create(executable().simpleName())
+                    .snake('_')
+                    .toUpperCase(Locale.ROOT)));
+
     private AnnotatedParameter(
             String enumName,
-            ExecutableParameter parameter,
-            String paramLabel) {
-        super(enumName, paramLabel);
+            ExecutableParameter parameter) {
+        super(enumName);
         this.parameter = parameter;
     }
 
     static AnnotatedParameter createParameter(
             ExecutableParameter parameter,
             String enumName) {
-        String paramLabel = parameter.paramLabel()
-                .orElseGet(() -> SnakeName.create(parameter.simpleName())
-                        .snake('_')
-                        .toUpperCase(Locale.US));
-        return new AnnotatedParameter(enumName,
-                parameter, paramLabel);
+        return new AnnotatedParameter(enumName, parameter);
     }
 
     @Override
-    Executable executable() {
+    ExecutableParameter executable() {
         return parameter;
     }
 
@@ -40,6 +42,11 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     @Override
     public boolean isVarargsParameter() {
         return false;
+    }
+
+    @Override
+    public String paramLabel() {
+        return paramLabel.get();
     }
 
     public int index() {

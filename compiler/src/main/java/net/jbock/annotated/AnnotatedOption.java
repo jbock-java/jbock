@@ -5,8 +5,10 @@ import net.jbock.common.SnakeName;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
+import static net.jbock.common.Suppliers.memoize;
 
 public final class AnnotatedOption extends AnnotatedMethod {
 
@@ -16,41 +18,36 @@ public final class AnnotatedOption extends AnnotatedMethod {
             .thenComparing(String::toString);
 
     private final ExecutableOption option;
-    private final List<String> names;
+
+    private final Supplier<List<String>> names = memoize(() -> executable().names().stream()
+            .sorted(LENGTH_FIRST_COMPARATOR)
+            .collect(toList()));
+
+    private final Supplier<String> paramLabel = memoize(() -> executable().paramLabel()
+            .or(() -> names().stream()
+                    .filter(name -> name.startsWith("--"))
+                    .map(name -> name.substring(2))
+                    .map(s -> s.toUpperCase(Locale.ROOT))
+                    .findFirst())
+            .orElseGet(() -> SnakeName.create(executable().simpleName())
+                    .snake('_')
+                    .toUpperCase(Locale.ROOT)));
 
     private AnnotatedOption(
             String enumName,
-            ExecutableOption option,
-            String paramLabel,
-            List<String> names) {
-        super(enumName, paramLabel);
+            ExecutableOption option) {
+        super(enumName);
         this.option = option;
-        this.names = names;
     }
 
     static AnnotatedOption createOption(
             ExecutableOption option,
             String enumName) {
-        List<String> names = option.names().stream()
-                .sorted(LENGTH_FIRST_COMPARATOR)
-                .collect(toList());
-        String paramLabel = option.paramLabel().or(() -> names.stream()
-                        .filter(name -> name.startsWith("--"))
-                        .map(name -> name.substring(2))
-                        .map(s -> s.toUpperCase(Locale.US))
-                        .findFirst())
-                .orElseGet(() -> SnakeName.create(option.simpleName())
-                        .snake('_')
-                        .toUpperCase(Locale.US));
-        return new AnnotatedOption(
-                enumName,
-                option,
-                paramLabel,
-                names);
+        return new AnnotatedOption(enumName, option);
     }
 
     @Override
-    Executable executable() {
+    ExecutableOption executable() {
         return option;
     }
 
@@ -64,7 +61,12 @@ public final class AnnotatedOption extends AnnotatedMethod {
         return false;
     }
 
+    @Override
+    public String paramLabel() {
+        return paramLabel.get();
+    }
+
     public List<String> names() {
-        return names;
+        return names.get();
     }
 }

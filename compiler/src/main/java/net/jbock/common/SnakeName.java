@@ -26,7 +26,7 @@ public class SnakeName {
             boolean caseUp = t1 == CharType.LOWER
                     && t0 == CharType.UPPER;
             if (sb.length() > 0 && (caseUp || typeChange)) {
-                result.add(sb.toString().toLowerCase(Locale.US));
+                result.add(sb.toString().toLowerCase(Locale.ROOT));
                 sb.setLength(0);
             }
             sb.append(input.charAt(i));
@@ -34,7 +34,7 @@ public class SnakeName {
             t1 = t0;
         }
         if (sb.length() > 0) {
-            result.add(sb.toString().toLowerCase(Locale.US));
+            result.add(sb.toString().toLowerCase(Locale.ROOT));
         }
         return new SnakeName(result);
     }

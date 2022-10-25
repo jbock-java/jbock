@@ -12,13 +12,9 @@ import java.util.Optional;
 public abstract class AnnotatedMethod {
 
     private final String enumName;
-    private final String paramLabel;
 
-    AnnotatedMethod(
-            String enumName,
-            String paramLabel) {
+    AnnotatedMethod(String enumName) {
         this.enumName = enumName;
-        this.paramLabel = paramLabel;
     }
 
     abstract Executable executable();
@@ -26,6 +22,8 @@ public abstract class AnnotatedMethod {
     public abstract boolean isParameter();
 
     public abstract boolean isVarargsParameter();
+
+    public abstract String paramLabel();
 
     public final String enumName() {
         return enumName;
@@ -37,10 +35,6 @@ public abstract class AnnotatedMethod {
 
     public final TypeMirror returnType() {
         return method().getReturnType();
-    }
-
-    public final String paramLabel() {
-        return paramLabel;
     }
 
     public final List<Modifier> accessModifiers() {

@@ -31,14 +31,11 @@ import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 public class ExecutableElementsFinder {
 
     private final SourceElement sourceElement;
-    private final Executable.Factory executableFactory;
 
     @Inject
     ExecutableElementsFinder(
-            SourceElement sourceElement,
-            Executable.Factory executableFactory) {
+            SourceElement sourceElement) {
         this.sourceElement = sourceElement;
-        this.executableFactory = executableFactory;
     }
 
     /**
@@ -103,7 +100,7 @@ public class ExecutableElementsFinder {
     private Either<ValidationFailure, Executable> validateAbstractMethod(
             ExecutableElement method) {
         return getMethodAnnotation(method)
-                .map(a -> executableFactory.create(method, a))
+                .map(a -> Executable.create(method, a))
                 .filter(this::validateParameterless);
     }
 

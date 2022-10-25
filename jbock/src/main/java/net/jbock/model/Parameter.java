@@ -104,7 +104,7 @@ public final class Parameter extends Item {
 
     @Override
     public String namesOverviewError() {
-        return itemType().name().toLowerCase(Locale.US) + " " + paramLabel();
+        return itemType().name().toLowerCase(Locale.ROOT) + " " + paramLabel();
     }
 
     @Override

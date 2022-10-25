@@ -146,7 +146,7 @@ public final class Option extends Item {
 
     @Override
     public String namesOverviewError() {
-        return itemType().name().toLowerCase(Locale.US) + " " +
+        return itemType().name().toLowerCase(Locale.ROOT) + " " +
                 paramLabel() + " (" + String.join(", ", names) + ")";
     }
 
