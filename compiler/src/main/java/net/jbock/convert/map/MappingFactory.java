@@ -36,7 +36,7 @@ final class MappingFactory {
         this.types = types;
     }
 
-    <M extends AnnotatedMethod> Either<ValidationFailure, Mapping<M>> checkMatchingMatch(Match<M> match) {
+    <M extends AnnotatedMethod<?>> Either<ValidationFailure, Mapping<M>> checkMatchingMatch(Match<M> match) {
         if (!types.isSameType(outputType, match.baseType())) {
             String expectedType = StringConverter.class.getSimpleName() +
                     "<" + Util.typeToString(match.baseType()) + ">";
@@ -47,7 +47,7 @@ final class MappingFactory {
         return Either.right(toMapping(match));
     }
 
-    private <M extends AnnotatedMethod> Mapping<M> toMapping(Match<M> match) {
+    private <M extends AnnotatedMethod<?>> Mapping<M> toMapping(Match<M> match) {
         CodeBlock.Builder createConverterExpression = CodeBlock.builder();
         createConverterExpression.add("new $T()", converter.asType());
         if (supplier) {

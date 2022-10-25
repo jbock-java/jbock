@@ -26,7 +26,7 @@ class ListMatcher extends Matcher {
     }
 
     @Override
-    <M extends AnnotatedMethod>
+    <M extends AnnotatedMethod<?>>
     Optional<Match<M>> tryMatch(
             M sourceMethod) {
         if (sourceMethod.isParameter()) {

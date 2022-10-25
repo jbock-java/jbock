@@ -35,7 +35,7 @@ public class MatchFinder {
         this.types = types;
     }
 
-    public <M extends AnnotatedMethod>
+    public <M extends AnnotatedMethod<?>>
     Either<ValidationFailure, Match<M>> findMatch(
             M sourceMethod) {
         Match<M> match = findMatchInternal(sourceMethod);
@@ -44,7 +44,7 @@ public class MatchFinder {
                 .orElseGet(() -> right(match));
     }
 
-    public <M extends AnnotatedMethod>
+    public <M extends AnnotatedMethod<?>>
     Either<ValidationFailure, Match<M>>
     createNullaryMatch(
             M sourceMethod) {
@@ -55,7 +55,7 @@ public class MatchFinder {
                 .orElseGet(() -> right(match));
     }
 
-    private <M extends AnnotatedMethod> Match<M>
+    private <M extends AnnotatedMethod<?>> Match<M>
     findMatchInternal(
             M sourceMethod) {
         return matchers.stream()
@@ -71,7 +71,7 @@ public class MatchFinder {
                 });
     }
 
-    private <M extends AnnotatedMethod>
+    private <M extends AnnotatedMethod<?>>
     Optional<ValidationFailure> validateVarargsIsList(
             Match<M> match) {
         M sourceMethod = match.sourceMethod();

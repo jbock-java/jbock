@@ -6,7 +6,7 @@ import java.util.Optional;
 
 abstract class Matcher {
 
-    abstract <M extends AnnotatedMethod>
+    abstract <M extends AnnotatedMethod<?>>
     Optional<Match<M>> tryMatch(
             M parameter);
 }

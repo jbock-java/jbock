@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
-public final class Match<M extends AnnotatedMethod> {
+public final class Match<M extends AnnotatedMethod<?>> {
 
     /* baseType (List<A>) == A
     /* baseType (Optional<A>) == A
@@ -33,7 +33,7 @@ public final class Match<M extends AnnotatedMethod> {
         this.sourceMethod = sourceMethod;
     }
 
-    static <M extends AnnotatedMethod>
+    static <M extends AnnotatedMethod<?>>
     Match<M> createWithExtract(
             TypeMirror baseType,
             CodeBlock extractExpr,
@@ -41,7 +41,7 @@ public final class Match<M extends AnnotatedMethod> {
         return new Match<>(baseType, OPTIONAL, Optional.of(extractExpr), sourceMethod);
     }
 
-    static <M extends AnnotatedMethod>
+    static <M extends AnnotatedMethod<?>>
     Match<M> create(
             TypeMirror baseType,
             Multiplicity multiplicity,

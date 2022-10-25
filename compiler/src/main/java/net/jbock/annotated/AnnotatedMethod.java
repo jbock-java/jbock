@@ -9,15 +9,20 @@ import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class AnnotatedMethod {
+public abstract class AnnotatedMethod<E extends Executable> {
 
     private final String enumName;
+    
+    private final E executable;
 
-    AnnotatedMethod(String enumName) {
+    AnnotatedMethod(E executable, String enumName) {
+        this.executable = executable;
         this.enumName = enumName;
     }
 
-    abstract Executable executable();
+    final E executable() {
+        return executable;
+    }
 
     public abstract boolean isParameter();
 

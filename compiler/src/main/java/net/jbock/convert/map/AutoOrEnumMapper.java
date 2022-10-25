@@ -31,7 +31,7 @@ public class AutoOrEnumMapper {
         this.autoMappings = autoMappings;
     }
 
-    public <M extends AnnotatedMethod>
+    public <M extends AnnotatedMethod<?>>
     Either<ValidationFailure, Mapping<M>> findMapping(
             Match<M> match) {
         return autoMappings.findAutoMapping(match)
@@ -40,7 +40,7 @@ public class AutoOrEnumMapper {
                 .orElseGet(() -> left(noConverterError(match)));
     }
 
-    private <M extends AnnotatedMethod>
+    private <M extends AnnotatedMethod<?>>
     Optional<Mapping<M>> findEnumMapping(
             Match<M> match) {
         return TypeTool.AS_DECLARED.visit(match.baseType())

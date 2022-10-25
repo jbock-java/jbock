@@ -27,7 +27,7 @@ import static net.jbock.common.TypeTool.ANNOTATION_VALUE_AS_TYPE;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
-abstract class Executable {
+public abstract class Executable {
 
     private static final Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
@@ -64,7 +64,7 @@ abstract class Executable {
         throw new AssertionError();
     }
 
-    abstract AnnotatedMethod annotatedMethod(SourceElement sourceElement, String enumName);
+    abstract AnnotatedMethod<?> annotatedMethod(SourceElement sourceElement, String enumName);
 
     abstract Optional<String> descriptionKey();
 

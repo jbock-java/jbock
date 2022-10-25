@@ -32,7 +32,7 @@ class AutoMappings {
         this.mappings = autoMappings();
     }
 
-    <M extends AnnotatedMethod>
+    <M extends AnnotatedMethod<?>>
     Optional<Mapping<M>> findAutoMapping(
             Match<M> match) {
         TypeMirror baseType = match.baseType();

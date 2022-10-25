@@ -10,14 +10,12 @@ import java.util.function.Supplier;
 import static java.util.stream.Collectors.toList;
 import static net.jbock.common.Suppliers.memoize;
 
-public final class AnnotatedOption extends AnnotatedMethod {
+public final class AnnotatedOption extends AnnotatedMethod<ExecutableOption> {
 
     // visible for testing
     static final Comparator<String> LENGTH_FIRST_COMPARATOR = Comparator
             .comparing(String::length)
             .thenComparing(String::toString);
-
-    private final ExecutableOption option;
 
     private final Supplier<List<String>> names = memoize(() -> executable().names().stream()
             .sorted(LENGTH_FIRST_COMPARATOR)
@@ -36,19 +34,13 @@ public final class AnnotatedOption extends AnnotatedMethod {
     private AnnotatedOption(
             String enumName,
             ExecutableOption option) {
-        super(enumName);
-        this.option = option;
+        super(option, enumName);
     }
 
     static AnnotatedOption createOption(
             ExecutableOption option,
             String enumName) {
         return new AnnotatedOption(enumName, option);
-    }
-
-    @Override
-    ExecutableOption executable() {
-        return option;
     }
 
     @Override

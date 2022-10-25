@@ -20,7 +20,7 @@ import static net.jbock.model.Multiplicity.OPTIONAL;
  * @param <M> one of three types of annotated methods:
  *           named option, positional parameter, or repeatable positional parameter
  */
-public final class Mapping<M extends AnnotatedMethod> {
+public final class Mapping<M extends AnnotatedMethod<?>> {
 
     private final CodeBlock createConverterExpression;
     private final Match<M> match;
@@ -35,14 +35,14 @@ public final class Mapping<M extends AnnotatedMethod> {
         this.nullary = nullary;
     }
 
-    public static <M extends AnnotatedMethod>
+    public static <M extends AnnotatedMethod<?>>
     Mapping<M> create(
             CodeBlock createConverterExpression,
             Match<M> match) {
         return create(createConverterExpression, match, false);
     }
 
-    public static <M extends AnnotatedMethod>
+    public static <M extends AnnotatedMethod<?>>
     Mapping<M> create(
             CodeBlock createConverterExpression,
             Match<M> match,

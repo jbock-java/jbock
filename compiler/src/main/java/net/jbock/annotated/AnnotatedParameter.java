@@ -7,9 +7,7 @@ import java.util.function.Supplier;
 
 import static net.jbock.common.Suppliers.memoize;
 
-public final class AnnotatedParameter extends AnnotatedMethod {
-
-    private final ExecutableParameter parameter;
+public final class AnnotatedParameter extends AnnotatedMethod<ExecutableParameter> {
 
     private final Supplier<String> paramLabel = memoize(() -> executable().paramLabel()
             .orElseGet(() -> SnakeName.create(executable().simpleName())
@@ -19,19 +17,13 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     private AnnotatedParameter(
             String enumName,
             ExecutableParameter parameter) {
-        super(enumName);
-        this.parameter = parameter;
+        super(parameter, enumName);
     }
 
     static AnnotatedParameter createParameter(
             ExecutableParameter parameter,
             String enumName) {
         return new AnnotatedParameter(enumName, parameter);
-    }
-
-    @Override
-    ExecutableParameter executable() {
-        return parameter;
     }
 
     @Override
@@ -50,6 +42,6 @@ public final class AnnotatedParameter extends AnnotatedMethod {
     }
 
     public int index() {
-        return parameter.index();
+        return executable().index();
     }
 }

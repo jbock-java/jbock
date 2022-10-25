@@ -7,9 +7,7 @@ import java.util.function.Supplier;
 
 import static net.jbock.common.Suppliers.memoize;
 
-public final class AnnotatedVarargsParameter extends AnnotatedMethod {
-
-    private final ExecutableVarargsParameter parameters;
+public final class AnnotatedVarargsParameter extends AnnotatedMethod<ExecutableVarargsParameter> {
 
     private final Supplier<String> paramLabel = memoize(() -> executable().paramLabel()
             .orElseGet(() -> SnakeName.create(executable().simpleName())
@@ -19,19 +17,13 @@ public final class AnnotatedVarargsParameter extends AnnotatedMethod {
     private AnnotatedVarargsParameter(
             String enumName,
             ExecutableVarargsParameter parameters) {
-        super(enumName);
-        this.parameters = parameters;
+        super(parameters, enumName);
     }
 
     static AnnotatedVarargsParameter createVarargsParameter(
             ExecutableVarargsParameter parameters,
             String enumName) {
         return new AnnotatedVarargsParameter(enumName, parameters);
-    }
-
-    @Override
-    ExecutableVarargsParameter executable() {
-        return parameters;
     }
 
     @Override
