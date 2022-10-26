@@ -14,16 +14,12 @@ public final class AnnotatedVarargsParameter extends AnnotatedMethod<ExecutableV
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
-    private AnnotatedVarargsParameter(
-            String enumName,
-            ExecutableVarargsParameter parameters) {
-        super(parameters, enumName);
+    private AnnotatedVarargsParameter(ExecutableVarargsParameter parameters) {
+        super(parameters);
     }
 
-    static AnnotatedVarargsParameter createVarargsParameter(
-            ExecutableVarargsParameter parameters,
-            String enumName) {
-        return new AnnotatedVarargsParameter(enumName, parameters);
+    static AnnotatedVarargsParameter createVarargsParameter(ExecutableVarargsParameter parameters) {
+        return new AnnotatedVarargsParameter(parameters);
     }
 
     @Override

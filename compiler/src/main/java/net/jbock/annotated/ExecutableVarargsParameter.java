@@ -1,7 +1,6 @@
 package net.jbock.annotated;
 
 import net.jbock.VarargsParameter;
-import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -18,16 +17,15 @@ final class ExecutableVarargsParameter extends Executable {
     ExecutableVarargsParameter(
             ExecutableElement method,
             VarargsParameter parameter,
-            Optional<TypeElement> converter) {
-        super(method, converter);
+            Optional<TypeElement> converter,
+            String enumName) {
+        super(method, converter, enumName);
         this.parameter = parameter;
     }
 
     @Override
-    AnnotatedMethod<?> annotatedMethod(
-            SourceElement sourceElement,
-            String enumName) {
-        return createVarargsParameter(this, enumName);
+    AnnotatedMethod<?> annotatedMethod() {
+        return createVarargsParameter(this);
     }
 
     @Override

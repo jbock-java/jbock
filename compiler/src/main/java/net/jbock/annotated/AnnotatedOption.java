@@ -31,16 +31,12 @@ public final class AnnotatedOption extends AnnotatedMethod<ExecutableOption> {
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
-    private AnnotatedOption(
-            String enumName,
-            ExecutableOption option) {
-        super(option, enumName);
+    private AnnotatedOption(ExecutableOption option) {
+        super(option);
     }
 
-    static AnnotatedOption createOption(
-            ExecutableOption option,
-            String enumName) {
-        return new AnnotatedOption(enumName, option);
+    static AnnotatedOption createOption(ExecutableOption option) {
+        return new AnnotatedOption(option);
     }
 
     @Override

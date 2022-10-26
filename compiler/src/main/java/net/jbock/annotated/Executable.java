@@ -4,7 +4,6 @@ import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.VarargsParameter;
 import net.jbock.common.ValidationFailure;
-import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -33,15 +32,21 @@ public abstract class Executable {
 
     private final ExecutableElement method;
     private final Optional<TypeElement> converter;
+    private final String enumName;
 
-    Executable(ExecutableElement method, Optional<TypeElement> converter) {
+    Executable(
+            ExecutableElement method,
+            Optional<TypeElement> converter,
+            String enumName) {
         this.method = method;
         this.converter = converter;
+        this.enumName = enumName;
     }
 
     static Executable create(
             ExecutableElement method,
-            Annotation annotation) {
+            Annotation annotation,
+            String enumName) {
         String canonicalName = annotation.annotationType().getCanonicalName();
         AnnotationMirror annotationMirror = method.getAnnotationMirrors().stream()
                 .filter(mirror -> AS_TYPE_ELEMENT.visit(mirror.getAnnotationType().asElement())
@@ -53,18 +58,18 @@ public abstract class Executable {
                 .orElseThrow(AssertionError::new);
         Optional<TypeElement> converter = findConverterAttribute(annotationMirror);
         if (annotation instanceof Option) {
-            return new ExecutableOption(method, (Option) annotation, converter);
+            return new ExecutableOption(method, (Option) annotation, converter, enumName);
         }
         if (annotation instanceof Parameter) {
-            return new ExecutableParameter(method, (Parameter) annotation, converter);
+            return new ExecutableParameter(method, (Parameter) annotation, converter, enumName);
         }
         if (annotation instanceof VarargsParameter) {
-            return new ExecutableVarargsParameter(method, (VarargsParameter) annotation, converter);
+            return new ExecutableVarargsParameter(method, (VarargsParameter) annotation, converter, enumName);
         }
         throw new AssertionError();
     }
 
-    abstract AnnotatedMethod<?> annotatedMethod(SourceElement sourceElement, String enumName);
+    abstract AnnotatedMethod<?> annotatedMethod();
 
     abstract Optional<String> descriptionKey();
 
@@ -104,5 +109,9 @@ public abstract class Executable {
 
     final ValidationFailure fail(String message) {
         return new ValidationFailure(message, method);
+    }
+
+    public final String enumName() {
+        return enumName;
     }
 }

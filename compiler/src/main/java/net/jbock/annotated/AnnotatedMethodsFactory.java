@@ -32,7 +32,7 @@ public class AnnotatedMethodsFactory {
 
     public Either<List<ValidationFailure>, AnnotatedMethods> createAnnotatedMethods() {
         return executableElementsFinder.findExecutableElements()
-                .map(methods -> new SourceElementWithMethods(sourceElement, methods))
+                .map(SourceElementWithMethods::new)
                 .flatMap(SourceElementWithMethods::validListOfAnnotatedMethods)
                 .map(AnnotatedMethodsBuilder::builder)
                 .map(builder -> builder.withNamedOptions(builder.annotatedMethods()

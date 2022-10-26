@@ -14,16 +14,13 @@ public final class AnnotatedParameter extends AnnotatedMethod<ExecutableParamete
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
-    private AnnotatedParameter(
-            String enumName,
-            ExecutableParameter parameter) {
-        super(parameter, enumName);
+    private AnnotatedParameter(ExecutableParameter parameter) {
+        super(parameter);
     }
 
     static AnnotatedParameter createParameter(
-            ExecutableParameter parameter,
-            String enumName) {
-        return new AnnotatedParameter(enumName, parameter);
+            ExecutableParameter parameter) {
+        return new AnnotatedParameter(parameter);
     }
 
     @Override

@@ -11,13 +11,10 @@ import java.util.Optional;
 
 public abstract class AnnotatedMethod<E extends Executable> {
 
-    private final String enumName;
-    
     private final E executable;
 
-    AnnotatedMethod(E executable, String enumName) {
+    AnnotatedMethod(E executable) {
         this.executable = executable;
-        this.enumName = enumName;
     }
 
     final E executable() {
@@ -31,7 +28,7 @@ public abstract class AnnotatedMethod<E extends Executable> {
     public abstract String paramLabel();
 
     public final String enumName() {
-        return enumName;
+        return executable().enumName();
     }
 
     public final String methodName() {

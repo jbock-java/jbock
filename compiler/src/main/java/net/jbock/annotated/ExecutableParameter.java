@@ -18,16 +18,15 @@ final class ExecutableParameter extends Executable {
     ExecutableParameter(
             ExecutableElement method,
             Parameter parameter,
-            Optional<TypeElement> converter) {
-        super(method, converter);
+            Optional<TypeElement> converter,
+            String enumName) {
+        super(method, converter, enumName);
         this.parameter = parameter;
     }
 
     @Override
-    AnnotatedMethod<?> annotatedMethod(
-            SourceElement sourceElement,
-            String enumName) {
-        return createParameter(this, enumName);
+    AnnotatedMethod<?> annotatedMethod() {
+        return createParameter(this);
     }
 
     @Override

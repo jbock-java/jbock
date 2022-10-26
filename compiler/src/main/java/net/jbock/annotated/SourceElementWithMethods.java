@@ -1,16 +1,12 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
-import net.jbock.common.SnakeName;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
-import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Name;
 import javax.lang.model.type.DeclaredType;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 import static io.jbock.util.Either.right;
@@ -25,13 +21,10 @@ import static net.jbock.common.Util.checkNoDuplicateAnnotations;
 
 final class SourceElementWithMethods {
 
-    private final SourceElement sourceElement;
     private final List<Executable> methods;
-    private final UniqueNameSet uniqueNameSet = new UniqueNameSet();
 
-    SourceElementWithMethods(SourceElement sourceElement, List<Executable> methods) {
+    SourceElementWithMethods(List<Executable> methods) {
         this.methods = methods;
-        this.sourceElement = sourceElement;
     }
 
     Either<List<ValidationFailure>, List<AnnotatedMethod<?>>> validListOfAnnotatedMethods() {
@@ -42,11 +35,10 @@ final class SourceElementWithMethods {
 
     private Either<ValidationFailure, AnnotatedMethod<?>> createAnnotatedMethod(
             Executable sourceMethod) {
-        String enumName = enumNameFor(sourceMethod.simpleName());
         ExecutableElement method = sourceMethod.method();
         return checkNoDuplicateAnnotations(method, methodLevelAnnotations())
                 .<Either<ValidationFailure, AnnotatedMethod<?>>>map(Either::left)
-                .orElseGet(() -> right(sourceMethod.annotatedMethod(sourceElement, enumName)))
+                .orElseGet(() -> right(sourceMethod.annotatedMethod()))
                 .filter(this::checkAccessibleReturnType);
     }
 
@@ -72,12 +64,5 @@ final class SourceElementWithMethods {
                 .map(AS_DECLARED::visit)
                 .flatMap(Optional::stream)
                 .anyMatch(this::isInaccessible);
-    }
-
-    private String enumNameFor(Name sourceMethodName) {
-        String enumName = "_".contentEquals(sourceMethodName) ?
-                "_1" : // avoid potential keyword issue
-                SnakeName.create(sourceMethodName).snake('_').toUpperCase(Locale.ROOT);
-        return uniqueNameSet.getUniqueName(enumName);
     }
 }

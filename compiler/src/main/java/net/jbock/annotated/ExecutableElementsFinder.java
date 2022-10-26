@@ -2,6 +2,7 @@ package net.jbock.annotated;
 
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
+import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 import net.jbock.validate.ValidateScope;
@@ -16,6 +17,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -53,13 +55,38 @@ public class ExecutableElementsFinder {
                 .or(this::checkNoInterfaces)
                 .map(List::of)
                 .<Either<List<ValidationFailure>, List<Executable>>>map(Either::left)
-                .orElseGet(this::validParameterlessAbstract);
+                .orElseGet(() -> new ParameterlessAbstractValidator(abstractMethods()).validParameterlessAbstract());
     }
+    
+    private static class ParameterlessAbstractValidator {
 
-    private Either<List<ValidationFailure>, List<Executable>> validParameterlessAbstract() {
-        return abstractMethods().stream()
-                .map(this::validateAbstractMethod)
-                .collect(allFailures());
+        final List<ExecutableElement> abstractMethods;
+        final UniqueNameSet uniqueNameSet = new UniqueNameSet();
+
+        ParameterlessAbstractValidator(List<ExecutableElement> abstractMethods) {
+            this.abstractMethods = abstractMethods;
+        }
+
+        Either<List<ValidationFailure>, List<Executable>> validParameterlessAbstract() {
+            return abstractMethods.stream()
+                    .map(this::validateAbstractMethod)
+                    .collect(allFailures());
+        }
+
+        Either<ValidationFailure, Executable> validateAbstractMethod(
+                ExecutableElement method) {
+            String enumName = enumNameFor(method.getSimpleName());
+            return getMethodAnnotation(method)
+                    .map(a -> Executable.create(method, a, enumName))
+                    .filter(ExecutableElementsFinder::validateParameterless);
+        }
+
+        String enumNameFor(Name sourceMethodName) {
+            String enumName = "_".contentEquals(sourceMethodName) ?
+                    "_1" : // avoid potential keyword issue
+                    SnakeName.create(sourceMethodName).snake('_').toUpperCase(Locale.ROOT);
+            return uniqueNameSet.getUniqueName(enumName);
+        }
     }
 
     private Optional<ValidationFailure> checkInterfaceOrSimpleClass() {
@@ -96,15 +123,8 @@ public class ExecutableElementsFinder {
                 .filter(m -> m.getModifiers().contains(ABSTRACT))
                 .collect(toList());
     }
-
-    private Either<ValidationFailure, Executable> validateAbstractMethod(
-            ExecutableElement method) {
-        return getMethodAnnotation(method)
-                .map(a -> Executable.create(method, a))
-                .filter(this::validateParameterless);
-    }
-
-    private Either<ValidationFailure, Annotation> getMethodAnnotation(
+    
+    private static Either<ValidationFailure, Annotation> getMethodAnnotation(
             ExecutableElement method) {
         return methodLevelAnnotations().stream()
                 .map(method::getAnnotation)
@@ -114,7 +134,7 @@ public class ExecutableElementsFinder {
                 .orElseGet(() -> left(missingAnnotationError(method)));
     }
 
-    private Optional<ValidationFailure> validateParameterless(
+    private static Optional<ValidationFailure> validateParameterless(
             Executable method) {
         if (method.method().getParameters().isEmpty()) {
             return Optional.empty();
@@ -128,7 +148,7 @@ public class ExecutableElementsFinder {
                         .collect(toList())));
     }
 
-    private ValidationFailure missingAnnotationError(
+    private static ValidationFailure missingAnnotationError(
             ExecutableElement method) {
         String message = "missing annotation: add one of these annotations: " + methodLevelAnnotations().stream()
                 .map(Class::getSimpleName).collect(toList());
