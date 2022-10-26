@@ -47,8 +47,19 @@ public final class ExecutableVarargsParameter extends Executable {
         return List.of(parameter.description());
     }
 
+    @Override
     public String paramLabel() {
         return paramLabel.get();
+    }
+
+    @Override
+    public boolean isParameter() {
+        return false;
+    }
+
+    @Override
+    public boolean isVarargsParameter() {
+        return true;
     }
 
     private Optional<String> parameterParamLabel() {

@@ -11,21 +11,6 @@ public final class AnnotatedParameter extends AnnotatedMethod<ExecutableParamete
         return new AnnotatedParameter(parameter);
     }
 
-    @Override
-    public boolean isParameter() {
-        return true;
-    }
-
-    @Override
-    public boolean isVarargsParameter() {
-        return false;
-    }
-
-    @Override
-    public String paramLabel() {
-        return executable().paramLabel();
-    }
-
     public int index() {
         return executable().index();
     }

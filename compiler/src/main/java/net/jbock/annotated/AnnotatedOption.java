@@ -12,21 +12,6 @@ public final class AnnotatedOption extends AnnotatedMethod<ExecutableOption> {
         return new AnnotatedOption(option);
     }
 
-    @Override
-    public boolean isParameter() {
-        return false;
-    }
-
-    @Override
-    public boolean isVarargsParameter() {
-        return false;
-    }
-
-    @Override
-    public String paramLabel() {
-        return executable().paramLabel();
-    }
-
     public List<String> names() {
         return executable().names();
     }

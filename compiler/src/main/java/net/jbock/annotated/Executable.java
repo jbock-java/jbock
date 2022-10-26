@@ -69,6 +69,12 @@ public abstract class Executable {
         throw new AssertionError();
     }
 
+    public abstract boolean isParameter();
+
+    public abstract boolean isVarargsParameter();
+
+    public abstract String paramLabel();
+
     abstract AnnotatedMethod<?> annotatedMethod();
 
     abstract Optional<String> descriptionKey();

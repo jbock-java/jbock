@@ -21,11 +21,17 @@ public abstract class AnnotatedMethod<E extends Executable> {
         return executable;
     }
 
-    public abstract boolean isParameter();
+    public final boolean isParameter() {
+        return executable.isParameter();
+    }
 
-    public abstract boolean isVarargsParameter();
+    public final boolean isVarargsParameter() {
+        return executable.isVarargsParameter();
+    }
 
-    public abstract String paramLabel();
+    public final String paramLabel() {
+        return executable.paramLabel();
+    }
 
     public final String enumName() {
         return executable().enumName();

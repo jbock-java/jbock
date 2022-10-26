@@ -66,10 +66,21 @@ public final class ExecutableOption extends Executable {
         return names.get();
     }
 
+    @Override
     public String paramLabel() {
         return paramLabel.get();
     }
-    
+
+    @Override
+    public boolean isParameter() {
+        return false;
+    }
+
+    @Override
+    public boolean isVarargsParameter() {
+        return false;
+    }
+
     private List<String> optionNames() {
         return List.of(option.names());
     }

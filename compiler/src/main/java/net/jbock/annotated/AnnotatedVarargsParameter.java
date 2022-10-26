@@ -9,19 +9,4 @@ public final class AnnotatedVarargsParameter extends AnnotatedMethod<ExecutableV
     static AnnotatedVarargsParameter createVarargsParameter(ExecutableVarargsParameter parameters) {
         return new AnnotatedVarargsParameter(parameters);
     }
-
-    @Override
-    public boolean isParameter() {
-        return false;
-    }
-
-    @Override
-    public boolean isVarargsParameter() {
-        return true;
-    }
-
-    @Override
-    public String paramLabel() {
-        return executable().paramLabel();
-    }
 }
