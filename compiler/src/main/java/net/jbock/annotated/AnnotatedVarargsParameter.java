@@ -1,18 +1,6 @@
 package net.jbock.annotated;
 
-import net.jbock.common.SnakeName;
-
-import java.util.Locale;
-import java.util.function.Supplier;
-
-import static net.jbock.common.Suppliers.memoize;
-
 public final class AnnotatedVarargsParameter extends AnnotatedMethod<ExecutableVarargsParameter> {
-
-    private final Supplier<String> paramLabel = memoize(() -> executable().paramLabel()
-            .orElseGet(() -> SnakeName.create(executable().simpleName())
-                    .snake('_')
-                    .toUpperCase(Locale.ROOT)));
 
     private AnnotatedVarargsParameter(ExecutableVarargsParameter parameters) {
         super(parameters);
@@ -34,6 +22,6 @@ public final class AnnotatedVarargsParameter extends AnnotatedMethod<ExecutableV
 
     @Override
     public String paramLabel() {
-        return paramLabel.get();
+        return executable().paramLabel();
     }
 }

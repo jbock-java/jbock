@@ -1,18 +1,6 @@
 package net.jbock.annotated;
 
-import net.jbock.common.SnakeName;
-
-import java.util.Locale;
-import java.util.function.Supplier;
-
-import static net.jbock.common.Suppliers.memoize;
-
 public final class AnnotatedParameter extends AnnotatedMethod<ExecutableParameter> {
-
-    private final Supplier<String> paramLabel = memoize(() -> executable().paramLabel()
-            .orElseGet(() -> SnakeName.create(executable().simpleName())
-                    .snake('_')
-                    .toUpperCase(Locale.ROOT)));
 
     private AnnotatedParameter(ExecutableParameter parameter) {
         super(parameter);
@@ -35,7 +23,7 @@ public final class AnnotatedParameter extends AnnotatedMethod<ExecutableParamete
 
     @Override
     public String paramLabel() {
-        return paramLabel.get();
+        return executable().paramLabel();
     }
 
     public int index() {

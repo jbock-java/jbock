@@ -16,7 +16,7 @@ import static net.jbock.annotated.AnnotatedOption.createOption;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
-final class ExecutableOption extends Executable {
+public final class ExecutableOption extends Executable {
 
     private static final Comparator<String> LENGTH_FIRST_COMPARATOR = Comparator
             .comparing(String::length)
