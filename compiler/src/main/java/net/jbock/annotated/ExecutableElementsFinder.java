@@ -57,7 +57,7 @@ public class ExecutableElementsFinder {
                 .<Either<List<ValidationFailure>, List<Executable>>>map(Either::left)
                 .orElseGet(() -> new ParameterlessAbstractValidator(abstractMethods()).validParameterlessAbstract());
     }
-    
+
     private static class ParameterlessAbstractValidator {
 
         final List<ExecutableElement> abstractMethods;
@@ -123,7 +123,7 @@ public class ExecutableElementsFinder {
                 .filter(m -> m.getModifiers().contains(ABSTRACT))
                 .collect(toList());
     }
-    
+
     private static Either<ValidationFailure, Annotation> getMethodAnnotation(
             ExecutableElement method) {
         return methodLevelAnnotations().stream()

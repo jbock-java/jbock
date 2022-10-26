@@ -39,12 +39,12 @@ public final class ExecutableParameter extends Executable {
     }
 
     @Override
-    Optional<String> descriptionKey() {
+    public Optional<String> descriptionKey() {
         return optionalString(parameter.descriptionKey());
     }
 
     @Override
-    List<String> description() {
+    public List<String> description() {
         return List.of(parameter.description());
     }
 

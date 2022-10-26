@@ -53,12 +53,12 @@ public final class ExecutableOption extends Executable {
     }
 
     @Override
-    Optional<String> descriptionKey() {
+    public Optional<String> descriptionKey() {
         return optionalString(option.descriptionKey());
     }
 
     @Override
-    List<String> description() {
+    public List<String> description() {
         return List.of(option.description());
     }
 

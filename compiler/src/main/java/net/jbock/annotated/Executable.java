@@ -12,6 +12,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.EnumSet;
 import java.util.List;
@@ -77,11 +78,11 @@ public abstract class Executable {
 
     abstract AnnotatedMethod<?> annotatedMethod();
 
-    abstract Optional<String> descriptionKey();
+    public abstract Optional<String> descriptionKey();
 
-    abstract List<String> description();
+    public abstract List<String> description();
 
-    final ExecutableElement method() {
+    public final ExecutableElement method() {
         return method;
     }
 
@@ -89,7 +90,7 @@ public abstract class Executable {
         return method.getSimpleName();
     }
 
-    final List<Modifier> accessModifiers() {
+    public final List<Modifier> accessModifiers() {
         return method().getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
                 .collect(toList());
@@ -109,15 +110,23 @@ public abstract class Executable {
                 .filter(element -> !"java.lang.Void".contentEquals(element.getQualifiedName()));
     }
 
-    final Optional<TypeElement> converter() {
+    public final Optional<TypeElement> converter() {
         return converter;
     }
 
-    final ValidationFailure fail(String message) {
+    public final ValidationFailure fail(String message) {
         return new ValidationFailure(message, method);
     }
 
     public final String enumName() {
         return enumName;
+    }
+
+    public final String methodName() {
+        return method.getSimpleName().toString();
+    }
+
+    public final TypeMirror returnType() {
+        return method.getReturnType();
     }
 }

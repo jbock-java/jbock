@@ -34,15 +34,15 @@ public abstract class AnnotatedMethod<E extends Executable> {
     }
 
     public final String enumName() {
-        return executable().enumName();
+        return executable.enumName();
     }
 
     public final String methodName() {
-        return method().getSimpleName().toString();
+        return executable.methodName();
     }
 
     public final TypeMirror returnType() {
-        return method().getReturnType();
+        return executable.returnType();
     }
 
     public final List<Modifier> accessModifiers() {
