@@ -34,24 +34,24 @@ final class SourceElementWithMethods {
         this.sourceElement = sourceElement;
     }
 
-    Either<List<ValidationFailure>, List<AnnotatedMethod>> validListOfAnnotatedMethods() {
+    Either<List<ValidationFailure>, List<AnnotatedMethod<?>>> validListOfAnnotatedMethods() {
         return methods.stream()
                 .map(this::createAnnotatedMethod)
                 .collect(allFailures());
     }
 
-    private Either<ValidationFailure, AnnotatedMethod> createAnnotatedMethod(
+    private Either<ValidationFailure, AnnotatedMethod<?>> createAnnotatedMethod(
             Executable sourceMethod) {
         String enumName = enumNameFor(sourceMethod.simpleName());
         ExecutableElement method = sourceMethod.method();
         return checkNoDuplicateAnnotations(method, methodLevelAnnotations())
-                .<Either<ValidationFailure, AnnotatedMethod>>map(Either::left)
+                .<Either<ValidationFailure, AnnotatedMethod<?>>>map(Either::left)
                 .orElseGet(() -> right(sourceMethod.annotatedMethod(sourceElement, enumName)))
                 .filter(this::checkAccessibleReturnType);
     }
 
     private Optional<ValidationFailure> checkAccessibleReturnType(
-            AnnotatedMethod annotatedMethod) {
+            AnnotatedMethod<?> annotatedMethod) {
         return AS_DECLARED.visit(annotatedMethod.returnType())
                 .filter(this::isInaccessible)
                 .map(type -> annotatedMethod.fail("inaccessible type: " +

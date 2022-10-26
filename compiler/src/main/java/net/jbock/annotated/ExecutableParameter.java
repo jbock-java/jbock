@@ -24,7 +24,7 @@ final class ExecutableParameter extends Executable {
     }
 
     @Override
-    AnnotatedMethod annotatedMethod(
+    AnnotatedMethod<?> annotatedMethod(
             SourceElement sourceElement,
             String enumName) {
         return createParameter(this, enumName);

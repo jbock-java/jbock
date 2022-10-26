@@ -24,7 +24,7 @@ final class ExecutableVarargsParameter extends Executable {
     }
 
     @Override
-    AnnotatedMethod annotatedMethod(
+    AnnotatedMethod<?> annotatedMethod(
             SourceElement sourceElement,
             String enumName) {
         return createVarargsParameter(this, enumName);

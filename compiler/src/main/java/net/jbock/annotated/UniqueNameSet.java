@@ -27,15 +27,11 @@ public final class UniqueNameSet {
    * Generates a unique name using {@code base}. If {@code base} has not yet been added, it will be
    * returned as-is. If your {@code base} is healthy, this will always return {@code base}.
    */
-  public String getUniqueName(CharSequence base) {
-    String name = base.toString();
+  public String getUniqueName(String base) {
+    String name = base;
     for (int differentiator = 2; !uniqueNames.add(name); differentiator++) {
-      name = base.toString() + differentiator;
+      name = base + differentiator;
     }
     return name;
-  }
-
-  public void claim(CharSequence name) {
-    uniqueNames.add(name.toString());
   }
 }

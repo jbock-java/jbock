@@ -8,19 +8,19 @@ final class AnnotatedMethodsBuilder {
     private AnnotatedMethodsBuilder() {
     }
 
-    static Step1 builder(List<AnnotatedMethod> annotatedMethods) {
+    static Step1 builder(List<AnnotatedMethod<?>> annotatedMethods) {
         return new Step1(annotatedMethods);
     }
 
     static final class Step1 {
 
-        private final List<AnnotatedMethod> annotatedMethods;
+        private final List<AnnotatedMethod<?>> annotatedMethods;
 
-        private Step1(List<AnnotatedMethod> annotatedMethods) {
+        private Step1(List<AnnotatedMethod<?>> annotatedMethods) {
             this.annotatedMethods = annotatedMethods;
         }
 
-        Stream<AnnotatedMethod> annotatedMethods() {
+        Stream<AnnotatedMethod<?>> annotatedMethods() {
             return annotatedMethods.stream();
         }
 
@@ -39,7 +39,7 @@ final class AnnotatedMethodsBuilder {
             this.namedOptions = namedOptions;
         }
 
-        Stream<AnnotatedMethod> annotatedMethods() {
+        Stream<AnnotatedMethod<?>> annotatedMethods() {
             return step1.annotatedMethods.stream();
         }
 
@@ -58,7 +58,7 @@ final class AnnotatedMethodsBuilder {
             this.positionalParameters = positionalParameters;
         }
 
-        Stream<AnnotatedMethod> annotatedMethods() {
+        Stream<AnnotatedMethod<?>> annotatedMethods() {
             return step2.step1.annotatedMethods.stream();
         }
 
