@@ -43,26 +43,26 @@ public abstract class AnnotatedMethod<E extends Executable> {
     }
 
     public final List<Modifier> accessModifiers() {
-        return executable().accessModifiers();
+        return executable.accessModifiers();
     }
 
     public final Optional<TypeElement> converter() {
-        return executable().converter();
+        return executable.converter();
     }
 
     public final ValidationFailure fail(String message) {
-        return executable().fail(message);
+        return executable.fail(message);
     }
 
     public final ExecutableElement method() {
-        return executable().method();
+        return executable.method();
     }
 
     public final Optional<String> descriptionKey() {
-        return executable().descriptionKey();
+        return executable.descriptionKey();
     }
 
     public final List<String> description() {
-        return executable().description();
+        return executable.description();
     }
 }
