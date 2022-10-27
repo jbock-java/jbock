@@ -18,12 +18,12 @@ import static io.jbock.util.Eithers.allFailures;
 import static java.util.stream.Collectors.toList;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 
-final class ParameterlessAbstractValidator {
+final class ItemListFactory {
 
     private final List<ExecutableElement> abstractMethods;
     private final UniqueNameSet uniqueNameSet = new UniqueNameSet();
 
-    ParameterlessAbstractValidator(List<ExecutableElement> abstractMethods) {
+    ItemListFactory(List<ExecutableElement> abstractMethods) {
         this.abstractMethods = abstractMethods;
     }
 
@@ -38,7 +38,7 @@ final class ParameterlessAbstractValidator {
         String enumName = enumNameFor(method.getSimpleName());
         return getMethodAnnotation(method)
                 .map(a -> Item.create(method, a, enumName))
-                .filter(ParameterlessAbstractValidator::validateParameterless);
+                .filter(ItemListFactory::validateParameterless);
     }
 
     private String enumNameFor(Name sourceMethodName) {

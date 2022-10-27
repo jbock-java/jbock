@@ -2,7 +2,7 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
-import net.jbock.annotated.AnnotatedMethods;
+import net.jbock.annotated.Items;
 import net.jbock.annotated.AnnotatedMethodsFactory;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
@@ -58,7 +58,7 @@ public class CommandProcessor {
     /* Left-Optional
      */
     private Optional<List<ValidationFailure>> checkDuplicateDescriptionKeys(
-            AnnotatedMethods methods) {
+            Items methods) {
         List<ValidationFailure> failures = new ArrayList<>();
         Set<String> keys = new HashSet<>();
         sourceElement.descriptionKey().ifPresent(keys::add);

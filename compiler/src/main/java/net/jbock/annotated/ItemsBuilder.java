@@ -3,9 +3,9 @@ package net.jbock.annotated;
 import java.util.List;
 import java.util.stream.Stream;
 
-final class AnnotatedMethodsBuilder {
+final class ItemsBuilder {
 
-    private AnnotatedMethodsBuilder() {
+    private ItemsBuilder() {
     }
 
     static Step1 builder(List<? extends Item> annotatedMethods) {
@@ -62,8 +62,8 @@ final class AnnotatedMethodsBuilder {
             return step2.step1.annotatedMethods.stream();
         }
 
-        AnnotatedMethods withVarargsParameters(List<VarargsParameter> varargsParameters) {
-            return new AnnotatedMethods(this, varargsParameters);
+        Items withVarargsParameters(List<VarargsParameter> varargsParameters) {
+            return new Items(this, varargsParameters);
         }
     }
 }

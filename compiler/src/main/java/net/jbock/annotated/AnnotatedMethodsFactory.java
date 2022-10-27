@@ -30,11 +30,11 @@ public class AnnotatedMethodsFactory {
         this.executableElementsFinder = executableElementsFinder;
     }
 
-    public Either<List<ValidationFailure>, AnnotatedMethods> createAnnotatedMethods() {
-        return executableElementsFinder.findExecutableElements()
+    public Either<List<ValidationFailure>, Items> createAnnotatedMethods() {
+        return executableElementsFinder.findItems()
                 .map(SourceElementWithMethods::new)
                 .flatMap(SourceElementWithMethods::validListOfAnnotatedMethods)
-                .map(AnnotatedMethodsBuilder::builder)
+                .map(ItemsBuilder::builder)
                 .map(builder -> builder.withNamedOptions(builder.annotatedMethods()
                         .flatMap(instancesOf(Option.class))
                         .collect(toList())))
@@ -49,9 +49,9 @@ public class AnnotatedMethodsFactory {
     }
 
     private Optional<List<ValidationFailure>> validateAtLeastOneParameterInSuperCommand(
-            AnnotatedMethods annotatedMethods) {
+            Items items) {
         if (!sourceElement.isSuperCommand() ||
-                !annotatedMethods.positionalParameters().isEmpty()) {
+                !items.positionalParameters().isEmpty()) {
             return Optional.empty();
         }
         String message = "at least one positional parameter must be defined" +

@@ -41,12 +41,12 @@ public class ExecutableElementsFinder {
      * @return all annotated parameterless abstract methods,
      *         or a nonempty list of validation failures
      */
-    Either<List<ValidationFailure>, List<Item>> findExecutableElements() {
+    Either<List<ValidationFailure>, List<Item>> findItems() {
         return checkInterfaceOrSimpleClass()
                 .or(this::checkNoInterfaces)
                 .map(List::of)
                 .<Either<List<ValidationFailure>, List<Item>>>map(Either::left)
-                .orElseGet(() -> new ParameterlessAbstractValidator(abstractMethods()).validParameterlessAbstract());
+                .orElseGet(() -> new ItemListFactory(abstractMethods()).validParameterlessAbstract());
     }
 
     private Optional<ValidationFailure> checkInterfaceOrSimpleClass() {

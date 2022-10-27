@@ -2,14 +2,13 @@ package net.jbock.annotated;
 
 import java.util.List;
 
-public final class AnnotatedMethods {
+public final class Items {
 
-    private final AnnotatedMethodsBuilder.Step3 step3;
+    private final ItemsBuilder.Step3 step3;
     private final List<VarargsParameter> varargsParameters;
 
-    AnnotatedMethods(
-            AnnotatedMethodsBuilder.Step3 step3,
-            List<VarargsParameter> varargsParameters) {
+    Items(ItemsBuilder.Step3 step3,
+          List<VarargsParameter> varargsParameters) {
         this.step3 = step3;
         this.varargsParameters = varargsParameters;
     }
