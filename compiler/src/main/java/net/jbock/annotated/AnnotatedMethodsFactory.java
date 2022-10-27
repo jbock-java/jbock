@@ -34,6 +34,7 @@ public class AnnotatedMethodsFactory {
         return executableElementsFinder.findExecutableElements()
                 .map(SourceElementWithMethods::new)
                 .flatMap(SourceElementWithMethods::validListOfAnnotatedMethods)
+                .map(executables -> executables.stream().map(Executable::annotatedMethod).collect(toList()))
                 .map(AnnotatedMethodsBuilder::builder)
                 .map(builder -> builder.withNamedOptions(builder.annotatedMethods()
                         .flatMap(instancesOf(AnnotatedOption.class))

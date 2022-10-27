@@ -27,23 +27,22 @@ final class SourceElementWithMethods {
         this.methods = methods;
     }
 
-    Either<List<ValidationFailure>, List<AnnotatedMethod<?>>> validListOfAnnotatedMethods() {
+    Either<List<ValidationFailure>, List<Executable>> validListOfAnnotatedMethods() {
         return methods.stream()
                 .map(this::createAnnotatedMethod)
                 .collect(allFailures());
     }
 
-    private Either<ValidationFailure, AnnotatedMethod<?>> createAnnotatedMethod(
+    private Either<ValidationFailure, Executable> createAnnotatedMethod(
             Executable sourceMethod) {
         ExecutableElement method = sourceMethod.method();
         return checkNoDuplicateAnnotations(method, methodLevelAnnotations())
-                .<Either<ValidationFailure, AnnotatedMethod<?>>>map(Either::left)
-                .orElseGet(() -> right(sourceMethod.annotatedMethod()))
+                .<Either<ValidationFailure, Executable>>map(Either::left)
+                .orElseGet(() -> right(sourceMethod))
                 .filter(this::checkAccessibleReturnType);
     }
 
-    private Optional<ValidationFailure> checkAccessibleReturnType(
-            AnnotatedMethod<?> annotatedMethod) {
+    private Optional<ValidationFailure> checkAccessibleReturnType(Executable annotatedMethod) {
         return AS_DECLARED.visit(annotatedMethod.returnType())
                 .filter(this::isInaccessible)
                 .map(type -> annotatedMethod.fail("inaccessible type: " +
