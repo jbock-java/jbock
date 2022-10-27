@@ -2,7 +2,7 @@ package net.jbock.writing;
 
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
-import net.jbock.annotated.ExecutableOption;
+import net.jbock.annotated.Option;
 import net.jbock.convert.Mapping;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -22,7 +22,7 @@ final class OptEnum extends HasCommandRepresentation {
 
     TypeSpec define() {
         TypeSpec.Builder spec = TypeSpec.enumBuilder(sourceElement().optionEnumType());
-        for (Mapping<ExecutableOption> option : namedOptions()) {
+        for (Mapping<Option> option : namedOptions()) {
             spec.addEnumConstant(option.enumName());
         }
         return spec.addModifiers(PRIVATE)

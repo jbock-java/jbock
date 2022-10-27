@@ -1,6 +1,5 @@
 package net.jbock.annotated;
 
-import net.jbock.VarargsParameter;
 import net.jbock.common.SnakeName;
 
 import javax.lang.model.element.ExecutableElement;
@@ -13,18 +12,18 @@ import java.util.function.Supplier;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
-public final class ExecutableVarargsParameter extends Executable {
-
-    private final VarargsParameter parameter;
+public final class Parameter extends Item {
 
     private final Supplier<String> paramLabel = memoize(() -> parameterParamLabel()
             .orElseGet(() -> SnakeName.create(simpleName())
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
-    ExecutableVarargsParameter(
+    private final net.jbock.Parameter parameter;
+
+    Parameter(
             ExecutableElement method,
-            VarargsParameter parameter,
+            net.jbock.Parameter parameter,
             Optional<TypeElement> converter,
             String enumName) {
         super(method, converter, enumName);
@@ -48,12 +47,16 @@ public final class ExecutableVarargsParameter extends Executable {
 
     @Override
     public boolean isParameter() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isVarargsParameter() {
-        return true;
+        return false;
+    }
+
+    public int index() {
+        return parameter.index();
     }
 
     private Optional<String> parameterParamLabel() {

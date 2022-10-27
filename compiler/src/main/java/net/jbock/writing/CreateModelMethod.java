@@ -3,11 +3,10 @@ package net.jbock.writing;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import jakarta.inject.Inject;
-import net.jbock.annotated.ExecutableOption;
+import net.jbock.annotated.Option;
 import net.jbock.convert.Mapping;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Multiplicity;
-import net.jbock.model.Option;
 import net.jbock.model.Parameter;
 
 import java.util.ArrayList;
@@ -40,7 +39,7 @@ final class CreateModelMethod extends HasCommandRepresentation {
         if (isSuperCommand()) {
             code.add(CodeBlock.of(".withSuperCommand($L)", true));
         }
-        for (Mapping<ExecutableOption> c : namedOptions()) {
+        for (Mapping<Option> c : namedOptions()) {
             code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
         }
         Stream.concat(positionalParameters().stream(), varargsParameter().stream())
@@ -57,16 +56,16 @@ final class CreateModelMethod extends HasCommandRepresentation {
         return define.get();
     }
 
-    private CodeBlock optionBlock(Mapping<ExecutableOption> m) {
+    private CodeBlock optionBlock(Mapping<Option> m) {
         List<CodeBlock> names = new ArrayList<>();
         for (String name : m.sourceMethod().names()) {
             names.add(CodeBlock.of("$S", name));
         }
         List<CodeBlock> code = new ArrayList<>();
         if (m.isNullary()) {
-            code.add(CodeBlock.of("$T.nullary()", Option.class));
+            code.add(CodeBlock.of("$T.nullary()", net.jbock.model.Option.class));
         } else {
-            code.add(CodeBlock.of("$T.unary($T.$L)", Option.class, Multiplicity.class, m.multiplicity().name()));
+            code.add(CodeBlock.of("$T.unary($T.$L)", net.jbock.model.Option.class, Multiplicity.class, m.multiplicity().name()));
         }
         code.add(CodeBlock.of(".withParamLabel($S)", m.paramLabel()));
         m.sourceMethod().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));

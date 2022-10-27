@@ -21,28 +21,28 @@ import static net.jbock.common.Util.checkNoDuplicateAnnotations;
 
 final class SourceElementWithMethods {
 
-    private final List<Executable> methods;
+    private final List<Item> methods;
 
-    SourceElementWithMethods(List<Executable> methods) {
+    SourceElementWithMethods(List<Item> methods) {
         this.methods = methods;
     }
 
-    Either<List<ValidationFailure>, List<Executable>> validListOfAnnotatedMethods() {
+    Either<List<ValidationFailure>, List<Item>> validListOfAnnotatedMethods() {
         return methods.stream()
                 .map(this::createAnnotatedMethod)
                 .collect(allFailures());
     }
 
-    private Either<ValidationFailure, Executable> createAnnotatedMethod(
-            Executable sourceMethod) {
+    private Either<ValidationFailure, Item> createAnnotatedMethod(
+            Item sourceMethod) {
         ExecutableElement method = sourceMethod.method();
         return checkNoDuplicateAnnotations(method, methodLevelAnnotations())
-                .<Either<ValidationFailure, Executable>>map(Either::left)
+                .<Either<ValidationFailure, Item>>map(Either::left)
                 .orElseGet(() -> right(sourceMethod))
                 .filter(this::checkAccessibleReturnType);
     }
 
-    private Optional<ValidationFailure> checkAccessibleReturnType(Executable annotatedMethod) {
+    private Optional<ValidationFailure> checkAccessibleReturnType(Item annotatedMethod) {
         return AS_DECLARED.visit(annotatedMethod.returnType())
                 .filter(this::isInaccessible)
                 .map(type -> annotatedMethod.fail("inaccessible type: " +

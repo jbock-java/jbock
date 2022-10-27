@@ -1,8 +1,5 @@
 package net.jbock.annotated;
 
-import net.jbock.Option;
-import net.jbock.Parameter;
-import net.jbock.VarargsParameter;
 import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -27,7 +24,7 @@ import static net.jbock.common.TypeTool.ANNOTATION_VALUE_AS_TYPE;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
-public abstract class Executable {
+public abstract class Item {
 
     private static final Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
@@ -35,16 +32,15 @@ public abstract class Executable {
     private final Optional<TypeElement> converter;
     private final String enumName;
 
-    Executable(
-            ExecutableElement method,
-            Optional<TypeElement> converter,
-            String enumName) {
+    Item(ExecutableElement method,
+         Optional<TypeElement> converter,
+         String enumName) {
         this.method = method;
         this.converter = converter;
         this.enumName = enumName;
     }
 
-    static Executable create(
+    static Item create(
             ExecutableElement method,
             Annotation annotation,
             String enumName) {
@@ -58,14 +54,14 @@ public abstract class Executable {
                 .findFirst()
                 .orElseThrow(AssertionError::new);
         Optional<TypeElement> converter = findConverterAttribute(annotationMirror);
-        if (annotation instanceof Option) {
-            return new ExecutableOption(method, (Option) annotation, converter, enumName);
+        if (annotation instanceof net.jbock.Option) {
+            return new Option(method, (net.jbock.Option) annotation, converter, enumName);
         }
-        if (annotation instanceof Parameter) {
-            return new ExecutableParameter(method, (Parameter) annotation, converter, enumName);
+        if (annotation instanceof net.jbock.Parameter) {
+            return new Parameter(method, (net.jbock.Parameter) annotation, converter, enumName);
         }
-        if (annotation instanceof VarargsParameter) {
-            return new ExecutableVarargsParameter(method, (VarargsParameter) annotation, converter, enumName);
+        if (annotation instanceof net.jbock.VarargsParameter) {
+            return new VarargsParameter(method, (net.jbock.VarargsParameter) annotation, converter, enumName);
         }
         throw new AssertionError();
     }

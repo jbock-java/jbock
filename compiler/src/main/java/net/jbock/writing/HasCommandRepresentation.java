@@ -2,9 +2,9 @@ package net.jbock.writing;
 
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.FieldSpec;
-import net.jbock.annotated.ExecutableOption;
-import net.jbock.annotated.ExecutableParameter;
-import net.jbock.annotated.ExecutableVarargsParameter;
+import net.jbock.annotated.Option;
+import net.jbock.annotated.Parameter;
+import net.jbock.annotated.VarargsParameter;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 
@@ -19,7 +19,7 @@ abstract class HasCommandRepresentation {
         this.commandRepresentation = commandRepresentation;
     }
 
-    final List<Mapping<ExecutableOption>> namedOptions() {
+    final List<Mapping<Option>> namedOptions() {
         return commandRepresentation.namedOptions();
     }
 
@@ -35,11 +35,11 @@ abstract class HasCommandRepresentation {
         return commandRepresentation.optionNames();
     }
 
-    final List<Mapping<ExecutableParameter>> positionalParameters() {
+    final List<Mapping<Parameter>> positionalParameters() {
         return commandRepresentation.positionalParameters();
     }
 
-    final Optional<Mapping<ExecutableVarargsParameter>> varargsParameter() {
+    final Optional<Mapping<VarargsParameter>> varargsParameter() {
         return commandRepresentation.varargsParameters().stream().findAny();
     }
 

@@ -3,7 +3,7 @@ package net.jbock.convert;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.TypeName;
-import net.jbock.annotated.Executable;
+import net.jbock.annotated.Item;
 import net.jbock.common.Suppliers;
 import net.jbock.convert.match.Match;
 import net.jbock.model.Multiplicity;
@@ -20,7 +20,7 @@ import static net.jbock.model.Multiplicity.OPTIONAL;
  * @param <M> one of three types of annotated methods:
  *           named option, positional parameter, or repeatable positional parameter
  */
-public final class Mapping<M extends Executable> {
+public final class Mapping<M extends Item> {
 
     private final CodeBlock createConverterExpression;
     private final Match<M> match;
@@ -35,14 +35,14 @@ public final class Mapping<M extends Executable> {
         this.nullary = nullary;
     }
 
-    public static <M extends Executable>
+    public static <M extends Item>
     Mapping<M> create(
             CodeBlock createConverterExpression,
             Match<M> match) {
         return create(createConverterExpression, match, false);
     }
 
-    public static <M extends Executable>
+    public static <M extends Item>
     Mapping<M> create(
             CodeBlock createConverterExpression,
             Match<M> match,

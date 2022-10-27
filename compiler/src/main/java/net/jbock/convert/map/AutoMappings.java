@@ -2,7 +2,7 @@ package net.jbock.convert.map;
 
 import io.jbock.javapoet.CodeBlock;
 import jakarta.inject.Inject;
-import net.jbock.annotated.Executable;
+import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;
 import net.jbock.contrib.StandardConverters;
 import net.jbock.convert.Mapping;
@@ -32,7 +32,7 @@ class AutoMappings {
         this.mappings = autoMappings();
     }
 
-    <M extends Executable>
+    <M extends Item>
     Optional<Mapping<M>> findAutoMapping(
             Match<M> match) {
         TypeMirror baseType = match.baseType();

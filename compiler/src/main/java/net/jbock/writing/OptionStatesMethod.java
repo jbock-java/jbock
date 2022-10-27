@@ -5,7 +5,7 @@ import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
 import jakarta.inject.Inject;
-import net.jbock.annotated.ExecutableOption;
+import net.jbock.annotated.Option;
 import net.jbock.convert.Mapping;
 import net.jbock.parse.OptionState;
 import net.jbock.parse.OptionStateModeFlag;
@@ -37,7 +37,7 @@ final class OptionStatesMethod extends HasCommandRepresentation {
         } else {
             code.addStatement("$T $N = new $T<>($T.class)", result.type, result, EnumMap.class, sourceElement().optionEnumType());
         }
-        for (Mapping<ExecutableOption> namedOption : namedOptions()) {
+        for (Mapping<Option> namedOption : namedOptions()) {
             code.addStatement("$N.put($T.$L, new $T())",
                     result, sourceElement().optionEnumType(),
                     namedOption.enumName(), optionParserType(namedOption));
@@ -54,7 +54,7 @@ final class OptionStatesMethod extends HasCommandRepresentation {
         return define.get();
     }
 
-    private ClassName optionParserType(Mapping<ExecutableOption> param) {
+    private ClassName optionParserType(Mapping<Option> param) {
         if (param.isRepeatable()) {
             return ClassName.get(OptionStateRepeatable.class);
         }

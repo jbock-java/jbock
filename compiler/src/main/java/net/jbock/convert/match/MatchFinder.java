@@ -3,7 +3,7 @@ package net.jbock.convert.match;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
 import net.jbock.VarargsParameter;
-import net.jbock.annotated.Executable;
+import net.jbock.annotated.Item;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.ValidationFailure;
 import net.jbock.model.Multiplicity;
@@ -35,7 +35,7 @@ public class MatchFinder {
         this.types = types;
     }
 
-    public <M extends Executable>
+    public <M extends Item>
     Either<ValidationFailure, Match<M>> findMatch(
             M sourceMethod) {
         Match<M> match = findMatchInternal(sourceMethod);
@@ -44,7 +44,7 @@ public class MatchFinder {
                 .orElseGet(() -> right(match));
     }
 
-    public <M extends Executable>
+    public <M extends Item>
     Either<ValidationFailure, Match<M>>
     createNullaryMatch(
             M sourceMethod) {
@@ -55,7 +55,7 @@ public class MatchFinder {
                 .orElseGet(() -> right(match));
     }
 
-    private <M extends Executable> Match<M>
+    private <M extends Item> Match<M>
     findMatchInternal(
             M sourceMethod) {
         return matchers.stream()
@@ -71,7 +71,7 @@ public class MatchFinder {
                 });
     }
 
-    private <M extends Executable>
+    private <M extends Item>
     Optional<ValidationFailure> validateVarargsIsList(
             Match<M> match) {
         M sourceMethod = match.sourceMethod();

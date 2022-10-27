@@ -1,6 +1,5 @@
 package net.jbock.annotated;
 
-import net.jbock.Option;
 import net.jbock.common.SnakeName;
 
 import javax.lang.model.element.ExecutableElement;
@@ -15,7 +14,7 @@ import static java.util.stream.Collectors.toList;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
-public final class ExecutableOption extends Executable {
+public final class Option extends Item {
 
     private static final Comparator<String> LENGTH_FIRST_COMPARATOR = Comparator
             .comparing(String::length)
@@ -35,11 +34,11 @@ public final class ExecutableOption extends Executable {
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
-    private final Option option;
+    private final net.jbock.Option option;
 
-    ExecutableOption(
+    Option(
             ExecutableElement method,
-            Option option,
+            net.jbock.Option option,
             Optional<TypeElement> converter,
             String enumName) {
         super(method, converter, enumName);
@@ -54,10 +53,6 @@ public final class ExecutableOption extends Executable {
     @Override
     public List<String> description() {
         return List.of(option.description());
-    }
-
-    public List<String> names() {
-        return names.get();
     }
 
     @Override
@@ -75,11 +70,15 @@ public final class ExecutableOption extends Executable {
         return false;
     }
 
+    public List<String> names() {
+        return names.get();
+    }
+
     private List<String> optionNames() {
         return List.of(option.names());
     }
 
-    Optional<String> optionParamLabel() {
+    private Optional<String> optionParamLabel() {
         return optionalString(option.paramLabel());
     }
 }

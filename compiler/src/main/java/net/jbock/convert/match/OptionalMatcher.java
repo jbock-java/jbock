@@ -2,7 +2,7 @@ package net.jbock.convert.match;
 
 import io.jbock.javapoet.CodeBlock;
 import jakarta.inject.Inject;
-import net.jbock.annotated.Executable;
+import net.jbock.annotated.Item;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.validate.ValidateScope;
@@ -29,7 +29,7 @@ class OptionalMatcher extends Matcher {
     }
 
     @Override
-    <M extends Executable>
+    <M extends Item>
     Optional<Match<M>> tryMatch(
             M sourceMethod) {
         if (sourceMethod.isVarargsParameter()) {
@@ -40,14 +40,14 @@ class OptionalMatcher extends Matcher {
                 .or(() -> matchOptional(sourceMethod, returnType));
     }
 
-    private <M extends Executable> Optional<Match<M>>
+    private <M extends Item> Optional<Match<M>>
     matchOptional(M sourceMethod, TypeMirror returnType) {
         return elements.getTypeElement("java.util.Optional")
                 .flatMap(el -> tool.getSingleTypeArgument(returnType, el))
                 .map(typeArg -> Match.create(typeArg, OPTIONAL, sourceMethod));
     }
 
-    private <M extends Executable>
+    private <M extends Item>
     Optional<Match<M>> getOptionalPrimitive(
             M sourceMethod,
             TypeMirror type) {

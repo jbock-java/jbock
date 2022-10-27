@@ -3,7 +3,7 @@ package net.jbock.convert.map;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
-import net.jbock.annotated.Executable;
+import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
@@ -31,7 +31,7 @@ public class AutoOrEnumMapper {
         this.autoMappings = autoMappings;
     }
 
-    public <M extends Executable>
+    public <M extends Item>
     Either<ValidationFailure, Mapping<M>> findMapping(
             Match<M> match) {
         return autoMappings.findAutoMapping(match)
@@ -40,7 +40,7 @@ public class AutoOrEnumMapper {
                 .orElseGet(() -> left(noConverterError(match)));
     }
 
-    private <M extends Executable>
+    private <M extends Item>
     Optional<Mapping<M>> findEnumMapping(
             Match<M> match) {
         return TypeTool.AS_DECLARED.visit(match.baseType())

@@ -2,7 +2,7 @@ package net.jbock.convert.map;
 
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
-import net.jbock.annotated.Executable;
+import net.jbock.annotated.Item;
 import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.ValidationFailure;
@@ -38,7 +38,7 @@ public class ConverterValidator {
         this.mappingFactoryFactory = mappingFactoryFactory;
     }
 
-    public <M extends Executable>
+    public <M extends Item>
     Either<ValidationFailure, Mapping<M>> findMapping(
             Match<M> match,
             TypeElement converter) {
@@ -48,7 +48,7 @@ public class ConverterValidator {
                 .flatMap(referencedType -> referencedType.checkMatchingMatch(match));
     }
 
-    private <M extends Executable>
+    private <M extends Item>
     Either<ValidationFailure, MappingFactory> handleConverter(
             TypeElement converter,
             Match<M> match,
@@ -61,7 +61,7 @@ public class ConverterValidator {
         return right(mappingFactoryFactory.create(converter, typeArgument, isSupplier));
     }
 
-    private <M extends Executable>
+    private <M extends Item>
     Optional<Either<ValidationFailure, MappingFactory>> checkSuppliedConverter(
             TypeElement converter, Match<M> match) {
         return converter.getInterfaces().stream()
@@ -72,7 +72,7 @@ public class ConverterValidator {
                 .map(declaredType -> checkSuppliedConverter(converter, match, declaredType));
     }
 
-    private <M extends Executable>
+    private <M extends Item>
     Either<ValidationFailure, MappingFactory> checkSuppliedConverter(
             TypeElement converter,
             Match<M> match,
@@ -87,7 +87,7 @@ public class ConverterValidator {
                 .flatMap(suppliedType -> handleConverter(converter, match, suppliedType, true));
     }
 
-    private <M extends Executable>
+    private <M extends Item>
     Optional<Either<ValidationFailure, MappingFactory>> checkDirectConverter(
             TypeElement converter, Match<M> match) {
         return Optional.of(converter.getSuperclass())
