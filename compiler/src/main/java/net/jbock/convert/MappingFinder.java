@@ -4,7 +4,7 @@ import dagger.Lazy;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
-import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.annotated.Executable;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.map.AutoOrEnumMapper;
@@ -44,14 +44,14 @@ public class MappingFinder {
         this.matchFinder = matchFinder;
     }
 
-    public <M extends AnnotatedMethod<?>>
+    public <M extends Executable>
     Either<ValidationFailure, Mapping<M>> findMapping(
             M sourceMethod) {
         return matchFinder.findMatch(sourceMethod)
                 .flatMap(this::findMappingWithMatch);
     }
 
-    public <M extends AnnotatedMethod<?>>
+    public <M extends Executable>
     Either<ValidationFailure, Mapping<M>> findNullaryMapping(
             M sourceMethod) {
         return matchFinder.createNullaryMatch(sourceMethod)
@@ -59,7 +59,7 @@ public class MappingFinder {
                         CodeBlock.of("$T.identity())", StringConverter.class), match, true));
     }
 
-    private <M extends AnnotatedMethod<?>>
+    private <M extends Executable>
     Either<ValidationFailure, Mapping<M>> findMappingWithMatch(
             Match<M> match) {
         M sourceMethod = match.sourceMethod();
@@ -77,7 +77,7 @@ public class MappingFinder {
 
     /* Left-Optional
      */
-    private <M extends AnnotatedMethod<?>>
+    private <M extends Executable>
     Optional<ValidationFailure> checkConverterIsInnerClass(
             M sourceMethod,
             TypeElement converter) {
@@ -93,7 +93,7 @@ public class MappingFinder {
 
     /* Left-Optional
      */
-    private <M extends AnnotatedMethod<?>>
+    private <M extends Executable>
     Optional<ValidationFailure> checkNotAbstract(
             M sourceMethod,
             TypeElement converter) {
@@ -107,7 +107,7 @@ public class MappingFinder {
 
     /* Left-Optional
      */
-    private <M extends AnnotatedMethod<?>>
+    private <M extends Executable>
     Optional<ValidationFailure> checkNoTypeVars(
             M sourceMethod,
             TypeElement converter) {

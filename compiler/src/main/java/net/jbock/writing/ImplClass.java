@@ -8,10 +8,10 @@ import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
 import jakarta.inject.Inject;
-import net.jbock.annotated.AnnotatedMethod;
-import net.jbock.annotated.AnnotatedOption;
-import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.annotated.AnnotatedVarargsParameter;
+import net.jbock.annotated.Executable;
+import net.jbock.annotated.ExecutableOption;
+import net.jbock.annotated.ExecutableParameter;
+import net.jbock.annotated.ExecutableVarargsParameter;
 import net.jbock.common.Suppliers;
 import net.jbock.convert.Mapping;
 import net.jbock.model.ItemType;
@@ -66,7 +66,7 @@ final class ImplClass extends HasCommandRepresentation {
     }
 
     private MethodSpec parameterMethodOverride(Mapping<?> m) {
-        AnnotatedMethod sourceMethod = m.sourceMethod();
+        Executable sourceMethod = m.sourceMethod();
         return MethodSpec.methodBuilder(sourceMethod.methodName())
                 .returns(TypeName.get(sourceMethod.returnType()))
                 .addModifiers(sourceMethod.accessModifiers())
@@ -88,11 +88,11 @@ final class ImplClass extends HasCommandRepresentation {
     private MethodSpec constructor() {
         MethodSpec.Builder spec = MethodSpec.constructorBuilder();
         for (int i = 0; i < namedOptions().size(); i++) {
-            Mapping<AnnotatedOption> m = namedOptions().get(i);
+            Mapping<ExecutableOption> m = namedOptions().get(i);
             spec.addStatement("this.$N = $L", m.field(), convertExpressionOption(m, i));
         }
         for (int i = 0; i < positionalParameters().size(); i++) {
-            Mapping<AnnotatedParameter> m = positionalParameters().get(i);
+            Mapping<ExecutableParameter> m = positionalParameters().get(i);
             spec.addStatement("this.$N = $L", m.field(), convertExpressionParameter(m, i));
         }
         varargsParameter().ifPresent(m ->
@@ -102,7 +102,7 @@ final class ImplClass extends HasCommandRepresentation {
                 .build();
     }
 
-    private CodeBlock convertExpressionOption(Mapping<AnnotatedOption> m, int i) {
+    private CodeBlock convertExpressionOption(Mapping<ExecutableOption> m, int i) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.option($T.$N)", result(),
                 sourceElement().optionEnumType(), m.enumName()));
@@ -114,7 +114,7 @@ final class ImplClass extends HasCommandRepresentation {
         return joinByNewline(code);
     }
 
-    private CodeBlock convertExpressionParameter(Mapping<AnnotatedParameter> m, int i) {
+    private CodeBlock convertExpressionParameter(Mapping<ExecutableParameter> m, int i) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.param($L)", result(),
                 m.sourceMethod().index()));
@@ -124,7 +124,7 @@ final class ImplClass extends HasCommandRepresentation {
         return joinByNewline(code);
     }
 
-    private CodeBlock convertExpressionVarargsParameter(Mapping<AnnotatedVarargsParameter> m) {
+    private CodeBlock convertExpressionVarargsParameter(Mapping<ExecutableVarargsParameter> m) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.rest()", result()));
         code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
@@ -133,7 +133,7 @@ final class ImplClass extends HasCommandRepresentation {
         return joinByNewline(code);
     }
 
-    private List<CodeBlock> tailExpressionOption(Mapping<AnnotatedOption> m, int i) {
+    private List<CodeBlock> tailExpressionOption(Mapping<ExecutableOption> m, int i) {
         if (m.isNullary()) {
             return List.of(CodeBlock.of(".findAny().isPresent()"));
         }
@@ -160,7 +160,7 @@ final class ImplClass extends HasCommandRepresentation {
         }
     }
 
-    private List<CodeBlock> tailExpressionParameter(Mapping<AnnotatedParameter> m, int i) {
+    private List<CodeBlock> tailExpressionParameter(Mapping<ExecutableParameter> m, int i) {
         if (m.isRequired()) {
             return List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
                             ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),

@@ -2,7 +2,7 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
-import net.jbock.annotated.AnnotatedOption;
+import net.jbock.annotated.ExecutableOption;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
@@ -42,15 +42,15 @@ class OptionValidator {
                 .map(step::accept);
     }
 
-    private Either<ValidationFailure, Mapping<AnnotatedOption>> wrapOption(
-            AnnotatedOption option) {
+    private Either<ValidationFailure, Mapping<ExecutableOption>> wrapOption(
+            ExecutableOption option) {
         return checkNullary(option)
                 .map(mappingFinder::findNullaryMapping)
                 .orElseGet(() -> mappingFinder.findMapping(option));
     }
 
-    private Optional<AnnotatedOption> checkNullary(
-            AnnotatedOption option) {
+    private Optional<ExecutableOption> checkNullary(
+            ExecutableOption option) {
         if (option.converter().isPresent()) {
             return Optional.empty();
         }
@@ -60,8 +60,8 @@ class OptionValidator {
         return Optional.of(option);
     }
 
-    private Either<ValidationFailure, AnnotatedOption> checkOptionNames(
-            AnnotatedOption option) {
+    private Either<ValidationFailure, ExecutableOption> checkOptionNames(
+            ExecutableOption option) {
         if (option.names().isEmpty()) {
             return left(option.fail("define at least one option name"));
         }
@@ -70,13 +70,13 @@ class OptionValidator {
                 .flatMap(Optional::stream)
                 .map(s -> s.prepend("invalid name: "))
                 .findFirst()
-                .<Either<ValidationFailure, AnnotatedOption>>map(Either::left)
+                .<Either<ValidationFailure, ExecutableOption>>map(Either::left)
                 .orElseGet(() -> right(option));
     }
 
     /* Left-Optional
      */
-    private Optional<ValidationFailure> checkName(AnnotatedOption option, String name) {
+    private Optional<ValidationFailure> checkName(ExecutableOption option, String name) {
         if (Objects.toString(name, "").length() <= 1 || "--".equals(name)) {
             return Optional.of(option.fail(name));
         }
@@ -104,7 +104,7 @@ class OptionValidator {
     /* Left-Optional
      */
     private Optional<List<ValidationFailure>> validateUniqueOptionNames(
-            List<AnnotatedOption> allOptions) {
+            List<ExecutableOption> allOptions) {
         Set<String> allNames = new HashSet<>();
         return allOptions.stream()
                 .flatMap(option -> option.names().stream()

@@ -2,7 +2,7 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
-import net.jbock.annotated.AnnotatedParameter;
+import net.jbock.annotated.ExecutableParameter;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
@@ -36,25 +36,25 @@ class ParameterValidator {
                 .map(step::accept);
     }
 
-    private Either<List<ValidationFailure>, List<AnnotatedParameter>> validatePositions(
-            List<AnnotatedParameter> parameters) {
+    private Either<List<ValidationFailure>, List<ExecutableParameter>> validatePositions(
+            List<ExecutableParameter> parameters) {
         List<ValidationFailure> failures = new ArrayList<>();
         for (int i = 0; i < parameters.size(); i++) {
-            AnnotatedParameter parameter = parameters.get(i);
+            ExecutableParameter parameter = parameters.get(i);
             int index = parameter.index();
             if (index != i) {
                 failures.add(parameter.fail("invalid position: expecting " + i + " but found " + index));
             }
         }
         return optionalList(failures)
-                .<Either<List<ValidationFailure>, List<AnnotatedParameter>>>map(Either::left)
+                .<Either<List<ValidationFailure>, List<ExecutableParameter>>>map(Either::left)
                 .orElseGet(() -> right(parameters));
     }
 
     /* Left-Optional
      */
     private Optional<List<ValidationFailure>> checkNoRequiredAfterOptional(
-            List<Mapping<AnnotatedParameter>> positionalParameters) {
+            List<Mapping<ExecutableParameter>> positionalParameters) {
         return positionalParameters.stream()
                 .filter(Mapping::isOptional)
                 .findFirst()

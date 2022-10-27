@@ -4,9 +4,9 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.ParameterizedTypeName;
 import jakarta.inject.Inject;
-import net.jbock.parse.VarargsParameterParser;
 import net.jbock.parse.StandardParser;
 import net.jbock.parse.SuperParser;
+import net.jbock.parse.VarargsParameterParser;
 
 import java.util.Map;
 import java.util.function.Supplier;

@@ -1,7 +1,7 @@
 package net.jbock.convert.match;
 
 import io.jbock.javapoet.CodeBlock;
-import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.annotated.Executable;
 import net.jbock.common.ValidationFailure;
 import net.jbock.model.Multiplicity;
 
@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
-public final class Match<M extends AnnotatedMethod<?>> {
+public final class Match<M extends Executable> {
 
     /* baseType (List<A>) == A
     /* baseType (Optional<A>) == A
@@ -33,7 +33,7 @@ public final class Match<M extends AnnotatedMethod<?>> {
         this.sourceMethod = sourceMethod;
     }
 
-    static <M extends AnnotatedMethod<?>>
+    static <M extends Executable>
     Match<M> createWithExtract(
             TypeMirror baseType,
             CodeBlock extractExpr,
@@ -41,7 +41,7 @@ public final class Match<M extends AnnotatedMethod<?>> {
         return new Match<>(baseType, OPTIONAL, Optional.of(extractExpr), sourceMethod);
     }
 
-    static <M extends AnnotatedMethod<?>>
+    static <M extends Executable>
     Match<M> create(
             TypeMirror baseType,
             Multiplicity multiplicity,

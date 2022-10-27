@@ -3,7 +3,7 @@ package net.jbock.writing;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import jakarta.inject.Inject;
-import net.jbock.annotated.AnnotatedOption;
+import net.jbock.annotated.ExecutableOption;
 import net.jbock.convert.Mapping;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Multiplicity;
@@ -40,7 +40,7 @@ final class CreateModelMethod extends HasCommandRepresentation {
         if (isSuperCommand()) {
             code.add(CodeBlock.of(".withSuperCommand($L)", true));
         }
-        for (Mapping<AnnotatedOption> c : namedOptions()) {
+        for (Mapping<ExecutableOption> c : namedOptions()) {
             code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
         }
         Stream.concat(positionalParameters().stream(), varargsParameter().stream())
@@ -57,7 +57,7 @@ final class CreateModelMethod extends HasCommandRepresentation {
         return define.get();
     }
 
-    private CodeBlock optionBlock(Mapping<AnnotatedOption> m) {
+    private CodeBlock optionBlock(Mapping<ExecutableOption> m) {
         List<CodeBlock> names = new ArrayList<>();
         for (String name : m.sourceMethod().names()) {
             names.add(CodeBlock.of("$S", name));

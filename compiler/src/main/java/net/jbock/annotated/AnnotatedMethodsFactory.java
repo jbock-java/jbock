@@ -16,8 +16,8 @@ import static net.jbock.common.Constants.instancesOf;
 @ValidateScope
 public class AnnotatedMethodsFactory {
 
-    private final Comparator<AnnotatedParameter> indexComparator =
-            Comparator.comparingInt(AnnotatedParameter::index);
+    private final Comparator<ExecutableParameter> indexComparator =
+            Comparator.comparingInt(ExecutableParameter::index);
 
     private final SourceElement sourceElement;
     private final ExecutableElementsFinder executableElementsFinder;
@@ -34,17 +34,16 @@ public class AnnotatedMethodsFactory {
         return executableElementsFinder.findExecutableElements()
                 .map(SourceElementWithMethods::new)
                 .flatMap(SourceElementWithMethods::validListOfAnnotatedMethods)
-                .map(executables -> executables.stream().map(Executable::annotatedMethod).collect(toList()))
                 .map(AnnotatedMethodsBuilder::builder)
                 .map(builder -> builder.withNamedOptions(builder.annotatedMethods()
-                        .flatMap(instancesOf(AnnotatedOption.class))
+                        .flatMap(instancesOf(ExecutableOption.class))
                         .collect(toList())))
                 .map(builder -> builder.withPositionalParameters(builder.annotatedMethods()
-                        .flatMap(instancesOf(AnnotatedParameter.class))
+                        .flatMap(instancesOf(ExecutableParameter.class))
                         .sorted(indexComparator)
                         .collect(toList())))
                 .map(builder -> builder.withVarargsParameters(builder.annotatedMethods()
-                        .flatMap(instancesOf(AnnotatedVarargsParameter.class))
+                        .flatMap(instancesOf(ExecutableVarargsParameter.class))
                         .collect(toList())))
                 .filter(this::validateAtLeastOneParameterInSuperCommand);
     }

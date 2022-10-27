@@ -76,8 +76,6 @@ public abstract class Executable {
 
     public abstract String paramLabel();
 
-    abstract AnnotatedMethod<?> annotatedMethod();
-
     public abstract Optional<String> descriptionKey();
 
     public abstract List<String> description();

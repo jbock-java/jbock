@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
-import static net.jbock.annotated.AnnotatedOption.createOption;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
@@ -45,11 +44,6 @@ public final class ExecutableOption extends Executable {
             String enumName) {
         super(method, converter, enumName);
         this.option = option;
-    }
-
-    @Override
-    AnnotatedMethod<?> annotatedMethod() {
-        return createOption(this);
     }
 
     @Override

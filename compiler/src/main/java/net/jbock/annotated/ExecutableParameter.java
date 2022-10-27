@@ -10,7 +10,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static net.jbock.annotated.AnnotatedParameter.createParameter;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
@@ -31,11 +30,6 @@ public final class ExecutableParameter extends Executable {
             String enumName) {
         super(method, converter, enumName);
         this.parameter = parameter;
-    }
-
-    @Override
-    AnnotatedMethod<?> annotatedMethod() {
-        return createParameter(this);
     }
 
     @Override
@@ -68,7 +62,7 @@ public final class ExecutableParameter extends Executable {
         return optionalString(parameter.paramLabel());
     }
 
-    int index() {
+    public int index() {
         return parameter.index();
     }
 }

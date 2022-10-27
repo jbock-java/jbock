@@ -3,7 +3,7 @@ package net.jbock.validate;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
 import net.jbock.VarargsParameter;
-import net.jbock.annotated.AnnotatedVarargsParameter;
+import net.jbock.annotated.ExecutableVarargsParameter;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.MappingFinder;
 import net.jbock.processor.SourceElement;
@@ -39,20 +39,20 @@ class VarargsParameterValidator {
                 .map(step::accept);
     }
 
-    private Either<List<ValidationFailure>, List<AnnotatedVarargsParameter>> validateDuplicateParametersAnnotation(
-            List<AnnotatedVarargsParameter> parameters) {
+    private Either<List<ValidationFailure>, List<ExecutableVarargsParameter>> validateDuplicateParametersAnnotation(
+            List<ExecutableVarargsParameter> parameters) {
         return parameters.stream()
                 .skip(1)
                 .map(param -> param.fail("duplicate @" + VarargsParameter.class.getSimpleName() + " annotation"))
                 .collect(toOptionalList())
-                .<Either<List<ValidationFailure>, List<AnnotatedVarargsParameter>>>map(Either::left)
+                .<Either<List<ValidationFailure>, List<ExecutableVarargsParameter>>>map(Either::left)
                 .orElseGet(() -> right(parameters));
     }
 
     /* Left-Optional
      */
     private Optional<List<ValidationFailure>> validateNoRepeatableParameterInSuperCommand(
-            List<AnnotatedVarargsParameter> parameters) {
+            List<ExecutableVarargsParameter> parameters) {
         if (!sourceElement.isSuperCommand()) {
             return Optional.empty();
         }

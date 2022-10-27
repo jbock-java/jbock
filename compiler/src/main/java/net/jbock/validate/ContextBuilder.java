@@ -1,9 +1,9 @@
 package net.jbock.validate;
 
 import net.jbock.annotated.AnnotatedMethods;
-import net.jbock.annotated.AnnotatedOption;
-import net.jbock.annotated.AnnotatedParameter;
-import net.jbock.annotated.AnnotatedVarargsParameter;
+import net.jbock.annotated.ExecutableOption;
+import net.jbock.annotated.ExecutableParameter;
+import net.jbock.annotated.ExecutableVarargsParameter;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.writing.CommandRepresentation;
@@ -16,9 +16,9 @@ import java.util.List;
 public final class ContextBuilder {
 
     private final Step3 step3;
-    private final List<Mapping<AnnotatedOption>> namedOptions;
+    private final List<Mapping<ExecutableOption>> namedOptions;
 
-    private ContextBuilder(Step3 step3, List<Mapping<AnnotatedOption>> namedOptions) {
+    private ContextBuilder(Step3 step3, List<Mapping<ExecutableOption>> namedOptions) {
         this.step3 = step3;
         this.namedOptions = namedOptions;
     }
@@ -48,60 +48,60 @@ public final class ContextBuilder {
             this.sourceElement = sourceElement;
         }
 
-        Step2 accept(List<Mapping<AnnotatedParameter>> positionalParameters) {
+        Step2 accept(List<Mapping<ExecutableParameter>> positionalParameters) {
             return new Step2(this, positionalParameters);
         }
 
-        List<AnnotatedParameter> positionalParameters() {
+        List<ExecutableParameter> positionalParameters() {
             return step0.abstractMethods.positionalParameters();
         }
     }
 
     static final class Step2 {
         private final Step1 step1;
-        private final List<Mapping<AnnotatedParameter>> positionalParameters;
+        private final List<Mapping<ExecutableParameter>> positionalParameters;
 
-        private Step2(Step1 step1, List<Mapping<AnnotatedParameter>> positionalParameters) {
+        private Step2(Step1 step1, List<Mapping<ExecutableParameter>> positionalParameters) {
             this.step1 = step1;
             this.positionalParameters = positionalParameters;
         }
 
-        List<AnnotatedVarargsParameter> varargsParameters() {
+        List<ExecutableVarargsParameter> varargsParameters() {
             return step1.step0.abstractMethods.varargsParameters();
         }
 
-        Step3 accept(List<Mapping<AnnotatedVarargsParameter>> varargsParameters) {
+        Step3 accept(List<Mapping<ExecutableVarargsParameter>> varargsParameters) {
             return new Step3(this, varargsParameters);
         }
     }
 
     static final class Step3 {
         private final Step2 step2;
-        private final List<Mapping<AnnotatedVarargsParameter>> varargsParameters;
+        private final List<Mapping<ExecutableVarargsParameter>> varargsParameters;
 
-        private Step3(Step2 step2, List<Mapping<AnnotatedVarargsParameter>> varargsParameters) {
+        private Step3(Step2 step2, List<Mapping<ExecutableVarargsParameter>> varargsParameters) {
             this.step2 = step2;
             this.varargsParameters = varargsParameters;
         }
 
-        List<AnnotatedOption> namedOptions() {
+        List<ExecutableOption> namedOptions() {
             return step2.step1.step0.abstractMethods.namedOptions();
         }
 
-        ContextBuilder accept(List<Mapping<AnnotatedOption>> namedOptions) {
+        ContextBuilder accept(List<Mapping<ExecutableOption>> namedOptions) {
             return new ContextBuilder(this, namedOptions);
         }
     }
 
-    public List<Mapping<AnnotatedOption>> namedOptions() {
+    public List<Mapping<ExecutableOption>> namedOptions() {
         return namedOptions;
     }
 
-    public List<Mapping<AnnotatedParameter>> positionalParameters() {
+    public List<Mapping<ExecutableParameter>> positionalParameters() {
         return step3.step2.positionalParameters;
     }
 
-    public List<Mapping<AnnotatedVarargsParameter>> varargsParameters() {
+    public List<Mapping<ExecutableVarargsParameter>> varargsParameters() {
         return step3.varargsParameters;
     }
 

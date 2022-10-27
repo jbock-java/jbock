@@ -1,7 +1,7 @@
 package net.jbock.convert.match;
 
 import jakarta.inject.Inject;
-import net.jbock.annotated.AnnotatedMethod;
+import net.jbock.annotated.Executable;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.validate.ValidateScope;
@@ -26,7 +26,7 @@ class ListMatcher extends Matcher {
     }
 
     @Override
-    <M extends AnnotatedMethod<?>>
+    <M extends Executable>
     Optional<Match<M>> tryMatch(
             M sourceMethod) {
         if (sourceMethod.isParameter()) {

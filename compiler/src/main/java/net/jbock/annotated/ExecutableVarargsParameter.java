@@ -10,7 +10,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static net.jbock.annotated.AnnotatedVarargsParameter.createVarargsParameter;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
@@ -30,11 +29,6 @@ public final class ExecutableVarargsParameter extends Executable {
             String enumName) {
         super(method, converter, enumName);
         this.parameter = parameter;
-    }
-
-    @Override
-    AnnotatedMethod<?> annotatedMethod() {
-        return createVarargsParameter(this);
     }
 
     @Override
