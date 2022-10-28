@@ -6,12 +6,10 @@ import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
-import javax.lang.model.element.VariableElement;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Eithers.allFailures;
@@ -20,30 +18,29 @@ import static net.jbock.common.Annotations.methodLevelAnnotations;
 
 final class ItemListFactory {
 
-    private final List<ExecutableElement> abstractMethods;
+    private final List<ExecutableElement> methods;
     private final UniqueNameSet uniqueNameSet = new UniqueNameSet();
 
-    private ItemListFactory(List<ExecutableElement> abstractMethods) {
-        this.abstractMethods = abstractMethods;
+    private ItemListFactory(List<ExecutableElement> methods) {
+        this.methods = methods;
     }
 
     static Either<List<ValidationFailure>, List<Item>> createItemList(
-            List<ExecutableElement> abstractMethods) {
-        return new ItemListFactory(abstractMethods).validParameterlessAbstract();
+            List<ExecutableElement> methods) {
+        return new ItemListFactory(methods).validParameterlessAbstract();
     }
 
     private Either<List<ValidationFailure>, List<Item>> validParameterlessAbstract() {
-        return abstractMethods.stream()
-                .map(this::validateAbstractMethod)
+        return methods.stream()
+                .map(this::createItem)
                 .collect(allFailures());
     }
 
-    private Either<ValidationFailure, Item> validateAbstractMethod(
+    private Either<ValidationFailure, Item> createItem(
             ExecutableElement method) {
         String enumName = enumNameFor(method.getSimpleName());
         return getMethodAnnotation(method)
-                .map(a -> Item.create(method, a, enumName))
-                .filter(ItemListFactory::validateParameterless);
+                .map(a -> Item.create(method, a, enumName));
     }
 
     private String enumNameFor(Name sourceMethodName) {
@@ -61,20 +58,6 @@ final class ItemListFactory {
                 .findFirst()
                 .<Either<ValidationFailure, Annotation>>map(Either::right)
                 .orElseGet(() -> left(missingAnnotationError(method)));
-    }
-
-    private static Optional<ValidationFailure> validateParameterless(
-            Item method) {
-        if (method.method().getParameters().isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(method.fail("invalid method parameters: abstract method '" +
-                method.method().getSimpleName() +
-                "' may not have any parameters, but found: " +
-                method.method().getParameters().stream()
-                        .map(VariableElement::getSimpleName)
-                        .map(Name::toString)
-                        .collect(toList())));
     }
 
     private static ValidationFailure missingAnnotationError(

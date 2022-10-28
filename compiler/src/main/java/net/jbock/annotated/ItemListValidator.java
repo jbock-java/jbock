@@ -5,12 +5,15 @@ import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import java.util.List;
 import java.util.Optional;
 
 import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.allFailures;
+import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.element.NestingKind.MEMBER;
@@ -43,7 +46,22 @@ final class ItemListValidator {
         return checkNoDuplicateAnnotations(method, methodLevelAnnotations())
                 .<Either<ValidationFailure, Item>>map(Either::left)
                 .orElseGet(() -> right(item))
+                .filter(this::validateParameterless)
                 .filter(this::checkAccessibleReturnType);
+    }
+
+    private Optional<ValidationFailure> validateParameterless(
+            Item method) {
+        if (method.method().getParameters().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(method.fail("invalid method parameters: abstract method '" +
+                method.method().getSimpleName() +
+                "' may not have any parameters, but found: " +
+                method.method().getParameters().stream()
+                        .map(VariableElement::getSimpleName)
+                        .map(Name::toString)
+                        .collect(toList())));
     }
 
     private Optional<ValidationFailure> checkAccessibleReturnType(Item item) {
