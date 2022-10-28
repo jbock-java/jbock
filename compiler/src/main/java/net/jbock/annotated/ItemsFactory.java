@@ -14,26 +14,26 @@ import static java.util.stream.Collectors.toList;
 import static net.jbock.common.Constants.instancesOf;
 
 @ValidateScope
-public class AnnotatedMethodsFactory {
+public class ItemsFactory {
 
     private final Comparator<Parameter> indexComparator =
             Comparator.comparingInt(Parameter::index);
 
     private final SourceElement sourceElement;
-    private final ExecutableElementsFinder executableElementsFinder;
+    private final AbstractMethodsFinder abstractMethodsFinder;
 
     @Inject
-    AnnotatedMethodsFactory(
+    ItemsFactory(
             SourceElement sourceElement,
-            ExecutableElementsFinder executableElementsFinder) {
+            AbstractMethodsFinder abstractMethodsFinder) {
         this.sourceElement = sourceElement;
-        this.executableElementsFinder = executableElementsFinder;
+        this.abstractMethodsFinder = abstractMethodsFinder;
     }
 
-    public Either<List<ValidationFailure>, Items> createAnnotatedMethods() {
-        return executableElementsFinder.findItems()
-                .map(SourceElementWithMethods::new)
-                .flatMap(SourceElementWithMethods::validListOfAnnotatedMethods)
+    public Either<List<ValidationFailure>, Items> createItems() {
+        return abstractMethodsFinder.findAbstractMethods()
+                .flatMap(ItemListFactory::createItemList)
+                .flatMap(ItemListValidator::validate)
                 .map(ItemsBuilder::builder)
                 .map(builder -> builder.withNamedOptions(builder.annotatedMethods()
                         .flatMap(instancesOf(Option.class))

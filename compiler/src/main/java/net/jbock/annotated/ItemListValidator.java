@@ -19,33 +19,37 @@ import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 import static net.jbock.common.Util.checkNoDuplicateAnnotations;
 
-final class SourceElementWithMethods {
+final class ItemListValidator {
 
-    private final List<Item> methods;
+    private final List<Item> items;
 
-    SourceElementWithMethods(List<Item> methods) {
-        this.methods = methods;
+    private ItemListValidator(List<Item> items) {
+        this.items = items;
     }
 
-    Either<List<ValidationFailure>, List<Item>> validListOfAnnotatedMethods() {
-        return methods.stream()
+    static Either<List<ValidationFailure>, List<Item>> validate(List<Item> items) {
+        return new ItemListValidator(items).validate();
+    }
+
+    private Either<List<ValidationFailure>, List<Item>> validate() {
+        return items.stream()
                 .map(this::createAnnotatedMethod)
                 .collect(allFailures());
     }
 
     private Either<ValidationFailure, Item> createAnnotatedMethod(
-            Item sourceMethod) {
-        ExecutableElement method = sourceMethod.method();
+            Item item) {
+        ExecutableElement method = item.method();
         return checkNoDuplicateAnnotations(method, methodLevelAnnotations())
                 .<Either<ValidationFailure, Item>>map(Either::left)
-                .orElseGet(() -> right(sourceMethod))
+                .orElseGet(() -> right(item))
                 .filter(this::checkAccessibleReturnType);
     }
 
-    private Optional<ValidationFailure> checkAccessibleReturnType(Item annotatedMethod) {
-        return AS_DECLARED.visit(annotatedMethod.returnType())
+    private Optional<ValidationFailure> checkAccessibleReturnType(Item item) {
+        return AS_DECLARED.visit(item.returnType())
                 .filter(this::isInaccessible)
-                .map(type -> annotatedMethod.fail("inaccessible type: " +
+                .map(type -> item.fail("inaccessible type: " +
                         Util.typeToString(type)));
     }
 

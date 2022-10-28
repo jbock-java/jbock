@@ -23,15 +23,15 @@ public final class ContextBuilder {
         this.namedOptions = namedOptions;
     }
 
-    static Step0 builder(Items abstractMethods) {
-        return new Step0(abstractMethods);
+    static Step0 builder(Items items) {
+        return new Step0(items);
     }
 
     static final class Step0 {
-        private final Items abstractMethods;
+        private final Items items;
 
-        Step0(Items abstractMethods) {
-            this.abstractMethods = abstractMethods;
+        Step0(Items items) {
+            this.items = items;
         }
 
         Step1 accept(SourceElement sourceElement) {
@@ -53,7 +53,7 @@ public final class ContextBuilder {
         }
 
         List<Parameter> positionalParameters() {
-            return step0.abstractMethods.positionalParameters();
+            return step0.items.positionalParameters();
         }
     }
 
@@ -67,7 +67,7 @@ public final class ContextBuilder {
         }
 
         List<VarargsParameter> varargsParameters() {
-            return step1.step0.abstractMethods.varargsParameters();
+            return step1.step0.items.varargsParameters();
         }
 
         Step3 accept(List<Mapping<VarargsParameter>> varargsParameters) {
@@ -85,7 +85,7 @@ public final class ContextBuilder {
         }
 
         List<Option> namedOptions() {
-            return step2.step1.step0.abstractMethods.namedOptions();
+            return step2.step1.step0.items.namedOptions();
         }
 
         ContextBuilder accept(List<Mapping<Option>> namedOptions) {

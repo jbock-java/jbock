@@ -3,7 +3,7 @@ package net.jbock.validate;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
 import net.jbock.annotated.Items;
-import net.jbock.annotated.AnnotatedMethodsFactory;
+import net.jbock.annotated.ItemsFactory;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 import net.jbock.writing.CommandRepresentation;
@@ -24,7 +24,7 @@ import static io.jbock.util.Eithers.optionalList;
 @ValidateScope
 public class CommandProcessor {
 
-    private final AnnotatedMethodsFactory methodsFactory;
+    private final ItemsFactory itemsFactory;
     private final SourceElement sourceElement;
     private final OptionValidator optionValidator;
     private final ParameterValidator parameterValidator;
@@ -32,12 +32,12 @@ public class CommandProcessor {
 
     @Inject
     CommandProcessor(
-            AnnotatedMethodsFactory methodsFactory,
+            ItemsFactory itemsFactory,
             SourceElement sourceElement,
             OptionValidator optionValidator,
             ParameterValidator parameterValidator,
             VarargsParameterValidator parametersValidator) {
-        this.methodsFactory = methodsFactory;
+        this.itemsFactory = itemsFactory;
         this.sourceElement = sourceElement;
         this.optionValidator = optionValidator;
         this.parameterValidator = parameterValidator;
@@ -45,7 +45,7 @@ public class CommandProcessor {
     }
 
     public Either<List<ValidationFailure>, CommandRepresentation> generate() {
-        return methodsFactory.createAnnotatedMethods()
+        return itemsFactory.createItems()
                 .filter(this::checkDuplicateDescriptionKeys)
                 .map(ContextBuilder::builder)
                 .map(builder -> builder.accept(sourceElement))
@@ -58,13 +58,13 @@ public class CommandProcessor {
     /* Left-Optional
      */
     private Optional<List<ValidationFailure>> checkDuplicateDescriptionKeys(
-            Items methods) {
+            Items items) {
         List<ValidationFailure> failures = new ArrayList<>();
         Set<String> keys = new HashSet<>();
         sourceElement.descriptionKey().ifPresent(keys::add);
-        Stream.of(methods.namedOptions(),
-                        methods.positionalParameters(),
-                        methods.varargsParameters())
+        Stream.of(items.namedOptions(),
+                        items.positionalParameters(),
+                        items.varargsParameters())
                 .flatMap(List::stream)
                 .forEach(m -> m.descriptionKey().ifPresent(key -> {
                     if (!keys.add(key)) {

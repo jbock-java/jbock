@@ -21,12 +21,12 @@ import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
 @ValidateScope
-public class ExecutableElementsFinder {
+public class AbstractMethodsFinder {
 
     private final SourceElement sourceElement;
 
     @Inject
-    ExecutableElementsFinder(
+    AbstractMethodsFinder(
             SourceElement sourceElement) {
         this.sourceElement = sourceElement;
     }
@@ -41,12 +41,12 @@ public class ExecutableElementsFinder {
      * @return all annotated parameterless abstract methods,
      *         or a nonempty list of validation failures
      */
-    Either<List<ValidationFailure>, List<Item>> findItems() {
+    Either<List<ValidationFailure>, List<ExecutableElement>> findAbstractMethods() {
         return checkInterfaceOrSimpleClass()
                 .or(this::checkNoInterfaces)
                 .map(List::of)
-                .<Either<List<ValidationFailure>, List<Item>>>map(Either::left)
-                .orElseGet(() -> new ItemListFactory(abstractMethods()).validParameterlessAbstract());
+                .<Either<List<ValidationFailure>, List<ExecutableElement>>>map(Either::left)
+                .orElseGet(() -> Either.right(abstractMethods()));
     }
 
     private Optional<ValidationFailure> checkInterfaceOrSimpleClass() {

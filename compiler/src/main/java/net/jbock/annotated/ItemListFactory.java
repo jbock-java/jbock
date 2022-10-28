@@ -23,11 +23,16 @@ final class ItemListFactory {
     private final List<ExecutableElement> abstractMethods;
     private final UniqueNameSet uniqueNameSet = new UniqueNameSet();
 
-    ItemListFactory(List<ExecutableElement> abstractMethods) {
+    private ItemListFactory(List<ExecutableElement> abstractMethods) {
         this.abstractMethods = abstractMethods;
     }
 
-    Either<List<ValidationFailure>, List<Item>> validParameterlessAbstract() {
+    static Either<List<ValidationFailure>, List<Item>> createItemList(
+            List<ExecutableElement> abstractMethods) {
+        return new ItemListFactory(abstractMethods).validParameterlessAbstract();
+    }
+
+    private Either<List<ValidationFailure>, List<Item>> validParameterlessAbstract() {
         return abstractMethods.stream()
                 .map(this::validateAbstractMethod)
                 .collect(allFailures());
