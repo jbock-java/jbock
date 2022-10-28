@@ -6,18 +6,11 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 import net.jbock.validate.ValidateScope;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.stream.Collectors.toList;
-import static net.jbock.common.Constants.instancesOf;
-
 @ValidateScope
 public class ItemsFactory {
-
-    private final Comparator<Parameter> indexComparator =
-            Comparator.comparingInt(Parameter::index);
 
     private final SourceElement sourceElement;
     private final AbstractMethodsFinder abstractMethodsFinder;
@@ -34,17 +27,7 @@ public class ItemsFactory {
         return abstractMethodsFinder.findAbstractMethods()
                 .flatMap(ItemListFactory::createItemList)
                 .flatMap(ItemListValidator::validate)
-                .map(ItemsBuilder::builder)
-                .map(builder -> builder.withNamedOptions(builder.annotatedMethods()
-                        .flatMap(instancesOf(Option.class))
-                        .collect(toList())))
-                .map(builder -> builder.withPositionalParameters(builder.annotatedMethods()
-                        .flatMap(instancesOf(Parameter.class))
-                        .sorted(indexComparator)
-                        .collect(toList())))
-                .map(builder -> builder.withVarargsParameters(builder.annotatedMethods()
-                        .flatMap(instancesOf(VarargsParameter.class))
-                        .collect(toList())))
+                .map(ItemsBuilder::createItems)
                 .filter(this::validateAtLeastOneParameterInSuperCommand);
     }
 

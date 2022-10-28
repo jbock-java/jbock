@@ -1,27 +1,43 @@
 package net.jbock.annotated;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
+import static net.jbock.common.Constants.instancesOf;
+
 final class ItemsBuilder {
+
+    private static final Comparator<Parameter> BY_INDEX = Comparator.comparingInt(Parameter::index);
 
     private ItemsBuilder() {
     }
 
-    static Step1 builder(List<? extends Item> annotatedMethods) {
-        return new Step1(annotatedMethods);
+    static Items createItems(List<? extends Item> itemList) {
+        Step1 builder = new Step1(itemList);
+        return builder.withNamedOptions(builder.annotatedMethods()
+                        .flatMap(instancesOf(Option.class))
+                        .collect(toList()))
+                .withPositionalParameters(builder.annotatedMethods()
+                        .flatMap(instancesOf(Parameter.class))
+                        .sorted(BY_INDEX)
+                        .collect(toList()))
+                .withVarargsParameters(builder.annotatedMethods()
+                        .flatMap(instancesOf(VarargsParameter.class))
+                        .collect(toList()));
     }
 
-    static final class Step1 {
+    private static final class Step1 {
 
-        private final List<? extends Item> annotatedMethods;
+        private final List<? extends Item> itemList;
 
-        private Step1(List<? extends Item> annotatedMethods) {
-            this.annotatedMethods = annotatedMethods;
+        private Step1(List<? extends Item> itemList) {
+            this.itemList = itemList;
         }
 
         Stream<? extends Item> annotatedMethods() {
-            return annotatedMethods.stream();
+            return itemList.stream();
         }
 
         Step2 withNamedOptions(List<Option> namedOptions) {
@@ -39,10 +55,6 @@ final class ItemsBuilder {
             this.namedOptions = namedOptions;
         }
 
-        Stream<? extends Item> annotatedMethods() {
-            return step1.annotatedMethods.stream();
-        }
-
         Step3 withPositionalParameters(List<Parameter> positionalParameters) {
             return new Step3(this, positionalParameters);
         }
@@ -56,10 +68,6 @@ final class ItemsBuilder {
         private Step3(Step2 step2, List<Parameter> positionalParameters) {
             this.step2 = step2;
             this.positionalParameters = positionalParameters;
-        }
-
-        Stream<? extends Item> annotatedMethods() {
-            return step2.step1.annotatedMethods.stream();
         }
 
         Items withVarargsParameters(List<VarargsParameter> varargsParameters) {
