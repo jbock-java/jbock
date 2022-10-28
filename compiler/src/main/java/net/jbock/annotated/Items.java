@@ -1,24 +1,46 @@
 package net.jbock.annotated;
 
+import java.util.Comparator;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+import static net.jbock.common.Constants.instancesOf;
 
 public final class Items {
 
-    private final ItemsBuilder.Step3 step3;
+    private static final Comparator<Parameter> BY_INDEX = Comparator.comparingInt(Parameter::index);
+    
+    private final List<Option> namedOptions;
+    private final List<Parameter> positionalParameters;
     private final List<VarargsParameter> varargsParameters;
 
-    Items(ItemsBuilder.Step3 step3,
+    private Items(List<Option> namedOptions,
+          List<Parameter> positionalParameters,
           List<VarargsParameter> varargsParameters) {
-        this.step3 = step3;
+        this.namedOptions = namedOptions;
+        this.positionalParameters = positionalParameters;
         this.varargsParameters = varargsParameters;
     }
 
+    static Items createItems(List<? extends Item> itemList) {
+        return new Items(itemList.stream()
+                .flatMap(instancesOf(Option.class))
+                .collect(toList()),
+                itemList.stream()
+                        .flatMap(instancesOf(Parameter.class))
+                        .sorted(BY_INDEX)
+                        .collect(toList()),
+                itemList.stream()
+                        .flatMap(instancesOf(VarargsParameter.class))
+                        .collect(toList()));
+    }
+
     public List<Option> namedOptions() {
-        return step3.step2.namedOptions;
+        return namedOptions;
     }
 
     public List<Parameter> positionalParameters() {
-        return step3.positionalParameters;
+        return positionalParameters;
     }
 
     public List<VarargsParameter> varargsParameters() {

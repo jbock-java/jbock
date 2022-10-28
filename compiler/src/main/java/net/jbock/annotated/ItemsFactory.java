@@ -27,7 +27,7 @@ public class ItemsFactory {
         return abstractMethodsFinder.findAbstractMethods()
                 .flatMap(ItemListFactory::createItemList)
                 .flatMap(ItemListValidator::validate)
-                .map(ItemsBuilder::createItems)
+                .map(Items::createItems)
                 .filter(this::validateAtLeastOneParameterInSuperCommand);
     }
 

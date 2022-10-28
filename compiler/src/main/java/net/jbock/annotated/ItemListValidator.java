@@ -24,33 +24,27 @@ import static net.jbock.common.Util.checkNoDuplicateAnnotations;
 
 final class ItemListValidator {
 
-    private final List<Item> items;
-
-    private ItemListValidator(List<Item> items) {
-        this.items = items;
+    private ItemListValidator() {
     }
 
-    static Either<List<ValidationFailure>, List<Item>> validate(List<Item> items) {
-        return new ItemListValidator(items).validate();
-    }
-
-    private Either<List<ValidationFailure>, List<Item>> validate() {
+    static Either<List<ValidationFailure>, List<Item>> validate(
+            List<Item> items) {
         return items.stream()
-                .map(this::createAnnotatedMethod)
+                .map(ItemListValidator::createAnnotatedMethod)
                 .collect(allFailures());
     }
 
-    private Either<ValidationFailure, Item> createAnnotatedMethod(
+    private static Either<ValidationFailure, Item> createAnnotatedMethod(
             Item item) {
         ExecutableElement method = item.method();
         return checkNoDuplicateAnnotations(method, methodLevelAnnotations())
                 .<Either<ValidationFailure, Item>>map(Either::left)
                 .orElseGet(() -> right(item))
-                .filter(this::validateParameterless)
-                .filter(this::checkAccessibleReturnType);
+                .filter(ItemListValidator::validateParameterless)
+                .filter(ItemListValidator::checkAccessibleReturnType);
     }
 
-    private Optional<ValidationFailure> validateParameterless(
+    private static Optional<ValidationFailure> validateParameterless(
             Item method) {
         if (method.method().getParameters().isEmpty()) {
             return Optional.empty();
@@ -64,14 +58,14 @@ final class ItemListValidator {
                         .collect(toList())));
     }
 
-    private Optional<ValidationFailure> checkAccessibleReturnType(Item item) {
+    private static Optional<ValidationFailure> checkAccessibleReturnType(Item item) {
         return AS_DECLARED.visit(item.returnType())
-                .filter(this::isInaccessible)
+                .filter(ItemListValidator::isInaccessible)
                 .map(type -> item.fail("inaccessible type: " +
                         Util.typeToString(type)));
     }
 
-    private boolean isInaccessible(DeclaredType declared) {
+    private static boolean isInaccessible(DeclaredType declared) {
         if (declared.asElement().getModifiers().contains(PRIVATE)) {
             return true;
         }
@@ -84,6 +78,6 @@ final class ItemListValidator {
         return declared.getTypeArguments().stream()
                 .map(AS_DECLARED::visit)
                 .flatMap(Optional::stream)
-                .anyMatch(this::isInaccessible);
+                .anyMatch(ItemListValidator::isInaccessible);
     }
 }

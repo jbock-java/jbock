@@ -18,19 +18,18 @@ import static net.jbock.common.Annotations.methodLevelAnnotations;
 
 final class ItemListFactory {
 
-    private final List<ExecutableElement> methods;
     private final UniqueNameSet uniqueNameSet = new UniqueNameSet();
 
-    private ItemListFactory(List<ExecutableElement> methods) {
-        this.methods = methods;
+    private ItemListFactory() {
     }
 
     static Either<List<ValidationFailure>, List<Item>> createItemList(
             List<ExecutableElement> methods) {
-        return new ItemListFactory(methods).validParameterlessAbstract();
+        return new ItemListFactory().validParameterlessAbstract(methods);
     }
 
-    private Either<List<ValidationFailure>, List<Item>> validParameterlessAbstract() {
+    private Either<List<ValidationFailure>, List<Item>> validParameterlessAbstract(
+            List<ExecutableElement> methods) {
         return methods.stream()
                 .map(this::createItem)
                 .collect(allFailures());
