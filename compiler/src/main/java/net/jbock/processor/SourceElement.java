@@ -13,71 +13,59 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 import static net.jbock.common.Constants.optionalString;
+import static net.jbock.common.Suppliers.memoize;
 
 public class SourceElement {
 
-    private final TypeElement sourceElement;
-    private final List<Modifier> accessModifiers;
-    private final String programName;
-    private final ClassName generatedClass;
-    private final ClassName optionEnumType;
-    private final String descriptionKey;
-    private final boolean skipGeneratingParseOrExitMethod;
-    private final List<String> description;
-    private final boolean superCommand;
+    private final AnyCommand command;
 
-    private SourceElement(
-            TypeElement sourceElement,
-            List<Modifier> accessModifiers,
-            String programName,
-            ClassName generatedClass,
-            ClassName optionEnumType,
-            String descriptionKey,
-            boolean skipGeneratingParseOrExitMethod,
-            List<String> description,
-            boolean superCommand) {
-        this.sourceElement = sourceElement;
-        this.accessModifiers = accessModifiers;
-        this.programName = programName;
-        this.generatedClass = generatedClass;
-        this.optionEnumType = optionEnumType;
-        this.descriptionKey = descriptionKey;
-        this.skipGeneratingParseOrExitMethod = skipGeneratingParseOrExitMethod;
-        this.description = description;
-        this.superCommand = superCommand;
+    private final Supplier<List<Modifier>> accessModifiers = memoize(() -> command().isPublicParser() ?
+            List.of(Modifier.PUBLIC) :
+            List.of());
+
+    private final Supplier<String> programName = memoize(() -> optionalString(command().getName())
+            .orElseGet(() -> SnakeName.create(command().typeElement.getSimpleName()).snake('-')));
+
+    private final Supplier<ClassName> optionEnumType = memoize(() ->
+            generatedClass().nestedClass("Opt"));
+
+    private final Supplier<Optional<String>> descriptionKey = memoize(() ->
+            optionalString(command().getDescriptionKey()));
+
+    private final Supplier<List<String>> description = memoize(() ->
+            List.of(command().getDescription()));
+
+    private final Supplier<ClassName> generatedClass = memoize(() -> {
+        ClassName commandClass = ClassName.get(command().typeElement);
+        return commandClass
+                .topLevelClassName()
+                .peerClass(String.join("_", commandClass.simpleNames()) + "Parser");
+    });
+
+    private SourceElement(AnyCommand command) {
+        this.command = command;
     }
 
     static SourceElement create(TypeElement t) {
         AnyCommand command = new AnyCommand(t);
-        List<Modifier> accessModifiers = command.isPublicParser() ?
-                List.of(Modifier.PUBLIC) :
-                List.of();
-        String programName = optionalString(command.getName())
-                .orElseGet(() -> SnakeName.create(t.getSimpleName()).snake('-'));
-        ClassName optionEnumType = command.generatedClass().nestedClass("Opt");
-        String descriptionKey = command.getDescriptionKey();
-        boolean skipGeneratingParseOrExitMethod = command.isSkipGeneratingParseOrExitMethod();
-        List<String> description = List.of(command.getDescription());
-        boolean superCommand = command.isSuperCommand();
-        return new SourceElement(t, accessModifiers,
-                programName, command.generatedClass(), optionEnumType,
-                descriptionKey, skipGeneratingParseOrExitMethod, description, superCommand);
+        return new SourceElement(command);
     }
 
     private static class AnyCommand {
         final Either<Command, SuperCommand> command;
-        final ClassName commandClass;
+        final TypeElement typeElement;
 
         AnyCommand(TypeElement typeElement) {
+            this.typeElement = typeElement;
             Command command = typeElement.getAnnotation(Command.class);
             this.command = command != null ?
                     left(command) :
                     right(typeElement.getAnnotation(SuperCommand.class));
-            this.commandClass = ClassName.get(typeElement);
         }
 
         String getDescriptionKey() {
@@ -109,64 +97,57 @@ public class SourceElement {
                     Command::description,
                     SuperCommand::description);
         }
-
-        boolean isSuperCommand() {
-            return command.isRight();
-        }
-
-        ClassName generatedClass() {
-            String generatedClassName = String.join("_", commandClass.simpleNames()) + "Parser";
-            return commandClass
-                    .topLevelClassName()
-                    .peerClass(generatedClassName);
-        }
     }
 
     public TypeElement element() {
-        return sourceElement;
+        return command.typeElement;
+    }
+
+    private AnyCommand command() {
+        return command;
     }
 
     public TypeName typeName() {
-        return TypeName.get(sourceElement.asType());
+        return TypeName.get(element().asType());
     }
 
     public ValidationFailure fail(String message) {
-        return new ValidationFailure(message, sourceElement);
+        return new ValidationFailure(message, element());
     }
 
     public boolean isSuperCommand() {
-        return superCommand;
+        return command.command.isRight();
     }
 
     public List<Modifier> accessModifiers() {
-        return accessModifiers;
+        return accessModifiers.get();
     }
 
     public ClassName generatedClass() {
-        return generatedClass;
+        return generatedClass.get();
     }
 
     public ClassName optionEnumType() {
-        return optionEnumType;
+        return optionEnumType.get();
     }
 
     public boolean isInterface() {
-        return sourceElement.getKind() == ElementKind.INTERFACE;
+        return element().getKind() == ElementKind.INTERFACE;
     }
 
     public String programName() {
-        return programName;
+        return programName.get();
     }
 
     public Optional<String> descriptionKey() {
-        return optionalString(descriptionKey);
+        return descriptionKey.get();
     }
 
     public List<String> description() {
-        return description;
+        return description.get();
     }
 
     public boolean skipGeneratingParseOrExitMethod() {
-        return skipGeneratingParseOrExitMethod;
+        return command.isSkipGeneratingParseOrExitMethod();
     }
 }
