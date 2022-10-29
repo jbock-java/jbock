@@ -28,7 +28,7 @@ final class OptionNamesMethod extends HasCommandRepresentation {
         ParameterSpec result = ParameterSpec.builder(
                 optionNames().type, "result").build();
         long mapSize = namedOptions().stream()
-                .map(Mapping::sourceMethod)
+                .map(Mapping::item)
                 .map(Option::names)
                 .map(List::size)
                 .mapToLong(i -> i)
@@ -36,7 +36,7 @@ final class OptionNamesMethod extends HasCommandRepresentation {
         CodeBlock.Builder code = CodeBlock.builder();
         code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
         for (Mapping<Option> namedOption : namedOptions()) {
-            for (String dashedName : namedOption.sourceMethod().names()) {
+            for (String dashedName : namedOption.item().names()) {
                 code.addStatement("$N.put($S, $T.$L)",
                         result, dashedName, sourceElement().optionEnumType(),
                         namedOption.enumName());

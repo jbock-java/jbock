@@ -66,7 +66,7 @@ final class ImplClass extends HasCommandRepresentation {
     }
 
     private MethodSpec parameterMethodOverride(Mapping<?> m) {
-        Item sourceMethod = m.sourceMethod();
+        Item sourceMethod = m.item();
         return MethodSpec.methodBuilder(sourceMethod.methodName())
                 .returns(TypeName.get(sourceMethod.returnType()))
                 .addModifiers(sourceMethod.accessModifiers())
@@ -117,7 +117,7 @@ final class ImplClass extends HasCommandRepresentation {
     private CodeBlock convertExpressionParameter(Mapping<Parameter> m, int i) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.param($L)", result(),
-                m.sourceMethod().index()));
+                m.item().index()));
         code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
         code.addAll(tailExpressionParameter(m, i));
         m.extractExpr().ifPresent(code::add);

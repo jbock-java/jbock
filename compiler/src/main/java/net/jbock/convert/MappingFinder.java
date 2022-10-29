@@ -45,29 +45,25 @@ public class MappingFinder {
     }
 
     public <M extends Item>
-    Either<ValidationFailure, Mapping<M>> findMapping(
-            M sourceMethod) {
-        return matchFinder.findMatch(sourceMethod)
+    Either<ValidationFailure, Mapping<M>> findMapping(M item) {
+        return matchFinder.findMatch(item)
                 .flatMap(this::findMappingWithMatch);
     }
 
     public <M extends Item>
-    Either<ValidationFailure, Mapping<M>> findNullaryMapping(
-            M sourceMethod) {
-        return matchFinder.createNullaryMatch(sourceMethod)
+    Either<ValidationFailure, Mapping<M>> findNullaryMapping(M item) {
+        return matchFinder.createNullaryMatch(item)
                 .map(match -> Mapping.create(
                         CodeBlock.of("$T.identity())", StringConverter.class), match, true));
     }
 
     private <M extends Item>
-    Either<ValidationFailure, Mapping<M>> findMappingWithMatch(
-            Match<M> match) {
-        M sourceMethod = match.sourceMethod();
-        return sourceMethod.converter()
-                .map(converter -> checkConverterIsInnerClass(sourceMethod, converter)
+    Either<ValidationFailure, Mapping<M>> findMappingWithMatch(Match<M> match) {
+        return match.item().converter()
+                .map(converter -> checkConverterIsInnerClass(match.item(), converter)
                         .or(() -> util.commonTypeChecks(converter))
-                        .or(() -> checkNotAbstract(sourceMethod, converter))
-                        .or(() -> checkNoTypeVars(sourceMethod, converter))
+                        .or(() -> checkNotAbstract(match.item(), converter))
+                        .or(() -> checkNoTypeVars(match.item(), converter))
                         .map(failure -> failure.prepend("invalid converter class: "))
                         .<Either<ValidationFailure, TypeElement>>map(Either::left)
                         .orElseGet(() -> right(converter))
@@ -79,12 +75,12 @@ public class MappingFinder {
      */
     private <M extends Item>
     Optional<ValidationFailure> checkConverterIsInnerClass(
-            M sourceMethod,
+            M item,
             TypeElement converter) {
         boolean nested = util.getEnclosingElements(converter).contains(sourceElement.element());
         if (!nested) {
-            return Optional.of(sourceMethod.fail("converter of '" +
-                    sourceMethod.methodName() +
+            return Optional.of(item.fail("converter of '" +
+                    item.methodName() +
                     "' must be an inner class of the command class '" +
                     sourceElement.element().getSimpleName() + "'"));
         }
@@ -95,10 +91,10 @@ public class MappingFinder {
      */
     private <M extends Item>
     Optional<ValidationFailure> checkNotAbstract(
-            M sourceMethod,
+            M item,
             TypeElement converter) {
         if (converter.getModifiers().contains(ABSTRACT)) {
-            return Optional.of(sourceMethod.fail("the converter class '" +
+            return Optional.of(item.fail("the converter class '" +
                     converter.getSimpleName() +
                     "' may not be abstract"));
         }
@@ -109,10 +105,10 @@ public class MappingFinder {
      */
     private <M extends Item>
     Optional<ValidationFailure> checkNoTypeVars(
-            M sourceMethod,
+            M item,
             TypeElement converter) {
         if (!converter.getTypeParameters().isEmpty()) {
-            return Optional.of(sourceMethod.fail("type parameters are not allowed in the declaration of" +
+            return Optional.of(item.fail("type parameters are not allowed in the declaration of" +
                     " converter class '" +
                     converter.getSimpleName() +
                     "'"));

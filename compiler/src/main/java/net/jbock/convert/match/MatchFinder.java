@@ -36,9 +36,8 @@ public class MatchFinder {
     }
 
     public <M extends Item>
-    Either<ValidationFailure, Match<M>> findMatch(
-            M sourceMethod) {
-        Match<M> match = findMatchInternal(sourceMethod);
+    Either<ValidationFailure, Match<M>> findMatch(M item) {
+        Match<M> match = findMatchInternal(item);
         return validateVarargsIsList(match)
                 .<Either<ValidationFailure, Match<M>>>map(Either::left)
                 .orElseGet(() -> right(match));
@@ -46,39 +45,36 @@ public class MatchFinder {
 
     public <M extends Item>
     Either<ValidationFailure, Match<M>>
-    createNullaryMatch(
-            M sourceMethod) {
+    createNullaryMatch(M item) {
         PrimitiveType bool = types.getPrimitiveType(BOOLEAN);
-        Match<M> match = Match.create(bool, OPTIONAL, sourceMethod);
+        Match<M> match = Match.create(bool, OPTIONAL, item);
         return validateVarargsIsList(match)
                 .<Either<ValidationFailure, Match<M>>>map(Either::left)
                 .orElseGet(() -> right(match));
     }
 
     private <M extends Item> Match<M>
-    findMatchInternal(
-            M sourceMethod) {
+    findMatchInternal(M item) {
         return matchers.stream()
-                .map(matcher -> matcher.tryMatch(sourceMethod))
+                .map(matcher -> matcher.tryMatch(item))
                 .flatMap(Optional::stream)
                 .findFirst()
                 .orElseGet(() -> {
-                    TypeMirror baseType = AS_PRIMITIVE.visit(sourceMethod.returnType())
+                    TypeMirror baseType = AS_PRIMITIVE.visit(item.returnType())
                             .map(types::boxedClass)
                             .map(TypeElement::asType)
-                            .orElse(sourceMethod.returnType());
-                    return Match.create(baseType, REQUIRED, sourceMethod);
+                            .orElse(item.returnType());
+                    return Match.create(baseType, REQUIRED, item);
                 });
     }
 
     private <M extends Item>
-    Optional<ValidationFailure> validateVarargsIsList(
-            Match<M> match) {
-        M sourceMethod = match.sourceMethod();
-        if (sourceMethod.isVarargsParameter()
+    Optional<ValidationFailure> validateVarargsIsList(Match<M> match) {
+        M item = match.item();
+        if (item.isVarargsParameter()
                 && match.multiplicity() != Multiplicity.REPEATABLE) {
-            return Optional.of(sourceMethod.fail("method '" +
-                    sourceMethod.method().getSimpleName() +
+            return Optional.of(item.fail("method '" +
+                    item.method().getSimpleName() +
                     "' is annotated with @" +
                     VarargsParameter.class.getSimpleName() +
                     ", so it must return java.util.List"));

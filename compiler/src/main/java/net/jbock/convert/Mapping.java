@@ -63,7 +63,7 @@ public final class Mapping<M extends Item> {
     }
 
     public String enumName() {
-        return sourceMethod().enumName();
+        return item().enumName();
     }
 
     public boolean isRequired() {
@@ -82,17 +82,17 @@ public final class Mapping<M extends Item> {
         return nullary;
     }
 
-    public M sourceMethod() {
-        return match.sourceMethod();
+    public M item() {
+        return match.item();
     }
 
     public String paramLabel() {
-        return sourceMethod().paramLabel();
+        return item().paramLabel();
     }
 
     private final Supplier<FieldSpec> fieldSupplier = memoize(() -> {
-        TypeName fieldType = TypeName.get(sourceMethod().returnType());
-        String fieldName = sourceMethod().methodName();
+        TypeName fieldType = TypeName.get(item().returnType());
+        String fieldName = item().methodName();
         return FieldSpec.builder(fieldType, fieldName, FINAL).build();
     });
 

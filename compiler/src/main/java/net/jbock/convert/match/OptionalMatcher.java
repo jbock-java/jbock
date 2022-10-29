@@ -30,26 +30,25 @@ class OptionalMatcher extends Matcher {
 
     @Override
     <M extends Item>
-    Optional<Match<M>> tryMatch(
-            M sourceMethod) {
-        if (sourceMethod.isVarargsParameter()) {
+    Optional<Match<M>> tryMatch(M item) {
+        if (item.isVarargsParameter()) {
             return Optional.empty(); // A VarargsParameter cannot match as an Optional.
         }
-        TypeMirror returnType = sourceMethod.returnType();
-        return getOptionalPrimitive(sourceMethod, returnType)
-                .or(() -> matchOptional(sourceMethod, returnType));
+        TypeMirror returnType = item.returnType();
+        return getOptionalPrimitive(item, returnType)
+                .or(() -> matchOptional(item, returnType));
     }
 
     private <M extends Item> Optional<Match<M>>
-    matchOptional(M sourceMethod, TypeMirror returnType) {
+    matchOptional(M item, TypeMirror returnType) {
         return elements.getTypeElement("java.util.Optional")
                 .flatMap(el -> tool.getSingleTypeArgument(returnType, el))
-                .map(typeArg -> Match.create(typeArg, OPTIONAL, sourceMethod));
+                .map(typeArg -> Match.create(typeArg, OPTIONAL, item));
     }
 
     private <M extends Item>
     Optional<Match<M>> getOptionalPrimitive(
-            M sourceMethod,
+            M item,
             TypeMirror type) {
         for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
             if (tool.isSameType(type, optionalPrimitive.type())) {
@@ -57,7 +56,7 @@ class OptionalMatcher extends Matcher {
                 return elements.getTypeElement(optionalPrimitive.numberType())
                         .map(TypeElement::asType)
                         .map(numberType ->
-                                createWithExtract(numberType, extractExpr, sourceMethod));
+                                createWithExtract(numberType, extractExpr, item));
             }
         }
         return Optional.empty();

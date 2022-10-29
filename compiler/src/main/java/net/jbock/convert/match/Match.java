@@ -20,33 +20,33 @@ public final class Match<M extends Item> {
     private final TypeMirror baseType;
     private final Optional<CodeBlock> extractExpr;
     private final Multiplicity multiplicity;
-    private final M sourceMethod;
+    private final M item;
 
     private Match(
             TypeMirror baseType,
             Multiplicity multiplicity,
             Optional<CodeBlock> extractExpr,
-            M sourceMethod) {
+            M item) {
         this.baseType = baseType;
         this.multiplicity = multiplicity;
         this.extractExpr = extractExpr;
-        this.sourceMethod = sourceMethod;
+        this.item = item;
     }
 
     static <M extends Item>
     Match<M> createWithExtract(
             TypeMirror baseType,
             CodeBlock extractExpr,
-            M sourceMethod) {
-        return new Match<>(baseType, OPTIONAL, Optional.of(extractExpr), sourceMethod);
+            M item) {
+        return new Match<>(baseType, OPTIONAL, Optional.of(extractExpr), item);
     }
 
     static <M extends Item>
     Match<M> create(
             TypeMirror baseType,
             Multiplicity multiplicity,
-            M sourceMethod) {
-        return new Match<>(baseType, multiplicity, Optional.empty(), sourceMethod);
+            M item) {
+        return new Match<>(baseType, multiplicity, Optional.empty(), item);
     }
 
     public TypeMirror baseType() {
@@ -57,12 +57,12 @@ public final class Match<M extends Item> {
         return multiplicity;
     }
 
-    public M sourceMethod() {
-        return sourceMethod;
+    public M item() {
+        return item;
     }
 
     public ValidationFailure fail(String message) {
-        return sourceMethod().fail(message);
+        return item().fail(message);
     }
 
     public Optional<CodeBlock> extractExpr() {

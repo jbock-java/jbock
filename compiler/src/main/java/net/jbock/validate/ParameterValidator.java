@@ -58,10 +58,10 @@ class ParameterValidator {
         return positionalParameters.stream()
                 .filter(Mapping::isOptional)
                 .findFirst()
-                .map(Mapping::sourceMethod)
+                .map(Mapping::item)
                 .flatMap(firstOptional -> positionalParameters.stream()
                         .filter(Mapping::isRequired)
-                        .map(Mapping::sourceMethod)
+                        .map(Mapping::item)
                         .filter(sourceMethod -> sourceMethod.index()
                                 > firstOptional.index())
                         .map(item -> item.fail("position of required parameter '" +

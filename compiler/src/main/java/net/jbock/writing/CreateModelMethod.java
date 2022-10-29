@@ -58,7 +58,7 @@ final class CreateModelMethod extends HasCommandRepresentation {
 
     private CodeBlock optionBlock(Mapping<Option> m) {
         List<CodeBlock> names = new ArrayList<>();
-        for (String name : m.sourceMethod().names()) {
+        for (String name : m.item().names()) {
             names.add(CodeBlock.of("$S", name));
         }
         List<CodeBlock> code = new ArrayList<>();
@@ -68,9 +68,9 @@ final class CreateModelMethod extends HasCommandRepresentation {
             code.add(CodeBlock.of("$T.unary($T.$L)", net.jbock.model.Option.class, Multiplicity.class, m.multiplicity().name()));
         }
         code.add(CodeBlock.of(".withParamLabel($S)", m.paramLabel()));
-        m.sourceMethod().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
+        m.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
         code.add(CodeBlock.of(".withNames($T.of($L))", List.class, joinByComma(names)));
-        for (String line : m.sourceMethod().description()) {
+        for (String line : m.item().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
@@ -81,8 +81,8 @@ final class CreateModelMethod extends HasCommandRepresentation {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$T.builder($T.$L)", Parameter.class, Multiplicity.class, m.multiplicity().name()));
         code.add(CodeBlock.of(".withParamLabel($S)", m.paramLabel()));
-        m.sourceMethod().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
-        for (String line : m.sourceMethod().description()) {
+        m.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
+        for (String line : m.item().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
