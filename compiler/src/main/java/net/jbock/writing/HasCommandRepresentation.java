@@ -40,7 +40,7 @@ abstract class HasCommandRepresentation {
     }
 
     final Optional<Mapping<VarargsParameter>> varargsParameter() {
-        return commandRepresentation.varargsParameters().stream().findAny();
+        return commandRepresentation.varargsParameter();
     }
 
     final List<Mapping<?>> allMappings() {

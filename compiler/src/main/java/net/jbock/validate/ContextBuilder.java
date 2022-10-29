@@ -4,16 +4,22 @@ import net.jbock.annotated.Items;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.annotated.VarargsParameter;
+import net.jbock.common.Suppliers;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.writing.CommandRepresentation;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A telescoping builder that creates the command representation.
  */
 public final class ContextBuilder {
+
+    private final Supplier<Optional<Mapping<VarargsParameter>>> varargsParameter = Suppliers.memoize(() ->
+            varargsParameters().stream().findAny());
 
     private final Step3 step3;
     private final List<Mapping<Option>> namedOptions;
@@ -101,7 +107,11 @@ public final class ContextBuilder {
         return step3.step2.positionalParameters;
     }
 
-    public List<Mapping<VarargsParameter>> varargsParameters() {
+    public Optional<Mapping<VarargsParameter>> varargsParameter() {
+        return varargsParameter.get();
+    }
+
+    private List<Mapping<VarargsParameter>> varargsParameters() {
         return step3.varargsParameters;
     }
 

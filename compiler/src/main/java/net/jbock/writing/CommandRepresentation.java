@@ -9,11 +9,11 @@ import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.validate.ContextBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.STRING;
@@ -21,6 +21,22 @@ import static net.jbock.common.Constants.mapOf;
 import static net.jbock.common.Suppliers.memoize;
 
 public final class CommandRepresentation {
+
+    private final Supplier<FieldSpec> optionNames = memoize(() -> FieldSpec.builder(
+                    mapOf(STRING, optType()), "optionNames")
+            .addModifiers(PRIVATE, FINAL).build());
+
+    private final Supplier<ClassName> optType = memoize(() -> namedOptions().isEmpty() ?
+            ClassName.get(Void.class) : // javapoet #739
+            sourceElement().optionEnumType());
+
+    private final Supplier<List<Mapping<?>>> allMappings = memoize(() -> {
+        List<Mapping<?>> result = new ArrayList<>();
+        result.addAll(namedOptions());
+        result.addAll(positionalParameters());
+        varargsParameter().ifPresent(result::add);
+        return result;
+    });
 
     private final ContextBuilder contextBuilder;
     private final SourceElement sourceElement;
@@ -36,8 +52,8 @@ public final class CommandRepresentation {
         return sourceElement;
     }
 
-    List<Mapping<VarargsParameter>> varargsParameters() {
-        return contextBuilder.varargsParameters();
+    Optional<Mapping<VarargsParameter>> varargsParameter() {
+        return contextBuilder.varargsParameter();
     }
 
     List<Mapping<Parameter>> positionalParameters() {
@@ -48,27 +64,14 @@ public final class CommandRepresentation {
         return contextBuilder.namedOptions();
     }
 
-    private final Supplier<FieldSpec> optionNames = memoize(() -> FieldSpec.builder(
-                    mapOf(STRING, optType()), "optionNames")
-            .addModifiers(PRIVATE, FINAL).build());
-
     FieldSpec optionNames() {
         return optionNames.get();
     }
-
-    private final Supplier<ClassName> optType = memoize(() -> namedOptions().isEmpty() ?
-            ClassName.get(Void.class) : // javapoet #739
-            sourceElement().optionEnumType());
 
     /** Returns the type of the option enum. */
     ClassName optType() {
         return optType.get();
     }
-
-    private final Supplier<List<Mapping<?>>> allMappings = memoize(() ->
-            Stream.of(namedOptions(), positionalParameters(), varargsParameters())
-                    .flatMap(List::stream)
-                    .collect(toList()));
 
     List<Mapping<?>> allMappings() {
         return allMappings.get();
