@@ -16,10 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static net.jbock.common.Suppliers.memoize;
 import static net.jbock.common.TypeTool.ANNOTATION_VALUE_AS_TYPE;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
@@ -28,24 +30,9 @@ public abstract class Item {
 
     private static final Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
-    private final ExecutableElement method;
-    private final Optional<TypeElement> converter;
-    private final String enumName;
-
-    Item(ExecutableElement method,
-         Optional<TypeElement> converter,
-         String enumName) {
-        this.method = method;
-        this.converter = converter;
-        this.enumName = enumName;
-    }
-
-    static Item create(
-            ExecutableElement method,
-            Annotation annotation,
-            String enumName) {
-        String canonicalName = annotation.annotationType().getCanonicalName();
-        AnnotationMirror annotationMirror = method.getAnnotationMirrors().stream()
+    private final Supplier<Optional<TypeElement>> converter = memoize(() -> {
+        String canonicalName = annotation().annotationType().getCanonicalName();
+        AnnotationMirror annotationMirror = method().getAnnotationMirrors().stream()
                 .filter(mirror -> AS_TYPE_ELEMENT.visit(mirror.getAnnotationType().asElement())
                         .map(TypeElement::getQualifiedName)
                         .map(Name::toString)
@@ -53,15 +40,30 @@ public abstract class Item {
                         .isPresent())
                 .findFirst()
                 .orElseThrow(AssertionError::new);
-        Optional<TypeElement> converter = findConverterAttribute(annotationMirror);
+        return findConverterAttribute(annotationMirror);
+    });
+
+    private final ExecutableElement method;
+    private final String enumName;
+
+    Item(ExecutableElement method,
+         String enumName) {
+        this.method = method;
+        this.enumName = enumName;
+    }
+
+    static Item create(
+            ExecutableElement method,
+            Annotation annotation,
+            String enumName) {
         if (annotation instanceof net.jbock.Option) {
-            return new Option(method, (net.jbock.Option) annotation, converter, enumName);
+            return new Option(method, (net.jbock.Option) annotation, enumName);
         }
         if (annotation instanceof net.jbock.Parameter) {
-            return new Parameter(method, (net.jbock.Parameter) annotation, converter, enumName);
+            return new Parameter(method, (net.jbock.Parameter) annotation, enumName);
         }
         if (annotation instanceof net.jbock.VarargsParameter) {
-            return new VarargsParameter(method, (net.jbock.VarargsParameter) annotation, converter, enumName);
+            return new VarargsParameter(method, (net.jbock.VarargsParameter) annotation, enumName);
         }
         throw new AssertionError();
     }
@@ -75,6 +77,8 @@ public abstract class Item {
     public abstract Optional<String> descriptionKey();
 
     public abstract List<String> description();
+
+    abstract Annotation annotation();
 
     public final ExecutableElement method() {
         return method;
@@ -105,7 +109,7 @@ public abstract class Item {
     }
 
     public final Optional<TypeElement> converter() {
-        return converter;
+        return converter.get();
     }
 
     public final ValidationFailure fail(String message) {

@@ -4,7 +4,6 @@ import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
 import io.jbock.javapoet.TypeName;
 import net.jbock.annotated.Item;
-import net.jbock.common.Suppliers;
 import net.jbock.convert.match.Match;
 import net.jbock.model.Multiplicity;
 
@@ -12,6 +11,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static javax.lang.model.element.Modifier.FINAL;
+import static net.jbock.common.Suppliers.memoize;
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
 /**
@@ -90,7 +90,7 @@ public final class Mapping<M extends Item> {
         return sourceMethod().paramLabel();
     }
 
-    private final Supplier<FieldSpec> fieldSupplier = Suppliers.memoize(() -> {
+    private final Supplier<FieldSpec> fieldSupplier = memoize(() -> {
         TypeName fieldType = TypeName.get(sourceMethod().returnType());
         String fieldName = sourceMethod().methodName();
         return FieldSpec.builder(fieldType, fieldName, FINAL).build();

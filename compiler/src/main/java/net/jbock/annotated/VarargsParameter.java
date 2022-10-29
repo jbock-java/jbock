@@ -3,7 +3,7 @@ package net.jbock.annotated;
 import net.jbock.common.SnakeName;
 
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -24,9 +24,8 @@ public final class VarargsParameter extends Item {
     VarargsParameter(
             ExecutableElement method,
             net.jbock.VarargsParameter parameter,
-            Optional<TypeElement> converter,
             String enumName) {
-        super(method, converter, enumName);
+        super(method, enumName);
         this.parameter = parameter;
     }
 
@@ -38,6 +37,11 @@ public final class VarargsParameter extends Item {
     @Override
     public List<String> description() {
         return List.of(parameter.description());
+    }
+
+    @Override
+    Annotation annotation() {
+        return parameter;
     }
 
     @Override

@@ -3,7 +3,7 @@ package net.jbock.annotated;
 import net.jbock.common.SnakeName;
 
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
+import java.lang.annotation.Annotation;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -39,9 +39,8 @@ public final class Option extends Item {
     Option(
             ExecutableElement method,
             net.jbock.Option option,
-            Optional<TypeElement> converter,
             String enumName) {
-        super(method, converter, enumName);
+        super(method, enumName);
         this.option = option;
     }
 
@@ -53,6 +52,11 @@ public final class Option extends Item {
     @Override
     public List<String> description() {
         return List.of(option.description());
+    }
+
+    @Override
+    Annotation annotation() {
+        return option;
     }
 
     @Override
