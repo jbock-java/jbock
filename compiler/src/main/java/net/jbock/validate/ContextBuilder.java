@@ -4,22 +4,17 @@ import net.jbock.annotated.Items;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.annotated.VarargsParameter;
-import net.jbock.common.Suppliers;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.writing.CommandRepresentation;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * A telescoping builder that creates the command representation.
  */
 public final class ContextBuilder {
-
-    private final Supplier<Optional<Mapping<VarargsParameter>>> varargsParameter = Suppliers.memoize(() ->
-            varargsParameters().stream().findAny());
 
     private final Step3 step3;
     private final List<Mapping<Option>> namedOptions;
@@ -76,18 +71,18 @@ public final class ContextBuilder {
             return step1.step0.items.varargsParameters();
         }
 
-        Step3 accept(List<Mapping<VarargsParameter>> varargsParameters) {
-            return new Step3(this, varargsParameters);
+        Step3 accept(Optional<Mapping<VarargsParameter>> varargsParameter) {
+            return new Step3(this, varargsParameter);
         }
     }
 
     static final class Step3 {
         private final Step2 step2;
-        private final List<Mapping<VarargsParameter>> varargsParameters;
+        private final Optional<Mapping<VarargsParameter>> varargsParameter;
 
-        private Step3(Step2 step2, List<Mapping<VarargsParameter>> varargsParameters) {
+        private Step3(Step2 step2, Optional<Mapping<VarargsParameter>> varargsParameter) {
             this.step2 = step2;
-            this.varargsParameters = varargsParameters;
+            this.varargsParameter = varargsParameter;
         }
 
         List<Option> namedOptions() {
@@ -108,11 +103,7 @@ public final class ContextBuilder {
     }
 
     public Optional<Mapping<VarargsParameter>> varargsParameter() {
-        return varargsParameter.get();
-    }
-
-    private List<Mapping<VarargsParameter>> varargsParameters() {
-        return step3.varargsParameters;
+        return step3.varargsParameter;
     }
 
     public CommandRepresentation build() {

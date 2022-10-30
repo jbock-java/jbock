@@ -35,6 +35,7 @@ class VarargsParameterValidator {
                 .flatMap(parameters -> parameters.stream()
                         .map(mappingFinder::findMapping)
                         .collect(allFailures()))
+                .map(mappings -> mappings.stream().findAny())
                 .map(step::accept);
     }
 
