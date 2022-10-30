@@ -2,8 +2,10 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
+import net.jbock.annotated.Items;
 import net.jbock.annotated.VarargsParameter;
 import net.jbock.common.ValidationFailure;
+import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
 import net.jbock.processor.SourceElement;
 
@@ -28,15 +30,14 @@ class VarargsParameterValidator {
         this.sourceElement = sourceElement;
     }
 
-    Either<List<ValidationFailure>, ContextBuilder.Step3> wrapRepeatablePositionalParams(
-            ContextBuilder.Step2 step) {
-        return validateDuplicateParametersAnnotation(step.varargsParameters())
+    Either<List<ValidationFailure>, Optional<Mapping<VarargsParameter>>> wrapVarargsParameters(
+            Items items) {
+        return validateDuplicateParametersAnnotation(items.varargsParameters())
                 .filter(this::validateNoRepeatableParameterInSuperCommand)
                 .flatMap(parameters -> parameters.stream()
                         .map(mappingFinder::findMapping)
                         .collect(allFailures()))
-                .map(mappings -> mappings.stream().findAny())
-                .map(step::accept);
+                .map(mappings -> mappings.stream().findAny());
     }
 
     private Either<List<ValidationFailure>, List<VarargsParameter>> validateDuplicateParametersAnnotation(

@@ -7,7 +7,6 @@ import net.jbock.annotated.Parameter;
 import net.jbock.annotated.VarargsParameter;
 import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
-import net.jbock.validate.ContextBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,13 +37,20 @@ public final class CommandRepresentation {
         return result;
     });
 
-    private final ContextBuilder contextBuilder;
+    private final List<Mapping<Option>> namedOptions;
+    private final List<Mapping<Parameter>> positionalParameters;
+    private final Optional<Mapping<VarargsParameter>> varargsParameter;
+
     private final SourceElement sourceElement;
 
     public CommandRepresentation(
-            ContextBuilder contextBuilder,
-            SourceElement sourceElement) {
-        this.contextBuilder = contextBuilder;
+            SourceElement sourceElement,
+            List<Mapping<Option>> namedOptions,
+            List<Mapping<Parameter>> positionalParameters,
+            Optional<Mapping<VarargsParameter>> varargsParameter) {
+        this.namedOptions = namedOptions;
+        this.positionalParameters = positionalParameters;
+        this.varargsParameter = varargsParameter;
         this.sourceElement = sourceElement;
     }
 
@@ -53,15 +59,15 @@ public final class CommandRepresentation {
     }
 
     Optional<Mapping<VarargsParameter>> varargsParameter() {
-        return contextBuilder.varargsParameter();
+        return varargsParameter;
     }
 
     List<Mapping<Parameter>> positionalParameters() {
-        return contextBuilder.positionalParameters();
+        return positionalParameters;
     }
 
     List<Mapping<Option>> namedOptions() {
-        return contextBuilder.namedOptions();
+        return namedOptions;
     }
 
     FieldSpec optionNames() {

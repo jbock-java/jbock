@@ -4,7 +4,11 @@ import io.jbock.util.Either;
 import jakarta.inject.Inject;
 import net.jbock.annotated.Items;
 import net.jbock.annotated.ItemsFactory;
+import net.jbock.annotated.Option;
+import net.jbock.annotated.Parameter;
+import net.jbock.annotated.VarargsParameter;
 import net.jbock.common.ValidationFailure;
+import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.writing.CommandRepresentation;
 
@@ -28,7 +32,7 @@ public class CommandProcessor {
     private final SourceElement sourceElement;
     private final OptionValidator optionValidator;
     private final ParameterValidator parameterValidator;
-    private final VarargsParameterValidator parametersValidator;
+    private final VarargsParameterValidator varargsParameterValidator;
 
     @Inject
     CommandProcessor(
@@ -36,23 +40,25 @@ public class CommandProcessor {
             SourceElement sourceElement,
             OptionValidator optionValidator,
             ParameterValidator parameterValidator,
-            VarargsParameterValidator parametersValidator) {
+            VarargsParameterValidator varargsParameterValidator) {
         this.itemsFactory = itemsFactory;
         this.sourceElement = sourceElement;
         this.optionValidator = optionValidator;
         this.parameterValidator = parameterValidator;
-        this.parametersValidator = parametersValidator;
+        this.varargsParameterValidator = varargsParameterValidator;
     }
 
     public Either<List<ValidationFailure>, CommandRepresentation> generate() {
         return itemsFactory.createItems()
                 .filter(this::checkDuplicateDescriptionKeys)
-                .map(ContextBuilder::builder)
-                .map(builder -> builder.accept(sourceElement))
-                .flatMap(parameterValidator::wrapPositionalParams)
-                .flatMap(parametersValidator::wrapRepeatablePositionalParams)
-                .flatMap(optionValidator::wrapOptions)
-                .map(ContextBuilder::build);
+                .flatMap(items -> {
+                    Either<List<ValidationFailure>, List<Mapping<Parameter>>> a = parameterValidator.wrapPositionalParams(items);
+                    Either<List<ValidationFailure>, Optional<Mapping<VarargsParameter>>> b = varargsParameterValidator.wrapVarargsParameters(items);
+                    Either<List<ValidationFailure>, List<Mapping<Option>>> c = optionValidator.wrapOptions(items);
+                    return a.flatMap(parameters ->
+                            b.flatMap(varargsParameter ->
+                                    c.map(options -> new CommandRepresentation(sourceElement, options, parameters, varargsParameter))));
+                });
     }
 
     /* Left-Optional

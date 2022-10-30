@@ -2,6 +2,7 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
+import net.jbock.annotated.Items;
 import net.jbock.annotated.Option;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
@@ -30,16 +31,15 @@ class OptionValidator {
         this.mappingFinder = mappingFinder;
     }
 
-    Either<List<ValidationFailure>, ContextBuilder> wrapOptions(
-            ContextBuilder.Step3 step) {
-        return step.namedOptions().stream()
+    Either<List<ValidationFailure>, List<Mapping<Option>>> wrapOptions(
+            Items items) {
+        return items.namedOptions().stream()
                 .map(this::checkOptionNames)
                 .collect(allFailures())
                 .filter(this::validateUniqueOptionNames)
                 .flatMap(sourceOptions -> sourceOptions.stream()
                         .map(this::wrapOption)
-                        .collect(allFailures()))
-                .map(step::accept);
+                        .collect(allFailures()));
     }
 
     private Either<ValidationFailure, Mapping<Option>> wrapOption(

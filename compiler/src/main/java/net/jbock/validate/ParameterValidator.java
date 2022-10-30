@@ -2,6 +2,7 @@ package net.jbock.validate;
 
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
+import net.jbock.annotated.Items;
 import net.jbock.annotated.Parameter;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
@@ -26,14 +27,13 @@ class ParameterValidator {
         this.mappingFinder = mappingFinder;
     }
 
-    Either<List<ValidationFailure>, ContextBuilder.Step2> wrapPositionalParams(
-            ContextBuilder.Step1 step) {
-        return validatePositions(step.positionalParameters())
+    Either<List<ValidationFailure>, List<Mapping<Parameter>>> wrapPositionalParams(
+            Items items) {
+        return validatePositions(items.positionalParameters())
                 .flatMap(parameters -> parameters.stream()
                         .map(mappingFinder::findMapping)
                         .collect(allFailures()))
-                .filter(this::checkNoRequiredAfterOptional)
-                .map(step::accept);
+                .filter(this::checkNoRequiredAfterOptional);
     }
 
     private Either<List<ValidationFailure>, List<Parameter>> validatePositions(
