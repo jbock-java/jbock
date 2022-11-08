@@ -78,8 +78,8 @@ public static void main(String[] args) {
 
 ````
 
-In addition to `parseOrExit`, the generated parser has a basic `parse` method 
-that you can build upon to fine-tune the help and error messages for your users.
+In addition to `parseOrExit`, the generated parser has a basic and side-effect free `parse` method.
+This can be used to fine-tune the help and error messages for your users.
 
 ### Standard types
 
