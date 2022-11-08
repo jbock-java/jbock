@@ -9,12 +9,17 @@ means it doesn't use reflection, but generates a custom parser at compile time i
 
 ### Quick rundown
 
-Create an abstract class, or alternatively a Java interface,
+Create an *abstract* class, or alternatively a Java interface,
 and add the `@Command` annotation.
-In your command class, each abstract method must have *no* arguments,
-and be annotated with either `@Option`, `@Parameter` or `@VarargsParameter`.
+In this so-called command class, each *abstract* method
 
-The *multiplicity* of options and parameters is determined by their declaring method's return type. `List`, `Optional` and `boolean` are "special".
+* must return something (not `void`),
+* must have *no* arguments, and
+* must be annotated with either `@Option`, `@Parameter` or `@VarargsParameter`.
+
+The *multiplicity* of options and parameters is determined by the *return type* of their declaring method.
+The types `boolean`, `List` and `Optional` (including `OptionalInt`, yada yada) have a special meaning.
+See example below.
 
 ````java
 @Command
