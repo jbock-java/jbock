@@ -13,7 +13,7 @@ Create an *abstract* class, or alternatively a Java interface,
 and add the `@Command` annotation.
 In this so-called command class, each *abstract* method
 
-* must return something (not `void`),
+* must return *something* (not `void`),
 * must have *no* arguments, and
 * must be annotated with either `@Option`, `@Parameter` or `@VarargsParameter`.
 
