@@ -18,25 +18,25 @@ class SuperArgumentsTest {
     @Test
     void testRest() {
         SuperResult<SuperArguments> success = f.parse("-q", "foo", "-a", "1");
-        SuperArguments result = success.result();
+        SuperArguments result = success.getCommand();
         assertEquals("foo", result.command());
         assertTrue(result.quiet());
-        assertArrayEquals(new String[]{"-a", "1"}, success.rest());
+        assertArrayEquals(new String[]{"-a", "1"}, success.getRest());
     }
 
     @Test
     void testDoubleEscape() {
         String[] args = {"-q", "--", "--", "a"};
         SuperResult<SuperArguments> result = f.parse(args);
-        assertArrayEquals(new String[]{"--", "a"}, result.rest());
+        assertArrayEquals(new String[]{"--", "a"}, result.getRest());
     }
 
     @Test
     void testEscapeSequenceNotRecognized() {
         String[] args = {"-q", "--"};
         SuperResult<SuperArguments> result = f.parse(args);
-        assertEquals("--", result.result().command());
-        assertEquals(0, result.rest().length);
+        assertEquals("--", result.getCommand().command());
+        assertEquals(0, result.getRest().length);
     }
 
     @Test
