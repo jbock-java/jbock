@@ -1,7 +1,7 @@
 [![jbock-compiler](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock-compiler/badge.svg?color=grey&subject=jbock-compiler)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock-compiler)
 [![jbock](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock/badge.svg?subject=jbock)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock)
 
-jbock is a command line parser, which uses the well-known annotation names from [JCommander](https://jcommander.org/)
+jbock is a command line parser, which uses the same well-known annotation names as [JCommander](https://jcommander.org/)
 and [picocli](https://github.com/remkop/picocli).
 Being an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
