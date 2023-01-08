@@ -80,7 +80,7 @@ class CommandStep implements Step {
                 .map(ContextComponent::new)
                 .ifLeftOrElse(
                         this::printFailures,
-                        component -> writeSpec(sourceElement, component.parserClass().define()));
+                        component -> writeSpec(sourceElement, component.parserClass()));
     }
 
     private void writeSpec(SourceElement sourceElement, TypeSpec typeSpec) {

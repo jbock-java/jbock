@@ -7,7 +7,7 @@ import javax.lang.model.element.Modifier;
 /**
  * Generates the *Parser class.
  */
-public final class ParserClass extends HasCommandRepresentation {
+final class ParserClass extends HasCommandRepresentation {
 
     private final ParseMethod parseMethod;
     private final OptEnum optionEnum;
@@ -44,7 +44,7 @@ public final class ParserClass extends HasCommandRepresentation {
      *
      * @return type spec of the generated {@code *Parser}
      */
-    public TypeSpec define() {
+    TypeSpec define() {
         TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement().generatedClass());
         spec.addMethod(parseMethod.get());
         if (!sourceElement().skipGeneratingParseOrExitMethod()) {

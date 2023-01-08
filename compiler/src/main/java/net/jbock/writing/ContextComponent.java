@@ -1,5 +1,7 @@
 package net.jbock.writing;
 
+import io.jbock.javapoet.TypeSpec;
+
 import java.util.function.Supplier;
 
 import static net.jbock.util.Suppliers.memoize;
@@ -32,7 +34,7 @@ public final class ContextComponent {
         this.parserClassProvider = memoize(() -> new ParserClass(parseMethodProvider.get(), commandRepresentation, optEnumProvider.get(), parseOrExitMethodProvider.get(), createModelMethodProvider.get(), generatedAnnotationProvider.get(), optionNamesMethodProvider.get(), optionStatesMethodProvider.get(), implClassProvider.get()));
     }
 
-    public ParserClass parserClass() {
-        return parserClassProvider.get();
+    public TypeSpec parserClass() {
+        return parserClassProvider.get().define();
     }
 }
