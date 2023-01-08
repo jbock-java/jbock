@@ -3,7 +3,6 @@ package net.jbock.writing;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
-import jakarta.inject.Inject;
 import net.jbock.util.ExFailure;
 
 import java.util.function.Supplier;
@@ -14,14 +13,12 @@ import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Suppliers.memoize;
 
-@WritingScope
 final class ParseMethod extends HasCommandRepresentation {
 
     private final GeneratedTypes generatedTypes;
     private final CreateModelMethod createModelMethod;
     private final ParserTypeFactory parserTypeFactory;
 
-    @Inject
     ParseMethod(
             GeneratedTypes generatedTypes,
             CommandRepresentation commandRepresentation,

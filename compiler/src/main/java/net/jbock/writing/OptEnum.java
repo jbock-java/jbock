@@ -1,7 +1,6 @@
 package net.jbock.writing;
 
 import io.jbock.javapoet.TypeSpec;
-import jakarta.inject.Inject;
 import net.jbock.annotated.Option;
 import net.jbock.convert.Mapping;
 
@@ -12,10 +11,8 @@ import static javax.lang.model.element.Modifier.PRIVATE;
  *
  * @see ParserClass
  */
-@WritingScope
 final class OptEnum extends HasCommandRepresentation {
 
-    @Inject
     OptEnum(CommandRepresentation commandRepresentation) {
         super(commandRepresentation);
     }

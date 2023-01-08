@@ -7,13 +7,12 @@ import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.TypeTool;
 import net.jbock.validate.ValidateComponent;
-import net.jbock.writing.ContextComponent;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 
-@Module(subcomponents = {ValidateComponent.class, ContextComponent.class})
+@Module(subcomponents = {ValidateComponent.class})
 interface ProcessorModule {
 
     @Provides

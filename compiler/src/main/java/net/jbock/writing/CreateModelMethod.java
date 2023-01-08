@@ -2,7 +2,6 @@ package net.jbock.writing;
 
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
-import jakarta.inject.Inject;
 import net.jbock.annotated.Option;
 import net.jbock.convert.Mapping;
 import net.jbock.model.CommandModel;
@@ -19,10 +18,8 @@ import static net.jbock.common.Suppliers.memoize;
 import static net.jbock.writing.CodeBlocks.joinByComma;
 import static net.jbock.writing.CodeBlocks.joinByNewline;
 
-@WritingScope
 final class CreateModelMethod extends HasCommandRepresentation {
 
-    @Inject
     CreateModelMethod(CommandRepresentation commandRepresentation) {
         super(commandRepresentation);
     }

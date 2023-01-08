@@ -4,7 +4,6 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
-import jakarta.inject.Inject;
 import net.jbock.annotated.Option;
 import net.jbock.convert.Mapping;
 import net.jbock.parse.OptionState;
@@ -20,10 +19,8 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.mapOf;
 import static net.jbock.common.Suppliers.memoize;
 
-@WritingScope
 final class OptionStatesMethod extends HasCommandRepresentation {
 
-    @Inject
     OptionStatesMethod(CommandRepresentation commandRepresentation) {
         super(commandRepresentation);
     }
