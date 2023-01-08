@@ -94,3 +94,6 @@ The `@SuperCommand` annotation can be used to define a git-like subcommand struc
 * [jbock-maven-example](https://github.com/jbock-java/jbock-maven-example)
 * [jbock-gradle-example](https://github.com/jbock-java/jbock-gradle-example)
 
+### Alternatives
+
+* [Tim's list](https://github.com/timtiemens/javacommandlineparser)
