@@ -101,4 +101,12 @@ public class TypeTool {
                         types.erasure(someClass.asType())))
                 .map(declaredType -> declaredType.getTypeArguments().get(0));
     }
+
+    public SafeTypes types() {
+        return types;
+    }
+
+    public SafeElements elements() {
+        return elements;
+    }
 }

@@ -4,7 +4,7 @@ import io.jbock.javapoet.TypeSpec;
 
 import java.util.function.Supplier;
 
-import static net.jbock.util.Suppliers.memoize;
+import static net.jbock.common.Suppliers.memoize;
 
 public final class ContextComponent {
 

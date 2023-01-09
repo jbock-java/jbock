@@ -1,7 +1,6 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
 import net.jbock.annotated.Items;
 import net.jbock.annotated.ItemsFactory;
 import net.jbock.annotated.Option;
@@ -25,7 +24,6 @@ import static io.jbock.util.Eithers.optionalList;
  * This class is responsible for item validation.
  * If validation succeeds, a {@link CommandRepresentation} is created.
  */
-@ValidateScope
 public class CommandProcessor {
 
     private final ItemsFactory itemsFactory;
@@ -34,7 +32,6 @@ public class CommandProcessor {
     private final ParameterValidator parameterValidator;
     private final VarargsParameterValidator varargsParameterValidator;
 
-    @Inject
     CommandProcessor(
             ItemsFactory itemsFactory,
             SourceElement sourceElement,

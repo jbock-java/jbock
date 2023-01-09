@@ -1,11 +1,9 @@
 package net.jbock.convert.match;
 
 import io.jbock.javapoet.CodeBlock;
-import jakarta.inject.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
-import net.jbock.validate.ValidateScope;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -14,14 +12,12 @@ import java.util.Optional;
 import static net.jbock.convert.match.Match.createWithExtract;
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
-@ValidateScope
-class OptionalMatcher extends Matcher {
+public class OptionalMatcher extends Matcher {
 
     private final TypeTool tool;
     private final SafeElements elements;
 
-    @Inject
-    OptionalMatcher(
+    public OptionalMatcher(
             TypeTool tool,
             SafeElements elements) {
         this.tool = tool;

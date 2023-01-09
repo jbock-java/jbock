@@ -1,13 +1,11 @@
 package net.jbock.convert.map;
 
 import io.jbock.javapoet.CodeBlock;
-import jakarta.inject.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;
 import net.jbock.contrib.StandardConverters;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
-import net.jbock.validate.ValidateScope;
 
 import javax.lang.model.type.TypeMirror;
 import java.io.File;
@@ -20,14 +18,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-@ValidateScope
-class AutoMappings {
+public class AutoMappings {
 
     private final TypeTool tool;
     private final List<AutoMapping> mappings;
 
-    @Inject
-    AutoMappings(TypeTool tool) {
+    public AutoMappings(TypeTool tool) {
         this.tool = tool;
         this.mappings = autoMappings();
     }

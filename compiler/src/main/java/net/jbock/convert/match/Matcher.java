@@ -4,7 +4,7 @@ import net.jbock.annotated.Item;
 
 import java.util.Optional;
 
-abstract class Matcher {
+public abstract class Matcher {
 
     abstract <M extends Item>
     Optional<Match<M>> tryMatch(

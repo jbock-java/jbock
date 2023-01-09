@@ -1,22 +1,18 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
-import net.jbock.validate.ValidateScope;
 
 import java.util.List;
 import java.util.Optional;
 
-@ValidateScope
 public class ItemsFactory {
 
     private final SourceElement sourceElement;
     private final AbstractMethodsFinder abstractMethodsFinder;
 
-    @Inject
-    ItemsFactory(
+    public ItemsFactory(
             SourceElement sourceElement,
             AbstractMethodsFinder abstractMethodsFinder) {
         this.sourceElement = sourceElement;

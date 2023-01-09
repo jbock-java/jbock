@@ -2,7 +2,6 @@ package net.jbock.convert.map;
 
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
@@ -11,7 +10,6 @@ import net.jbock.contrib.EnumConverter;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
 import net.jbock.util.StringConverter;
-import net.jbock.validate.ValidateScope;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.DeclaredType;
@@ -20,13 +18,11 @@ import java.util.function.Supplier;
 
 import static io.jbock.util.Either.left;
 
-@ValidateScope
 public class AutoOrEnumMapper {
 
     private final AutoMappings autoMappings;
 
-    @Inject
-    AutoOrEnumMapper(
+    public AutoOrEnumMapper(
             AutoMappings autoMappings) {
         this.autoMappings = autoMappings;
     }

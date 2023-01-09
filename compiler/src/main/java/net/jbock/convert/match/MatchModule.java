@@ -1,17 +1,15 @@
 package net.jbock.convert.match;
 
-import dagger.Binds;
 import dagger.Module;
-import dagger.multibindings.IntoSet;
+import dagger.Provides;
+
+import java.util.Set;
 
 @Module
 public interface MatchModule {
 
-    @Binds
-    @IntoSet
-    Matcher optionalMatcher(OptionalMatcher validator);
-
-    @Binds
-    @IntoSet
-    Matcher listMatcher(ListMatcher validator);
+    @Provides
+    static Set<Matcher> matchers(OptionalMatcher optionalMatcher, ListMatcher listMatcher) {
+        return Set.of(optionalMatcher, listMatcher);
+    }
 }

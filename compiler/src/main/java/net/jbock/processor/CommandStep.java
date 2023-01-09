@@ -4,12 +4,11 @@ import io.jbock.javapoet.JavaFile;
 import io.jbock.javapoet.TypeSpec;
 import io.jbock.util.Either;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import net.jbock.Command;
 import net.jbock.SuperCommand;
+import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
-import net.jbock.validate.CommandProcessor;
 import net.jbock.validate.ValidateComponent;
 import net.jbock.writing.ContextComponent;
 
@@ -37,18 +36,18 @@ class CommandStep implements Step {
     private final Messager messager;
     private final Util util;
     private final SourceFileGenerator sourceFileGenerator;
-    private final Provider<ValidateComponent.Builder> validateComponentProvider;
+    private final TypeTool tool;
 
     @Inject
     CommandStep(
             Messager messager,
             Util util,
             SourceFileGenerator sourceFileGenerator,
-            Provider<ValidateComponent.Builder> validateComponentProvider) {
+            TypeTool tool) {
         this.messager = messager;
         this.util = util;
         this.sourceFileGenerator = sourceFileGenerator;
-        this.validateComponentProvider = validateComponentProvider;
+        this.tool = tool;
     }
 
     @Override
@@ -72,11 +71,8 @@ class CommandStep implements Step {
     }
 
     private void processSourceElement(SourceElement sourceElement) {
-        CommandProcessor processor = validateComponentProvider.get()
-                .sourceElement(sourceElement)
-                .build()
-                .processor();
-        processor.generate()
+        new ValidateComponent(util, tool, sourceElement)
+                .generate()
                 .map(ContextComponent::new)
                 .ifLeftOrElse(
                         this::printFailures,

@@ -1,7 +1,6 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
 import net.jbock.annotated.Items;
 import net.jbock.annotated.Parameter;
 import net.jbock.common.ValidationFailure;
@@ -17,12 +16,10 @@ import static io.jbock.util.Eithers.allFailures;
 import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
 
-@ValidateScope
 class ParameterValidator {
 
     private final MappingFinder mappingFinder;
 
-    @Inject
     ParameterValidator(MappingFinder mappingFinder) {
         this.mappingFinder = mappingFinder;
     }

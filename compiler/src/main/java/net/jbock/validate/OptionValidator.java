@@ -1,7 +1,6 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
 import net.jbock.annotated.Items;
 import net.jbock.annotated.Option;
 import net.jbock.common.ValidationFailure;
@@ -21,12 +20,10 @@ import static io.jbock.util.Eithers.toOptionalList;
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
 
-@ValidateScope
 class OptionValidator {
 
     private final MappingFinder mappingFinder;
 
-    @Inject
     OptionValidator(MappingFinder mappingFinder) {
         this.mappingFinder = mappingFinder;
     }

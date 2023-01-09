@@ -1,13 +1,11 @@
 package net.jbock.convert.match;
 
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
 import net.jbock.VarargsParameter;
 import net.jbock.annotated.Item;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.ValidationFailure;
 import net.jbock.model.Multiplicity;
-import net.jbock.validate.ValidateScope;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
@@ -21,14 +19,12 @@ import static net.jbock.common.TypeTool.AS_PRIMITIVE;
 import static net.jbock.model.Multiplicity.OPTIONAL;
 import static net.jbock.model.Multiplicity.REQUIRED;
 
-@ValidateScope
 public class MatchFinder {
 
     private final Set<Matcher> matchers;
     private final SafeTypes types;
 
-    @Inject
-    MatchFinder(
+    public MatchFinder(
             Set<Matcher> matchers,
             SafeTypes types) {
         this.matchers = matchers;

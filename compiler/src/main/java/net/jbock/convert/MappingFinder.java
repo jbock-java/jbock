@@ -1,9 +1,7 @@
 package net.jbock.convert;
 
-import dagger.Lazy;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
@@ -13,7 +11,6 @@ import net.jbock.convert.match.Match;
 import net.jbock.convert.match.MatchFinder;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.StringConverter;
-import net.jbock.validate.ValidateScope;
 
 import javax.lang.model.element.TypeElement;
 import java.util.Optional;
@@ -21,19 +18,17 @@ import java.util.Optional;
 import static io.jbock.util.Either.right;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
-@ValidateScope
 public class MappingFinder {
 
-    private final Lazy<AutoOrEnumMapper> autoOrEnumMapper;
-    private final Lazy<ConverterValidator> converterValidator;
+    private final AutoOrEnumMapper autoOrEnumMapper;
+    private final ConverterValidator converterValidator;
     private final SourceElement sourceElement;
     private final Util util;
     private final MatchFinder matchFinder;
 
-    @Inject
-    MappingFinder(
-            Lazy<AutoOrEnumMapper> autoOrEnumMapper,
-            Lazy<ConverterValidator> converterValidator,
+    public MappingFinder(
+            AutoOrEnumMapper autoOrEnumMapper,
+            ConverterValidator converterValidator,
             SourceElement sourceElement,
             Util util,
             MatchFinder matchFinder) {
@@ -67,8 +62,8 @@ public class MappingFinder {
                         .map(failure -> failure.prepend("invalid converter class: "))
                         .<Either<ValidationFailure, TypeElement>>map(Either::left)
                         .orElseGet(() -> right(converter))
-                        .flatMap(c -> converterValidator.get().findMapping(match, c)))
-                .orElseGet(() -> autoOrEnumMapper.get().findMapping(match));
+                        .flatMap(c -> converterValidator.findMapping(match, c)))
+                .orElseGet(() -> autoOrEnumMapper.findMapping(match));
     }
 
     /* Left-Optional

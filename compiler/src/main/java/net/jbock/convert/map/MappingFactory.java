@@ -17,7 +17,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.function.Supplier;
 
-final class MappingFactory {
+public final class MappingFactory {
 
     private final TypeElement converter;
     private final TypeMirror outputType; // the type-arg T in StringConverter<T>
@@ -25,7 +25,7 @@ final class MappingFactory {
     private final SafeTypes types;
 
     @AssistedInject
-    MappingFactory(
+    public MappingFactory(
             @Assisted TypeElement converter,
             @Assisted TypeMirror outputType,
             @Assisted boolean supplier,
@@ -57,7 +57,7 @@ final class MappingFactory {
     }
 
     @AssistedFactory
-    interface Factory {
+    public interface Factory {
         MappingFactory create(TypeElement converter, TypeMirror outputType, boolean supplier);
     }
 }

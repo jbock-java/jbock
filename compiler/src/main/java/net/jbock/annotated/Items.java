@@ -9,14 +9,14 @@ import static net.jbock.common.Constants.instancesOf;
 public final class Items {
 
     private static final Comparator<Parameter> BY_INDEX = Comparator.comparingInt(Parameter::index);
-    
+
     private final List<Option> namedOptions;
     private final List<Parameter> positionalParameters;
     private final List<VarargsParameter> varargsParameters;
 
     private Items(List<Option> namedOptions,
-          List<Parameter> positionalParameters,
-          List<VarargsParameter> varargsParameters) {
+                  List<Parameter> positionalParameters,
+                  List<VarargsParameter> varargsParameters) {
         this.namedOptions = namedOptions;
         this.positionalParameters = positionalParameters;
         this.varargsParameters = varargsParameters;

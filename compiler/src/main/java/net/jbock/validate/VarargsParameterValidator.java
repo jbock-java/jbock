@@ -1,7 +1,6 @@
 package net.jbock.validate;
 
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
 import net.jbock.annotated.Items;
 import net.jbock.annotated.VarargsParameter;
 import net.jbock.common.ValidationFailure;
@@ -16,13 +15,11 @@ import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.allFailures;
 import static io.jbock.util.Eithers.toOptionalList;
 
-@ValidateScope
 class VarargsParameterValidator {
 
     private final MappingFinder mappingFinder;
     private final SourceElement sourceElement;
 
-    @Inject
     VarargsParameterValidator(
             MappingFinder mappingFinder,
             SourceElement sourceElement) {

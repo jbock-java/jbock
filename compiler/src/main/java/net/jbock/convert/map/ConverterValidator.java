@@ -1,7 +1,6 @@
 package net.jbock.convert.map;
 
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
@@ -9,7 +8,6 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
 import net.jbock.util.StringConverter;
-import net.jbock.validate.ValidateScope;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -21,15 +19,13 @@ import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 
-@ValidateScope
 public class ConverterValidator {
 
     private final SafeTypes types;
     private final SafeElements elements;
     private final MappingFactory.Factory mappingFactoryFactory;
 
-    @Inject
-    ConverterValidator(
+    public ConverterValidator(
             SafeTypes types,
             SafeElements elements,
             MappingFactory.Factory mappingFactoryFactory) {

@@ -1,10 +1,8 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
-import net.jbock.validate.ValidateScope;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -20,13 +18,11 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
-@ValidateScope
 public class AbstractMethodsFinder {
 
     private final SourceElement sourceElement;
 
-    @Inject
-    AbstractMethodsFinder(
+    public AbstractMethodsFinder(
             SourceElement sourceElement) {
         this.sourceElement = sourceElement;
     }
