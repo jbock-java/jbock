@@ -26,7 +26,7 @@ import java.util.function.Supplier;
 
 import static net.jbock.common.Suppliers.memoize;
 
-public class ValidateComponent {
+public final class ValidateComponent {
 
     private final Supplier<AbstractMethodsFinder> abstractMethodsFinderProvider;
     private final Supplier<ItemsFactory> itemsFactoryProvider;

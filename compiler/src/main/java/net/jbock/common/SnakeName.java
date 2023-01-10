@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class SnakeName {
+public final class SnakeName {
 
     private final List<String> parts; // lower case parts
 

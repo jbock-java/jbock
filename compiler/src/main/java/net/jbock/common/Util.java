@@ -16,7 +16,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.element.NestingKind.MEMBER;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 
-public class Util {
+public final class Util {
 
     private final SafeTypes types;
     private final TypeTool tool;

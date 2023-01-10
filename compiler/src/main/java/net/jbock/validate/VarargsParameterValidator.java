@@ -15,7 +15,7 @@ import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.allFailures;
 import static io.jbock.util.Eithers.toOptionalList;
 
-class VarargsParameterValidator {
+final class VarargsParameterValidator {
 
     private final MappingFinder mappingFinder;
     private final SourceElement sourceElement;

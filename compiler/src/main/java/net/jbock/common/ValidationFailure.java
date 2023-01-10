@@ -5,7 +5,7 @@ import javax.lang.model.element.Element;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-public class ValidationFailure {
+public final class ValidationFailure {
 
     private final Element about;
     private final String message;

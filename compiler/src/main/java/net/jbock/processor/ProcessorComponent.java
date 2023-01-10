@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 
 import static net.jbock.common.Suppliers.memoize;
 
-class ProcessorComponent {
+final class ProcessorComponent {
 
     private final Supplier<Util> utilProvider;
     private final Supplier<SafeTypes> typesProvider;

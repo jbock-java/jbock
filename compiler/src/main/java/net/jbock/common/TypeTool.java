@@ -13,7 +13,7 @@ import javax.lang.model.util.SimpleElementVisitor9;
 import javax.lang.model.util.SimpleTypeVisitor9;
 import java.util.Optional;
 
-public class TypeTool {
+public final class TypeTool {
 
     private abstract static class OptionalTypeVisitor<E> extends SimpleTypeVisitor9<Optional<E>, Void> {
 

@@ -19,7 +19,7 @@ import static net.jbock.common.TypeTool.AS_PRIMITIVE;
 import static net.jbock.model.Multiplicity.OPTIONAL;
 import static net.jbock.model.Multiplicity.REQUIRED;
 
-public class MatchFinder {
+public final class MatchFinder {
 
     private final Set<Matcher> matchers;
     private final SafeTypes types;

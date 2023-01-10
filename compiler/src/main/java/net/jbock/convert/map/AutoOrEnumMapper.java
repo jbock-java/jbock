@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 
 import static io.jbock.util.Either.left;
 
-public class AutoOrEnumMapper {
+public final class AutoOrEnumMapper {
 
     private final AutoMappings autoMappings;
 

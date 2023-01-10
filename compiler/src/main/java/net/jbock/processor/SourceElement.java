@@ -20,7 +20,7 @@ import static io.jbock.util.Either.right;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
-public class SourceElement {
+public final class SourceElement {
 
     private final AnyCommand command;
 

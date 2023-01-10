@@ -20,7 +20,7 @@ import static io.jbock.util.Eithers.toOptionalList;
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
 
-class OptionValidator {
+final class OptionValidator {
 
     private final MappingFinder mappingFinder;
 

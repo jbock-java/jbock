@@ -24,7 +24,7 @@ import static io.jbock.util.Eithers.optionalList;
  * This class is responsible for item validation.
  * If validation succeeds, a {@link CommandRepresentation} is created.
  */
-public class CommandProcessor {
+final class CommandProcessor {
 
     private final ItemsFactory itemsFactory;
     private final SourceElement sourceElement;
@@ -45,7 +45,7 @@ public class CommandProcessor {
         this.varargsParameterValidator = varargsParameterValidator;
     }
 
-    public Either<List<ValidationFailure>, CommandRepresentation> generate() {
+    Either<List<ValidationFailure>, CommandRepresentation> generate() {
         return itemsFactory.createItems()
                 .filter(this::checkDuplicateDescriptionKeys)
                 .flatMap(items -> {

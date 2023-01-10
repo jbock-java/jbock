@@ -30,7 +30,7 @@ import static net.jbock.common.Util.checkNoDuplicateAnnotations;
  * This step handles the {@link Command} and {@link SuperCommand} annotations.
  * It performs validation and source generation.
  */
-class CommandStep implements Step {
+final class CommandStep implements Step {
 
     private final Messager messager;
     private final Util util;

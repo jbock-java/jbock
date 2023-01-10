@@ -10,7 +10,7 @@ import java.io.StringWriter;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-class SourceFileGenerator {
+final class SourceFileGenerator {
 
     private final Filer filer;
     private final Messager messager;

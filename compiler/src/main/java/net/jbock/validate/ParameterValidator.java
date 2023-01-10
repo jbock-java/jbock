@@ -16,7 +16,7 @@ import static io.jbock.util.Eithers.allFailures;
 import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
 
-class ParameterValidator {
+final class ParameterValidator {
 
     private final MappingFinder mappingFinder;
 

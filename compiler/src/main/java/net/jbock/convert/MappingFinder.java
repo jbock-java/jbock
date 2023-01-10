@@ -18,7 +18,7 @@ import java.util.Optional;
 import static io.jbock.util.Either.right;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
-public class MappingFinder {
+public final class MappingFinder {
 
     private final AutoOrEnumMapper autoOrEnumMapper;
     private final ConverterValidator converterValidator;

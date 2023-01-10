@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-public class AutoMappings {
+public final class AutoMappings {
 
     private final TypeTool tool;
     private final List<AutoMapping> mappings;

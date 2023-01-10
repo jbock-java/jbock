@@ -19,7 +19,7 @@ import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 
-public class ConverterValidator {
+public final class ConverterValidator {
 
     private final SafeTypes types;
     private final SafeElements elements;
