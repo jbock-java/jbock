@@ -1,7 +1,6 @@
 package net.jbock.processor;
 
 import io.jbock.auto.common.BasicAnnotationProcessor.Step;
-import jakarta.inject.Inject;
 import net.jbock.Command;
 import net.jbock.SuperCommand;
 import net.jbock.common.Util;
@@ -37,7 +36,6 @@ class MethodStep implements Step {
     private final Messager messager;
     private final Util util;
 
-    @Inject
     MethodStep(Messager messager, Util util) {
         this.messager = messager;
         this.util = util;

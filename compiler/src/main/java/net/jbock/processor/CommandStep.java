@@ -3,7 +3,6 @@ package net.jbock.processor;
 import io.jbock.javapoet.JavaFile;
 import io.jbock.javapoet.TypeSpec;
 import io.jbock.util.Either;
-import jakarta.inject.Inject;
 import net.jbock.Command;
 import net.jbock.SuperCommand;
 import net.jbock.common.TypeTool;
@@ -38,7 +37,6 @@ class CommandStep implements Step {
     private final SourceFileGenerator sourceFileGenerator;
     private final TypeTool tool;
 
-    @Inject
     CommandStep(
             Messager messager,
             Util util,

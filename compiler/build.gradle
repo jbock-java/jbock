@@ -40,27 +40,20 @@ tasks.withType(GenerateModuleMetadata) {
 shadowJar {
     minimize()
     archiveClassifier.set('')
-    relocate('io.jbock.auto.common', 'io.jbock.shadow.auto.common')
-    relocate('io.jbock.javapoet', 'io.jbock.shadow.javapoet')
-    relocate('jakarta.inject', 'io.jbock.shadow.jakarta.inject')
-    relocate('dagger.internal', 'io.jbock.shadow.dagger.internal')
+    relocate('io.jbock.auto.common', 'io.jbock.jbock.auto.common')
+    relocate('io.jbock.javapoet', 'io.jbock.jbock.javapoet')
 }
 
 dependencies {
     def jbock = project(':jbock')
-    def dapper = 'io.github.jbock-java:dapper:2.41.2'
     def javapoet = 'io.github.jbock-java:javapoet:1.15'
     implementation(javapoet)
     implementation('io.github.jbock-java:auto-common:1.2.3')
-    implementation('jakarta.inject:jakarta.inject-api:2.0.1')
     shadow(jbock)
-    implementation(dapper)
-    annotationProcessor('io.github.jbock-java:dapper-compiler:2.41.2')
     testImplementation('io.github.jbock-java:compile-testing:0.19.12')
     testImplementation('org.junit.jupiter:junit-jupiter:5.9.1')
     testImplementation('org.mockito:mockito-core:4.8.0')
     testImplementation(jbock)
-    testImplementation(dapper)
 }
 
 jar {

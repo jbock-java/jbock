@@ -1,24 +1,42 @@
 package net.jbock.processor;
 
-import dagger.BindsInstance;
-import dagger.Component;
+import net.jbock.common.SafeElements;
+import net.jbock.common.SafeTypes;
+import net.jbock.common.TypeTool;
+import net.jbock.common.Util;
 
+import javax.annotation.processing.Filer;
+import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
+import java.util.function.Supplier;
 
-@Component(modules = ProcessorModule.class)
-interface ProcessorComponent {
+import static net.jbock.common.Suppliers.memoize;
 
-    MethodStep methodStep();
+class ProcessorComponent {
 
-    CommandStep commandStep();
+    private final Supplier<Util> utilProvider;
+    private final Supplier<SafeTypes> typesProvider;
+    private final Supplier<SafeElements> elementsProvider;
+    private final Supplier<TypeTool> toolProvider;
+    private final Supplier<Filer> filerProvider;
+    private final Supplier<Messager> messagerProvider;
+    private final Supplier<SourceFileGenerator> sourceFileGeneratorProvider;
 
-    static ProcessorComponent create(ProcessingEnvironment processingEnvironment) {
-        return DaggerProcessorComponent.factory().create(processingEnvironment);
+    ProcessorComponent(ProcessingEnvironment processingEnvironment) {
+        this.typesProvider = memoize(() -> new SafeTypes(processingEnvironment.getTypeUtils()));
+        this.elementsProvider = memoize(() -> new SafeElements(processingEnvironment.getElementUtils()));
+        this.toolProvider = memoize(() -> new TypeTool(elementsProvider.get(), typesProvider.get()));
+        this.utilProvider = memoize(() -> new Util(typesProvider.get(), toolProvider.get()));
+        this.filerProvider = memoize(processingEnvironment::getFiler);
+        this.messagerProvider = memoize(processingEnvironment::getMessager);
+        this.sourceFileGeneratorProvider = memoize(() -> new SourceFileGenerator(filerProvider.get(), messagerProvider.get()));
     }
 
-    @Component.Factory
-    interface Factory {
+    MethodStep methodStep() {
+        return new MethodStep(messagerProvider.get(), utilProvider.get());
+    }
 
-        ProcessorComponent create(@BindsInstance ProcessingEnvironment processingEnvironment);
+    CommandStep commandStep() {
+        return new CommandStep(messagerProvider.get(), utilProvider.get(), sourceFileGeneratorProvider.get(), toolProvider.get());
     }
 }

@@ -1,8 +1,5 @@
 package net.jbock.convert.map;
 
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedFactory;
-import dagger.assisted.AssistedInject;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import net.jbock.annotated.Item;
@@ -24,11 +21,10 @@ public final class MappingFactory {
     private final boolean supplier; // true if converter implements Supplier<StringConverter<T>>
     private final SafeTypes types;
 
-    @AssistedInject
     public MappingFactory(
-            @Assisted TypeElement converter,
-            @Assisted TypeMirror outputType,
-            @Assisted boolean supplier,
+            TypeElement converter,
+            TypeMirror outputType,
+            boolean supplier,
             SafeTypes types) {
         this.converter = converter;
         this.outputType = outputType;
@@ -56,7 +52,6 @@ public final class MappingFactory {
         return Mapping.create(createConverterExpression.build(), match);
     }
 
-    @AssistedFactory
     public interface Factory {
         MappingFactory create(TypeElement converter, TypeMirror outputType, boolean supplier);
     }

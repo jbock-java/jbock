@@ -13,7 +13,7 @@ public final class JbockProcessor extends BasicAnnotationProcessor {
 
     @Override
     protected List<Step> steps() {
-        ProcessorComponent component = ProcessorComponent.create(processingEnv);
+        ProcessorComponent component = new ProcessorComponent(processingEnv);
         return List.of(
                 component.commandStep(),
                 component.methodStep());

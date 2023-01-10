@@ -1,8 +1,6 @@
 package net.jbock.processor;
 
-import dagger.Reusable;
 import io.jbock.javapoet.JavaFile;
-import jakarta.inject.Inject;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -12,13 +10,11 @@ import java.io.StringWriter;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-@Reusable
 class SourceFileGenerator {
 
     private final Filer filer;
     private final Messager messager;
 
-    @Inject
     SourceFileGenerator(Filer filer, Messager messager) {
         this.filer = filer;
         this.messager = messager;
