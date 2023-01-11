@@ -22,50 +22,32 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
-
-import static net.jbock.common.Suppliers.memoize;
 
 public final class ValidateComponent {
 
-    private final Supplier<AbstractMethodsFinder> abstractMethodsFinderProvider;
-    private final Supplier<ItemsFactory> itemsFactoryProvider;
-    private final Supplier<AutoMappings> autoMappingsProvider;
-    private final Supplier<AutoOrEnumMapper> autoOrEnumMapperProvider;
-    private final Supplier<MappingFactory.Factory> factoryProvider;
-    private final Supplier<ConverterValidator> converterValidatorProvider;
-    private final Supplier<OptionalMatcher> optionalMatcherProvider;
-    private final Supplier<ListMatcher> listMatcherProvider;
-    private final Supplier<Set<Matcher>> matchersProvider;
-    private final Supplier<MatchFinder> matchFinderProvider;
-    private final Supplier<MappingFinder> mappingFinderProvider;
-    private final Supplier<OptionValidator> optionValidatorProvider;
-    private final Supplier<ParameterValidator> parameterValidatorProvider;
-    private final Supplier<VarargsParameterValidator> varargsParameterValidatorProvider;
-    private final Supplier<CommandProcessor> commandProcessorProvider;
-
-    public ValidateComponent(
+    public static Either<List<ValidationFailure>, CommandRepresentation> generate(
             Util util,
             TypeTool tool,
             SourceElement sourceElement) {
-        this.abstractMethodsFinderProvider = memoize(() -> new AbstractMethodsFinder(sourceElement));
-        this.itemsFactoryProvider = memoize(() -> new ItemsFactory(sourceElement, abstractMethodsFinderProvider.get()));
-        this.autoMappingsProvider = memoize(() -> new AutoMappings(tool));
-        this.autoOrEnumMapperProvider = memoize(() -> new AutoOrEnumMapper(autoMappingsProvider.get()));
-        this.factoryProvider = memoize(() -> (TypeElement converter, TypeMirror outputType, boolean supplier) -> new MappingFactory(converter, outputType, supplier, tool.types()));
-        this.converterValidatorProvider = memoize(() -> new ConverterValidator(tool.types(), tool.elements(), factoryProvider.get()));
-        this.optionalMatcherProvider = memoize(() -> new OptionalMatcher(tool, tool.elements()));
-        this.listMatcherProvider = memoize(() -> new ListMatcher(tool.elements(), tool));
-        this.matchersProvider = memoize(() -> Set.of(optionalMatcherProvider.get(), listMatcherProvider.get()));
-        this.matchFinderProvider = memoize(() -> new MatchFinder(matchersProvider.get(), tool.types()));
-        this.mappingFinderProvider = memoize(() -> new MappingFinder(autoOrEnumMapperProvider.get(), converterValidatorProvider.get(), sourceElement, util, matchFinderProvider.get()));
-        this.optionValidatorProvider = memoize(() -> new OptionValidator(mappingFinderProvider.get()));
-        this.parameterValidatorProvider = memoize(() -> new ParameterValidator(mappingFinderProvider.get()));
-        this.varargsParameterValidatorProvider = memoize(() -> new VarargsParameterValidator(mappingFinderProvider.get(), sourceElement));
-        this.commandProcessorProvider = memoize(() -> new CommandProcessor(itemsFactoryProvider.get(), sourceElement, optionValidatorProvider.get(), parameterValidatorProvider.get(), varargsParameterValidatorProvider.get()));
+        AbstractMethodsFinder abstractMethodsFinder = new AbstractMethodsFinder(sourceElement);
+        ItemsFactory itemsFactory = new ItemsFactory(sourceElement, abstractMethodsFinder);
+        AutoMappings autoMappings = new AutoMappings(tool);
+        AutoOrEnumMapper autoOrEnumMapper = new AutoOrEnumMapper(autoMappings);
+        ConverterValidator converterValidator = new ConverterValidator(tool.types(), tool.elements(),
+                (TypeElement converter, TypeMirror outputType, boolean supplier) ->
+                        new MappingFactory(converter, outputType, supplier, tool.types()));
+        OptionalMatcher optionalMatcher = new OptionalMatcher(tool, tool.elements());
+        ListMatcher listMatcher = new ListMatcher(tool.elements(), tool);
+        Set<Matcher> matchers = Set.of(optionalMatcher, listMatcher);
+        MatchFinder matchFinder = new MatchFinder(matchers, tool.types());
+        MappingFinder mappingFinder = new MappingFinder(autoOrEnumMapper, converterValidator, sourceElement, util, matchFinder);
+        OptionValidator optionValidator = new OptionValidator(mappingFinder);
+        ParameterValidator parameterValidator = new ParameterValidator(mappingFinder);
+        VarargsParameterValidator varargsParameterValidator = new VarargsParameterValidator(mappingFinder, sourceElement);
+        CommandProcessor commandProcessor = new CommandProcessor(itemsFactory, sourceElement, optionValidator, parameterValidator, varargsParameterValidator);
+        return commandProcessor.generate();
     }
 
-    public Either<List<ValidationFailure>, CommandRepresentation> generate() {
-        return commandProcessorProvider.get().generate();
+    private ValidateComponent() {
     }
 }

@@ -69,8 +69,7 @@ final class CommandStep implements Step {
     }
 
     private void processSourceElement(SourceElement sourceElement) {
-        new ValidateComponent(util, tool, sourceElement)
-                .generate()
+        ValidateComponent.generate(util, tool, sourceElement)
                 .map(ContextComponent::parserClass)
                 .ifLeftOrElse(
                         this::printFailures,
