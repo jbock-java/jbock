@@ -71,10 +71,10 @@ final class CommandStep implements Step {
     private void processSourceElement(SourceElement sourceElement) {
         new ValidateComponent(util, tool, sourceElement)
                 .generate()
-                .map(ContextComponent::new)
+                .map(ContextComponent::parserClass)
                 .ifLeftOrElse(
                         this::printFailures,
-                        component -> writeSpec(sourceElement, component.parserClass()));
+                        typeSpec -> writeSpec(sourceElement, typeSpec));
     }
 
     private void writeSpec(SourceElement sourceElement, TypeSpec typeSpec) {
