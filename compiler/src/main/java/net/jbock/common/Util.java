@@ -15,6 +15,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.element.NestingKind.MEMBER;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
+import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
 public final class Util {
 
@@ -101,7 +102,7 @@ public final class Util {
                     typeToString(thrown), element));
         }
         return types.asElement(mirror)
-                .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
+                .flatMap(AS_TYPE_ELEMENT::visit)
                 .flatMap(t -> checkNesting(t)
                         .map(f -> f.prepend("invalid throws clause: declared exception " +
                                 typeToString(thrown) + " is invalid: ").about(element))
@@ -109,19 +110,24 @@ public final class Util {
     }
 
     public List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
+        if (sourceElement.getNestingKind() != MEMBER) {
+            return List.of();
+        }
         List<TypeElement> result = new ArrayList<>();
         result.add(sourceElement);
         while (result.get(result.size() - 1).getNestingKind() == MEMBER) {
-            Element enclosingElement = result.get(result.size() - 1).getEnclosingElement();
-            TypeTool.AS_TYPE_ELEMENT.visit(enclosingElement)
-                    .ifPresent(result::add);
+            Optional<TypeElement> enclosing = AS_TYPE_ELEMENT.visit(result.get(result.size() - 1).getEnclosingElement());
+            if (enclosing.isEmpty()) {
+                break;
+            }
+            result.add(enclosing.orElseThrow());
         }
         return result;
     }
 
     public static String typeToString(TypeMirror type) {
         return TypeTool.AS_DECLARED.visit(type).flatMap(declared ->
-                TypeTool.AS_TYPE_ELEMENT.visit(declared.asElement()).map(t -> {
+                AS_TYPE_ELEMENT.visit(declared.asElement()).map(t -> {
                     String base = t.getSimpleName().toString();
                     if (declared.getTypeArguments().isEmpty()) {
                         return base;
