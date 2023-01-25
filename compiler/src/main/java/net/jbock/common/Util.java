@@ -52,10 +52,10 @@ public final class Util {
                         element.getSimpleName() +
                         "' may not be private", element));
             }
-            if (element.getNestingKind() == MEMBER && !element.getModifiers().contains(STATIC)) {
+            if (element.getNestingKind().isNested() && !element.getModifiers().contains(STATIC)) {
                 return Optional.of(new ValidationFailure("nested class '" +
                         element.getSimpleName() +
-                        "' must be static", classToCheck));
+                        "' must be static", element));
             }
         }
         return Optional.empty();
