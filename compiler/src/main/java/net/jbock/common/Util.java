@@ -50,7 +50,12 @@ public final class Util {
             if (element.getModifiers().contains(PRIVATE)) {
                 return Optional.of(new ValidationFailure("enclosing class '" +
                         element.getSimpleName() +
-                        "' may not be private", classToCheck));
+                        "' may not be private", element));
+            }
+            if (element.getNestingKind() == MEMBER && !element.getModifiers().contains(STATIC)) {
+                return Optional.of(new ValidationFailure("nested class '" +
+                        element.getSimpleName() +
+                        "' must be static", classToCheck));
             }
         }
         return Optional.empty();
@@ -114,13 +119,15 @@ public final class Util {
             return List.of();
         }
         List<TypeElement> result = new ArrayList<>();
-        result.add(sourceElement);
-        while (result.get(result.size() - 1).getNestingKind() == MEMBER) {
-            Optional<TypeElement> enclosing = AS_TYPE_ELEMENT.visit(result.get(result.size() - 1).getEnclosingElement());
+        TypeElement current = sourceElement;
+        while (current.getNestingKind() == MEMBER) {
+            Optional<TypeElement> enclosing = AS_TYPE_ELEMENT.visit(current.getEnclosingElement());
             if (enclosing.isEmpty()) {
                 break;
             }
-            result.add(enclosing.orElseThrow());
+            TypeElement e = enclosing.orElseThrow();
+            result.add(e);
+            current = e;
         }
         return result;
     }
