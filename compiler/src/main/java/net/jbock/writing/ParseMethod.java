@@ -3,6 +3,7 @@ package net.jbock.writing;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
+import io.jbock.simple.Inject;
 import net.jbock.util.ExFailure;
 
 import java.util.function.Supplier;
@@ -19,6 +20,7 @@ final class ParseMethod extends HasCommandRepresentation {
     private final CreateModelMethod createModelMethod;
     private final ParserTypeFactory parserTypeFactory;
 
+    @Inject
     ParseMethod(
             GeneratedTypes generatedTypes,
             CommandRepresentation commandRepresentation,

@@ -1,6 +1,7 @@
 package net.jbock.writing;
 
 import io.jbock.javapoet.TypeSpec;
+import io.jbock.simple.Inject;
 
 import javax.lang.model.element.Modifier;
 
@@ -18,6 +19,7 @@ final class ParserClass extends HasCommandRepresentation {
     private final OptionStatesMethod optionStatesMethod;
     private final ImplClass implClass;
 
+    @Inject
     ParserClass(
             ParseMethod parseMethod,
             CommandRepresentation commandRepresentation,

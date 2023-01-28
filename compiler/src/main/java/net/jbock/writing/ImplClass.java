@@ -7,6 +7,7 @@ import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
+import io.jbock.simple.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
@@ -38,6 +39,7 @@ final class ImplClass extends HasCommandRepresentation {
 
     private final GeneratedTypes generatedTypes;
 
+    @Inject
     ImplClass(GeneratedTypes generatedTypes,
               CommandRepresentation commandRepresentation) {
         super(commandRepresentation);

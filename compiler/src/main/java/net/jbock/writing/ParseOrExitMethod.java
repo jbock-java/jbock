@@ -4,6 +4,7 @@ import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
+import io.jbock.simple.Inject;
 import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.util.AtFileError;
 import net.jbock.util.ParseRequest;
@@ -18,6 +19,7 @@ final class ParseOrExitMethod extends HasCommandRepresentation {
     private final ParseMethod parseMethod;
     private final CreateModelMethod createModelMethod;
 
+    @Inject
     ParseOrExitMethod(
             CommandRepresentation commandRepresentation,
             GeneratedTypes generatedTypes,

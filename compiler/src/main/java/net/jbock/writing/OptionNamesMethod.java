@@ -3,6 +3,7 @@ package net.jbock.writing;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
+import io.jbock.simple.Inject;
 import net.jbock.annotated.Option;
 import net.jbock.convert.Mapping;
 
@@ -16,6 +17,7 @@ import static net.jbock.common.Suppliers.memoize;
 
 final class OptionNamesMethod extends HasCommandRepresentation {
 
+    @Inject
     OptionNamesMethod(
             CommandRepresentation commandRepresentation) {
         super(commandRepresentation);

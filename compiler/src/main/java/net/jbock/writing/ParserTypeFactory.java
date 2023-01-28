@@ -3,6 +3,7 @@ package net.jbock.writing;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.ParameterizedTypeName;
+import io.jbock.simple.Inject;
 import net.jbock.parse.StandardParser;
 import net.jbock.parse.SuperParser;
 import net.jbock.parse.VarargsParameterParser;
@@ -16,6 +17,7 @@ final class ParserTypeFactory extends HasCommandRepresentation {
 
     private final OptionStatesMethod optionStatesMethod;
 
+    @Inject
     ParserTypeFactory(
             CommandRepresentation commandRepresentation,
             OptionStatesMethod optionStatesMethod) {

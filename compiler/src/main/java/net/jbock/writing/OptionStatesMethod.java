@@ -4,6 +4,7 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
+import io.jbock.simple.Inject;
 import net.jbock.annotated.Option;
 import net.jbock.convert.Mapping;
 import net.jbock.parse.OptionState;
@@ -21,6 +22,7 @@ import static net.jbock.common.Suppliers.memoize;
 
 final class OptionStatesMethod extends HasCommandRepresentation {
 
+    @Inject
     OptionStatesMethod(CommandRepresentation commandRepresentation) {
         super(commandRepresentation);
     }

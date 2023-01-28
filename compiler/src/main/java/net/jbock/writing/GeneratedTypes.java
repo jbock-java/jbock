@@ -3,6 +3,7 @@ package net.jbock.writing;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
+import io.jbock.simple.Inject;
 import net.jbock.util.ParsingFailed;
 import net.jbock.util.SuperResult;
 
@@ -12,6 +13,7 @@ import static net.jbock.common.Constants.EITHER;
 
 final class GeneratedTypes extends HasCommandRepresentation {
 
+    @Inject
     GeneratedTypes(CommandRepresentation commandRepresentation) {
         super(commandRepresentation);
     }

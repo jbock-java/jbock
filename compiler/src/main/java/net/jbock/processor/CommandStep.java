@@ -9,6 +9,7 @@ import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.validate.ValidateComponent;
+import net.jbock.writing.CommandRepresentation;
 import net.jbock.writing.ContextComponent;
 
 import javax.annotation.processing.Messager;
