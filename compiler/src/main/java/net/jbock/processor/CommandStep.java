@@ -2,6 +2,7 @@ package net.jbock.processor;
 
 import io.jbock.javapoet.JavaFile;
 import io.jbock.javapoet.TypeSpec;
+import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.Command;
 import net.jbock.SuperCommand;
@@ -9,10 +10,10 @@ import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.validate.ValidateComponent;
-import net.jbock.writing.CommandRepresentation;
 import net.jbock.writing.ContextComponent;
 
 import javax.annotation.processing.Messager;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
@@ -38,12 +39,13 @@ final class CommandStep implements Step {
     private final SourceFileGenerator sourceFileGenerator;
     private final TypeTool tool;
 
+    @Inject
     CommandStep(
-            Messager messager,
+            ProcessingEnvironment processingEnvironment,
             Util util,
             SourceFileGenerator sourceFileGenerator,
             TypeTool tool) {
-        this.messager = messager;
+        this.messager = processingEnvironment.getMessager();
         this.util = util;
         this.sourceFileGenerator = sourceFileGenerator;
         this.tool = tool;

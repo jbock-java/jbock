@@ -1,5 +1,7 @@
 package net.jbock.common;
 
+import io.jbock.simple.Inject;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -22,6 +24,7 @@ public final class Util {
     private final SafeTypes types;
     private final TypeTool tool;
 
+    @Inject
     public Util(SafeTypes types, TypeTool tool) {
         this.types = types;
         this.tool = tool;

@@ -1,5 +1,8 @@
 package net.jbock.common;
 
+import io.jbock.simple.Inject;
+
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.util.Optional;
@@ -11,8 +14,9 @@ public class SafeElements {
 
     private final Elements elements;
 
-    public SafeElements(Elements elements) {
-        this.elements = elements;
+    @Inject
+    public SafeElements(ProcessingEnvironment processingEnvironment) {
+        this.elements = processingEnvironment.getElementUtils();
     }
 
     public Optional<TypeElement> getTypeElement(String name) {

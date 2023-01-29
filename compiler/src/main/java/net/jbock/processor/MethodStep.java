@@ -1,12 +1,14 @@
 package net.jbock.processor;
 
 import io.jbock.auto.common.BasicAnnotationProcessor.Step;
+import io.jbock.simple.Inject;
 import net.jbock.Command;
 import net.jbock.SuperCommand;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 
 import javax.annotation.processing.Messager;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -36,8 +38,9 @@ final class MethodStep implements Step {
     private final Messager messager;
     private final Util util;
 
-    MethodStep(Messager messager, Util util) {
-        this.messager = messager;
+    @Inject
+    MethodStep(ProcessingEnvironment processingEnvironment, Util util) {
+        this.messager = processingEnvironment.getMessager();
         this.util = util;
     }
 

@@ -1,5 +1,7 @@
 package net.jbock.common;
 
+import io.jbock.simple.Inject;
+
 import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
@@ -66,7 +68,7 @@ public final class TypeTool {
 
     private final SafeElements elements;
 
-    // visible for testing
+    @Inject
     public TypeTool(SafeElements elements, SafeTypes types) {
         this.types = types;
         this.elements = elements;

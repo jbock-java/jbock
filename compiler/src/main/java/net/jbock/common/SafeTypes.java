@@ -1,5 +1,8 @@
 package net.jbock.common;
 
+import io.jbock.simple.Inject;
+
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
@@ -15,8 +18,9 @@ public final class SafeTypes {
 
     private final Types types;
 
-    public SafeTypes(Types types) {
-        this.types = types;
+    @Inject
+    public SafeTypes(ProcessingEnvironment processingEnvironment) {
+        this.types = processingEnvironment.getTypeUtils();
     }
 
     public Optional<Element> asElement(TypeMirror t) {
