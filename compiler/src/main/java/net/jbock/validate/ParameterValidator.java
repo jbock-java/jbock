@@ -1,5 +1,6 @@
 package net.jbock.validate;
 
+import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.annotated.Items;
 import net.jbock.annotated.Parameter;
@@ -20,6 +21,7 @@ final class ParameterValidator {
 
     private final MappingFinder mappingFinder;
 
+    @Inject
     ParameterValidator(MappingFinder mappingFinder) {
         this.mappingFinder = mappingFinder;
     }

@@ -1,6 +1,7 @@
 package net.jbock.convert.match;
 
 import io.jbock.javapoet.CodeBlock;
+import io.jbock.simple.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
@@ -17,11 +18,11 @@ public final class OptionalMatcher extends Matcher {
     private final TypeTool tool;
     private final SafeElements elements;
 
+    @Inject
     public OptionalMatcher(
-            TypeTool tool,
-            SafeElements elements) {
+            TypeTool tool) {
         this.tool = tool;
-        this.elements = elements;
+        this.elements = tool.elements();
     }
 
     @Override

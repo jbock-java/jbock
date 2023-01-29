@@ -1,5 +1,6 @@
 package net.jbock.validate;
 
+import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.annotated.Items;
 import net.jbock.annotated.Option;
@@ -24,6 +25,7 @@ final class OptionValidator {
 
     private final MappingFinder mappingFinder;
 
+    @Inject
     OptionValidator(MappingFinder mappingFinder) {
         this.mappingFinder = mappingFinder;
     }

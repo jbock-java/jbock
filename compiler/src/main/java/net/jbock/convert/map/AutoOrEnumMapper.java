@@ -1,6 +1,7 @@
 package net.jbock.convert.map;
 
 import io.jbock.javapoet.CodeBlock;
+import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;
@@ -22,6 +23,7 @@ public final class AutoOrEnumMapper {
 
     private final AutoMappings autoMappings;
 
+    @Inject
     public AutoOrEnumMapper(
             AutoMappings autoMappings) {
         this.autoMappings = autoMappings;

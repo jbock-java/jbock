@@ -1,9 +1,11 @@
 package net.jbock.convert.map;
 
+import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.annotated.Item;
 import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
+import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
@@ -25,12 +27,12 @@ public final class ConverterValidator {
     private final SafeElements elements;
     private final MappingFactory.Factory mappingFactoryFactory;
 
+    @Inject
     public ConverterValidator(
-            SafeTypes types,
-            SafeElements elements,
+            TypeTool tool,
             MappingFactory.Factory mappingFactoryFactory) {
-        this.types = types;
-        this.elements = elements;
+        this.types = tool.types();
+        this.elements = tool.elements();
         this.mappingFactoryFactory = mappingFactoryFactory;
     }
 

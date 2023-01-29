@@ -1,5 +1,6 @@
 package net.jbock.validate;
 
+import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.annotated.Items;
 import net.jbock.annotated.ItemsFactory;
@@ -32,6 +33,7 @@ final class CommandProcessor {
     private final ParameterValidator parameterValidator;
     private final VarargsParameterValidator varargsParameterValidator;
 
+    @Inject
     CommandProcessor(
             ItemsFactory itemsFactory,
             SourceElement sourceElement,

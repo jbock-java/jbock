@@ -1,9 +1,11 @@
 package net.jbock.convert.map;
 
 import io.jbock.javapoet.CodeBlock;
+import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.annotated.Item;
 import net.jbock.common.SafeTypes;
+import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
@@ -52,7 +54,17 @@ public final class MappingFactory {
         return Mapping.create(createConverterExpression.build(), match);
     }
 
-    public interface Factory {
-        MappingFactory create(TypeElement converter, TypeMirror outputType, boolean supplier);
+    public static final class Factory {
+
+        private final SafeTypes types;
+
+        @Inject
+        public Factory(TypeTool tool) {
+            this.types = tool.types();
+        }
+
+        MappingFactory create(TypeElement converter, TypeMirror outputType, boolean supplier) {
+            return new MappingFactory(converter, outputType, supplier, types);
+        }
     }
 }

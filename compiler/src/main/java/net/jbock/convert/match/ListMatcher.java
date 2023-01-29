@@ -1,5 +1,6 @@
 package net.jbock.convert.match;
 
+import io.jbock.simple.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
@@ -14,10 +15,10 @@ public final class ListMatcher extends Matcher {
     private final SafeElements elements;
     private final TypeTool tool;
 
+    @Inject
     public ListMatcher(
-            SafeElements elements,
             TypeTool tool) {
-        this.elements = elements;
+        this.elements = tool.elements();
         this.tool = tool;
     }
 

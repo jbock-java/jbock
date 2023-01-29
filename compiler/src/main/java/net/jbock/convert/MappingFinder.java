@@ -1,6 +1,7 @@
 package net.jbock.convert;
 
 import io.jbock.javapoet.CodeBlock;
+import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.annotated.Item;
 import net.jbock.common.Util;
@@ -26,6 +27,7 @@ public final class MappingFinder {
     private final Util util;
     private final MatchFinder matchFinder;
 
+    @Inject
     public MappingFinder(
             AutoOrEnumMapper autoOrEnumMapper,
             ConverterValidator converterValidator,

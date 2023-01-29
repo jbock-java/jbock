@@ -1,6 +1,7 @@
 package net.jbock.convert.map;
 
 import io.jbock.javapoet.CodeBlock;
+import io.jbock.simple.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;
 import net.jbock.contrib.StandardConverters;
@@ -23,6 +24,7 @@ public final class AutoMappings {
     private final TypeTool tool;
     private final List<AutoMapping> mappings;
 
+    @Inject
     public AutoMappings(TypeTool tool) {
         this.tool = tool;
         this.mappings = autoMappings();

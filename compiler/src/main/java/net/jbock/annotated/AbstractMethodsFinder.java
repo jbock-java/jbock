@@ -1,5 +1,6 @@
 package net.jbock.annotated;
 
+import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
@@ -22,6 +23,7 @@ public class AbstractMethodsFinder {
 
     private final SourceElement sourceElement;
 
+    @Inject
     public AbstractMethodsFinder(
             SourceElement sourceElement) {
         this.sourceElement = sourceElement;
