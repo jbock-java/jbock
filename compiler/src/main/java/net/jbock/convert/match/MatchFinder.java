@@ -1,7 +1,6 @@
 package net.jbock.convert.match;
 
 import io.jbock.simple.Inject;
-import io.jbock.simple.Named;
 import io.jbock.util.Either;
 import net.jbock.VarargsParameter;
 import net.jbock.annotated.Item;
@@ -29,10 +28,9 @@ public final class MatchFinder {
 
     @Inject
     public MatchFinder(
-            @Named("optional") Matcher optionalMatcher,
-            @Named("list") Matcher listMatcher,
+            Set<Matcher> matchers,
             TypeTool tool) {
-        this.matchers = Set.of(optionalMatcher, listMatcher);
+        this.matchers = matchers;
         this.types = tool.types();
     }
 
