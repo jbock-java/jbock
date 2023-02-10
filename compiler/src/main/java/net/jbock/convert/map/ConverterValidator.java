@@ -43,11 +43,11 @@ public final class ConverterValidator {
         return checkSuppliedConverter(converter, match)
                 .or(() -> checkDirectConverter(converter, match))
                 .orElseGet(() -> left(match.fail(errorConverterType())))
-                .flatMap(referencedType -> referencedType.checkMatchingMatch(match));
+                .flatMap(MappingFactory::checkMatchingMatch);
     }
 
     private <M extends Item>
-    Either<ValidationFailure, MappingFactory> handleConverter(
+    Either<ValidationFailure, MappingFactory<M>> handleConverter(
             TypeElement converter,
             Match<M> match,
             DeclaredType converterType,
@@ -56,11 +56,11 @@ public final class ConverterValidator {
             return left(match.fail(converterRawType(converterType)));
         }
         TypeMirror typeArgument = converterType.getTypeArguments().get(0);
-        return right(mappingFactoryFactory.create(converter, typeArgument, isSupplier));
+        return right(mappingFactoryFactory.create(converter, typeArgument, match, isSupplier));
     }
 
     private <M extends Item>
-    Optional<Either<ValidationFailure, MappingFactory>> checkSuppliedConverter(
+    Optional<Either<ValidationFailure, MappingFactory<M>>> checkSuppliedConverter(
             TypeElement converter, Match<M> match) {
         return converter.getInterfaces().stream()
                 .filter(inter -> isSameErasure(inter, Supplier.class))
@@ -71,7 +71,7 @@ public final class ConverterValidator {
     }
 
     private <M extends Item>
-    Either<ValidationFailure, MappingFactory> checkSuppliedConverter(
+    Either<ValidationFailure, MappingFactory<M>> checkSuppliedConverter(
             TypeElement converter,
             Match<M> match,
             DeclaredType supplierType) {
@@ -86,7 +86,7 @@ public final class ConverterValidator {
     }
 
     private <M extends Item>
-    Optional<Either<ValidationFailure, MappingFactory>> checkDirectConverter(
+    Optional<Either<ValidationFailure, MappingFactory<M>>> checkDirectConverter(
             TypeElement converter, Match<M> match) {
         return Optional.of(converter.getSuperclass())
                 .filter(inter -> isSameErasure(inter, StringConverter.class))
