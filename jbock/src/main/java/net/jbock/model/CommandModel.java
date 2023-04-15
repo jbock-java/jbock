@@ -58,6 +58,24 @@ public final class CommandModel {
         private Builder() {
         }
 
+        public Builder withOptions(List<Option> newOptions) {
+            options.clear();
+            options.addAll(newOptions);
+            return this;
+        }
+
+        public Builder withParameters(List<Parameter> newParameters) {
+            parameters.clear();
+            parameters.addAll(newParameters);
+            return this;
+        }
+
+        public Builder withDescriptionLines(List<String> newDescriptionLines) {
+            descriptionLines.clear();
+            descriptionLines.addAll(newDescriptionLines);
+            return this;
+        }
+
         /**
          * Sets the description key.
          *
@@ -138,6 +156,16 @@ public final class CommandModel {
                     programName, superCommand,
                     options, parameters);
         }
+    }
+
+    public Builder toBuilder() {
+        return builder()
+                .withDescriptionKey(descriptionKey)
+                .withDescriptionLines(descriptionLines)
+                .withProgramName(programName)
+                .withSuperCommand(superCommand)
+                .withOptions(options)
+                .withParameters(parameters);
     }
 
     /**
