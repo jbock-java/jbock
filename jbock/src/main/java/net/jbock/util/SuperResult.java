@@ -28,18 +28,6 @@ public final class SuperResult<S> {
      * Returns the command instance.
      *
      * @return an instance of the SuperCommand type
-     *
-     * @deprecated use {@link #getCommand()}
-     */
-    @Deprecated(forRemoval = true)
-    public S result() {
-        return superCommand;
-    }
-
-    /**
-     * Returns the command instance.
-     *
-     * @return an instance of the SuperCommand type
      */
     public S getCommand() {
         return superCommand;
@@ -50,12 +38,9 @@ public final class SuperResult<S> {
      * Returns the remaining tokens, after the SuperCommand's last parameter.
      *
      * @return remaining tokens, suitable for further parsing
-     *
-     * @deprecated use {@link #getRest()} instead
      */
-    @Deprecated(forRemoval = true)
-    public String[] rest() {
-        return rest.toArray(new String[0]);
+    public List<String> rest() {
+        return rest;
     }
 
     /**
