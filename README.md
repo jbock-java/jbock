@@ -9,9 +9,9 @@ so it doesn't use runtime reflection, but generates a custom parser at compile t
 
 ### Quick rundown
 
-Create an *abstract* class, or alternatively a Java interface,
+Create an abstract class, or alternatively a Java interface,
 and add the `@Command` annotation.
-In this so-called command class, each *abstract* method
+In this so-called *command class*, each abstract method
 
 * must return *something* (not `void`),
 * must have *no* arguments, and
