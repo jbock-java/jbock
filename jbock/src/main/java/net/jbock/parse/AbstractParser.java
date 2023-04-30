@@ -13,10 +13,8 @@ import java.util.stream.Stream;
 import static net.jbock.util.ErrTokenType.INVALID_OPTION;
 
 /**
- * Abstract superclass of several types of mutable command line parsers.
- * Mutable parsers are not re-usable.
- * These parsers do not perform string conversion, so all parsing results
- * are in the basic form of strings.
+ * Abstract superclass of several primitive command line parsers.
+ * These parsers are mutable and not thread safe.
  *
  * @param <T> type of keys that identify named options
  */
@@ -71,7 +69,9 @@ abstract class AbstractParser<T> implements ParseResult<T> {
 
     /**
      * Parse the given input and store the result internally.
-     * This method should only be invoked once.
+     * 
+     * <p>The parser is single-use: The parse method should not
+     * be called more than once per parser instance.
      *
      * @param tokens command line input
      * @throws ExToken if the input is not valid command line syntax

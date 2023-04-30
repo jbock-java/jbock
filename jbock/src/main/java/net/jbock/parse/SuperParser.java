@@ -6,12 +6,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Mutable command line parser that allows arbitrary additional
- * tokens, after the last positional parameter has been read.
+ * This parser accepts a fixed number of positional parameters and
+ * any number of <em>arbitrary</em> excess tokens.
  *
- * <p>The parser rejects suspicious tokens, but allows them after
- * the last positional parameter has been read.
- * The generated parser does not support double-dash escape.
+ * <p>The parser does not recognize the standard escape sequence.
  *
  * @param <T> type of keys that identify named options
  */
@@ -58,15 +56,7 @@ public final class SuperParser<T> extends AbstractParser<T> {
         rest.add(token);
     }
 
-    /**
-     * Returns all remaining tokens, after the last
-     * regular positional parameter was read.
-     *
-     * <p>This method should be not be invoked before {@link #parse(List)}
-     * was invoked.
-     *
-     * @return a stream of strings
-     */
+    @Override
     public Stream<String> rest() {
         return rest.stream();
     }

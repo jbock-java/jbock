@@ -55,7 +55,7 @@ final class ParseOrExitMethod extends HasCommandRepresentation {
                 .addStatement("})").unindent();
         return methodBuilder("parseOrExit").addParameter(args)
                 .addModifiers(sourceElement().accessModifiers())
-                .returns(generatedTypes.parseSuccessType())
+                .returns(generatedTypes.sourceElement().typeName())
                 .addCode(code.build())
                 .build();
     }

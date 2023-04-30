@@ -81,6 +81,23 @@ public final class TypeTool {
         return isSameType(mirror, cl.getCanonicalName());
     }
 
+    public boolean isListOfString(TypeMirror mirror) {
+        Optional<DeclaredType> visit = AS_DECLARED.visit(mirror);
+        if (visit.isEmpty()) {
+            return false;
+        }
+        DeclaredType declaredType = visit.orElseThrow();
+        if (declaredType.getTypeArguments().isEmpty()) {
+            return false;
+        }
+        if (elements.getTypeElement("java.util.List")
+                .filter(list -> list.equals(declaredType.asElement()))
+                .isEmpty()) {
+            return false;
+        }
+        return isSameType(declaredType.getTypeArguments().get(0), String.class);
+    }
+
     /**
      * Works for classes with no type parameters.
      */

@@ -35,8 +35,8 @@ public class ItemsFactory {
                 !items.positionalParameters().isEmpty()) {
             return Optional.empty();
         }
-        String message = "at least one positional parameter must be defined" +
-                " when the superCommand attribute is set";
+        String message = "At least one @Parameter must be defined" +
+                " in a @SuperCommand";
         return Optional.of(List.of(sourceElement.fail(message)));
     }
 }

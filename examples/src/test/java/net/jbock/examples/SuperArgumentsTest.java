@@ -1,10 +1,10 @@
 package net.jbock.examples;
 
 import net.jbock.examples.fixture.ParserTestFixture;
-import net.jbock.util.SuperResult;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -12,31 +12,30 @@ class SuperArgumentsTest {
 
     private final SuperArgumentsParser parser = new SuperArgumentsParser();
 
-    private final ParserTestFixture<SuperResult<SuperArguments>> f =
+    private final ParserTestFixture<SuperArguments> f =
             ParserTestFixture.create(parser::parse);
 
     @Test
     void testRest() {
-        SuperResult<SuperArguments> success = f.parse("-q", "foo", "-a", "1");
-        SuperArguments result = success.getCommand();
+        SuperArguments result = f.parse("-q", "foo", "-a", "1");
         assertEquals("foo", result.command());
         assertTrue(result.quiet());
-        assertArrayEquals(new String[]{"-a", "1"}, success.getRest());
+        assertEquals(List.of("-a", "1"), result.rest());
     }
 
     @Test
     void testDoubleEscape() {
         String[] args = {"-q", "--", "--", "a"};
-        SuperResult<SuperArguments> result = f.parse(args);
-        assertArrayEquals(new String[]{"--", "a"}, result.getRest());
+        SuperArguments result = f.parse(args);
+        assertEquals(List.of("--", "a"), result.rest());
     }
 
     @Test
     void testEscapeSequenceNotRecognized() {
         String[] args = {"-q", "--"};
-        SuperResult<SuperArguments> result = f.parse(args);
-        assertEquals("--", result.getCommand().command());
-        assertEquals(0, result.getRest().length);
+        SuperArguments result = f.parse(args);
+        assertEquals("--", result.command());
+        assertTrue(result.rest().isEmpty());
     }
 
     @Test
@@ -44,10 +43,11 @@ class SuperArgumentsTest {
         f.assertPrintsHelp(
                 parser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
-                "  super-arguments [OPTIONS] COMMAND",
+                "  super-arguments [OPTIONS] COMMAND REST...",
                 "",
                 "\u001B[1mPARAMETERS\u001B[m",
                 "  COMMAND ",
+                "  REST    ",
                 "",
                 "\u001B[1mOPTIONS\u001B[m",
                 "  -q, --quiet ",
