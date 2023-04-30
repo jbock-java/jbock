@@ -92,6 +92,18 @@ public final class SourceElement {
                     SuperCommand::skipGeneratingParseOrExitMethod);
         }
 
+        boolean isParseOrExitMethodAcceptsList() {
+            return command.fold(
+                    Command::parseOrExitMethodAcceptsList,
+                    SuperCommand::parseOrExitMethodAcceptsList);
+        }
+
+        boolean isEnableAtFileExpansion() {
+            return command.fold(
+                    Command::enableAtFileExpansion,
+                    SuperCommand::enableAtFileExpansion);
+        }
+
         String[] getDescription() {
             return command.fold(
                     Command::description,
@@ -149,5 +161,13 @@ public final class SourceElement {
 
     public boolean skipGeneratingParseOrExitMethod() {
         return command.isSkipGeneratingParseOrExitMethod();
+    }
+
+    public boolean parseOrExitMethodAcceptsList() {
+        return command.isParseOrExitMethodAcceptsList();
+    }
+
+    public boolean enableAtFileExpansion() {
+        return command.isEnableAtFileExpansion();
     }
 }

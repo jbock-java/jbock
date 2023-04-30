@@ -9,8 +9,11 @@ import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.util.AtFileError;
 import net.jbock.util.ParseRequest;
 
+import java.util.List;
+
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
 import static io.jbock.javapoet.ParameterSpec.builder;
+import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
 
 final class ParseOrExitMethod extends HasCommandRepresentation {
@@ -33,26 +36,44 @@ final class ParseOrExitMethod extends HasCommandRepresentation {
 
     MethodSpec define() {
 
-        ParameterSpec args = builder(ArrayTypeName.of(STRING), "args").build();
+        ParameterSpec args = parseOrExitMethodAcceptsList() ?
+                builder(LIST_OF_STRING, "args").build() :
+                builder(ArrayTypeName.of(STRING), "args").build();
         ParameterSpec notSuccess = builder(generatedTypes.parseResultType(), "failure").build();
         ParameterSpec err = builder(AtFileError.class, "err").build();
 
         CodeBlock.Builder code = CodeBlock.builder();
-        code.beginControlFlow("if ($1N.length > 0 && $2S.equals($1N[0]))", args, "--help")
-                .add("$T.builder().build()\n", StandardErrorHandler.class).indent()
+        if (parseOrExitMethodAcceptsList()) {
+            code.beginControlFlow("if (!$1N.isEmpty() && $2S.equals($1N.get(0)))", args, "--help");
+        } else {
+            code.beginControlFlow("if ($1N.length > 0 && $2S.equals($1N[0]))", args, "--help");
+        }
+        code.add("$T.builder().build()\n", StandardErrorHandler.class).indent()
                 .add(".printUsageDocumentation($N());\n", createModelMethod.get()).unindent()
                 .addStatement("$T.exit(0)", System.class)
                 .endControlFlow();
 
-        code.add("return $T.from($N).expand()\n", ParseRequest.class, args).indent()
-                .add(".mapLeft($1N -> $1N.addModel($2N()))\n", err, createModelMethod.get())
-                .add(".flatMap(this::$N)\n", parseMethod.get())
-                .add(".orElseThrow($N -> {\n", notSuccess).indent()
-                .addStatement("$T.builder().build().printErrorMessage($N)",
-                        StandardErrorHandler.class, notSuccess)
-                .addStatement("$T.exit(1)", System.class)
-                .addStatement("return new $T()", RuntimeException.class).unindent()
-                .addStatement("})").unindent();
+        if (enableAtFileExpansion()) {
+            code.add("return $T.from($N).expand()\n", ParseRequest.class, args).indent()
+                    .add(".mapLeft($1N -> $1N.addModel($2N()))\n", err, createModelMethod.get())
+                    .add(".flatMap(this::$N)\n", parseMethod.get())
+                    .add(".orElseThrow($N -> {\n", notSuccess).indent()
+                    .addStatement("$T.builder().build().printErrorMessage($N)",
+                            StandardErrorHandler.class, notSuccess)
+                    .addStatement("$T.exit(1)", System.class)
+                    .addStatement("return new $T()", RuntimeException.class).unindent()
+                    .addStatement("})").unindent();
+        } else {
+            CodeBlock pArgs = parseOrExitMethodAcceptsList() ?
+                    CodeBlock.of("$N", args) :
+                    CodeBlock.of("$T.of($N)", List.class, args);
+            code.add("return parse($L).orElseThrow($N -> {\n", pArgs, notSuccess).indent()
+                    .addStatement("$T.builder().build().printErrorMessage($N)",
+                            StandardErrorHandler.class, notSuccess)
+                    .addStatement("$T.exit(1)", System.class)
+                    .addStatement("return new $T()", RuntimeException.class).unindent()
+                    .addStatement("})");
+        }
         return methodBuilder("parseOrExit").addParameter(args)
                 .addModifiers(sourceElement().accessModifiers())
                 .returns(generatedTypes.sourceElement().typeName())

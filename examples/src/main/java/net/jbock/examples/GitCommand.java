@@ -14,7 +14,8 @@ interface GitCommand {
 
     @Command(
             name = "git-add",
-            description = "Add file contents to the index")
+            description = "Add file contents to the index",
+            parseOrExitMethodAcceptsList = true)
     interface AddCommand {
         @VarargsParameter
         List<String> pathspec();

@@ -57,6 +57,17 @@ public @interface Command {
     boolean skipGeneratingParseOrExitMethod() default false;
 
     /**
+     * If {@code true}, the generated {@code parseOrExit} method
+     * will accept {@code List<String>} instead of {@code String[]}.
+     */
+    boolean parseOrExitMethodAcceptsList() default false;
+
+    /**
+     * Set to {@code true} to enable at-file expansion.
+     */
+    boolean enableAtFileExpansion() default false;
+
+    /**
      * If {@code true}, the generated parser class will be
      * {@code public}. Otherwise, it will be package-private.
      *

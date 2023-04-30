@@ -32,6 +32,17 @@ public abstract class ParseRequest {
         return new ParseRequestSimple(List.of(args));
     }
 
+    public static ParseRequest from(List<String> args) {
+        if (args.size() >= 1
+                && args.get(0).length() >= 2
+                && args.get(0).startsWith("@")) {
+            String fileName = args.get(0).substring(1);
+            List<String> rest = args.subList(1, args.size());
+            return new ParseRequestExpand(Paths.get(fileName), rest);
+        }
+        return new ParseRequestSimple(args);
+    }
+
     /**
      * Returns a Right containing the result of {@code @-file} expansion.
      * If an error occurs during {@code @-file} reading, returns a Left containing

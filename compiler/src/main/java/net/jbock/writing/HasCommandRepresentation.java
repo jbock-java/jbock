@@ -50,4 +50,12 @@ abstract class HasCommandRepresentation {
     final boolean isSuperCommand() {
         return commandRepresentation.sourceElement().isSuperCommand();
     }
+
+    final boolean parseOrExitMethodAcceptsList() {
+        return commandRepresentation.sourceElement().parseOrExitMethodAcceptsList();
+    }
+
+    final boolean enableAtFileExpansion() {
+        return commandRepresentation.sourceElement().enableAtFileExpansion();
+    }
 }

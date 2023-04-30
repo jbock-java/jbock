@@ -53,6 +53,17 @@ public @interface SuperCommand {
     boolean skipGeneratingParseOrExitMethod() default false;
 
     /**
+     * If {@code true}, the generated {@code parseOrExit} method
+     * will accept {@code List<String>} instead of {@code String[]}.
+     */
+    boolean parseOrExitMethodAcceptsList() default false;
+
+    /**
+     * Set to {@code true} to enable at-file expansion.
+     */
+    boolean enableAtFileExpansion() default false;
+
+    /**
      * @return {@code true} if public parser should be generated
      * @see Command#publicParser()
      */
