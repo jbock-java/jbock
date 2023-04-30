@@ -25,7 +25,7 @@ final class ParserTypeFactory extends HasCommandRepresentation {
         this.optionStatesMethod = optionStatesMethod;
     }
 
-    private final Supplier<ParserType> define = memoize(() -> {
+    private final Supplier<ParserType> parserType = memoize(() -> {
         CodeBlock optionNames = namedOptions().isEmpty() ?
                 CodeBlock.of("$T.of()", Map.class) :
                 CodeBlock.of("$N", optionNames());
@@ -55,7 +55,7 @@ final class ParserTypeFactory extends HasCommandRepresentation {
     });
 
     ParserType get() {
-        return define.get();
+        return parserType.get();
     }
 
     private OptionStatesMethod optionStatesMethod() {

@@ -26,4 +26,22 @@ class SuperCommandTest {
                 .failsToCompile()
                 .withErrorContaining("not both");
     }
+
+    @Test
+    void varargsParameterNotListOfStringInSuperCommand() {
+        JavaFileObject javaFile = fromSource(
+                "@SuperCommand",
+                "abstract class Arguments {",
+                "",
+                "  @Parameter(index = 0)",
+                "  abstract String a();",
+                "",
+                "  @VarargsParameter",
+                "  abstract List<Integer> rest();",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("The @VarargsParameter in a @SuperCommand must return List<String>");
+    }
 }

@@ -7,16 +7,14 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Mutable command line parser that does not allow additional
- * non-option tokens after the last positional parameter has
- * been read.
+ * This parser accepts a fixed number of positional parameters and
+ * rejects any excess non-option parameters after that.
  *
- * <p>The parser rejects suspicious tokens, and allows
- * double-dash escape.
+ * <p>The parser recognizes the standard escape sequence.
  *
  * @param <T> type of keys that identify named options
  */
-public final class StandardParser<T> extends SubParser<T> {
+public final class StandardParser<T> extends AbstractParser<T> {
 
     private StandardParser(
             Map<String, T> optionNames,
@@ -45,6 +43,17 @@ public final class StandardParser<T> extends SubParser<T> {
     @Override
     void handleExcessParam(String token) throws ExToken {
         throw new ExToken(ErrTokenType.EXCESS_PARAM, token);
+    }
+
+
+    @Override
+    boolean isEscapeSequence(String token) {
+        return "--".equals(token);
+    }
+
+    @Override
+    boolean hasOptionParsingEnded(int position) {
+        return false;
     }
 
     @Override

@@ -7,7 +7,6 @@ import io.jbock.simple.Inject;
 import net.jbock.util.ExFailure;
 
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static io.jbock.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.EITHER;
@@ -45,19 +44,9 @@ final class ParseMethod extends HasCommandRepresentation {
         code.addStatement("$T $N = $L", parserType.type(), parser, parserType.init());
         code.add("try {\n").indent()
                 .addStatement("$N.parse($N)", parser, tokens);
-        generatedTypes().superResultType().ifPresentOrElse(parseResultWithRestType -> {
-            ParameterSpec restArgs = ParameterSpec.builder(sourceElement().typeName(), "rest").build();
-            ParameterSpec impl = ParameterSpec.builder(generatedTypes().implType(), "impl").build();
-            code.addStatement("$T $N = new $T($N)", impl.type, impl, impl.type, parser);
-            code.addStatement("$T $N = $N.rest().collect($T.toList())", LIST_OF_STRING, restArgs,
-                    parser, Collectors.class);
-            code.addStatement("return $T.right(new $T($N, $N))", EITHER, parseResultWithRestType,
-                    impl, restArgs);
-        }, () -> {
-            ParameterSpec impl = ParameterSpec.builder(generatedTypes().implType(), "impl").build();
-            code.addStatement("return $T.right(new $T($N))", EITHER,
-                    impl.type, parser);
-        });
+        ParameterSpec impl = ParameterSpec.builder(generatedTypes().implType(), "impl").build();
+        code.addStatement("return $T.right(new $T($N))", EITHER,
+                impl.type, parser);
         code.unindent().add("} catch ($T $N) {\n", ExFailure.class, e).indent()
                 .addStatement("return $T.left($N.toError($N()))",
                         EITHER, e, createModelMethod().get())

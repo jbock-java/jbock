@@ -6,14 +6,14 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Mutable command line parser that allows an arbitrary number of additional
- * tokens after the last positional parameter.
- * The parser rejects unknown option-like tokens, and recognizes
- * double-dash escape.
+ * This parser accepts a fixed number of positional parameters and any
+ * number of <em>non-option</em> excess tokens.
+ *
+ * <p>The parser recognizes the standard escape sequence.
  *
  * @param <T> type of keys that identify named options
  */
-public final class VarargsParameterParser<T> extends SubParser<T> {
+public final class VarargsParameterParser<T> extends AbstractParser<T> {
 
     private final List<String> rest = new ArrayList<>();
 
@@ -46,15 +46,17 @@ public final class VarargsParameterParser<T> extends SubParser<T> {
         rest.add(token);
     }
 
-    /**
-     * Returns the additional positional parameters, after the last
-     * regular positional parameter was read.
-     *
-     * <p>This method should be not be invoked before {@link #parse(List)}
-     * was invoked.
-     *
-     * @return a stream of strings
-     */
+    @Override
+    boolean isEscapeSequence(String token) {
+        return "--".equals(token);
+    }
+
+    @Override
+    boolean hasOptionParsingEnded(int position) {
+        return false;
+    }
+
+    @Override
     public Stream<String> rest() {
         return rest.stream();
     }

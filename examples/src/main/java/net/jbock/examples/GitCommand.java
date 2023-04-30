@@ -25,5 +25,8 @@ interface GitCommand {
     @Parameter(index = 0)
     String command();
 
+    @VarargsParameter
+    List<String> rest();
+
     // more options...
 }

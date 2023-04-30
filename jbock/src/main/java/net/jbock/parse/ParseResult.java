@@ -34,10 +34,7 @@ public interface ParseResult<T> {
     Optional<String> param(int index);
 
     /**
-     * Returns the remaining tokens.
-     * This can be nonempty if there is a varargs parameter,
-     * or if this is a supercommand where parsing stops after the
-     * last positional parameter was read.
+     * Returns the remaining tokens after the last positional parameter.
      *
      * @return remaining tokens
      */

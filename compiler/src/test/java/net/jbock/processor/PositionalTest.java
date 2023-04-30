@@ -33,12 +33,16 @@ class PositionalTest {
                 "",
                 "  @Parameter(index = 0, description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
                 "  abstract Optional<String> a();",
+                "",
+                "  @VarargsParameter",
+                "  abstract List<String> rest();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .compilesWithoutError();
     }
 
+    // TODO move this to SuperCommandTest
     @Test
     void superComplexOptional() {
         JavaFileObject javaFile = fromSource(
@@ -50,30 +54,33 @@ class PositionalTest {
                 "",
                 "  @Option(names = \"--b\")",
                 "  abstract Optional<String> b();",
+                "",
+                "  @VarargsParameter",
+                "  abstract List<String> rest();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .compilesWithoutError();
     }
 
+    // TODO move this to SuperCommandTest
     @Test
-    void repeatableSuperCommand() {
+    void missingVarargsParameterInSuperCommand() {
         JavaFileObject javaFile = fromSource(
                 "@SuperCommand",
                 "abstract class Arguments {",
                 "",
                 "  @Parameter(index = 0)",
                 "  abstract String p();",
-                "",
-                "  @VarargsParameter",
-                "  abstract List<String> a();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("@VarargsParameter cannot be used when superCommand=true");
+                .withErrorContaining("At least one @VarargsParameter must be defined" +
+                        " in a @SuperCommand");
     }
 
+    // TODO move this to SuperCommandTest
     @Test
     void missingParamSuperCommand() {
         JavaFileObject javaFile = fromSource(
@@ -82,12 +89,15 @@ class PositionalTest {
                 "",
                 "  @Option(names = \"--a\")",
                 "  abstract String a();",
+                "",
+                "  @VarargsParameter",
+                "  abstract List<String> rest();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("at least one positional parameter must be defined" +
-                        " when the superCommand attribute is set");
+                .withErrorContaining("At least one @Parameter must be defined" +
+                        " in a @SuperCommand");
     }
 
     @Test

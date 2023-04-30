@@ -1,7 +1,6 @@
 package net.jbock.examples;
 
 import net.jbock.examples.GitCommand.AddCommand;
-import net.jbock.util.SuperResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,10 +15,9 @@ class GitCommandTest {
     @Test
     void testEscape() {
         String[] args = {"add", "foo", "bar"};
-        SuperResult<GitCommand> result = gitParser.parse(List.of(args)).getRight().orElseThrow();
-        GitCommand gitCommand = result.getCommand();
+        GitCommand gitCommand = gitParser.parse(List.of(args)).getRight().orElseThrow();
         assertEquals("add", gitCommand.command());
-        AddCommand addCommand = addParser.parse(List.of(result.getRest())).getRight().orElseThrow();
+        AddCommand addCommand = addParser.parse(gitCommand.rest()).getRight().orElseThrow();
         assertEquals(List.of("foo", "bar"), addCommand.pathspec());
     }
 }
