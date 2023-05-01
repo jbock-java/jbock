@@ -19,19 +19,26 @@ public interface ValidateComponent {
 
     CommandProcessor commandProcessor();
 
-    @Component.Factory
-    interface Factory {
-        ValidateComponent create(
-                Util util,
-                TypeTool tool,
-                SourceElement sourceElement);
+    @Component.Builder
+    interface Builder {
+        Builder util(Util util);
+
+        Builder tool(TypeTool tool);
+
+        Builder sourceElement(SourceElement sourceElement);
+
+        ValidateComponent build();
     }
 
     static Either<List<ValidationFailure>, CommandRepresentation> generate(
             Util util,
             TypeTool tool,
             SourceElement sourceElement) {
-        ValidateComponent component = ValidateComponent_Impl.factory().create(util, tool, sourceElement);
+        ValidateComponent component = ValidateComponent_Impl.builder()
+                .util(util)
+                .tool(tool)
+                .sourceElement(sourceElement)
+                .build();
         return component.commandProcessor().generate();
     }
 
