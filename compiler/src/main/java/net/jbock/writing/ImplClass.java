@@ -22,11 +22,13 @@ import net.jbock.util.ExMissingItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.common.Constants.EITHERS;
 import static net.jbock.common.Constants.STRING;
@@ -55,6 +57,7 @@ final class ImplClass extends HasCommandRepresentation {
         }
         return spec.addModifiers(PRIVATE, STATIC, FINAL)
                 .addMethod(constructor())
+                .addMethod(generateToString())
                 .addFields(allMappings().stream()
                         .map(Mapping::field)
                         .collect(toList()))
@@ -99,6 +102,24 @@ final class ImplClass extends HasCommandRepresentation {
         return spec.addParameter(result())
                 .addException(ExFailure.class)
                 .build();
+    }
+
+    private MethodSpec generateToString() {
+        MethodSpec.Builder spec = MethodSpec.methodBuilder("toString").addModifiers(PUBLIC);
+        spec.addAnnotation(Override.class);
+        ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
+        spec.addStatement("$T $N = new $T($S, $S, $S)", StringJoiner.class, joiner, StringJoiner.class,
+                ", ", "{", "}");
+        for (int i = 0; i < namedOptions().size(); i++) {
+            Mapping<Option> m = namedOptions().get(i);
+            spec.addStatement("$N.add($S + $N)", joiner, m.field().name + ": ", m.field());
+        }
+        for (int i = 0; i < positionalParameters().size(); i++) {
+            Mapping<Parameter> m = positionalParameters().get(i);
+            spec.addStatement("$N.add($S + $N)", joiner, m.field().name + ": ", m.field());
+        }
+        spec.addStatement("return $N.toString()", joiner);
+        return spec.returns(String.class).build();
     }
 
     private CodeBlock convertExpressionOption(Mapping<Option> m, int i) {
