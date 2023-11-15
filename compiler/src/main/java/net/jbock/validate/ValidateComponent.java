@@ -26,6 +26,10 @@ public interface ValidateComponent {
         ValidateComponent build();
     }
 
+    static ValidateComponent.Builder getBuilder() {
+        return ValidateComponent_Impl.builder();
+    }
+
     @Provides
     static Set<Matcher> allMatchers(
             @Named("optional") Matcher optionalMatcher,

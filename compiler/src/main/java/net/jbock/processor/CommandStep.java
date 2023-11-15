@@ -9,7 +9,7 @@ import net.jbock.SuperCommand;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
-import net.jbock.validate.ValidateComponent_Impl;
+import net.jbock.validate.ValidateComponent;
 import net.jbock.writing.ContextComponent;
 
 import javax.annotation.processing.Messager;
@@ -72,7 +72,7 @@ final class CommandStep implements Step {
     }
 
     private void processSourceElement(SourceElement sourceElement) {
-        ValidateComponent_Impl.builder()
+        ValidateComponent.getBuilder()
                 .util(util)
                 .tool(tool)
                 .sourceElement(sourceElement)
