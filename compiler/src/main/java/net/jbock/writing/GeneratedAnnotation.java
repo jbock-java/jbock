@@ -6,6 +6,7 @@ import io.jbock.simple.Inject;
 import net.jbock.processor.JbockProcessor;
 
 import javax.annotation.processing.Generated;
+import java.util.Objects;
 
 final class GeneratedAnnotation {
 
@@ -16,7 +17,8 @@ final class GeneratedAnnotation {
     AnnotationSpec define() {
         return AnnotationSpec.builder(Generated.class)
                 .addMember("value", CodeBlock.of("$S", JbockProcessor.class.getCanonicalName()))
-                .addMember("comments", CodeBlock.of("$S", "https://github.com/jbock-java/jbock"))
+                .addMember("comments", CodeBlock.of("$S", "https://github.com/jbock-java/jbock " +
+                        Objects.toString(getClass().getPackage().getImplementationVersion(), "")))
                 .build();
     }
 }
