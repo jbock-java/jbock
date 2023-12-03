@@ -17,8 +17,12 @@ final class GeneratedAnnotation {
     AnnotationSpec define() {
         return AnnotationSpec.builder(Generated.class)
                 .addMember("value", CodeBlock.of("$S", JbockProcessor.class.getCanonicalName()))
-                .addMember("comments", CodeBlock.of("$S", "https://github.com/jbock-java/jbock " +
-                        Objects.toString(getClass().getPackage().getImplementationVersion(), "")))
+                .addMember("comments", CodeBlock.of("$S", getComments()))
                 .build();
+    }
+
+    private String getComments() {
+        String version = Objects.toString(getClass().getPackage().getImplementationVersion(), "");
+        return "https://github.com/jbock-java/jbock" + (version.isEmpty() ? "" : " " + version);
     }
 }
