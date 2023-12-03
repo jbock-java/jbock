@@ -32,12 +32,12 @@ shadowJar {
     archiveClassifier.set('')
 }
 
-tasks.withType(AbstractArchiveTask) {
+tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
 }
 
-tasks.withType(GenerateModuleMetadata) {
+tasks.withType(GenerateModuleMetadata).configureEach {
     enabled = true
 }
 
@@ -50,13 +50,13 @@ shadowJar {
 
 dependencies {
     def jbock = project(':jbock')
-    def simple_component = 'io.github.jbock-java:simple-component:1.015'
+    def simple_component = 'io.github.jbock-java:simple-component:1.018'
     def javapoet = 'io.github.jbock-java:javapoet:1.15'
     implementation(javapoet)
     implementation('io.github.jbock-java:auto-common:1.2.3')
     shadow(jbock)
     compileOnly(simple_component)
-    annotationProcessor('io.github.jbock-java:simple-component-compiler:1.015')
+    annotationProcessor('io.github.jbock-java:simple-component-compiler:1.018')
     testImplementation('io.github.jbock-java:compile-testing:0.19.12')
     testImplementation('org.junit.jupiter:junit-jupiter:5.9.1')
     testImplementation('org.mockito:mockito-core:4.8.0')
@@ -79,12 +79,12 @@ test {
     }
 }
 
-task javadocJar(type: Jar) {
+tasks.register('javadocJar', Jar) {
     from javadoc
     archiveClassifier.set('javadoc')
 }
 
-task sourcesJar(type: Jar) {
+tasks.register('sourcesJar', Jar) {
     from sourceSets.main.allJava
     archiveClassifier.set('sources')
 }

@@ -4,7 +4,7 @@ import io.jbock.simple.Component;
 
 import javax.annotation.processing.ProcessingEnvironment;
 
-@Component
+@Component(omitMockBuilder = true)
 interface ProcessorComponent {
 
     MethodStep methodStep();

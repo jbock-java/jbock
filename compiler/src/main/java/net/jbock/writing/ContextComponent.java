@@ -3,7 +3,7 @@ package net.jbock.writing;
 import io.jbock.javapoet.TypeSpec;
 import io.jbock.simple.Component;
 
-@Component
+@Component(omitMockBuilder = true)
 public interface ContextComponent {
 
     ParserClass parser();

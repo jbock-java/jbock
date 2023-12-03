@@ -10,7 +10,7 @@ import net.jbock.processor.SourceElement;
 
 import java.util.Set;
 
-@Component
+@Component(omitMockBuilder = true)
 public interface ValidateComponent {
 
     CommandProcessor commandProcessor();
