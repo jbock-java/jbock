@@ -6,7 +6,6 @@ import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.Command;
 import net.jbock.SuperCommand;
-import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.validate.ValidateComponent;
@@ -37,18 +36,18 @@ final class CommandStep implements Step {
     private final Messager messager;
     private final Util util;
     private final SourceFileGenerator sourceFileGenerator;
-    private final TypeTool tool;
+    private final ValidateComponent.Factory validateComponentFactory;
 
     @Inject
     CommandStep(
             ProcessingEnvironment processingEnvironment,
             Util util,
             SourceFileGenerator sourceFileGenerator,
-            TypeTool tool) {
+            ValidateComponent.Factory validateComponentFactory) {
         this.messager = processingEnvironment.getMessager();
         this.util = util;
         this.sourceFileGenerator = sourceFileGenerator;
-        this.tool = tool;
+        this.validateComponentFactory = validateComponentFactory;
     }
 
     @Override
@@ -72,11 +71,9 @@ final class CommandStep implements Step {
     }
 
     private void processSourceElement(SourceElement sourceElement) {
-        ValidateComponent.getBuilder()
-                .util(util)
-                .tool(tool)
-                .sourceElement(sourceElement)
-                .build().commandProcessor().generate()
+        validateComponentFactory.create(sourceElement)
+                .commandProcessor()
+                .generate()
                 .map(ContextComponent::parserClass)
                 .ifLeftOrElse(
                         this::printFailures,

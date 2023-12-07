@@ -50,13 +50,13 @@ shadowJar {
 
 dependencies {
     def jbock = project(':jbock')
-    def simple_component = 'io.github.jbock-java:simple-component:1.018'
+    def simple_component = 'io.github.jbock-java:simple-component:1.019'
     def javapoet = 'io.github.jbock-java:javapoet:1.15'
     implementation(javapoet)
     implementation('io.github.jbock-java:auto-common:1.2.3')
     shadow(jbock)
     compileOnly(simple_component)
-    annotationProcessor('io.github.jbock-java:simple-component-compiler:1.018')
+    annotationProcessor('io.github.jbock-java:simple-component-compiler:1.019')
     testImplementation('io.github.jbock-java:compile-testing:0.19.12')
     testImplementation('org.junit.jupiter:junit-jupiter:5.9.1')
     testImplementation('org.mockito:mockito-core:4.8.0')
