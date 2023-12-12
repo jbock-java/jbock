@@ -8,3 +8,4 @@ build
 /core/out
 /compiler/out
 /examples/out
+/gradle.properties
