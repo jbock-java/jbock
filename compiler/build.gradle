@@ -9,7 +9,7 @@ group = 'io.github.jbock-java'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -50,15 +50,16 @@ shadowJar {
 
 dependencies {
     def jbock = project(':jbock')
-    def simple_component = 'io.github.jbock-java:simple-component:1.023'
+    def simple_component = 'io.github.jbock-java:simple-component:1.024'
     def javapoet = 'io.github.jbock-java:javapoet:1.15'
     implementation(javapoet)
     implementation('io.github.jbock-java:auto-common:1.2.3')
     shadow(jbock)
     compileOnly(simple_component)
-    annotationProcessor('io.github.jbock-java:simple-component-compiler:1.023')
+    annotationProcessor('io.github.jbock-java:simple-component-compiler:1.024')
     testImplementation('io.github.jbock-java:compile-testing:0.19.12')
     testImplementation('org.junit.jupiter:junit-jupiter:5.10.1')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation('org.mockito:mockito-core:5.8.0')
     testImplementation(jbock)
     testImplementation(simple_component)
