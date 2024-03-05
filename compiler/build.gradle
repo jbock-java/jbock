@@ -7,12 +7,6 @@ plugins {
 
 group = 'io.github.jbock-java'
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
 compileJava {
     options.encoding = 'UTF-8'
     sourceCompatibility = '11'
@@ -58,9 +52,8 @@ dependencies {
     compileOnly(simple_component)
     annotationProcessor('io.github.jbock-java:simple-component-compiler:1.024')
     testImplementation('io.github.jbock-java:compile-testing:0.19.12')
-    testImplementation('org.junit.jupiter:junit-jupiter:5.10.1')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation('org.mockito:mockito-core:5.8.0')
+    testImplementation('org.junit.jupiter:junit-jupiter:5.10.2')
+    testImplementation('org.mockito:mockito-core:5.11.0')
     testImplementation(jbock)
     testImplementation(simple_component)
 }
