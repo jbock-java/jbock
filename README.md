@@ -25,14 +25,14 @@ See example below.
 abstract class DeleteCommand {
 
   @Option(names = {"-v", "--verbosity"},
-          description = {"A named option. The return type is optional-ish, so this option is not required.",
+          description = {"A non-required, named option. The return type is optionalish.",
                          "Using int or Integer would make it required."})
   abstract OptionalInt verbosity();
 
   @Parameter(
           index = 0,
           description = {"A required positional parameter. Return type is not optionalish.",
-                         "Built-in converter is available for type Path, so no custom converter is needed."})
+                         "Built-in converter is available for type Path."})
   abstract Path path();
 
   @Parameter(
