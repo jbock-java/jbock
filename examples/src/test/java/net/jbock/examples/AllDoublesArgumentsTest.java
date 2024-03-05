@@ -8,10 +8,8 @@ import java.util.Optional;
 
 class AllDoublesArgumentsTest {
 
-    private final AllDoublesArgumentsParser parser = new AllDoublesArgumentsParser();
-
     private final ParserTestFixture<AllDoublesArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(AllDoublesArgumentsParser::parse);
 
     @Test
     void listOfInteger() {

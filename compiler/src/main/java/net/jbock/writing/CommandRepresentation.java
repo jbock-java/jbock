@@ -1,7 +1,6 @@
 package net.jbock.writing;
 
 import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.FieldSpec;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.annotated.VarargsParameter;
@@ -13,17 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static net.jbock.common.Constants.STRING;
-import static net.jbock.common.Constants.mapOf;
 import static net.jbock.common.Suppliers.memoize;
 
 public final class CommandRepresentation {
-
-    private final Supplier<FieldSpec> optionNames = memoize(() -> FieldSpec.builder(
-                    mapOf(STRING, optType()), "optionNames")
-            .addModifiers(PRIVATE, FINAL).build());
 
     private final Supplier<ClassName> optType = memoize(() -> namedOptions().isEmpty() ?
             ClassName.get(Void.class) : // javapoet #739
@@ -68,10 +59,6 @@ public final class CommandRepresentation {
 
     List<Mapping<Option>> namedOptions() {
         return namedOptions;
-    }
-
-    FieldSpec optionNames() {
-        return optionNames.get();
     }
 
     /** Returns the type of the option enum. */

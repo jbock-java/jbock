@@ -10,9 +10,7 @@ import java.util.Optional;
 
 class VariousArgumentsTest {
 
-    private final VariousArgumentsParser parser = new VariousArgumentsParser();
-
-    private final ParserTestFixture<VariousArguments> f = ParserTestFixture.create(parser::parse);
+    private final ParserTestFixture<VariousArguments> f = ParserTestFixture.create(VariousArgumentsParser::parse);
 
     @Test
     void bigDecimal() {

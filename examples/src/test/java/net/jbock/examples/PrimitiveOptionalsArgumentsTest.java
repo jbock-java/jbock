@@ -11,10 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PrimitiveOptionalsArgumentsTest {
 
-    private final PrimitiveOptionalsArgumentsParser parser = new PrimitiveOptionalsArgumentsParser();
-
     private final ParserTestFixture<PrimitiveOptionalsArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(PrimitiveOptionalsArgumentsParser::parse);
 
     @Test
     void simpleTest() {

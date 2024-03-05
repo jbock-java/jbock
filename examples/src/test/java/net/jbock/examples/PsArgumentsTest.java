@@ -5,15 +5,13 @@ import org.junit.jupiter.api.Test;
 
 class PsArgumentsTest {
 
-    private final PsArgumentsParser parser = new PsArgumentsParser();
-
     private final ParserTestFixture<PsArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(PsArgumentsParser::parse);
 
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                PsArgumentsParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  ps-arguments [OPTIONS]",
                 "",

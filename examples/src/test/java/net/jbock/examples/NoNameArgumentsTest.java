@@ -8,10 +8,8 @@ import java.util.Optional;
 
 class NoNameArgumentsTest {
 
-    private final NoNameArgumentsParser parser = new NoNameArgumentsParser();
-
     private final ParserTestFixture<NoNameArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(NoNameArgumentsParser::parse);
 
     @Test
     void testDifferentOrder() {
@@ -74,7 +72,7 @@ class NoNameArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                NoNameArgumentsParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  no-name-arguments [OPTIONS] -n NUMBER",
                 "",

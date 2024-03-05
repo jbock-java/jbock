@@ -7,10 +7,8 @@ import java.util.Optional;
 
 class EvilArgumentsTest {
 
-    private final EvilArgumentsParser parser = new EvilArgumentsParser();
-
     private final ParserTestFixture<EvilArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(EvilArgumentsParser::parse);
 
     @Test
     void basicTest() {
@@ -28,7 +26,7 @@ class EvilArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                EvilArgumentsParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  evil-arguments [OPTIONS] --fancy FANCY --fAncy FANCY --f_ancy F_ANCY",
                 "        --f__ancy F__ANCY --blub BLUB --Blub BLUB",

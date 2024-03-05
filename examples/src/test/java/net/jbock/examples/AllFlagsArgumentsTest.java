@@ -5,10 +5,8 @@ import org.junit.jupiter.api.Test;
 
 class AllFlagsArgumentsTest {
 
-    private final AllFlagsArgumentsParser parser = new AllFlagsArgumentsParser();
-
     private final ParserTestFixture<AllFlagsArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(AllFlagsArgumentsParser::parse);
 
     @Test
     void tests() {

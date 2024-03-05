@@ -9,10 +9,8 @@ import java.util.Map;
 
 class RestArgumentsTest {
 
-    private final RestArgumentsParser parser = new RestArgumentsParser();
-
     private final ParserTestFixture<RestArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(RestArgumentsParser::parse);
 
     private final Map<String, String> messages = new HashMap<>();
 
@@ -26,7 +24,7 @@ class RestArgumentsTest {
     @Test
     void testNoBundle() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                RestArgumentsParser.createModel(),
                 "ouch",
                 "",
                 "\u001B[1mUSAGE\u001B[m",
@@ -43,7 +41,7 @@ class RestArgumentsTest {
     @Test
     void testBundleKey() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                RestArgumentsParser.createModel(),
                 messages,
                 "A very good program.",
                 "",

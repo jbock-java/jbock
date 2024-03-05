@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Test;
 
 class ClusteredShortOptionsTest {
 
-    private final ClusteredShortOptionsParser parser = new ClusteredShortOptionsParser();
-
-    private final ParserTestFixture<ClusteredShortOptions> f = ParserTestFixture.create(parser::parse);
+    private final ParserTestFixture<ClusteredShortOptions> f = ParserTestFixture.create(ClusteredShortOptionsParser::parse);
 
     @Test
     void testAttached() {

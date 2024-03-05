@@ -7,10 +7,8 @@ import java.util.Optional;
 
 class SimpleArgumentsTest {
 
-    private final SimpleArgumentsParser parser = new SimpleArgumentsParser();
-
     private final ParserTestFixture<SimpleArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(SimpleArgumentsParser::parse);
 
     @Test
     void invalidOptions() {
@@ -34,7 +32,7 @@ class SimpleArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                SimpleArgumentsParser.createModel(),
                 "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                 "",
                 "\u001B[1mUSAGE\u001B[m",

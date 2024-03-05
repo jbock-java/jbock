@@ -15,10 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ComplicatedMapperArgumentsTest {
 
-    private final ComplicatedMapperArgumentsParser parser = new ComplicatedMapperArgumentsParser();
-
     private final ParserTestFixture<ComplicatedMapperArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(ComplicatedMapperArgumentsParser::parse);
 
     @Test
     void lazyNumber() {
@@ -34,7 +32,7 @@ class ComplicatedMapperArgumentsTest {
 
     @Test
     void nullConverter() {
-        Either<ParsingFailed, ComplicatedMapperArguments> parsed = parser.parse(List.of(
+        Either<ParsingFailed, ComplicatedMapperArguments> parsed = ComplicatedMapperArgumentsParser.parse(List.of(
                 "-N", "12",
                 "--date", "2020-01-10"));
         assertTrue(parsed.getLeft().isPresent());

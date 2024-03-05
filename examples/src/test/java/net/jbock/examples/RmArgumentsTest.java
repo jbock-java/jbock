@@ -7,10 +7,8 @@ import java.util.List;
 
 class RmArgumentsTest {
 
-    private final RmArgumentsParser parser = new RmArgumentsParser();
-
     private final ParserTestFixture<RmArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(RmArgumentsParser::parse);
 
     @Test
     void testRest() {
@@ -28,7 +26,7 @@ class RmArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                RmArgumentsParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  rm-arguments [OPTIONS] OTHER_TOKENS...",
                 "",

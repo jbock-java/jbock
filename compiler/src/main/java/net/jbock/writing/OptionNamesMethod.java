@@ -13,6 +13,8 @@ import java.util.function.Supplier;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.common.Constants.STRING;
+import static net.jbock.common.Constants.mapOf;
 import static net.jbock.common.Suppliers.memoize;
 
 final class OptionNamesMethod extends HasCommandRepresentation {
@@ -25,7 +27,7 @@ final class OptionNamesMethod extends HasCommandRepresentation {
 
     private final Supplier<MethodSpec> define = memoize(() -> {
         ParameterSpec result = ParameterSpec.builder(
-                optionNames().type, "result").build();
+                mapOf(STRING, optType()), "result").build();
         long mapSize = namedOptions().stream()
                 .map(Mapping::item)
                 .map(Option::names)
@@ -33,7 +35,8 @@ final class OptionNamesMethod extends HasCommandRepresentation {
                 .mapToLong(i -> i)
                 .sum();
         CodeBlock.Builder code = CodeBlock.builder();
-        code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
+        int capacity = (int) (1 + Math.max(mapSize * 1.35, 15));
+        code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, capacity);
         for (Mapping<Option> namedOption : namedOptions()) {
             for (String dashedName : namedOption.item().names()) {
                 code.addStatement("$N.put($S, $T.$L)",

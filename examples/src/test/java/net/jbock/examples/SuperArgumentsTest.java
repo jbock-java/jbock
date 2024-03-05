@@ -10,10 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SuperArgumentsTest {
 
-    private final SuperArgumentsParser parser = new SuperArgumentsParser();
-
     private final ParserTestFixture<SuperArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(SuperArgumentsParser::parse);
 
     @Test
     void testRest() {
@@ -41,7 +39,7 @@ class SuperArgumentsTest {
     @Test
     void testHelp() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                SuperArgumentsParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  super-arguments [OPTIONS] COMMAND REST...",
                 "",

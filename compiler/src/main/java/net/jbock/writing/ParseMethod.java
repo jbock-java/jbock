@@ -6,6 +6,7 @@ import io.jbock.javapoet.ParameterSpec;
 import io.jbock.simple.Inject;
 import net.jbock.util.ExFailure;
 
+import javax.lang.model.element.Modifier;
 import java.util.function.Supplier;
 
 import static io.jbock.javapoet.ParameterSpec.builder;
@@ -57,6 +58,7 @@ final class ParseMethod extends HasCommandRepresentation {
                 .returns(generatedTypes().parseResultType())
                 .addCode(code.build())
                 .addModifiers(sourceElement().accessModifiers())
+                .addModifiers(Modifier.STATIC)
                 .build();
     });
 

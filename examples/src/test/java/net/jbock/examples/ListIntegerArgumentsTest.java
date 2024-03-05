@@ -7,10 +7,8 @@ import java.util.List;
 
 class ListIntegerArgumentsTest {
 
-    private final ListIntegerArgumentsParser parser = new ListIntegerArgumentsParser();
-
     private final ParserTestFixture<ListIntegerArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(ListIntegerArgumentsParser::parse);
 
     @Test
     void testPresent() {
