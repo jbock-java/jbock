@@ -7,10 +7,8 @@ import java.util.OptionalInt;
 
 class OptionalIntArgumentsOptionalTest {
 
-    private final OptionalIntArgumentsOptionalParser parser = new OptionalIntArgumentsOptionalParser();
-
     private final ParserTestFixture<OptionalIntArgumentsOptional> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(OptionalIntArgumentsOptionalParser::parse);
 
     @Test
     void testPresent() {

@@ -7,10 +7,8 @@ import java.util.List;
 
 class RequiredArgumentsTest {
 
-    private final RequiredArgumentsParser parser = new RequiredArgumentsParser();
-
     private final ParserTestFixture<RequiredArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(RequiredArgumentsParser::parse);
 
     @Test
     void success() {
@@ -35,7 +33,7 @@ class RequiredArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                RequiredArgumentsParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  required-arguments --dir DIR OTHER_TOKENS...",
                 "",

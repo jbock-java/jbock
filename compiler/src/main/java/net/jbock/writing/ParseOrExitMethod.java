@@ -9,6 +9,7 @@ import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.util.AtFileError;
 import net.jbock.util.ParseRequest;
 
+import javax.lang.model.element.Modifier;
 import java.util.List;
 
 import static io.jbock.javapoet.MethodSpec.methodBuilder;
@@ -77,6 +78,7 @@ final class ParseOrExitMethod extends HasCommandRepresentation {
         return methodBuilder("parseOrExit").addParameter(args)
                 .addModifiers(sourceElement().accessModifiers())
                 .returns(generatedTypes.sourceElement().typeName())
+                .addModifiers(Modifier.STATIC)
                 .addCode(code.build())
                 .build();
     }

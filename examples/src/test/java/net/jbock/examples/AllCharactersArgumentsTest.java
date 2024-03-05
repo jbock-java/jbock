@@ -8,10 +8,8 @@ import java.util.Optional;
 
 class AllCharactersArgumentsTest {
 
-    private final AllCharactersArgumentsParser parser = new AllCharactersArgumentsParser();
-
     private final ParserTestFixture<AllCharactersArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(AllCharactersArgumentsParser::parse);
 
     @Test
     void tests() {

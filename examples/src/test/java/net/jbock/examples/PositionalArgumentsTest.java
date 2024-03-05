@@ -8,10 +8,8 @@ import java.util.Optional;
 
 class PositionalArgumentsTest {
 
-    private final PositionalArgumentsParser parser = new PositionalArgumentsParser();
-
     private final ParserTestFixture<PositionalArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(PositionalArgumentsParser::parse);
 
     @Test
     void errorMissingParameters() {
@@ -92,7 +90,7 @@ class PositionalArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                PositionalArgumentsParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  positional-arguments SOURCE DEST ANOTHER_INT [OPT_STRING] OTHER_TOKENS...",
                 "",

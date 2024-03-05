@@ -5,10 +5,8 @@ import org.junit.jupiter.api.Test;
 
 class TarArgumentsTest {
 
-    private final TarArgumentsParser parser = new TarArgumentsParser();
-
     private final ParserTestFixture<TarArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(TarArgumentsParser::parse);
 
     @Test
     void testExtract() {
@@ -35,7 +33,7 @@ class TarArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                TarArgumentsParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  tar-arguments [OPTIONS] -f FILE",
                 "",

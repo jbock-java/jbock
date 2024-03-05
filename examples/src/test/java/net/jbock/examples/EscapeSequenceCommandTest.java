@@ -12,10 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EscapeSequenceCommandTest {
 
-    private final EscapeSequenceCommandParser parser = new EscapeSequenceCommandParser();
-
     private final ParserTestFixture<EscapeSequenceCommand> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(EscapeSequenceCommandParser::parse);
 
     @RepeatedTest(10)
     void randomizedTest() {

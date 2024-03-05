@@ -9,10 +9,8 @@ import java.util.OptionalInt;
 
 class AllIntegersArgumentsTest {
 
-    private final AllIntegersArgumentsParser parser = new AllIntegersArgumentsParser();
-
     private final ParserTestFixture<AllIntegersArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(AllIntegersArgumentsParser::parse);
 
     @Test
     void listOfInteger() {

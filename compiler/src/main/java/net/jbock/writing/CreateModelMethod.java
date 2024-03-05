@@ -9,6 +9,7 @@ import net.jbock.model.CommandModel;
 import net.jbock.model.Multiplicity;
 import net.jbock.model.Parameter;
 
+import javax.lang.model.element.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -48,6 +49,7 @@ final class CreateModelMethod extends HasCommandRepresentation {
                 .addStatement(joinByNewline(code))
                 .returns(CommandModel.class)
                 .addModifiers(sourceElement().accessModifiers())
+                .addModifiers(Modifier.STATIC)
                 .build();
     });
 

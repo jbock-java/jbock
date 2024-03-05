@@ -1,7 +1,6 @@
 package net.jbock.writing;
 
 import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.FieldSpec;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.annotated.VarargsParameter;
@@ -29,10 +28,6 @@ abstract class HasCommandRepresentation {
 
     final ClassName optType() {
         return commandRepresentation.optType();
-    }
-
-    final FieldSpec optionNames() {
-        return commandRepresentation.optionNames();
     }
 
     final List<Mapping<Parameter>> positionalParameters() {

@@ -5,10 +5,8 @@ import org.junit.jupiter.api.Test;
 
 class MvArgumentsTest {
 
-    private final MvArgumentsParser parser = new MvArgumentsParser();
-
     private final ParserTestFixture<MvArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(MvArgumentsParser::parse);
 
     @Test
     void notEnoughArguments() {
@@ -48,7 +46,7 @@ class MvArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                MvArgumentsParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  mv-arguments SOURCE DEST",
                 "",

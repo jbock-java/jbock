@@ -7,10 +7,8 @@ import java.util.Optional;
 
 class MainTest {
 
-    private final Main_ArgumentsParser parser = new Main_ArgumentsParser();
-
     private final ParserTestFixture<Main.Arguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(Main_ArgumentsParser::parse);
 
     @Test
     void testMain() {

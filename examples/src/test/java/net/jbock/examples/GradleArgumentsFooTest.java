@@ -7,10 +7,8 @@ import java.util.Optional;
 
 class GradleArgumentsFooTest {
 
-    private final GradleArguments_FooParser parser = new GradleArguments_FooParser();
-
     private final ParserTestFixture<GradleArguments.Foo> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(GradleArguments_FooParser::parse);
 
     @Test
     void testParserForNestedClass() {
@@ -21,7 +19,7 @@ class GradleArgumentsFooTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                GradleArguments_FooParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  foo [OPTIONS]",
                 "",

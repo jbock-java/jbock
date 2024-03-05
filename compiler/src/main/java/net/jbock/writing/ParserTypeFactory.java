@@ -16,19 +16,22 @@ import static net.jbock.common.Suppliers.memoize;
 final class ParserTypeFactory extends HasCommandRepresentation {
 
     private final OptionStatesMethod optionStatesMethod;
+    private final OptionNamesMethod optionNamesMethod;
 
     @Inject
     ParserTypeFactory(
             CommandRepresentation commandRepresentation,
-            OptionStatesMethod optionStatesMethod) {
+            OptionStatesMethod optionStatesMethod,
+            OptionNamesMethod optionNamesMethod) {
         super(commandRepresentation);
         this.optionStatesMethod = optionStatesMethod;
+        this.optionNamesMethod = optionNamesMethod;
     }
 
     private final Supplier<ParserType> parserType = memoize(() -> {
         CodeBlock optionNames = namedOptions().isEmpty() ?
                 CodeBlock.of("$T.of()", Map.class) :
-                CodeBlock.of("$N", optionNames());
+                CodeBlock.of("$N()", optionNamesMethod().get());
         CodeBlock optionStates = namedOptions().isEmpty() ?
                 CodeBlock.of("$T.of()", Map.class) :
                 CodeBlock.of("$N()", optionStatesMethod().get());
@@ -60,5 +63,9 @@ final class ParserTypeFactory extends HasCommandRepresentation {
 
     private OptionStatesMethod optionStatesMethod() {
         return optionStatesMethod;
+    }
+
+    private OptionNamesMethod optionNamesMethod() {
+        return optionNamesMethod;
     }
 }

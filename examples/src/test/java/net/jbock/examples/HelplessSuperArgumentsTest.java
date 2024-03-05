@@ -9,15 +9,13 @@ import java.util.List;
 
 class HelplessSuperArgumentsTest {
 
-    private final HelplessSuperArgumentsParser parser = new HelplessSuperArgumentsParser();
-
     private final ParserTestFixture<HelplessSuperArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(HelplessSuperArgumentsParser::parse);
 
     @Test
     void testHelp() {
         Either<ParsingFailed, HelplessSuperArguments> result =
-                parser.parse(List.of("--help"));
+                HelplessSuperArgumentsParser.parse(List.of("--help"));
         f.assertThat(result).fails("Invalid option: --help");
     }
 }

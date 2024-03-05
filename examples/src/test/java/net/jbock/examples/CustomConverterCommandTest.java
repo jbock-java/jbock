@@ -19,10 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CustomConverterCommandTest {
 
-    private final CustomConverterCommandParser parser = new CustomConverterCommandParser();
-
     private final ParserTestFixture<CustomConverterCommand> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(CustomConverterCommandParser::parse);
 
     @Test
     void success() {

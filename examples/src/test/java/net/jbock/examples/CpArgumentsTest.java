@@ -8,10 +8,8 @@ import java.util.Optional;
 
 class CpArgumentsTest {
 
-    private final CpArgumentsParser parser = new CpArgumentsParser();
-
     private final ParserTestFixture<CpArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(CpArgumentsParser::parse);
 
     @Test
     void errorMissingSource() {
@@ -102,7 +100,7 @@ class CpArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                CpArgumentsParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  cp-arguments [OPTIONS] SOURCE DEST",
                 "",

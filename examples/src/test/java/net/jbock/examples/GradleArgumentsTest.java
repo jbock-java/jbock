@@ -8,10 +8,8 @@ import java.util.Optional;
 
 class GradleArgumentsTest {
 
-    private final GradleArgumentsParser parser = new GradleArgumentsParser();
-
     private final ParserTestFixture<GradleArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(GradleArgumentsParser::parse);
 
     @Test
     void errorShortLongConflict() {
@@ -219,7 +217,7 @@ class GradleArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                GradleArgumentsParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  gradle-arguments [OPTIONS] [SOME_TOKEN] moreTokens...",
                 "",

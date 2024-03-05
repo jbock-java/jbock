@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.common.Constants.mapOf;
 import static net.jbock.common.Suppliers.memoize;
 
@@ -45,7 +46,7 @@ final class OptionStatesMethod extends HasCommandRepresentation {
         return MethodSpec.methodBuilder("optionStates")
                 .addCode(code.build())
                 .returns(result.type)
-                .addModifiers(PRIVATE)
+                .addModifiers(PRIVATE, STATIC)
                 .build();
     });
 

@@ -7,10 +7,8 @@ import java.util.Optional;
 
 class AdditionArgumentsTest {
 
-    private final AdditionArgumentsParser parser = new AdditionArgumentsParser();
-
     private final ParserTestFixture<AdditionArguments> f =
-            ParserTestFixture.create(parser::parse);
+            ParserTestFixture.create(AdditionArgumentsParser::parse);
 
     @Test
     void optionalAbsent() {
@@ -48,7 +46,7 @@ class AdditionArgumentsTest {
     @Test
     void testPrint() {
         f.assertPrintsHelp(
-                parser.createModel(),
+                AdditionArgumentsParser.createModel(),
                 "\u001B[1mUSAGE\u001B[m",
                 "  addition-arguments A B [C]",
                 "",
