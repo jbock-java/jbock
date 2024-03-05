@@ -11,11 +11,11 @@ so it doesn't use runtime reflection, but generates a custom parser at compile t
 
 Create an abstract class, or alternatively a Java interface,
 and add the `@Command` annotation.
-In this so-called *command class*, each abstract method
+In this so-called *command class*, each abstract method represents a command line option or argument.
+Every such method must have
 
-* must return *something* (not `void`),
-* must have *no* arguments, and
-* must be annotated with either `@Option`, `@Parameter` or `@VarargsParameter`.
+* getter signature (doesn't return `void`, takes no arguments) and
+* annotation (either `@Option`, `@Parameter` or `@VarargsParameter`).
 
 The *multiplicity* of options and parameters is determined by the *return type* of their declaring method.
 The types `boolean`, `List` and `Optional` (including `OptionalInt`, yada yada) have a special meaning.
