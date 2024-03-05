@@ -17,8 +17,7 @@ Every such method must have
 * getter signature (doesn't return `void`, takes no arguments) and
 * annotation (either `@Option`, `@Parameter` or `@VarargsParameter`).
 
-The *multiplicity* of options and parameters is determined by the *return type* of their declaring method.
-The types `boolean`, `List` and `Optional` (including `OptionalInt`, yada yada) have a special meaning.
+The types `boolean`, `List` and `Optional` (including `OptionalInt`) have special meaning.
 See example below.
 
 ````java
@@ -26,15 +25,14 @@ See example below.
 abstract class DeleteCommand {
 
   @Option(names = {"-v", "--verbosity"},
-          description = {"A named option. The return type reflects optionality.",
-                         "Could use Optional<Integer> too, but using int or Integer",
-                         "would make it a 'required option'."})
+          description = {"A named option. The return type is optional-ish, so this option is not required.",
+                         "Using int or Integer would make it required."})
   abstract OptionalInt verbosity();
 
   @Parameter(
           index = 0,
-          description = {"A required positional parameter. Return type is non-optional.",
-                         "Path is a standard type, so no custom converter is needed."})
+          description = {"A required positional parameter. Return type is not optionalish.",
+                         "Built-in converter is available for type Path, so no custom converter is needed."})
   abstract Path path();
 
   @Parameter(
@@ -44,15 +42,15 @@ abstract class DeleteCommand {
 
   @VarargsParameter(
           description = {"A varargs parameter. There can only be one of these.",
-                         "The return type must be List-of-something."})
+                         "Must return List."})
   abstract List<Path> morePaths();
   
   @Option(names = "--dry-run",
-          description = "A nullary option, a.k.a. mode flag. Return type is boolean.")
+          description = "A nullary option, a.k.a. mode flag. Must return boolean.")
   abstract boolean dryRun();
   
   @Option(names = "-h",
-          description = "A repeatable option. Return type is List.")
+          description = "A repeatable option. Must return List.")
   abstract List<String> headers(); 
   
   @Option(names = "--charset",
@@ -60,7 +58,6 @@ abstract class DeleteCommand {
           converter = CharsetConverter.class)
   abstract Optional<Charset> charset();
   
-  // sample converter class
   static class CharsetConverter extends StringConverter<Charset> {
     @Override
     protected Charset convert(String token) { return Charset.forName(token); }
@@ -68,11 +65,11 @@ abstract class DeleteCommand {
 }
 ````
 
-The generated class is called `DeleteCommandParser`. It converts a string array to an instance of `DeleteCommand`:
+The generated class is called `*Parser`.
 
 ````java
 public static void main(String[] args) {
-  DeleteCommand command = new DeleteCommandParser().parseOrExit(args);
+  DeleteCommand command = DeleteCommandParser.parseOrExit(args);
   // ...
 }
 
