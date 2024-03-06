@@ -70,13 +70,10 @@ The generated class is called `*Parser`.
 ````java
 public static void main(String[] args) {
   DeleteCommand command = DeleteCommandParser.parseOrExit(args);
-  // ...
+  // or: Either<ParsingFailed, DeleteCommand> either = DeleteCommandParser.parse(List.of(args));
 }
 
 ````
-
-In addition to `parseOrExit`, the generated parser has a basic and side-effect free `parse` method.
-This can be used to fine-tune the help and error messages for your users.
 
 ### Standard types
 
