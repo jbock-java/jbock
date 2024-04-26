@@ -1,6 +1,5 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.AnnotationSpec;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.TypeSpec;
 import io.jbock.simple.Inject;
@@ -62,9 +61,7 @@ final class ParserClass extends HasCommandRepresentation {
 
         spec.addMethod(createModelMethod.get());
         Modifier[] modifiers = sourceElement().accessModifiers().toArray(new Modifier[0]);
-        spec.addMethod(MethodSpec.constructorBuilder().addModifiers(modifiers)
-                .addJavadoc("Constructor is deprecated, use the static methods instead.")
-                .addAnnotation(AnnotationSpec.builder(Deprecated.class).addMember("forRemoval", "true").build())
+        spec.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE)
                 .build());
 
         return spec.addOriginatingElement(sourceElement().element())

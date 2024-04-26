@@ -51,6 +51,7 @@ dependencies {
 	shadow(jbock)
 	compileOnly(simple_component)
 	annotationProcessor('io.github.jbock-java:simple-component-compiler:1.024')
+	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 	testImplementation('io.github.jbock-java:compile-testing:0.19.12')
 	testImplementation('org.junit.jupiter:junit-jupiter:5.10.2')
 	testImplementation('org.mockito:mockito-core:5.11.0')
@@ -68,6 +69,7 @@ jar {
 
 test {
 	useJUnitPlatform()
+	jvmArgs('-Xshare:off')
 	testLogging {
 		events('failed')
 	}
