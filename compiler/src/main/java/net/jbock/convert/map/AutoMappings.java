@@ -15,68 +15,74 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 public final class AutoMappings {
 
     private final TypeTool tool;
-    private final List<AutoMapping> mappings;
 
     @Inject
     public AutoMappings(TypeTool tool) {
         this.tool = tool;
-        this.mappings = autoMappings();
     }
 
     <M extends Item>
     Optional<Mapping<M>> findAutoMapping(
             Match<M> match) {
         TypeMirror baseType = match.baseType();
-        for (AutoMapping conversion : mappings) {
-            if (tool.isSameType(baseType, conversion.qualifiedName)) {
-                Mapping<M> mapping = Mapping.create(conversion.createConverterExpression, match);
-                return Optional.of(mapping);
-            }
+        if (tool.isSameType(baseType, String.class)) {
+            return Optional.of(createMapping("asString", match));
+        }
+        if (tool.isSameType(baseType, Integer.class)) {
+            return Optional.of(createMapping("asInteger", match));
+        }
+        if (tool.isSameType(baseType, Path.class)) {
+            return Optional.of(createMapping("asPath", match));
+        }
+        if (tool.isSameType(baseType, File.class)) {
+            return Optional.of(createMapping("asExistingFile", match));
+        }
+        if (tool.isSameType(baseType, URI.class)) {
+            return Optional.of(createMapping("asURI", match));
+        }
+        if (tool.isSameType(baseType, Pattern.class)) {
+            return Optional.of(createMapping("asPattern", match));
+        }
+        if (tool.isSameType(baseType, LocalDate.class)) {
+            return Optional.of(createMapping("asLocalDate", match));
+        }
+        if (tool.isSameType(baseType, Long.class)) {
+            return Optional.of(createMapping("asLong", match));
+        }
+        if (tool.isSameType(baseType, Short.class)) {
+            return Optional.of(createMapping("asShort", match));
+        }
+        if (tool.isSameType(baseType, Byte.class)) {
+            return Optional.of(createMapping("asByte", match));
+        }
+        if (tool.isSameType(baseType, Float.class)) {
+            return Optional.of(createMapping("asFloat", match));
+        }
+        if (tool.isSameType(baseType, Double.class)) {
+            return Optional.of(createMapping("asDouble", match));
+        }
+        if (tool.isSameType(baseType, Character.class)) {
+            return Optional.of(createMapping("asCharacter", match));
+        }
+        if (tool.isSameType(baseType, BigInteger.class)) {
+            return Optional.of(createMapping("asBigInteger", match));
+        }
+        if (tool.isSameType(baseType, BigDecimal.class)) {
+            return Optional.of(createMapping("asBigDecimal", match));
         }
         return Optional.empty();
     }
 
-    private static AutoMapping create(
-            Class<?> autoType,
-            String methodName) {
-        String canonicalName = autoType.getCanonicalName();
+    private static <M extends Item> Mapping<M> createMapping(
+            String methodName,
+            Match<M> match) {
         CodeBlock createConverterExpression = CodeBlock.of("$T.$L()", StandardConverters.class, methodName);
-        return new AutoMapping(canonicalName, createConverterExpression);
-    }
-
-    private static List<AutoMapping> autoMappings() {
-        return List.of(
-                create(String.class, "asString"),
-                create(Integer.class, "asInteger"),
-                create(Path.class, "asPath"),
-                create(File.class, "asExistingFile"),
-                create(URI.class, "asURI"),
-                create(Pattern.class, "asPattern"),
-                create(LocalDate.class, "asLocalDate"),
-                create(Long.class, "asLong"),
-                create(Short.class, "asShort"),
-                create(Byte.class, "asByte"),
-                create(Float.class, "asFloat"),
-                create(Double.class, "asDouble"),
-                create(Character.class, "asCharacter"),
-                create(BigInteger.class, "asBigInteger"),
-                create(BigDecimal.class, "asBigDecimal"));
-    }
-
-    private static final class AutoMapping {
-        final String qualifiedName;
-        final CodeBlock createConverterExpression;
-
-        AutoMapping(String qualifiedName, CodeBlock createConverterExpression) {
-            this.qualifiedName = qualifiedName;
-            this.createConverterExpression = createConverterExpression;
-        }
+        return Mapping.create(createConverterExpression, match);
     }
 }
