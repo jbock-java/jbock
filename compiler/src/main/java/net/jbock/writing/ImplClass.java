@@ -109,7 +109,7 @@ final class ImplClass extends HasCommandRepresentation {
         spec.addAnnotation(Override.class);
         ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
         spec.addStatement("$T $N = new $T($S, $S, $S)", StringJoiner.class, joiner, StringJoiner.class,
-                ", ", "{", "}");
+                ", ", "{ ", " }");
         for (int i = 0; i < namedOptions().size(); i++) {
             Mapping<Option> m = namedOptions().get(i);
             spec.addStatement("$N.add($S + $N)", joiner, m.field().name + ": ", m.field());
