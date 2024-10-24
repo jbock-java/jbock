@@ -1,6 +1,10 @@
-name: Java CI
+name: Java CI with Gradle
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -9,9 +13,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-java@v4
+    - name: Set up JDK
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: 22
         cache: 'gradle'
-    - run: ./gradlew compiler:test examples:test
+    - name: Build with Gradle
+     run: ./gradlew compiler:test examples:test
