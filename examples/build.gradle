@@ -1,34 +1,30 @@
 plugins {
-    id 'java'
+  id 'java'
 }
 
 repositories {
-    mavenCentral()
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+  mavenCentral()
 }
 
 compileJava {
-    options.encoding = 'UTF-8'
-    sourceCompatibility = '17'
-    targetCompatibility = '17'
+  options.encoding = 'UTF-8'
+  sourceCompatibility = '17'
+  targetCompatibility = '17'
 }
 
 dependencies {
-    def jbock = project(':jbock')
-    implementation(jbock)
-    annotationProcessor project(':compiler')
-    annotationProcessor project(':jbock')
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
+  def jbock = project(':jbock')
+  implementation(jbock)
+  annotationProcessor project(':compiler')
+  annotationProcessor project(':jbock')
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.11.2'
+  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {
-    useJUnitPlatform()
-    testLogging {
-        events 'failed'
-    }
+  useJUnitPlatform()
+  jvmArgs "-Xshare:off"
+  testLogging {
+    events 'failed'
+  }
 }
