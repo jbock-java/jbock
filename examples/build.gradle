@@ -17,7 +17,7 @@ dependencies {
   implementation(jbock)
   annotationProcessor project(':compiler')
   annotationProcessor project(':jbock')
-  testImplementation 'org.junit.jupiter:junit-jupiter:5.11.2'
+	testImplementation('org.junit.jupiter:junit-jupiter:5.12.1')
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
