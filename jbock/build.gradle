@@ -27,9 +27,9 @@ tasks.withType(GenerateModuleMetadata) {
 
 dependencies {
 	api('io.github.jbock-java:either:1.5.2')
-	testImplementation('org.junit.jupiter:junit-jupiter:5.12.1')
+	testImplementation platform('org.junit:junit-bom:5.12.2')
+	testImplementation('org.junit.jupiter:junit-jupiter')
 	testImplementation('org.mockito:mockito-core:5.16.1')
-  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 jar {
@@ -42,10 +42,6 @@ jar {
 
 test {
 	useJUnitPlatform()
-  jvmArgs "-Xshare:off"
-	testLogging {
-		events('failed')
-	}
 }
 
 task javadocJar(type: Jar) {

@@ -17,14 +17,11 @@ dependencies {
   implementation(jbock)
   annotationProcessor project(':compiler')
   annotationProcessor project(':jbock')
-	testImplementation('org.junit.jupiter:junit-jupiter:5.12.1')
+	testImplementation platform('org.junit:junit-bom:5.12.2')
+	testImplementation('org.junit.jupiter:junit-jupiter')
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {
   useJUnitPlatform()
-  jvmArgs "-Xshare:off"
-  testLogging {
-    events 'failed'
-  }
 }

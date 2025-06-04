@@ -53,7 +53,8 @@ dependencies {
 	annotationProcessor('io.github.jbock-java:simple-component-compiler:1.024')
 	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 	testImplementation('io.github.jbock-java:compile-testing:0.19.12')
-	testImplementation('org.junit.jupiter:junit-jupiter:5.12.1')
+	testImplementation platform('org.junit:junit-bom:5.12.2')
+	testImplementation('org.junit.jupiter:junit-jupiter')
 	testImplementation('org.mockito:mockito-core:5.16.1')
 	testImplementation(jbock)
 	testImplementation(simple_component)
@@ -69,10 +70,6 @@ jar {
 
 test {
 	useJUnitPlatform()
-  jvmArgs "-Xshare:off"
-	testLogging {
-		events('failed')
-	}
 }
 
 tasks.register('javadocJar', Jar) {
