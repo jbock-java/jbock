@@ -1,29 +1,24 @@
 plugins {
-	id('java')
-	id('maven-publish')
-	id('com.gradleup.shadow') version('8.3.6')
-	id('signing')
+	id("java")
+	id("maven-publish")
+	id("com.gradleup.shadow") version("8.3.6")
+	id("signing")
 }
 
-group = 'io.github.jbock-java'
+group = "io.github.jbock-java"
 
 compileJava {
-	options.encoding = 'UTF-8'
-	sourceCompatibility = '11'
-	targetCompatibility = '11'
+	options.encoding = "UTF-8"
+	sourceCompatibility = "11"
+	targetCompatibility = "11"
 }
 
 javadoc {
-	options.encoding = 'UTF-8'
+	options.encoding = "UTF-8"
 }
 
 repositories {
 	mavenCentral()
-}
-
-shadowJar {
-	minimize()
-	archiveClassifier.set('')
 }
 
 tasks.withType(AbstractArchiveTask).configureEach {
@@ -37,25 +32,25 @@ tasks.withType(GenerateModuleMetadata).configureEach {
 
 shadowJar {
 	minimize()
-	archiveClassifier.set('')
-	relocate('io.jbock.auto.common', 'io.jbock.jbock.auto.common')
-	relocate('io.jbock.javapoet', 'io.jbock.jbock.javapoet')
+	archiveClassifier.set("")
+	relocate("io.jbock.auto.common", "io.jbock.jbock.auto.common")
+	relocate("io.jbock.javapoet", "io.jbock.jbock.javapoet")
 }
 
 dependencies {
-	def jbock = project(':jbock')
-	def simple_component = 'io.github.jbock-java:simple-component:1.024'
-	def javapoet = 'io.github.jbock-java:javapoet:1.15'
+	def jbock = project(":jbock")
+	def simple_component = "io.github.jbock-java:simple-component:1.024"
+	def javapoet = "io.github.jbock-java:javapoet:1.15"
 	implementation(javapoet)
-	implementation('io.github.jbock-java:auto-common:1.2.3')
+	implementation("io.github.jbock-java:auto-common:1.2.3")
 	shadow(jbock)
 	compileOnly(simple_component)
-	annotationProcessor('io.github.jbock-java:simple-component-compiler:1.024')
-	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-	testImplementation('io.github.jbock-java:compile-testing:0.19.12')
-	testImplementation platform('org.junit:junit-bom:5.12.2')
-	testImplementation('org.junit.jupiter:junit-jupiter')
-	testImplementation('org.mockito:mockito-core:5.16.1')
+	annotationProcessor("io.github.jbock-java:simple-component-compiler:1.024")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation("io.github.jbock-java:compile-testing:0.19.12")
+	testImplementation platform("org.junit:junit-bom:5.12.2")
+	testImplementation("org.junit.jupiter:junit-jupiter")
+	testImplementation("org.mockito:mockito-core:5.16.1")
 	testImplementation(jbock)
 	testImplementation(simple_component)
 }
@@ -63,7 +58,7 @@ dependencies {
 jar {
 	manifest {
 		attributes(
-			'Implementation-Version': project.properties['version']
+			"Implementation-Version": project.properties["version"]
 		)
 	}
 }
@@ -72,14 +67,14 @@ test {
 	useJUnitPlatform()
 }
 
-tasks.register('javadocJar', Jar) {
+tasks.register("javadocJar", Jar) {
 	from javadoc
-	archiveClassifier.set('javadoc')
+	archiveClassifier.set("javadoc")
 }
 
-tasks.register('sourcesJar', Jar) {
+tasks.register("sourcesJar", Jar) {
 	from sourceSets.main.allJava
-	archiveClassifier.set('sources')
+	archiveClassifier.set("sources")
 }
 
 artifacts {
@@ -91,44 +86,44 @@ publishing {
 	publications {
 		shadow(MavenPublication) { publication ->
 			project.shadow.component(publication)
-			artifactId = 'jbock-compiler'
+			artifactId = "jbock-compiler"
 
 			artifact sourcesJar
 			artifact javadocJar
 
 			pom {
-				name = 'jbock-compiler'
-				packaging = 'jar'
-				description = 'jbock annotation processor'
-				url = 'https://github.com/jbock-java/jbock'
+				name = "jbock-compiler"
+				packaging = "jar"
+				description = "jbock annotation processor"
+				url = "https://github.com/jbock-java/jbock"
 
 				licenses {
 					license {
-						name = 'MIT License'
-						url = 'https://opensource.org/licenses/MIT'
+						name = "MIT License"
+						url = "https://opensource.org/licenses/MIT"
 					}
 				}
 				developers {
 					developer {
-						id = 'Various'
-						name = 'Various'
-						email = 'jbock-java@gmx.de'
+						id = "Various"
+						name = "Various"
+						email = "jbock-java@gmx.de"
 					}
 				}
 				scm {
-					connection = 'scm:git:https://github.com/jbock-java/jbock.git'
-					developerConnection = 'scm:git:https://github.com/jbock-java/jbock.git'
-					url = 'https://github.com/jbock-java/jbock'
+					connection = "scm:git:https://github.com/jbock-java/jbock.git"
+					developerConnection = "scm:git:https://github.com/jbock-java/jbock.git"
+					url = "https://github.com/jbock-java/jbock"
 				}
 			}
 		}
 	}
 	repositories {
 		maven {
-			url = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+			url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
 			credentials {
-				username = System.getenv('OSS_USER')
-				password = System.getenv('OSS_PASS')
+				username = System.getenv("OSS_USER")
+				password = System.getenv("OSS_PASS")
 			}
 		}
 	}
@@ -136,8 +131,8 @@ publishing {
 
 // https://docs.gradle.org/current/userguide/signing_plugin.html
 signing {
-	def signingKey = findProperty('signingKey')
-	def signingPassword = findProperty('signingPassword')
+	def signingKey = findProperty("signingKey")
+	def signingPassword = findProperty("signingPassword")
 	useInMemoryPgpKeys(signingKey, signingPassword)
 	sign publishing.publications.shadow
 }
