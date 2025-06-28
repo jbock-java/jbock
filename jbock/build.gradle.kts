@@ -11,10 +11,11 @@ plugins {
 
 group = "io.github.jbock-java"
 
-compileJava {
+tasks.withType<JavaCompile>().configureEach {
   options.encoding = "UTF-8"
 }
 
+// https://stackoverflow.com/questions/21904269/configure-gradle-to-publish-sources-and-javadoc
 java {
   withSourcesJar()
   withJavadocJar()
@@ -22,7 +23,7 @@ java {
   targetCompatibility = JavaVersion.VERSION_11
 }
 
-tasks.named("javadoc") {
+tasks.withType<Javadoc>().configureEach {
   options.encoding = "UTF-8"
 }
 
@@ -30,43 +31,40 @@ repositories {
   mavenCentral()
 }
 
-tasks.withType(AbstractArchiveTask) {
-  preserveFileTimestamps = false
-  reproducibleFileOrder = true
+tasks.withType<AbstractArchiveTask>().configureEach {
+  isPreserveFileTimestamps = false
+  isReproducibleFileOrder = true
 }
 
-tasks.withType(GenerateModuleMetadata) {
+tasks.withType<GenerateModuleMetadata>().configureEach {
   enabled = true
 }
 
 dependencies {
   api("io.github.jbock-java:either:1.5.2")
-  testImplementation platform("org.junit:junit-bom:5.12.2")
+  testImplementation("org.mockito:mockito-core:5.16.1")
   testImplementation("org.junit.jupiter:junit-jupiter")
   testImplementation("org.mockito:mockito-core:5.16.1")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-jar {
+tasks.withType<Jar> {
   manifest {
-    attributes(
-      "Implementation-Version": project.properties["version"]
-    )
+    attributes["Implementation-Version"] = project.properties["version"]
   }
 }
 
-tasks.named("test") {
+tasks.named<Test>("test") {
   useJUnitPlatform()
 }
 
 // https://central.sonatype.org/pages/gradle.html
 publishing {
   publications {
-    mavenJava(MavenPublication) {
-      artifactId = "jbock"
-      from components.java
+    create<MavenPublication>("mavenJava") {
+      from(components["java"])
 
-      artifact sourcesJar
-      artifact javadocJar
+      artifactId = "jbock"
 
       pom {
         name = "jbock"
@@ -97,7 +95,7 @@ publishing {
   }
   repositories {
     maven {
-      url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+      url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
       credentials {
         username = System.getenv("OSS_USER")
         password = System.getenv("OSS_PASS")
@@ -108,8 +106,8 @@ publishing {
 
 // https://docs.gradle.org/current/userguide/signing_plugin.html
 signing {
-  def signingKey = findProperty("signingKey")
-  def signingPassword = findProperty("signingPassword")
+  val signingKey: String? by project
+  val signingPassword: String? by project
   useInMemoryPgpKeys(signingKey, signingPassword)
-  sign publishing.publications.mavenJava
+  sign(publishing.publications["mavenJava"])
 }
