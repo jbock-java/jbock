@@ -20,8 +20,8 @@ dependencies {
   implementation(jbock)
   annotationProcessor project(":compiler")
   annotationProcessor project(":jbock")
-	testImplementation platform("org.junit:junit-bom:5.12.2")
-	testImplementation("org.junit.jupiter:junit-jupiter")
+  testImplementation platform("org.junit:junit-bom:5.12.2")
+  testImplementation("org.junit.jupiter:junit-jupiter")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
