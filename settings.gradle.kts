@@ -1,3 +1,3 @@
-include 'jbock'
-include 'compiler'
-include 'examples'
+include("jbock")
+include("compiler")
+include("examples")
