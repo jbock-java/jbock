@@ -8,6 +8,9 @@ repositories {
 
 compileJava {
   options.encoding = "UTF-8"
+}
+
+java {
   sourceCompatibility = "17"
   targetCompatibility = "17"
 }
@@ -19,9 +22,9 @@ dependencies {
   annotationProcessor project(":jbock")
 	testImplementation platform("org.junit:junit-bom:5.12.2")
 	testImplementation("org.junit.jupiter:junit-jupiter")
-  testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-test {
+tasks.named("test") {
   useJUnitPlatform()
 }

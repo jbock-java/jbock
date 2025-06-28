@@ -1,3 +1,8 @@
+import org.gradle.api.JavaVersion;
+import org.gradle.api.publish.tasks.GenerateModuleMetadata;
+import org.gradle.api.tasks.bundling.AbstractArchiveTask;
+import org.gradle.api.tasks.bundling.Jar;
+
 plugins {
 	id("java-library")
 	id("maven-publish")
@@ -8,11 +13,16 @@ group = "io.github.jbock-java"
 
 compileJava {
 	options.encoding = "UTF-8"
-	sourceCompatibility = "11"
-	targetCompatibility = "11"
 }
 
-javadoc {
+java {
+  withSourcesJar()
+  withJavadocJar()
+	sourceCompatibility = JavaVersion.VERSION_11
+	targetCompatibility = JavaVersion.VERSION_11
+}
+
+tasks.named("javadoc") {
 	options.encoding = "UTF-8"
 }
 
@@ -44,22 +54,8 @@ jar {
 	}
 }
 
-test {
+tasks.named("test") {
 	useJUnitPlatform()
-}
-
-tasks.register("javadocJar", Jar) {
-	from javadoc
-	archiveClassifier.set("javadoc")
-}
-
-tasks.register("sourcesJar", Jar) {
-	from sourceSets.main.allJava
-	archiveClassifier.set("sources")
-}
-
-artifacts {
-	archives(javadocJar, sourcesJar)
 }
 
 // https://central.sonatype.org/pages/gradle.html

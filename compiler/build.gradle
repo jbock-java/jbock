@@ -1,3 +1,8 @@
+import org.gradle.api.JavaVersion;
+import org.gradle.api.publish.tasks.GenerateModuleMetadata;
+import org.gradle.api.tasks.bundling.AbstractArchiveTask;
+import org.gradle.api.tasks.bundling.Jar;
+
 plugins {
 	id("java")
 	id("maven-publish")
@@ -9,11 +14,17 @@ group = "io.github.jbock-java"
 
 compileJava {
 	options.encoding = "UTF-8"
-	sourceCompatibility = "11"
-	targetCompatibility = "11"
 }
 
-javadoc {
+// https://stackoverflow.com/questions/21904269/configure-gradle-to-publish-sources-and-javadoc
+java {
+  withSourcesJar()
+  withJavadocJar()
+	sourceCompatibility = JavaVersion.VERSION_11
+	targetCompatibility = JavaVersion.VERSION_11
+}
+
+tasks.named("javadoc") {
 	options.encoding = "UTF-8"
 }
 
@@ -30,7 +41,7 @@ tasks.withType(GenerateModuleMetadata).configureEach {
 	enabled = true
 }
 
-shadowJar {
+tasks.named("shadowJar") {
 	minimize()
 	archiveClassifier.set("")
 	relocate("io.jbock.auto.common", "io.jbock.jbock.auto.common")
@@ -38,9 +49,9 @@ shadowJar {
 }
 
 dependencies {
-	def jbock = project(":jbock")
-	def simple_component = "io.github.jbock-java:simple-component:1.024"
-	def javapoet = "io.github.jbock-java:javapoet:1.15"
+	var jbock = project(":jbock")
+	var simple_component = "io.github.jbock-java:simple-component:1.024"
+	var javapoet = "io.github.jbock-java:javapoet:1.15"
 	implementation(javapoet)
 	implementation("io.github.jbock-java:auto-common:1.2.3")
 	shadow(jbock)
@@ -55,7 +66,7 @@ dependencies {
 	testImplementation(simple_component)
 }
 
-jar {
+tasks.named("jar") {
 	manifest {
 		attributes(
 			"Implementation-Version": project.properties["version"]
@@ -63,22 +74,8 @@ jar {
 	}
 }
 
-test {
+tasks.named("test") {
 	useJUnitPlatform()
-}
-
-tasks.register("javadocJar", Jar) {
-	from javadoc
-	archiveClassifier.set("javadoc")
-}
-
-tasks.register("sourcesJar", Jar) {
-	from sourceSets.main.allJava
-	archiveClassifier.set("sources")
-}
-
-artifacts {
-	archives(javadocJar, sourcesJar)
 }
 
 // https://central.sonatype.org/pages/gradle.html
