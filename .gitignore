@@ -1,6 +1,7 @@
 build
 .idea
 *.iml
+*.swp
 *~
 /dependency-reduced-pom.xml
 .gradle

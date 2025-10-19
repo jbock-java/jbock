@@ -43,6 +43,7 @@ tasks.withType<GenerateModuleMetadata>().configureEach {
 dependencies {
   api("io.github.jbock-java:either:1.5.2")
   testImplementation("org.mockito:mockito-core:5.16.1")
+  testImplementation(platform("org.junit:junit-bom:5.12.2"))
   testImplementation("org.junit.jupiter:junit-jupiter")
   testImplementation("org.mockito:mockito-core:5.16.1")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
