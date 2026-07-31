@@ -19,12 +19,13 @@ tasks.withType<JavaCompile>().configureEach {
 java {
   withSourcesJar()
   withJavadocJar()
-  sourceCompatibility = JavaVersion.VERSION_11
-  targetCompatibility = JavaVersion.VERSION_11
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.withType<Javadoc>().configureEach {
   options.encoding = "UTF-8"
+  (options as CoreJavadocOptions).addBooleanOption("Xdoclint:none", true)
 }
 
 repositories {
@@ -42,16 +43,15 @@ tasks.withType<GenerateModuleMetadata>().configureEach {
 
 dependencies {
   api("io.github.jbock-java:either:1.5.2")
-  testImplementation("org.mockito:mockito-core:5.16.1")
-  testImplementation(platform("org.junit:junit-bom:5.12.2"))
+  testImplementation(platform("org.junit:junit-bom:6.1.2"))
   testImplementation("org.junit.jupiter:junit-jupiter")
-  testImplementation("org.mockito:mockito-core:5.16.1")
+  testImplementation("org.mockito:mockito-core:5.23.0")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Jar> {
   manifest {
-    attributes["Implementation-Version"] = project.properties["version"]
+    attributes["Implementation-Version"] = project.version
   }
 }
 
@@ -107,8 +107,8 @@ publishing {
 
 // https://docs.gradle.org/current/userguide/signing_plugin.html
 signing {
-  val signingKey: String? by project
-  val signingPassword: String? by project
+  val signingKey = project.findProperty("signingKey") as String?
+  val signingPassword = project.findProperty("signingPassword") as String?
   useInMemoryPgpKeys(signingKey, signingPassword)
   sign(publishing.publications["mavenJava"])
 }
