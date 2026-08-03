@@ -96,7 +96,7 @@ publishing {
   }
   repositories {
     maven {
-      url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+      url = uri(System.getenv("PUBLISH_URL"))
       credentials {
         username = System.getenv("OSS_USER")
         password = System.getenv("OSS_PASS")
