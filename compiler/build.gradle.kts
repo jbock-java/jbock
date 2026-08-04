@@ -6,8 +6,7 @@ import org.gradle.api.tasks.javadoc.Javadoc;
 
 plugins {
   id("java")
-  id("maven-publish")
-  id("signing")
+  id("com.vanniktech.maven.publish") version "0.37.0"
 }
 
 group = "io.github.jbock-java"
@@ -16,10 +15,7 @@ tasks.withType<JavaCompile>().configureEach {
   options.encoding = "UTF-8"
 }
 
-// https://stackoverflow.com/questions/21904269/configure-gradle-to-publish-sources-and-javadoc
 java {
-  withSourcesJar()
-  withJavadocJar()
   sourceCompatibility = JavaVersion.VERSION_17
   targetCompatibility = JavaVersion.VERSION_17
 }
@@ -31,15 +27,6 @@ tasks.withType<Javadoc>().configureEach {
 
 repositories {
   mavenCentral()
-}
-
-tasks.withType<AbstractArchiveTask>().configureEach {
-  isPreserveFileTimestamps = false
-  isReproducibleFileOrder = true
-}
-
-tasks.withType<GenerateModuleMetadata>().configureEach {
-  enabled = true
 }
 
 dependencies {
@@ -70,29 +57,34 @@ tasks.named<Test>("test") {
   useJUnitPlatform()
 }
 
-// https://central.sonatype.org/pages/gradle.html
-publishing {
-  publications {
-    create<MavenPublication>("mavenJava") {
-      from(components["java"])
-    }
-  }
-  repositories {
-    maven {
-      val purl = System.getenv("PUBLISH_URL")
-      url = uri(purl ?: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-      credentials {
-        username = System.getenv("OSS_USER")
-        password = System.getenv("OSS_PASS")
+// https://vanniktech.github.io/gradle-maven-publish-plugin/central/
+mavenPublishing {
+  coordinates("io.github.jbock-java", "compiler", project.version?.toString())
+  pom {
+    name = "jbock"
+    packaging = "jar"
+    description = "jbock annotations and utils"
+    url = "https://github.com/jbock-java/jbock"
+
+    licenses {
+      license {
+        name = "MIT License"
+        url = "https://opensource.org/licenses/MIT"
       }
     }
+    developers {
+      developer {
+        id = "Various"
+        name = "Various"
+        email = "jbock-java@gmx.de"
+      }
+    }
+    scm {
+      connection = "scm:git:https://github.com/jbock-java/jbock.git"
+      developerConnection = "scm:git:https://github.com/jbock-java/jbock.git"
+      url = "https://github.com/jbock-java/jbock"
+    }
   }
-}
-
-// https://docs.gradle.org/current/userguide/signing_plugin.html
-signing {
-  val signingKey = project.findProperty("signingKey") as String?
-  val signingPassword = project.findProperty("signingPassword") as String?
-  useInMemoryPgpKeys(signingKey, signingPassword)
-  sign(publishing.publications["mavenJava"])
+  publishToMavenCentral()
+  signAllPublications()
 }

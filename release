@@ -19,18 +19,17 @@ if ! git pull origin $(git rev-parse --abbrev-ref HEAD); then
   die "pull failed"
 fi
 
-if ! ./gradlew clean -Pversion=${VERSION} jbock:publish; then
+if ! ./gradlew clean -Pversion=${VERSION} jbock:publishToMavenCentral; then
   die "build failed"
 fi
 
 
-if ! ./gradlew clean -Pversion=${VERSION} compiler:publish; then
+if ! ./gradlew clean -Pversion=${VERSION} compiler:publishToMavenCentral; then
   die "build failed"
 fi
 
-read -e -p "Upload successful. Also tag? [y/N]"
+read -r -p "Upload successful. Also tag? [y/N] "
 if [[ "$REPLY" == [Yy]* ]]; then
   git tag "${VERSION}"
   git push origin --tags
 fi
-
