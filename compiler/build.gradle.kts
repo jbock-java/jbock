@@ -59,7 +59,7 @@ tasks.named<Test>("test") {
 
 // https://vanniktech.github.io/gradle-maven-publish-plugin/central/
 mavenPublishing {
-  coordinates("io.github.jbock-java", "compiler", project.version?.toString())
+  coordinates("io.github.jbock-java", "jbock-compiler", project.version?.toString())
   pom {
     name = "jbock"
     packaging = "jar"
