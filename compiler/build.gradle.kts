@@ -79,7 +79,8 @@ publishing {
   }
   repositories {
     maven {
-      url = uri(System.getenv("PUBLISH_URL"))
+      val purl = System.getenv("PUBLISH_URL")
+      url = uri(purl ?: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
       credentials {
         username = System.getenv("OSS_USER")
         password = System.getenv("OSS_PASS")
