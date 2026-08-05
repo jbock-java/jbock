@@ -51,14 +51,19 @@ final class ParseMethod extends HasCommandRepresentation {
 
         ParserType parserType = parserTypeFactory().get();
 
-        ParameterSpec e = builder(Exception.class, "e").build();
         ParameterSpec parser = ParameterSpec.builder(parserType.type(), "parser").build();
-        CodeBlock optionNames = namedOptions().isEmpty() ?
-                CodeBlock.of("$T.of()", Map.class) :
-                CodeBlock.of("$N()", optionNamesMethod().get());
-        CodeBlock optionStates = namedOptions().isEmpty() ?
-                CodeBlock.of("$T.of()", Map.class) :
-                CodeBlock.of("$N()", optionStatesMethod().get());
+        CodeBlock optionNames;
+        CodeBlock optionStates;
+        if (namedOptions().isEmpty()) {
+          optionNames = CodeBlock.of("$T.of()", Map.class);
+        } else {
+          optionNames = CodeBlock.of("$N()", optionNamesMethod().get());
+        }
+        if (namedOptions().isEmpty()) {
+          optionStates = CodeBlock.of("$T.of()", Map.class);
+        } else {
+          optionStates = CodeBlock.of("$N()", optionStatesMethod().get());
+        }
         ClassName parserClass;
         if (isSuperCommand()) {
             parserClass = ClassName.get(SuperParser.class);
@@ -74,9 +79,10 @@ final class ParseMethod extends HasCommandRepresentation {
         ParameterSpec impl = ParameterSpec.builder(generatedTypes().implType(), "impl").build();
         code.addStatement("return $T.right(new $T($N))", EITHER,
                 impl.type, parser);
-        code.unindent().add("} catch ($T $N) {\n", ExFailure.class, e).indent()
+        ParameterSpec ex = builder(Exception.class, "e").build();
+        code.unindent().add("} catch ($T $N) {\n", ExFailure.class, ex).indent()
                 .addStatement("return $T.left($N.toError($N()))",
-                        EITHER, e, createModelMethod().get())
+                        EITHER, ex, createModelMethod().get())
                 .unindent().add("}\n");
 
         return MethodSpec.methodBuilder("parse")
