@@ -1,5 +1,5 @@
-[![jbock-compiler](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock-compiler/badge.svg?color=grey&subject=jbock-compiler)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock-compiler)
-[![jbock](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock/badge.svg?subject=jbock)](https://maven-badges.herokuapp.com/maven-central/io.github.jbock-java/jbock)
+[![jbock-compiler](https://maven-badges.sml.io/maven-central/io.github.jbock-java/jbock-compiler/badge.svg?color=grey&subject=jbock-compiler)](https://maven-badges.sml.io/maven-central/io.github.jbock-java/jbock-compiler)
+[![jbock](https://maven-badges.sml.io/maven-central/io.github.jbock-java/jbock/badge.svg?subject=jbock)](https://maven-badges.sml.io/maven-central/io.github.jbock-java/jbock)
 
 jbock is a command line parser, which uses the same well-known annotation names as [JCommander](https://jcommander.org/)
 and [picocli](https://github.com/remkop/picocli).
