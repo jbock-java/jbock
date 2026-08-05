@@ -16,8 +16,6 @@ final class ParserClass extends HasCommandRepresentation {
     private final ParseOrExitMethod parseOrExitMethod;
     private final CreateModelMethod createModelMethod;
     private final GeneratedAnnotation generatedAnnotation;
-    private final OptionNamesMethod optionNamesMethod;
-    private final OptionStatesMethod optionStatesMethod;
     private final ImplClass implClass;
 
     @Inject
@@ -28,8 +26,6 @@ final class ParserClass extends HasCommandRepresentation {
             ParseOrExitMethod parseOrExitMethod,
             CreateModelMethod createModelMethod,
             GeneratedAnnotation generatedAnnotation,
-            OptionNamesMethod optionNamesMethod,
-            OptionStatesMethod optionStatesMethod,
             ImplClass implClass) {
         super(commandRepresentation);
         this.parseMethod = parseMethod;
@@ -37,8 +33,6 @@ final class ParserClass extends HasCommandRepresentation {
         this.parseOrExitMethod = parseOrExitMethod;
         this.createModelMethod = createModelMethod;
         this.generatedAnnotation = generatedAnnotation;
-        this.optionNamesMethod = optionNamesMethod;
-        this.optionStatesMethod = optionStatesMethod;
         this.implClass = implClass;
     }
 
@@ -54,8 +48,6 @@ final class ParserClass extends HasCommandRepresentation {
             spec.addMethod(parseOrExitMethod.define());
         }
         if (!namedOptions().isEmpty()) {
-            spec.addMethod(optionNamesMethod.get());
-            spec.addMethod(optionStatesMethod.get());
             spec.addType(optionEnum.define());
         }
 

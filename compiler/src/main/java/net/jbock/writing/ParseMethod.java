@@ -35,23 +35,17 @@ final class ParseMethod extends HasCommandRepresentation {
     private final GeneratedTypes generatedTypes;
     private final CreateModelMethod createModelMethod;
     private final ParserTypeFactory parserTypeFactory;
-    private final OptionStatesMethod optionStatesMethod;
-    private final OptionNamesMethod optionNamesMethod;
 
     @Inject
     ParseMethod(
             GeneratedTypes generatedTypes,
             CommandRepresentation commandRepresentation,
             CreateModelMethod createModelMethod,
-            ParserTypeFactory parserTypeFactory,
-            OptionStatesMethod optionStatesMethod,
-            OptionNamesMethod optionNamesMethod) {
+            ParserTypeFactory parserTypeFactory) {
         super(commandRepresentation);
         this.generatedTypes = generatedTypes;
         this.createModelMethod = createModelMethod;
         this.parserTypeFactory = parserTypeFactory;
-        this.optionStatesMethod = optionStatesMethod;
-        this.optionNamesMethod = optionNamesMethod;
     }
 
     private final Supplier<MethodSpec> define = memoize(() -> {
@@ -150,13 +144,5 @@ final class ParseMethod extends HasCommandRepresentation {
 
     private GeneratedTypes generatedTypes() {
         return generatedTypes;
-    }
-
-    private OptionStatesMethod optionStatesMethod() {
-        return optionStatesMethod;
-    }
-
-    private OptionNamesMethod optionNamesMethod() {
-        return optionNamesMethod;
     }
 }
