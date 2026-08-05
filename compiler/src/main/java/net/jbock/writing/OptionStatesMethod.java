@@ -30,7 +30,7 @@ final class OptionStatesMethod extends HasCommandRepresentation {
 
     private final Supplier<MethodSpec> define = memoize(() -> {
         ParameterSpec result = ParameterSpec.builder(
-                mapOf(optType(), ClassName.get(OptionState.class)), "result").build();
+                mapOf(optType(), ClassName.get(OptionState.class)), "optionStates").build();
         CodeBlock.Builder code = CodeBlock.builder();
         if (namedOptions().isEmpty()) {
             code.addStatement("$T $N = $T.of()", result.type, result, Map.class);

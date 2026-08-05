@@ -27,7 +27,7 @@ final class OptionNamesMethod extends HasCommandRepresentation {
 
     private final Supplier<MethodSpec> define = memoize(() -> {
         ParameterSpec result = ParameterSpec.builder(
-                mapOf(STRING, optType()), "result").build();
+                mapOf(STRING, optType()), "optionNames").build();
         long mapSize = namedOptions().stream()
                 .map(Mapping::item)
                 .map(Option::names)
