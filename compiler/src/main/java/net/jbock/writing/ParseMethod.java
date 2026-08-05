@@ -1,12 +1,17 @@
 package net.jbock.writing;
 
+import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
 import io.jbock.simple.Inject;
+import net.jbock.parse.StandardParser;
+import net.jbock.parse.SuperParser;
+import net.jbock.parse.VarargsParameterParser;
 import net.jbock.util.ExFailure;
 
 import javax.lang.model.element.Modifier;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static io.jbock.javapoet.ParameterSpec.builder;
@@ -19,17 +24,23 @@ final class ParseMethod extends HasCommandRepresentation {
     private final GeneratedTypes generatedTypes;
     private final CreateModelMethod createModelMethod;
     private final ParserTypeFactory parserTypeFactory;
+    private final OptionStatesMethod optionStatesMethod;
+    private final OptionNamesMethod optionNamesMethod;
 
     @Inject
     ParseMethod(
             GeneratedTypes generatedTypes,
             CommandRepresentation commandRepresentation,
             CreateModelMethod createModelMethod,
-            ParserTypeFactory parserTypeFactory) {
+            ParserTypeFactory parserTypeFactory,
+            OptionStatesMethod optionStatesMethod,
+            OptionNamesMethod optionNamesMethod) {
         super(commandRepresentation);
         this.generatedTypes = generatedTypes;
         this.createModelMethod = createModelMethod;
         this.parserTypeFactory = parserTypeFactory;
+        this.optionStatesMethod = optionStatesMethod;
+        this.optionNamesMethod = optionNamesMethod;
     }
 
     private final Supplier<MethodSpec> define = memoize(() -> {
@@ -42,7 +53,22 @@ final class ParseMethod extends HasCommandRepresentation {
 
         ParameterSpec e = builder(Exception.class, "e").build();
         ParameterSpec parser = ParameterSpec.builder(parserType.type(), "parser").build();
-        code.addStatement("$T $N = $L", parserType.type(), parser, parserType.init());
+        CodeBlock optionNames = namedOptions().isEmpty() ?
+                CodeBlock.of("$T.of()", Map.class) :
+                CodeBlock.of("$N()", optionNamesMethod().get());
+        CodeBlock optionStates = namedOptions().isEmpty() ?
+                CodeBlock.of("$T.of()", Map.class) :
+                CodeBlock.of("$N()", optionStatesMethod().get());
+        ClassName parserClass;
+        if (isSuperCommand()) {
+            parserClass = ClassName.get(SuperParser.class);
+        } else if (varargsParameter().isPresent()) {
+            parserClass = ClassName.get(VarargsParameterParser.class);
+        } else {
+            parserClass = ClassName.get(StandardParser.class);
+        }
+        code.addStatement("$T $N = $T.create($L, $L, $L)", parserType.type(), parser, parserClass,
+                optionNames, optionStates, positionalParameters().size());
         code.add("try {\n").indent()
                 .addStatement("$N.parse($N)", parser, tokens);
         ParameterSpec impl = ParameterSpec.builder(generatedTypes().implType(), "impl").build();
@@ -76,5 +102,13 @@ final class ParseMethod extends HasCommandRepresentation {
 
     private GeneratedTypes generatedTypes() {
         return generatedTypes;
+    }
+
+    private OptionStatesMethod optionStatesMethod() {
+        return optionStatesMethod;
+    }
+
+    private OptionNamesMethod optionNamesMethod() {
+        return optionNamesMethod;
     }
 }
