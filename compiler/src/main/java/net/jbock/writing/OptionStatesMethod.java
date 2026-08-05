@@ -29,23 +29,23 @@ final class OptionStatesMethod extends HasCommandRepresentation {
     }
 
     private final Supplier<MethodSpec> define = memoize(() -> {
-        ParameterSpec states = ParameterSpec.builder(
-                mapOf(optType(), ClassName.get(OptionState.class)), "states").build();
+        ParameterSpec optionStates = ParameterSpec.builder(
+                mapOf(optType(), ClassName.get(OptionState.class)), "optionStates").build();
         CodeBlock.Builder code = CodeBlock.builder();
         if (namedOptions().isEmpty()) {
-            code.addStatement("$T $N = $T.of()", states.type, states, Map.class);
+            code.addStatement("$T $N = $T.of()", optionStates.type, optionStates, Map.class);
         } else {
-            code.addStatement("$T $N = new $T<>($T.class)", states.type, states, EnumMap.class, sourceElement().optionEnumType());
+            code.addStatement("$T $N = new $T<>($T.class)", optionStates.type, optionStates, EnumMap.class, sourceElement().optionEnumType());
         }
         for (Mapping<Option> namedOption : namedOptions()) {
             code.addStatement("$N.put($T.$L, new $T())",
-                    states, sourceElement().optionEnumType(),
+                    optionStates, sourceElement().optionEnumType(),
                     namedOption.enumName(), optionParserType(namedOption));
         }
-        code.addStatement("return $N", states);
+        code.addStatement("return $N", optionStates);
         return MethodSpec.methodBuilder("optionStates")
                 .addCode(code.build())
-                .returns(states.type)
+                .returns(optionStates.type)
                 .addModifiers(PRIVATE, STATIC)
                 .build();
     });

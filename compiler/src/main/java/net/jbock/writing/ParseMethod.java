@@ -5,18 +5,29 @@ import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
 import io.jbock.simple.Inject;
+import net.jbock.annotated.Option;
+import net.jbock.convert.Mapping;
+import net.jbock.parse.OptionState;
+import net.jbock.parse.OptionStateModeFlag;
+import net.jbock.parse.OptionStateNonRepeatable;
+import net.jbock.parse.OptionStateRepeatable;
 import net.jbock.parse.StandardParser;
 import net.jbock.parse.SuperParser;
 import net.jbock.parse.VarargsParameterParser;
 import net.jbock.util.ExFailure;
 
 import javax.lang.model.element.Modifier;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import static io.jbock.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.LIST_OF_STRING;
+import static net.jbock.common.Constants.STRING;
+import static net.jbock.common.Constants.mapOf;
 import static net.jbock.common.Suppliers.memoize;
 
 final class ParseMethod extends HasCommandRepresentation {
@@ -52,17 +63,38 @@ final class ParseMethod extends HasCommandRepresentation {
         ParserType parserType = parserTypeFactory().get();
 
         ParameterSpec parser = ParameterSpec.builder(parserType.type(), "parser").build();
-        CodeBlock optionNames;
-        CodeBlock optionStates;
+        ParameterSpec optionNames = ParameterSpec.builder(
+                mapOf(STRING, optType()), "optionNames").build();
+        ParameterSpec optionStates = ParameterSpec.builder(
+                mapOf(optType(), ClassName.get(OptionState.class)), "optionStates").build();
         if (namedOptions().isEmpty()) {
-          optionNames = CodeBlock.of("$T.of()", Map.class);
+          code.addStatement("$T $N = $T.of()", optionNames.type, optionNames, Map.class);
         } else {
-          optionNames = CodeBlock.of("$N()", optionNamesMethod().get());
+          long mapSize = namedOptions().stream()
+                  .map(Mapping::item)
+                  .map(Option::names)
+                  .map(List::size)
+                  .mapToLong(i -> i)
+                  .sum();
+          int capacity = (int) (1 + Math.max(mapSize * 1.35, 15));
+          code.addStatement("$T $N = new $T<>($L)", optionNames.type, optionNames, HashMap.class, capacity);
+          for (Mapping<Option> namedOption : namedOptions()) {
+              for (String dashedName : namedOption.item().names()) {
+                  code.addStatement("$N.put($S, $T.$L)",
+                          optionNames, dashedName, sourceElement().optionEnumType(),
+                          namedOption.enumName());
+              }
+          }
         }
         if (namedOptions().isEmpty()) {
-          optionStates = CodeBlock.of("$T.of()", Map.class);
+          code.addStatement("$T $N = $T.of()", optionStates.type, optionStates, Map.class);
         } else {
-          optionStates = CodeBlock.of("$N()", optionStatesMethod().get());
+          code.addStatement("$T $N = new $T<>($T.class)", optionStates.type, optionStates, EnumMap.class, sourceElement().optionEnumType());
+          for (Mapping<Option> namedOption : namedOptions()) {
+              code.addStatement("$N.put($T.$L, new $T())",
+                      optionStates, sourceElement().optionEnumType(),
+                      namedOption.enumName(), optionParserType(namedOption));
+          }
         }
         ClassName parserClass;
         if (isSuperCommand()) {
@@ -72,7 +104,7 @@ final class ParseMethod extends HasCommandRepresentation {
         } else {
             parserClass = ClassName.get(StandardParser.class);
         }
-        code.addStatement("$T $N = $T.create($L, $L, $L)", parserType.type(), parser, parserClass,
+        code.addStatement("$T $N = $T.create($N, $N, $L)", parserType.type(), parser, parserClass,
                 optionNames, optionStates, positionalParameters().size());
         code.add("try {\n").indent()
                 .addStatement("$N.parse($N)", parser, tokens);
@@ -93,6 +125,16 @@ final class ParseMethod extends HasCommandRepresentation {
                 .addModifiers(Modifier.STATIC)
                 .build();
     });
+
+    private ClassName optionParserType(Mapping<Option> param) {
+        if (param.isRepeatable()) {
+            return ClassName.get(OptionStateRepeatable.class);
+        }
+        if (param.isNullary()) {
+            return ClassName.get(OptionStateModeFlag.class);
+        }
+        return ClassName.get(OptionStateNonRepeatable.class);
+    }
 
     MethodSpec get() {
         return define.get();
