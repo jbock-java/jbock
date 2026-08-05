@@ -26,8 +26,8 @@ final class OptionNamesMethod extends HasCommandRepresentation {
     }
 
     private final Supplier<MethodSpec> define = memoize(() -> {
-        ParameterSpec result = ParameterSpec.builder(
-                mapOf(STRING, optType()), "optionNames").build();
+        ParameterSpec names = ParameterSpec.builder(
+                mapOf(STRING, optType()), "names").build();
         long mapSize = namedOptions().stream()
                 .map(Mapping::item)
                 .map(Option::names)
@@ -36,18 +36,18 @@ final class OptionNamesMethod extends HasCommandRepresentation {
                 .sum();
         CodeBlock.Builder code = CodeBlock.builder();
         int capacity = (int) (1 + Math.max(mapSize * 1.35, 15));
-        code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, capacity);
+        code.addStatement("$T $N = new $T<>($L)", names.type, names, HashMap.class, capacity);
         for (Mapping<Option> namedOption : namedOptions()) {
             for (String dashedName : namedOption.item().names()) {
                 code.addStatement("$N.put($S, $T.$L)",
-                        result, dashedName, sourceElement().optionEnumType(),
+                        names, dashedName, sourceElement().optionEnumType(),
                         namedOption.enumName());
             }
         }
-        code.addStatement("return $N", result);
+        code.addStatement("return $N", names);
         return MethodSpec.methodBuilder("optionNames")
                 .addCode(code.build())
-                .returns(result.type)
+                .returns(names.type)
                 .addModifiers(PRIVATE, STATIC)
                 .build();
     });
