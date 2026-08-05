@@ -28,6 +28,15 @@ class VarargsParameterParserTest {
     }
 
     @Test
+    void testSuspicious() throws ExToken {
+        StandardParser<String> parser = StandardParser.create(Map.of(), Map.of(), 1);
+        assertThrows(ExToken.class, () -> parser.parse(List.of("-a")));
+        assertThrows(ExToken.class, () -> parser.parse(List.of("--as")));
+        parser.parse(List.of("as"));
+        assertEquals(Optional.of("as"), parser.param(0));
+    }
+
+    @Test
     void testModeFlagRepetition() {
         Map<String, String> optionNames = Map.of("-a", "A");
         Map<String, OptionState> optionStates = Map.of("A", new OptionStateModeFlag());

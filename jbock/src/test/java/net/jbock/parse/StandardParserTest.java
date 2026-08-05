@@ -23,12 +23,6 @@ class StandardParserTest {
     }
 
     @Test
-    void testZeroParamsSuspicious() {
-        StandardParser<String> parser = StandardParser.create(Map.of(), Map.of(), 0);
-        assertThrows(ExToken.class, () -> parser.parse(List.of("-a")));
-    }
-
-    @Test
     void testZeroParamsSuccessEmpty() throws ExToken {
         StandardParser<String> parser = StandardParser.create(Map.of(), Map.of(), 0);
         parser.parse(List.of());

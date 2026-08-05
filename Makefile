@@ -1,4 +1,7 @@
+jbock:
+	./gradlew jbock:build
+
 compiler:
 	./gradlew compiler:build
 
-.PHONY: compiler
+.PHONY: jbock compiler
