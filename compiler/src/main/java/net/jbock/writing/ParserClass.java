@@ -12,7 +12,6 @@ import javax.lang.model.element.Modifier;
 final class ParserClass extends HasCommandRepresentation {
 
     private final ParseMethod parseMethod;
-    private final OptEnum optionEnum;
     private final ParseOrExitMethod parseOrExitMethod;
     private final CreateModelMethod createModelMethod;
     private final GeneratedAnnotation generatedAnnotation;
@@ -22,14 +21,12 @@ final class ParserClass extends HasCommandRepresentation {
     ParserClass(
             ParseMethod parseMethod,
             CommandRepresentation commandRepresentation,
-            OptEnum optionEnum,
             ParseOrExitMethod parseOrExitMethod,
             CreateModelMethod createModelMethod,
             GeneratedAnnotation generatedAnnotation,
             ImplClass implClass) {
         super(commandRepresentation);
         this.parseMethod = parseMethod;
-        this.optionEnum = optionEnum;
         this.parseOrExitMethod = parseOrExitMethod;
         this.createModelMethod = createModelMethod;
         this.generatedAnnotation = generatedAnnotation;
@@ -46,9 +43,6 @@ final class ParserClass extends HasCommandRepresentation {
         spec.addMethod(parseMethod.get());
         if (!sourceElement().skipGeneratingParseOrExitMethod()) {
             spec.addMethod(parseOrExitMethod.define());
-        }
-        if (!namedOptions().isEmpty()) {
-            spec.addType(optionEnum.define());
         }
 
         spec.addMethod(createModelMethod.get());

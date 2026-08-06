@@ -4,7 +4,6 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
-import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.javapoet.TypeName;
 import io.jbock.javapoet.TypeSpec;
 import io.jbock.simple.Inject;
@@ -38,6 +37,32 @@ import static net.jbock.writing.CodeBlocks.joinByNewline;
  * Implementation of the command class.
  */
 final class ImplClass extends HasCommandRepresentation {
+    
+ //   if the command class is an interface, we can generate a record instead:
+ //   
+ //   static ComplicatedMapperArguments_Impl create_ComplicatedMapperArguments_Impl(ParseResult result) throws ExFailure {
+ //       Integer number = result.option(0)
+ //               .map(new ComplicatedMapperArguments.MyConverter().get())
+ //               .findAny()
+ //               .orElseThrow(() -> new ExMissingItem(ItemType.OPTION, 0))
+ //               .orElseThrow(left -> new ExConvert(left, ItemType.OPTION, 0));
+ //       List<ComplicatedMapperArguments.LazyNumber> numbers = result.option(1)
+ //               .map(new ComplicatedMapperArguments.LazyNumberConverter().get())
+ //               .collect(Eithers.firstFailure())
+ //               .orElseThrow(left -> new ExConvert(left, ItemType.OPTION, 1));
+ //       Optional<LocalDate> date = result.option(2)
+ //               .map(new ComplicatedMapperArguments.NullReturningConverter())
+ //               .collect(Eithers.firstFailure())
+ //               .orElseThrow(left -> new ExConvert(left, ItemType.OPTION, 2))
+ //               .stream().findAny();
+ //       return new ComplicatedMapperArguments_Impl(number, numbers, date);
+ //   }
+//
+ //   record ComplicatedMapperArguments_Impl(
+ //           Integer number,
+ //           List<ComplicatedMapperArguments.LazyNumber> numbers,
+ //           Optional<LocalDate> date) implements ComplicatedMapperArguments {
+ //   }
 
     private final GeneratedTypes generatedTypes;
 
@@ -77,11 +102,8 @@ final class ImplClass extends HasCommandRepresentation {
                 .build();
     }
 
-    private final Supplier<ParameterSpec> resultSupplier = Suppliers.memoize(() -> {
-        ParameterizedTypeName resultType = ParameterizedTypeName.get(ClassName.get(ParseResult.class),
-                optType());
-        return ParameterSpec.builder(resultType, "result").build();
-    });
+    private final Supplier<ParameterSpec> resultSupplier = Suppliers.memoize(() ->
+            ParameterSpec.builder(ClassName.get(ParseResult.class), "result").build());
 
     private ParameterSpec result() {
         return resultSupplier.get();
@@ -124,8 +146,8 @@ final class ImplClass extends HasCommandRepresentation {
 
     private CodeBlock convertExpressionOption(Mapping<Option> m, int i) {
         List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$N.option($T.$N)", result(),
-                sourceElement().optionEnumType(), m.enumName()));
+        code.add(CodeBlock.of("$N.option($L)", result(),
+                m.item().index()));
         if (!m.isNullary()) {
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
         }

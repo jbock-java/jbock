@@ -16,7 +16,7 @@ import static net.jbock.util.ErrTokenType.INVALID_OPTION;
  * Abstract superclass of several primitive command line parsers.
  * These parsers are mutable and not thread safe.
  */
-abstract class SimpleParser implements SimpleParseResult {
+abstract class SimpleParser implements ParseResult {
 
     private static final Pattern SUSPICIOUS = Pattern.compile("^-[a-zA-Z0-9]+|^--[a-zA-Z0-9-]+");
 

@@ -1,7 +1,6 @@
 package net.jbock.writing;
 
 import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.ParameterizedTypeName;
 import io.jbock.simple.Inject;
 import net.jbock.parse.StandardParser;
 import net.jbock.parse.SuperParser;
@@ -21,14 +20,11 @@ final class ParserTypeFactory extends HasCommandRepresentation {
 
     private final Supplier<ParserType> parserType = memoize(() -> {
         if (isSuperCommand()) {
-            ClassName parserClass = ClassName.get(SuperParser.class);
-            return new ParserType(ParameterizedTypeName.get(parserClass, optType()));
+            return new ParserType(ClassName.get(SuperParser.class));
         } else if (varargsParameter().isPresent()) {
-            ClassName parserClass = ClassName.get(VarargsParameterParser.class);
-            return new ParserType(ParameterizedTypeName.get(parserClass, optType()));
+            return new ParserType(ClassName.get(VarargsParameterParser.class));
         } else {
-            ClassName parserClass = ClassName.get(StandardParser.class);
-            return new ParserType(ParameterizedTypeName.get(parserClass, optType()));
+            return new ParserType(ClassName.get(StandardParser.class));
         }
     });
 

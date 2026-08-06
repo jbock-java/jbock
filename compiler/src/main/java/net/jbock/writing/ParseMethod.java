@@ -1,5 +1,6 @@
 package net.jbock.writing;
 
+import io.jbock.javapoet.ArrayTypeName;
 import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
@@ -17,7 +18,6 @@ import net.jbock.parse.VarargsParameterParser;
 import net.jbock.util.ExFailure;
 
 import javax.lang.model.element.Modifier;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,9 +58,10 @@ final class ParseMethod extends HasCommandRepresentation {
 
         ParameterSpec parser = ParameterSpec.builder(parserType.type(), "parser").build();
         ParameterSpec optionNames = ParameterSpec.builder(
-                mapOf(STRING, optType()), "optionNames").build();
+                mapOf(STRING, ClassName.get(Integer.class)), "optionNames").build();
         ParameterSpec optionStates = ParameterSpec.builder(
-                mapOf(optType(), ClassName.get(OptionState.class)), "optionStates").build();
+                ArrayTypeName.of(ClassName.get(OptionState.class)),
+                "optionStates").build();
         if (namedOptions().isEmpty()) {
           code.addStatement("$T $N = $T.of()", optionNames.type, optionNames, Map.class);
         } else {
@@ -74,21 +75,17 @@ final class ParseMethod extends HasCommandRepresentation {
           code.addStatement("$T $N = new $T<>($L)", optionNames.type, optionNames, HashMap.class, capacity);
           for (Mapping<Option> namedOption : namedOptions()) {
               for (String dashedName : namedOption.item().names()) {
-                  code.addStatement("$N.put($S, $T.$L)",
-                          optionNames, dashedName, sourceElement().optionEnumType(),
-                          namedOption.enumName());
+                  code.addStatement("$N.put($S, $L)",
+                          optionNames, dashedName,
+                          namedOption.item().index());
               }
           }
         }
-        if (namedOptions().isEmpty()) {
-          code.addStatement("$T $N = $T.of()", optionStates.type, optionStates, Map.class);
-        } else {
-          code.addStatement("$T $N = new $T<>($T.class)", optionStates.type, optionStates, EnumMap.class, sourceElement().optionEnumType());
-          for (Mapping<Option> namedOption : namedOptions()) {
-              code.addStatement("$N.put($T.$L, new $T())",
-                      optionStates, sourceElement().optionEnumType(),
-                      namedOption.enumName(), optionParserType(namedOption));
-          }
+        code.addStatement("$T $N = new $T[$L]", optionStates.type, optionStates, OptionState.class, namedOptions().size());
+        for (Mapping<Option> namedOption : namedOptions()) {
+            code.addStatement("$N[$L] = new $T()",
+                    optionStates, namedOption.item().index(),
+                    optionParserType(namedOption));
         }
         ClassName parserClass;
         if (isSuperCommand()) {
