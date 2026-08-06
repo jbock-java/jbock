@@ -6,39 +6,36 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * This parser accepts a fixed number of positional parameters and any
- * number of <em>non-option</em> excess tokens.
+ * This parser accepts a fixed number of positional parameters, and any
+ * number of excess positional parameters after that.
  *
- * <p>The parser recognizes the standard escape sequence.
- *
- * @param <T> type of keys that identify named options
+ * <p>The parser recognizes the end-of-option-parsing token &quot;--&quot;.
  */
-public final class VarargsParameterParser<T> extends AbstractParser<T> {
+public final class VarargsParameterParser extends SimpleParser {
 
     private final List<String> rest = new ArrayList<>();
 
     private VarargsParameterParser(
-            Map<String, T> optionNames,
-            Map<T, OptionState> optionStates,
+            Map<String, Integer> optionNames,
+            OptionState[] optionStates,
             int numParams) {
         super(optionNames, optionStates, numParams);
     }
 
     /**
-     * Creates a RepeatableParser.
+     * Creates a VarargsParameterParser.
      *
-     * @param optionNames maps option names to option keys
-     * @param optionStates maps option keys to option states
+     * @param optionNames maps option names to indexes in the array of option states
+     * @param optionStates array of option states
      * @param numParams number of non-repeatable positional parameters
-     * @param <T> type of keys that identify named options
      *
-     * @return a parser instance
+     * @return new parser instance
      */
-    public static <T> VarargsParameterParser<T> create(
-            Map<String, T> optionNames,
-            Map<T, OptionState> optionStates,
+    public static VarargsParameterParser create(
+            Map<String, Integer> optionNames,
+            OptionState[] optionStates,
             int numParams) {
-        return new VarargsParameterParser<>(optionNames, optionStates, numParams);
+        return new VarargsParameterParser(optionNames, optionStates, numParams);
     }
 
     @Override

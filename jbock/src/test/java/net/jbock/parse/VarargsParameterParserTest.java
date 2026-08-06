@@ -14,14 +14,14 @@ class VarargsParameterParserTest {
 
     @Test
     void testZeroParamsExcess() throws ExToken {
-        VarargsParameterParser<String> parser = VarargsParameterParser.create(Map.of(), Map.of(), 0);
+        VarargsParameterParser parser = VarargsParameterParser.create(Map.of(), new OptionState[0], 0);
         parser.parse(List.of("1"));
         assertEquals(List.of("1"), parser.rest().toList());
     }
 
     @Test
     void testOneParamExcess() throws ExToken {
-        VarargsParameterParser<String> parser = VarargsParameterParser.create(Map.of(), Map.of(), 1);
+        VarargsParameterParser parser = VarargsParameterParser.create(Map.of(), new OptionState[0], 1);
         parser.parse(List.of("1", "2"));
         assertEquals(Optional.of("1"), parser.param(0));
         assertEquals(List.of("2"), parser.rest().toList());
@@ -29,7 +29,7 @@ class VarargsParameterParserTest {
 
     @Test
     void testSuspicious() throws ExToken {
-        StandardParser<String> parser = StandardParser.create(Map.of(), Map.of(), 1);
+        StandardParser parser = StandardParser.create(Map.of(), new OptionState[0], 1);
         assertThrows(ExToken.class, () -> parser.parse(List.of("-a")));
         assertThrows(ExToken.class, () -> parser.parse(List.of("--as")));
         parser.parse(List.of("as"));
@@ -38,34 +38,38 @@ class VarargsParameterParserTest {
 
     @Test
     void testModeFlagRepetition() {
-        Map<String, String> optionNames = Map.of("-a", "A");
-        Map<String, OptionState> optionStates = Map.of("A", new OptionStateModeFlag());
-        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
+        Map<String, Integer> optionNames = Map.of("-a", 0);
+        OptionState[] optionStates = new OptionState[1];
+        optionStates[0] = new OptionStateModeFlag();
+        StandardParser parser = StandardParser.create(optionNames, optionStates, 0);
         assertThrows(ExToken.class, () -> parser.parse(List.of("-a", "-a")));
     }
 
     @Test
     void testOptionNonRepeatableRepetition() {
-        Map<String, String> optionNames = Map.of("-a", "A");
-        Map<String, OptionState> optionStates = Map.of("A", new OptionStateNonRepeatable());
-        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
+        Map<String, Integer> optionNames = Map.of("-a", 0);
+        OptionState[] optionStates = new OptionState[1];
+        optionStates[0] = new OptionStateNonRepeatable();
+        StandardParser parser = StandardParser.create(optionNames, optionStates, 0);
         assertThrows(ExToken.class, () -> parser.parse(List.of("-a1", "-a1")));
     }
 
     @Test
     void testOptionRepeatableRepetition() throws ExToken {
-        Map<String, String> optionNames = Map.of("-a", "A");
-        Map<String, OptionState> optionStates = Map.of("A", new OptionStateRepeatable());
-        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
+        Map<String, Integer> optionNames = Map.of("-a", 0);
+        OptionState[] optionStates = new OptionState[1];
+        optionStates[0] = new OptionStateRepeatable();
+        StandardParser parser = StandardParser.create(optionNames, optionStates, 0);
         parser.parse(List.of("-a1", "-a2"));
-        assertEquals(List.of("1", "2"), parser.option("A").toList());
+        assertEquals(List.of("1", "2"), parser.option(0).toList());
     }
 
     @Test
     void testMissingOptionArgument() {
-        Map<String, String> optionNames = Map.of("-a", "A");
-        Map<String, OptionState> optionStates = Map.of("A", new OptionStateNonRepeatable());
-        StandardParser<String> parser = StandardParser.create(optionNames, optionStates, 0);
+        Map<String, Integer> optionNames = Map.of("-a", 0);
+        OptionState[] optionStates = new OptionState[1];
+        optionStates[0] = new OptionStateNonRepeatable();
+        StandardParser parser = StandardParser.create(optionNames, optionStates, 0);
         assertThrows(ExToken.class, () -> parser.parse(List.of("-a")));
     }
 }

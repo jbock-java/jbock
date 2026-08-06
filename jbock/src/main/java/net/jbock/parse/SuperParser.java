@@ -7,19 +7,17 @@ import java.util.stream.Stream;
 
 /**
  * This parser accepts a fixed number of positional parameters and
- * any number of <em>arbitrary</em> excess tokens.
+ * any number of <em>arbitrary</em> excess tokens after that.
  *
- * <p>The parser does not recognize the standard escape sequence.
- *
- * @param <T> type of keys that identify named options
+ * <p>The parser does not recognize the end-of-option-parsing token &quot;--&quot;.
  */
-public final class SuperParser<T> extends AbstractParser<T> {
+public final class SuperParser extends SimpleParser {
 
     private final List<String> rest = new ArrayList<>();
 
     private SuperParser(
-            Map<String, T> optionNames,
-            Map<T, OptionState> optionStates,
+            Map<String, Integer> optionNames,
+            OptionState[] optionStates,
             int numParams) {
         super(optionNames, optionStates, numParams);
     }
@@ -27,18 +25,17 @@ public final class SuperParser<T> extends AbstractParser<T> {
     /**
      * Creates a SuperParser.
      *
-     * @param optionNames maps option names to option keys
-     * @param optionStates maps option keys to option states
+     * @param optionNames maps option names to indexes in the array of option states
+     * @param optionStates array of option states
      * @param numParams number of positional parameters
-     * @param <T> type of keys that identify named options
      *
-     * @return a parser instance
+     * @return new parser instance
      */
-    public static <T> SuperParser<T> create(
-            Map<String, T> optionNames,
-            Map<T, OptionState> optionStates,
+    public static SuperParser create(
+            Map<String, Integer> optionNames,
+            OptionState[] optionStates,
             int numParams) {
-        return new SuperParser<>(optionNames, optionStates, numParams);
+        return new SuperParser(optionNames, optionStates, numParams);
     }
 
     @Override
