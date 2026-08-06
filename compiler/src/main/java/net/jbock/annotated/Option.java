@@ -36,12 +36,27 @@ public final class Option extends Item {
 
     private final net.jbock.Option option;
 
+    private final int index;
+
     Option(
             ExecutableElement method,
             net.jbock.Option option,
             String enumName) {
+        this(method, option, enumName, -1);
+    }
+
+    private Option(
+            ExecutableElement method,
+            net.jbock.Option option,
+            String enumName,
+            int index) {
         super(method, enumName);
         this.option = option;
+        this.index = index;
+    }
+
+    Option withIndex(int index) {
+        return new Option(method(), option, enumName(), index);
     }
 
     @Override
@@ -72,6 +87,13 @@ public final class Option extends Item {
     @Override
     public boolean isVarargsParameter() {
         return false;
+    }
+
+    public int index() {
+        if (index < 0) {
+            throw new IllegalStateException("no index");
+        }
+        return index;
     }
 
     public List<String> names() {

@@ -1,5 +1,6 @@
 package net.jbock.annotated;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -24,9 +25,15 @@ public final class Items {
     }
 
     static Items createItems(List<? extends Item> itemList) {
-        return new Items(itemList.stream()
+        List<Option> options = itemList.stream()
                 .flatMap(instancesOf(Option.class))
-                .collect(toList()),
+                .toList();
+        List<Option> indexedOptions = new ArrayList<>(options.size());
+        for (int i = 0; i < options.size(); i++) {
+            Option option = options.get(i);
+            indexedOptions.add(option.withIndex(i));
+        }
+        return new Items(indexedOptions,
                 itemList.stream()
                         .flatMap(instancesOf(Parameter.class))
                         .sorted(INDEX_COMPARATOR)
