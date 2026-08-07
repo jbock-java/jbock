@@ -1,7 +1,7 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.MethodSpec;
-import io.jbock.javapoet.TypeSpec;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.TypeSpec;
 import io.jbock.simple.Inject;
 
 import javax.lang.model.element.Modifier;

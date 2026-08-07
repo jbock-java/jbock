@@ -1,9 +1,9 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.ArrayTypeName;
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.MethodSpec;
-import io.jbock.javapoet.ParameterSpec;
+import com.palantir.javapoet.ArrayTypeName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
 import io.jbock.simple.Inject;
 import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.util.AtFileError;
@@ -12,8 +12,8 @@ import net.jbock.util.ParseRequest;
 import javax.lang.model.element.Modifier;
 import java.util.List;
 
-import static io.jbock.javapoet.MethodSpec.methodBuilder;
-import static io.jbock.javapoet.ParameterSpec.builder;
+import static com.palantir.javapoet.MethodSpec.methodBuilder;
+import static com.palantir.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
 

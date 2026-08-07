@@ -1,6 +1,6 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.ClassName;
+import com.palantir.javapoet.ClassName;
 import io.jbock.simple.Inject;
 import net.jbock.parse.StandardParser;
 import net.jbock.parse.SuperParser;

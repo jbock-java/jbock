@@ -1,6 +1,6 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.TypeSpec;
+import com.palantir.javapoet.TypeSpec;
 import io.jbock.simple.Component;
 
 @Component

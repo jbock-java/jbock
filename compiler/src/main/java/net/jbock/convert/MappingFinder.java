@@ -1,6 +1,6 @@
 package net.jbock.convert;
 
-import io.jbock.javapoet.CodeBlock;
+import com.palantir.javapoet.CodeBlock;
 import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.annotated.Item;

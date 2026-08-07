@@ -4,7 +4,7 @@ module net.jbock.compiler {
 
     requires java.compiler;
     requires io.jbock.auto.common;
-    requires io.jbock.javapoet;
+    requires com.palantir.javapoet;
     requires io.jbock.util;
     requires io.jbock.simple;
     requires net.jbock;

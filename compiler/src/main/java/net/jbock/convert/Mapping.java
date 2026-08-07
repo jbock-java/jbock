@@ -1,9 +1,9 @@
 package net.jbock.convert;
 
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.FieldSpec;
-import io.jbock.javapoet.ParameterSpec;
-import io.jbock.javapoet.TypeName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.FieldSpec;
+import com.palantir.javapoet.ParameterSpec;
+import com.palantir.javapoet.TypeName;
 import net.jbock.annotated.Item;
 import net.jbock.convert.match.Match;
 import net.jbock.model.Multiplicity;

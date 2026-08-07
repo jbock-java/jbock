@@ -1,6 +1,6 @@
 package net.jbock.convert.map;
 
-import io.jbock.javapoet.CodeBlock;
+import com.palantir.javapoet.CodeBlock;
 import io.jbock.simple.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;

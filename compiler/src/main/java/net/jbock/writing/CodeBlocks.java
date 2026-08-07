@@ -1,6 +1,6 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.CodeBlock;
+import com.palantir.javapoet.CodeBlock;
 
 import java.util.List;
 

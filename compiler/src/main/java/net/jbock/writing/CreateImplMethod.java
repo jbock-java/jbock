@@ -1,9 +1,9 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.MethodSpec;
-import io.jbock.javapoet.ParameterSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
 import io.jbock.simple.Inject;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;

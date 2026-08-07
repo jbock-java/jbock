@@ -1,11 +1,11 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.MethodSpec;
-import io.jbock.javapoet.ParameterSpec;
-import io.jbock.javapoet.TypeName;
-import io.jbock.javapoet.TypeSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
 import io.jbock.simple.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.annotated.Option;
@@ -109,11 +109,11 @@ final class ImplClass extends HasCommandRepresentation {
                 ", ", "{ ", " }");
         for (int i = 0; i < namedOptions().size(); i++) {
             Mapping<Option> m = namedOptions().get(i);
-            spec.addStatement("$N.add($S + $N)", joiner, m.field().name + ": ", m.field());
+            spec.addStatement("$N.add($S + $N)", joiner, m.field().name() + ": ", m.field());
         }
         for (int i = 0; i < positionalParameters().size(); i++) {
             Mapping<Parameter> m = positionalParameters().get(i);
-            spec.addStatement("$N.add($S + $N)", joiner, m.field().name + ": ", m.field());
+            spec.addStatement("$N.add($S + $N)", joiner, m.field().name() + ": ", m.field());
         }
         spec.addStatement("return $N.toString()", joiner);
         return spec.returns(String.class).build();

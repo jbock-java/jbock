@@ -32,8 +32,7 @@ repositories {
 dependencies {
   var jbock = project(":jbock")
   var simple_component = "io.github.jbock-java:simple-component:1.024"
-  var javapoet = "io.github.jbock-java:javapoet:1.15"
-  implementation(javapoet)
+  implementation("com.palantir.javapoet:javapoet:0.18.0")
   implementation("io.github.jbock-java:auto-common:1.2.3")
   implementation(jbock)
   compileOnly(simple_component)

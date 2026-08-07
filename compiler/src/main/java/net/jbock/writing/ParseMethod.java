@@ -1,10 +1,10 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.ArrayTypeName;
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.MethodSpec;
-import io.jbock.javapoet.ParameterSpec;
+import com.palantir.javapoet.ArrayTypeName;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
 import io.jbock.simple.Inject;
 import net.jbock.annotated.Option;
 import net.jbock.convert.Mapping;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static io.jbock.javapoet.ParameterSpec.builder;
+import static com.palantir.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
@@ -63,7 +63,7 @@ final class ParseMethod extends HasCommandRepresentation {
                 ArrayTypeName.of(ClassName.get(OptionState.class)),
                 "optionStates").build();
         if (namedOptions().isEmpty()) {
-          code.addStatement("$T $N = $T.of()", optionNames.type, optionNames, Map.class);
+          code.addStatement("$T $N = $T.of()", optionNames.type(), optionNames, Map.class);
         } else {
           long mapSize = namedOptions().stream()
                   .map(Mapping::item)
@@ -72,7 +72,7 @@ final class ParseMethod extends HasCommandRepresentation {
                   .mapToLong(i -> i)
                   .sum();
           int capacity = (int) (1 + Math.max(mapSize * 1.35, 15));
-          code.addStatement("$T $N = new $T<>($L)", optionNames.type, optionNames, HashMap.class, capacity);
+          code.addStatement("$T $N = new $T<>($L)", optionNames.type(), optionNames, HashMap.class, capacity);
           for (Mapping<Option> namedOption : namedOptions()) {
               for (String dashedName : namedOption.item().names()) {
                   code.addStatement("$N.put($S, $L)",
@@ -81,7 +81,7 @@ final class ParseMethod extends HasCommandRepresentation {
               }
           }
         }
-        code.addStatement("$T $N = new $T[$L]", optionStates.type, optionStates, OptionState.class, namedOptions().size());
+        code.addStatement("$T $N = new $T[$L]", optionStates.type(), optionStates, OptionState.class, namedOptions().size());
         for (Mapping<Option> namedOption : namedOptions()) {
             code.addStatement("$N[$L] = new $T()",
                     optionStates, namedOption.item().index(),

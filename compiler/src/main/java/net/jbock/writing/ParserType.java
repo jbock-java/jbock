@@ -1,6 +1,6 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.TypeName;
+import com.palantir.javapoet.TypeName;
 
 final class ParserType {
 

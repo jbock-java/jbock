@@ -1,7 +1,7 @@
 package net.jbock.processor;
 
-import io.jbock.javapoet.ClassName;
-import io.jbock.javapoet.TypeName;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.TypeName;
 import io.jbock.util.Either;
 import net.jbock.Command;
 import net.jbock.SuperCommand;

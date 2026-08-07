@@ -1,7 +1,7 @@
 package net.jbock.processor;
 
-import io.jbock.javapoet.JavaFile;
-import io.jbock.javapoet.TypeSpec;
+import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.TypeSpec;
 import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.Command;
@@ -81,7 +81,7 @@ final class CommandStep implements Step {
     }
 
     private void writeSpec(SourceElement sourceElement, TypeSpec typeSpec) {
-        if (typeSpec.originatingElements.size() != 1) {
+        if (typeSpec.originatingElements().size() != 1) {
             throw new AssertionError();
         }
         String packageName = sourceElement.generatedClass().packageName();

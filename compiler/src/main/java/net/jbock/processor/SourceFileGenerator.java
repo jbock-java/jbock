@@ -1,6 +1,6 @@
 package net.jbock.processor;
 
-import io.jbock.javapoet.JavaFile;
+import com.palantir.javapoet.JavaFile;
 import io.jbock.simple.Inject;
 
 import javax.annotation.processing.Filer;

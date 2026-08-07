@@ -1,7 +1,7 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.AnnotationSpec;
-import io.jbock.javapoet.CodeBlock;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.CodeBlock;
 import io.jbock.simple.Inject;
 import net.jbock.processor.JbockProcessor;
 

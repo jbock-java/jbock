@@ -1,6 +1,6 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.ClassName;
+import com.palantir.javapoet.ClassName;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.annotated.VarargsParameter;

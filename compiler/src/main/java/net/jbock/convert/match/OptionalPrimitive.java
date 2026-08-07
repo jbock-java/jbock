@@ -1,6 +1,6 @@
 package net.jbock.convert.match;
 
-import io.jbock.javapoet.CodeBlock;
+import com.palantir.javapoet.CodeBlock;
 
 import java.util.OptionalDouble;
 import java.util.OptionalInt;

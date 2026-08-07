@@ -1,7 +1,7 @@
 package net.jbock.writing;
 
-import io.jbock.javapoet.CodeBlock;
-import io.jbock.javapoet.MethodSpec;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.MethodSpec;
 import io.jbock.simple.Inject;
 import net.jbock.annotated.Option;
 import net.jbock.convert.Mapping;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static io.jbock.javapoet.MethodSpec.methodBuilder;
+import static com.palantir.javapoet.MethodSpec.methodBuilder;
 import static net.jbock.common.Suppliers.memoize;
 import static net.jbock.writing.CodeBlocks.joinByComma;
 import static net.jbock.writing.CodeBlocks.joinByNewline;
