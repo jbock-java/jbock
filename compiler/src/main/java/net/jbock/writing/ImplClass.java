@@ -1,7 +1,5 @@
 package net.jbock.writing;
 
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeName;
@@ -10,27 +8,15 @@ import io.jbock.simple.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
-import net.jbock.annotated.VarargsParameter;
-import net.jbock.common.Suppliers;
 import net.jbock.convert.Mapping;
-import net.jbock.model.ItemType;
-import net.jbock.parse.ParseResult;
-import net.jbock.util.ExConvert;
-import net.jbock.util.ExMissingItem;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.StringJoiner;
-import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.common.Constants.EITHERS;
-import static net.jbock.common.Constants.STRING;
-import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 /**
  * Implementation of the command class.
@@ -47,22 +33,26 @@ final class ImplClass extends HasCommandRepresentation {
     }
 
     TypeSpec define() {
-        TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType());
         if (sourceElement().isInterface()) {
+            TypeSpec.Builder spec = TypeSpec.recordBuilder(generatedTypes.implType());
+            spec.addModifiers(PRIVATE, STATIC);
+            spec.recordConstructor(recordConstructor());
             spec.addSuperinterface(sourceElement().typeName());
+            return spec.build();
         } else {
+            TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType());
             spec.superclass(sourceElement().typeName());
+            return spec.addModifiers(PRIVATE, STATIC, FINAL)
+                    .addMethod(allArgsConstructor())
+                    .addMethod(generateToString())
+                    .addFields(allMappings().stream()
+                            .map(Mapping::field)
+                            .toList())
+                    .addMethods(allMappings().stream()
+                            .map(this::parameterMethodOverride)
+                            .collect(toList()))
+                    .build();
         }
-        return spec.addModifiers(PRIVATE, STATIC, FINAL)
-                .addMethod(allArgsConstructor())
-                .addMethod(generateToString())
-                .addFields(allMappings().stream()
-                        .map(Mapping::field)
-                        .collect(toList()))
-                .addMethods(allMappings().stream()
-                        .map(this::parameterMethodOverride)
-                        .collect(toList()))
-                .build();
     }
 
     private MethodSpec parameterMethodOverride(Mapping<?> m) {
@@ -73,13 +63,6 @@ final class ImplClass extends HasCommandRepresentation {
                 .addStatement("return $N", m.field())
                 .addAnnotation(Override.class)
                 .build();
-    }
-
-    private final Supplier<ParameterSpec> resultSupplier = Suppliers.memoize(() ->
-            ParameterSpec.builder(ClassName.get(ParseResult.class), "result").build());
-
-    private ParameterSpec result() {
-        return resultSupplier.get();
     }
 
     private MethodSpec allArgsConstructor() {
@@ -101,6 +84,18 @@ final class ImplClass extends HasCommandRepresentation {
         return spec.build();
     }
 
+    private MethodSpec recordConstructor() {
+        MethodSpec.Builder spec = MethodSpec.constructorBuilder();
+        for (int i = 0; i < namedOptions().size(); i++) {
+            spec.addParameter(namedOptions().get(i).param());
+        }
+        for (int i = 0; i < positionalParameters().size(); i++) {
+            spec.addParameter(positionalParameters().get(i).param());
+        }
+        varargsParameter().ifPresent(m -> spec.addParameter(m.param()));
+        return spec.build();
+    }
+
     private MethodSpec generateToString() {
         MethodSpec.Builder spec = MethodSpec.methodBuilder("toString").addModifiers(PUBLIC);
         spec.addAnnotation(Override.class);
@@ -117,85 +112,5 @@ final class ImplClass extends HasCommandRepresentation {
         }
         spec.addStatement("return $N.toString()", joiner);
         return spec.returns(String.class).build();
-    }
-
-    private CodeBlock convertExpressionOption(Mapping<Option> m, int i) {
-        List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$N.option($L)", result(),
-                m.item().index()));
-        if (!m.isNullary()) {
-            code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
-        }
-        code.addAll(tailExpressionOption(m, i));
-        m.extractExpr().ifPresent(code::add);
-        return joinByNewline(code);
-    }
-
-    private CodeBlock convertExpressionParameter(Mapping<Parameter> m, int i) {
-        List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$N.param($L)", result(),
-                m.item().index()));
-        code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
-        code.addAll(tailExpressionParameter(m, i));
-        m.extractExpr().ifPresent(code::add);
-        return joinByNewline(code);
-    }
-
-    private CodeBlock convertExpressionVarargsParameter(Mapping<VarargsParameter> m) {
-        List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$N.rest()", result()));
-        code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
-        code.add(CodeBlock.of(".collect($T.firstFailure())", EITHERS));
-        code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters().size()));
-        return joinByNewline(code);
-    }
-
-    private List<CodeBlock> tailExpressionOption(Mapping<Option> m, int i) {
-        if (m.isNullary()) {
-            return List.of(CodeBlock.of(".findAny().isPresent()"));
-        }
-        switch (m.multiplicity()) {
-            case REQUIRED:
-                return List.of(
-                        CodeBlock.of(".findAny()"),
-                        CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
-                                ExMissingItem.class, ItemType.class, ItemType.OPTION, i),
-                        orElseThrowConverterError(ItemType.OPTION, i));
-            case OPTIONAL:
-                return List.of(
-                        CodeBlock.of(".collect($T.firstFailure())", EITHERS),
-                        orElseThrowConverterError(ItemType.OPTION, i),
-                        CodeBlock.of(".stream().findAny()"));
-            default: {
-                if (!m.isRepeatable()) {
-                    throw new AssertionError();
-                }
-                return List.of(
-                        CodeBlock.of(".collect($T.firstFailure())", EITHERS),
-                        orElseThrowConverterError(ItemType.OPTION, i));
-            }
-        }
-    }
-
-    private List<CodeBlock> tailExpressionParameter(Mapping<Parameter> m, int i) {
-        if (m.isRequired()) {
-            return List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
-                            ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
-                    orElseThrowConverterError(ItemType.PARAMETER, i));
-        }
-        if (!m.isOptional()) {
-            throw new AssertionError();
-        }
-        return List.of(
-                CodeBlock.of(".stream()"),
-                CodeBlock.of(".collect($T.firstFailure())", EITHERS),
-                orElseThrowConverterError(ItemType.PARAMETER, i),
-                CodeBlock.of(".stream().findAny()"));
-    }
-
-    private CodeBlock orElseThrowConverterError(ItemType itemType, int i) {
-        ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
-        return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5L))",
-                left, ExConvert.class, ItemType.class, itemType, i);
     }
 }
