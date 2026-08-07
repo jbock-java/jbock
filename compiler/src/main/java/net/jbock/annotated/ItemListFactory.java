@@ -13,7 +13,6 @@ import java.util.Objects;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Eithers.allFailures;
-import static java.util.stream.Collectors.toList;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 
 final class ItemListFactory {
@@ -62,7 +61,7 @@ final class ItemListFactory {
     private static ValidationFailure missingAnnotationError(
             ExecutableElement method) {
         String message = "missing annotation: add one of these annotations: " + methodLevelAnnotations().stream()
-                .map(Class::getSimpleName).collect(toList());
+                .map(Class::getSimpleName).toList();
         message = message + " to method '" + method.getSimpleName() + "'";
         return new ValidationFailure(message, method);
     }

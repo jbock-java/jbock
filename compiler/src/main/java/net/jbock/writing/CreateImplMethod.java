@@ -4,10 +4,7 @@ import io.jbock.javapoet.ClassName;
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.MethodSpec;
 import io.jbock.javapoet.ParameterSpec;
-import io.jbock.javapoet.TypeName;
-import io.jbock.javapoet.TypeSpec;
 import io.jbock.simple.Inject;
-import net.jbock.annotated.Item;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.annotated.VarargsParameter;
@@ -16,17 +13,14 @@ import net.jbock.convert.Mapping;
 import net.jbock.model.ItemType;
 import net.jbock.parse.ParseResult;
 import net.jbock.util.ExConvert;
+import net.jbock.util.ExFailure;
 import net.jbock.util.ExMissingItem;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.function.Supplier;
 
-import static java.util.stream.Collectors.toList;
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.common.Constants.EITHERS;
 import static net.jbock.common.Constants.STRING;
@@ -35,88 +29,65 @@ import static net.jbock.writing.CodeBlocks.joinByNewline;
 /**
  * Implementation of the command class.
  */
-final class ImplClass extends HasCommandRepresentation {
+final class CreateImplMethod extends HasCommandRepresentation {
 
+    //   if the command class is an interface, we can generate a record instead:
+    //
+    //   static ComplicatedMapperArguments_Impl create_ComplicatedMapperArguments_Impl(ParseResult result) throws ExFailure {
+    //       Integer number = result.option(0)
+    //               .map(new ComplicatedMapperArguments.MyConverter().get())
+    //               .findAny()
+    //               .orElseThrow(() -> new ExMissingItem(ItemType.OPTION, 0))
+    //               .orElseThrow(left -> new ExConvert(left, ItemType.OPTION, 0));
+    //       List<ComplicatedMapperArguments.LazyNumber> numbers = result.option(1)
+    //               .map(new ComplicatedMapperArguments.LazyNumberConverter().get())
+    //               .collect(Eithers.firstFailure())
+    //               .orElseThrow(left -> new ExConvert(left, ItemType.OPTION, 1));
+    //       Optional<LocalDate> date = result.option(2)
+    //               .map(new ComplicatedMapperArguments.NullReturningConverter())
+    //               .collect(Eithers.firstFailure())
+    //               .orElseThrow(left -> new ExConvert(left, ItemType.OPTION, 2))
+    //               .stream().findAny();
+    //       return new ComplicatedMapperArguments_Impl(number, numbers, date);
+    //   }
+    //
+    //   record ComplicatedMapperArguments_Impl(
+    //           Integer number,
+    //           List<ComplicatedMapperArguments.LazyNumber> numbers,
+    //           Optional<LocalDate> date) implements ComplicatedMapperArguments {
+    //   }
     private final GeneratedTypes generatedTypes;
 
     @Inject
-    ImplClass(GeneratedTypes generatedTypes,
-              CommandRepresentation commandRepresentation) {
+    CreateImplMethod(
+            CommandRepresentation commandRepresentation,
+            GeneratedTypes generatedTypes) {
         super(commandRepresentation);
         this.generatedTypes = generatedTypes;
     }
 
-    TypeSpec define() {
-        TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType());
-        if (sourceElement().isInterface()) {
-            spec.addSuperinterface(sourceElement().typeName());
-        } else {
-            spec.superclass(sourceElement().typeName());
-        }
-        return spec.addModifiers(PRIVATE, STATIC, FINAL)
-                .addMethod(allArgsConstructor())
-                .addMethod(generateToString())
-                .addFields(allMappings().stream()
-                        .map(Mapping::field)
-                        .collect(toList()))
-                .addMethods(allMappings().stream()
-                        .map(this::parameterMethodOverride)
-                        .collect(toList()))
-                .build();
-    }
-
-    private MethodSpec parameterMethodOverride(Mapping<?> m) {
-        Item sourceMethod = m.item();
-        return MethodSpec.methodBuilder(sourceMethod.methodName())
-                .returns(TypeName.get(sourceMethod.returnType()))
-                .addModifiers(sourceMethod.accessModifiers())
-                .addStatement("return $N", m.field())
-                .addAnnotation(Override.class)
-                .build();
-    }
-
-    private final Supplier<ParameterSpec> resultSupplier = Suppliers.memoize(() ->
-            ParameterSpec.builder(ClassName.get(ParseResult.class), "result").build());
-
-    private ParameterSpec result() {
-        return resultSupplier.get();
-    }
-
-    private MethodSpec allArgsConstructor() {
-        MethodSpec.Builder spec = MethodSpec.constructorBuilder();
+    MethodSpec define() {
+        MethodSpec.Builder spec = MethodSpec.methodBuilder("createImpl").addModifiers(PRIVATE, STATIC);
+        List<CodeBlock> constructorParams = new ArrayList<>(namedOptions().size() + positionalParameters().size() + varargsParameter().map(x -> 1).orElse(0));
         for (int i = 0; i < namedOptions().size(); i++) {
             Mapping<Option> m = namedOptions().get(i);
-            spec.addStatement("this.$N = $N", m.field(), m.param());
-            spec.addParameter(m.param());
+            spec.addStatement("$T $N = $L", m.item().returnType(), m.param(), convertExpressionOption(m, i));
+            constructorParams.add(CodeBlock.of("$N", m.param()));
         }
         for (int i = 0; i < positionalParameters().size(); i++) {
             Mapping<Parameter> m = positionalParameters().get(i);
-            spec.addStatement("this.$N = $N", m.field(), m.param());
-            spec.addParameter(m.param());
+            spec.addStatement("$T $N = $L", m.item().returnType(), m.param(), convertExpressionParameter(m, i));
+            constructorParams.add(CodeBlock.of("$N", m.param()));
         }
         varargsParameter().ifPresent(m -> {
-            spec.addStatement("this.$N = $N", m.field(), m.param());
-            spec.addParameter(m.param());
+            spec.addStatement("$T $N = $L", m.item().returnType(), m.param(), convertExpressionVarargsParameter(m));
+            constructorParams.add(CodeBlock.of("$N", m.param()));
         });
-        return spec.build();
-    }
-
-    private MethodSpec generateToString() {
-        MethodSpec.Builder spec = MethodSpec.methodBuilder("toString").addModifiers(PUBLIC);
-        spec.addAnnotation(Override.class);
-        ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
-        spec.addStatement("$T $N = new $T($S, $S, $S)", StringJoiner.class, joiner, StringJoiner.class,
-                ", ", "{ ", " }");
-        for (int i = 0; i < namedOptions().size(); i++) {
-            Mapping<Option> m = namedOptions().get(i);
-            spec.addStatement("$N.add($S + $N)", joiner, m.field().name + ": ", m.field());
-        }
-        for (int i = 0; i < positionalParameters().size(); i++) {
-            Mapping<Parameter> m = positionalParameters().get(i);
-            spec.addStatement("$N.add($S + $N)", joiner, m.field().name + ": ", m.field());
-        }
-        spec.addStatement("return $N.toString()", joiner);
-        return spec.returns(String.class).build();
+        spec.addStatement("return new $T($L)", generatedTypes.implType(), CodeBlocks.joinByComma(constructorParams));
+        return spec.addParameter(result())
+                .returns(sourceElement().typeName())
+                .addException(ExFailure.class)
+                .build();
     }
 
     private CodeBlock convertExpressionOption(Mapping<Option> m, int i) {
@@ -191,6 +162,13 @@ final class ImplClass extends HasCommandRepresentation {
                 CodeBlock.of(".collect($T.firstFailure())", EITHERS),
                 orElseThrowConverterError(ItemType.PARAMETER, i),
                 CodeBlock.of(".stream().findAny()"));
+    }
+
+    private final Supplier<ParameterSpec> resultSupplier = Suppliers.memoize(() ->
+            ParameterSpec.builder(ClassName.get(ParseResult.class), "result").build());
+
+    private ParameterSpec result() {
+        return resultSupplier.get();
     }
 
     private CodeBlock orElseThrowConverterError(ItemType itemType, int i) {

@@ -100,8 +100,8 @@ final class ParseMethod extends HasCommandRepresentation {
         code.add("try {\n").indent()
                 .addStatement("$N.parse($N)", parser, tokens);
         ParameterSpec impl = ParameterSpec.builder(generatedTypes().implType(), "impl").build();
-        code.addStatement("return $T.right(new $T($N))", EITHER,
-                impl.type, parser);
+        code.addStatement("return $T.right(createImpl($N))", EITHER,
+                parser);
         ParameterSpec ex = builder(Exception.class, "e").build();
         code.unindent().add("} catch ($T $N) {\n", ExFailure.class, ex).indent()
                 .addStatement("return $T.left($N.toError($N()))",

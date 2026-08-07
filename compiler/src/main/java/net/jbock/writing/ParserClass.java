@@ -13,6 +13,7 @@ final class ParserClass extends HasCommandRepresentation {
 
     private final ParseMethod parseMethod;
     private final ParseOrExitMethod parseOrExitMethod;
+    private final CreateImplMethod createImplMethod;
     private final CreateModelMethod createModelMethod;
     private final GeneratedAnnotation generatedAnnotation;
     private final ImplClass implClass;
@@ -22,12 +23,14 @@ final class ParserClass extends HasCommandRepresentation {
             ParseMethod parseMethod,
             CommandRepresentation commandRepresentation,
             ParseOrExitMethod parseOrExitMethod,
+            CreateImplMethod createImplMethod,
             CreateModelMethod createModelMethod,
             GeneratedAnnotation generatedAnnotation,
             ImplClass implClass) {
         super(commandRepresentation);
         this.parseMethod = parseMethod;
         this.parseOrExitMethod = parseOrExitMethod;
+        this.createImplMethod = createImplMethod;
         this.createModelMethod = createModelMethod;
         this.generatedAnnotation = generatedAnnotation;
         this.implClass = implClass;
@@ -45,6 +48,7 @@ final class ParserClass extends HasCommandRepresentation {
             spec.addMethod(parseOrExitMethod.define());
         }
 
+        spec.addMethod(createImplMethod.define());
         spec.addMethod(createModelMethod.get());
         Modifier[] modifiers = sourceElement().accessModifiers().toArray(new Modifier[0]);
         spec.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE)

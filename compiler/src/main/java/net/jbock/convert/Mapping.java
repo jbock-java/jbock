@@ -2,6 +2,7 @@ package net.jbock.convert;
 
 import io.jbock.javapoet.CodeBlock;
 import io.jbock.javapoet.FieldSpec;
+import io.jbock.javapoet.ParameterSpec;
 import io.jbock.javapoet.TypeName;
 import net.jbock.annotated.Item;
 import net.jbock.convert.match.Match;
@@ -90,6 +91,12 @@ public final class Mapping<M extends Item> {
         return item().paramLabel();
     }
 
+    private final Supplier<ParameterSpec> paramSupplier = memoize(() -> {
+        TypeName fieldType = TypeName.get(item().returnType());
+        String fieldName = item().methodName();
+        return ParameterSpec.builder(fieldType, fieldName).build();
+    });
+
     private final Supplier<FieldSpec> fieldSupplier = memoize(() -> {
         TypeName fieldType = TypeName.get(item().returnType());
         String fieldName = item().methodName();
@@ -98,5 +105,9 @@ public final class Mapping<M extends Item> {
 
     public FieldSpec field() {
         return fieldSupplier.get();
+    }
+
+    public ParameterSpec param() {
+        return paramSupplier.get();
     }
 }
