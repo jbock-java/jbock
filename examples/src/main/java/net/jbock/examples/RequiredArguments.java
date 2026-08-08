@@ -8,11 +8,11 @@ import net.jbock.VarargsParameter;
 import java.util.List;
 
 @Command
-abstract class RequiredArguments {
+interface RequiredArguments {
 
     @Option(names = "--dir")
-    abstract String dir();
+    String dir();
 
     @VarargsParameter
-    abstract List<String> otherTokens();
+    List<String> otherTokens();
 }

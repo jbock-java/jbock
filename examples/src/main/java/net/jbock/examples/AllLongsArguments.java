@@ -8,20 +8,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Command
-abstract class AllLongsArguments {
+interface AllLongsArguments {
 
     @VarargsParameter
-    abstract List<Long> positional();
+    List<Long> positional();
 
     @Option(names = {"--i", "-i"})
-    abstract List<Long> listOfLongs();
+    List<Long> listOfLongs();
 
     @Option(names = "--opt")
-    abstract Optional<Long> optionalLong();
+    Optional<Long> optionalLong();
 
     @Option(names = "--obj")
-    abstract Long longObject();
+    Long longObject();
 
     @Option(names = "--prim")
-    abstract long primitiveLong();
+    long primitiveLong();
 }

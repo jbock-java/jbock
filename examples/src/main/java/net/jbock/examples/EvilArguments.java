@@ -6,29 +6,29 @@ import net.jbock.Option;
 import java.util.Optional;
 
 @Command
-abstract class EvilArguments {
+interface EvilArguments {
 
     @Option(names = "--Fancy")
-    abstract Optional<String> Fancy();
+    Optional<String> Fancy();
 
     @Option(names = "--fancy")
-    abstract String fancy();
+    String fancy();
 
     @Option(names = "--fAncy")
-    abstract String fAncy();
+    String fAncy();
 
     @Option(names = "--f_ancy")
-    abstract String f_ancy();
+    String f_ancy();
 
     @Option(names = "--f__ancy")
-    abstract String f__ancy();
+    String f__ancy();
 
     @Option(names = "--blub")
-    abstract String blub();
+    String blub();
 
     @Option(names = "--Blub")
-    abstract String Blub();
+    String Blub();
 
     @Option(names = "--evil")
-    abstract Optional<String> __();
+    Optional<String> __();
 }

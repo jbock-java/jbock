@@ -9,23 +9,23 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 @Command
-abstract class AllIntegersArguments {
+interface AllIntegersArguments {
 
     @VarargsParameter
-    abstract List<Integer> positional();
+    List<Integer> positional();
 
     @Option(names = {"--i", "-i"})
-    abstract List<Integer> listOfIntegers();
+    List<Integer> listOfIntegers();
 
     @Option(names = "--opt")
-    abstract Optional<Integer> optionalInteger();
+    Optional<Integer> optionalInteger();
 
     @Option(names = "--obj")
-    abstract Integer integer();
+    Integer integer();
 
     @Option(names = "--prim")
-    abstract int primitiveInt();
+    int primitiveInt();
 
     @Option(names = "--opti")
-    abstract OptionalInt optionalInt();
+    OptionalInt optionalInt();
 }

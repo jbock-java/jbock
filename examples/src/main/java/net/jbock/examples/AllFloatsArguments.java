@@ -8,20 +8,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Command
-abstract class AllFloatsArguments {
+interface AllFloatsArguments {
 
     @VarargsParameter
-    abstract List<Float> positional();
+    List<Float> positional();
 
     @Option(names = {"--i", "-i"})
-    abstract List<Float> listOfFloats();
+    List<Float> listOfFloats();
 
     @Option(names = "--opt")
-    abstract Optional<Float> optionalFloat();
+    Optional<Float> optionalFloat();
 
     @Option(names = "--obj")
-    abstract Float floatObject();
+    Float floatObject();
 
     @Option(names = "--prim")
-    abstract float primitiveFloat();
+    float primitiveFloat();
 }

@@ -5,20 +5,20 @@ import net.jbock.Command;
 import net.jbock.Option;
 
 @Command
-abstract class TarArguments {
+interface TarArguments {
 
     @Option(names = {"--x", "-x"})
-    abstract boolean extract();
+    boolean extract();
 
     @Option(names = {"--c", "-c"})
-    abstract boolean create();
+    boolean create();
 
     @Option(names = {"--v", "-v"})
-    abstract boolean verbose();
+    boolean verbose();
 
     @Option(names = {"--z", "-z"})
-    abstract boolean compress();
+    boolean compress();
 
     @Option(names = {"--file", "-f"})
-    abstract String file();
+    String file();
 }

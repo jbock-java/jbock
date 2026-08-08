@@ -7,7 +7,7 @@ import net.jbock.Parameter;
 import java.util.Optional;
 
 @Command
-abstract class CpArguments {
+interface CpArguments {
 
     enum Control {
         NONE,
@@ -17,18 +17,18 @@ abstract class CpArguments {
     }
 
     @Parameter(index = 0)
-    abstract String source();
+    String source();
 
     @Parameter(index = 1)
-    abstract String dest();
+    String dest();
 
     @Option(names = {"--r", "-r"})
-    abstract boolean recursive();
+    boolean recursive();
 
     @Option(names = "--backup")
-    abstract Optional<Control> backup();
+    Optional<Control> backup();
 
     @Option(names = {"--suffix", "-s"},
             description = "Override the usual backup suffix")
-    abstract Optional<String> suffix();
+    Optional<String> suffix();
 }

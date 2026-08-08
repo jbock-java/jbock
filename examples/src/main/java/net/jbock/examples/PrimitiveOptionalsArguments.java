@@ -10,41 +10,41 @@ import java.util.OptionalLong;
 import java.util.function.Supplier;
 
 @Command
-abstract class PrimitiveOptionalsArguments {
+interface PrimitiveOptionalsArguments {
 
     @Option(names = {"--I", "-I"}, converter = IntegerConverter.class)
-    abstract OptionalInt simpleInt();
+    OptionalInt simpleInt();
 
     @Option(names = {"--L", "-L"}, converter = LongConverter.class)
-    abstract OptionalLong simpleLong();
+    OptionalLong simpleLong();
 
     @Option(names = {"--D", "-D"}, converter = DoubleConverter.class)
-    abstract OptionalDouble simpleDouble();
+    OptionalDouble simpleDouble();
 
     @Option(names = {"--i", "-i"}, converter = IntegerConverter.class)
-    abstract OptionalInt mappedInt();
+    OptionalInt mappedInt();
 
     @Option(names = {"--l", "-l"}, converter = LongConverter.class)
-    abstract OptionalLong mappedLong();
+    OptionalLong mappedLong();
 
     @Option(names = {"--d", "-d"}, converter = DoubleConverter.class)
-    abstract OptionalDouble mappedDouble();
+    OptionalDouble mappedDouble();
 
-    static class IntegerConverter implements Supplier<StringConverter<Integer>> {
+    class IntegerConverter implements Supplier<StringConverter<Integer>> {
         @Override
         public StringConverter<Integer> get() {
             return StringConverter.create(Integer::valueOf);
         }
     }
 
-    static class LongConverter implements Supplier<StringConverter<Long>> {
+    class LongConverter implements Supplier<StringConverter<Long>> {
         @Override
         public StringConverter<Long> get() {
             return StringConverter.create(Long::valueOf);
         }
     }
 
-    static class DoubleConverter implements Supplier<StringConverter<Double>> {
+    class DoubleConverter implements Supplier<StringConverter<Double>> {
         @Override
         public StringConverter<Double> get() {
             return StringConverter.create(Double::valueOf);

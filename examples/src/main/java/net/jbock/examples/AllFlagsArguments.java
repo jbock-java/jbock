@@ -4,8 +4,8 @@ import net.jbock.Command;
 import net.jbock.Option;
 
 @Command
-abstract class AllFlagsArguments {
+interface AllFlagsArguments {
 
     @Option(names = {"--smallFlag", "-f", "-s"})
-    abstract boolean smallFlag();
+    boolean smallFlag();
 }

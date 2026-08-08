@@ -8,20 +8,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Command
-abstract class PositionalArguments {
+interface PositionalArguments {
 
     @Parameter(index = 0)
-    abstract String source();
+    String source();
 
     @Parameter(index = 1, description = "Desc of dest.")
-    abstract String dest();
+    String dest();
 
     @Parameter(index = 2)
-    abstract int anotherInt();
+    int anotherInt();
 
     @Parameter(index = 3)
-    abstract Optional<String> optString();
+    Optional<String> optString();
 
     @VarargsParameter
-    abstract List<String> otherTokens();
+    List<String> otherTokens();
 }

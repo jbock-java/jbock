@@ -10,14 +10,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Command
-abstract class ListIntegerArguments {
+interface ListIntegerArguments {
 
-    private static final Function<String, Integer> PARSE_INT = Integer::parseInt;
+    Function<String, Integer> PARSE_INT = Integer::parseInt;
 
     @Option(names = {"--a", "-a"}, converter = Mapper.class)
-    abstract ArrayList<Integer> a();
+    ArrayList<Integer> a();
 
-    static class Mapper implements Supplier<StringConverter<ArrayList<Integer>>> {
+    class Mapper implements Supplier<StringConverter<ArrayList<Integer>>> {
 
         @Override
         public StringConverter<ArrayList<Integer>> get() {

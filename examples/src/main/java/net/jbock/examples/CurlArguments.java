@@ -15,23 +15,23 @@ import java.util.Optional;
                 "curl offers a busload of useful tricks.",
                 "curl is powered by libcurl for all transfer-related features.",
                 "See libcurl(3) for details."})
-abstract class CurlArguments {
+interface CurlArguments {
 
     @Option(names = {"--request", "-X"},
             description = "Optional<String> for regular arguments")
-    abstract Optional<String> method();
+    Optional<String> method();
 
     @Option(names = {"--header", "-H"},
             description = "List<String> for repeatable arguments")
-    abstract List<String> headers();
+    List<String> headers();
 
     @Option(names = {"--verbose", "-v"},
             description = "boolean for flags")
-    abstract boolean verbose();
+    boolean verbose();
 
     @Option(names = {"--include", "-i"})
-    abstract boolean include();
+    boolean include();
 
     @VarargsParameter
-    abstract List<String> url();
+    List<String> url();
 }

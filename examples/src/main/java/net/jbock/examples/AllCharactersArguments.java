@@ -7,17 +7,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Command
-abstract class AllCharactersArguments {
+interface AllCharactersArguments {
 
     @Option(names = "--smallChar")
-    abstract char smallChar();
+    char smallChar();
 
     @Option(names = "--bigChar")
-    abstract Character bigChar();
+    Character bigChar();
 
     @Option(names = "--charOpt")
-    abstract Optional<Character> charOpt();
+    Optional<Character> charOpt();
 
     @Option(names = "--charList")
-    abstract List<Character> charList();
+    List<Character> charList();
 }

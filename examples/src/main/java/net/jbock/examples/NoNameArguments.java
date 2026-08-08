@@ -8,20 +8,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Command
-abstract class NoNameArguments {
+interface NoNameArguments {
 
     @Option(names = "--message")
-    abstract Optional<String> message();
+    Optional<String> message();
 
     @Option(names = "--file")
-    abstract List<String> file();
+    List<String> file();
 
     @Option(names = {"--verbosity", "-v"})
-    abstract Optional<Integer> verbosity();
+    Optional<Integer> verbosity();
 
     @Option(names = {"--number", "-n"})
-    abstract int number();
+    int number();
 
     @Option(names = "--cmos")
-    abstract boolean cmos();
+    boolean cmos();
 }

@@ -4,15 +4,15 @@ import net.jbock.Command;
 import net.jbock.Parameter;
 
 @Command
-abstract class MvArguments {
+interface MvArguments {
 
     @Parameter(index = 0)
-    abstract String source();
+    String source();
 
     @Parameter(index = 1)
-    abstract String dest();
+    String dest();
 
-    public boolean isSafe() {
+    default boolean isSafe() {
         return true;
     }
 }

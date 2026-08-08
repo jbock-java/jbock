@@ -8,12 +8,12 @@ import java.util.OptionalInt;
 import java.util.function.Supplier;
 
 @Command
-abstract class OptionalIntArgumentsOptional {
+interface OptionalIntArgumentsOptional {
 
     @Option(names = {"--a", "-a"}, converter = MyConverter.class)
-    abstract OptionalInt a();
+    OptionalInt a();
 
-    static class MyConverter implements Supplier<StringConverter<Integer>> {
+    class MyConverter implements Supplier<StringConverter<Integer>> {
 
         @Override
         public StringConverter<Integer> get() {

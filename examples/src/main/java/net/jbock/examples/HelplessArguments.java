@@ -5,11 +5,11 @@ import net.jbock.Option;
 import net.jbock.Parameter;
 
 @Command
-abstract class HelplessArguments {
+interface HelplessArguments {
 
     @Parameter(index = 0)
-    abstract String required();
+    String required();
 
     @Option(names = "--help")
-    abstract boolean help();
+    boolean help();
 }

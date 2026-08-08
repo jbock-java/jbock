@@ -8,14 +8,14 @@ import net.jbock.VarargsParameter;
 import java.util.List;
 
 @SuperCommand
-abstract class SuperArguments {
+interface SuperArguments {
 
     @Option(names = {"--quiet", "-q"})
-    abstract boolean quiet();
+    boolean quiet();
 
     @Parameter(index = 0)
-    abstract String command();
+    String command();
 
     @VarargsParameter
-    abstract List<String> rest();
+    List<String> rest();
 }

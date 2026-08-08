@@ -4,17 +4,17 @@ import net.jbock.Command;
 import net.jbock.Option;
 
 @Command
-abstract class ClusteredShortOptions {
+interface ClusteredShortOptions {
 
     @Option(names = {"-a", "--aa"})
-    abstract boolean aaa();
+    boolean aaa();
 
     @Option(names = "-b")
-    abstract boolean bbb();
+    boolean bbb();
 
     @Option(names = "-c")
-    abstract boolean ccc();
+    boolean ccc();
 
     @Option(names = "-f")
-    abstract String file();
+    String file();
 }

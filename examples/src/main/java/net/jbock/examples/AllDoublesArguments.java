@@ -8,20 +8,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Command
-abstract class AllDoublesArguments {
+interface AllDoublesArguments {
 
     @VarargsParameter
-    abstract List<Double> positional();
+    List<Double> positional();
 
     @Option(names = {"--i", "-i"})
-    abstract List<Double> listOfDoubles();
+    List<Double> listOfDoubles();
 
     @Option(names = "--opt")
-    abstract Optional<Double> optionalDouble();
+    Optional<Double> optionalDouble();
 
     @Option(names = "--obj")
-    abstract Double doubleObject();
+    Double doubleObject();
 
     @Option(names = "--prim")
-    abstract double primitiveDouble();
+    double primitiveDouble();
 }

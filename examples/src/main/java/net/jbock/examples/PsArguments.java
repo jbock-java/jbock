@@ -6,12 +6,12 @@ import net.jbock.Option;
 import java.util.Optional;
 
 @Command
-abstract class PsArguments {
+interface PsArguments {
 
     @Option(names = {"--all", "-a"})
-    abstract boolean all();
+    boolean all();
 
     @Option(names = {"--width", "-w"},
             description = "This is the description.")
-    abstract Optional<Integer> width();
+    Optional<Integer> width();
 }

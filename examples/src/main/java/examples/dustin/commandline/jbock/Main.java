@@ -12,19 +12,19 @@ import java.util.Optional;
 public class Main {
 
     @Command
-    abstract static class Arguments {
+    interface Arguments {
 
         /**
          * Verbosity enabled?
          */
         @Option(names = {"-v", "--verbose"})
-        abstract boolean verbose();
+        boolean verbose();
 
         /**
          * File name and path
          */
         @Option(names = {"-f", "--file"})
-        abstract Optional<String> file();
+        Optional<String> file();
     }
 
     public static void main(String[] arguments) {

@@ -15,86 +15,86 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Command
-abstract class VariousArguments {
+interface VariousArguments {
 
     @Option(names = "--bigDecimal")
-    abstract BigDecimal bigDecimal();
+    BigDecimal bigDecimal();
 
     @Option(names = "--bigDecimalList")
-    abstract List<BigDecimal> bigDecimalList();
+    List<BigDecimal> bigDecimalList();
 
     @Option(names = "--bigDecimalOpt")
-    abstract Optional<BigDecimal> bigDecimalOpt();
+    Optional<BigDecimal> bigDecimalOpt();
 
     @Parameter(index = 0)
-    abstract Optional<BigDecimal> bigDecimalPos();
+    Optional<BigDecimal> bigDecimalPos();
 
     @Option(names = "--bigInteger")
-    abstract BigInteger bigInteger();
+    BigInteger bigInteger();
 
     @Option(names = "--bigIntegerList")
-    abstract List<BigInteger> bigIntegerList();
+    List<BigInteger> bigIntegerList();
 
     @Option(names = "--bigIntegerOpt")
-    abstract Optional<BigInteger> bigIntegerOpt();
+    Optional<BigInteger> bigIntegerOpt();
 
     @Parameter(index = 1)
-    abstract Optional<BigInteger> bigIntegerPos();
+    Optional<BigInteger> bigIntegerPos();
 
     @Option(names = "--fileList")
-    abstract List<File> fileList();
+    List<File> fileList();
 
     @Option(names = "--fileOpt")
-    abstract Optional<File> fileOpt();
+    Optional<File> fileOpt();
 
     @Parameter(index = 2)
-    abstract Optional<File> filePos();
+    Optional<File> filePos();
 
     @Option(names = "--path")
-    abstract Path path();
+    Path path();
 
     @Option(names = "--pathList")
-    abstract List<Path> pathList();
+    List<Path> pathList();
 
     @Option(names = "--pathOpt")
-    abstract Optional<Path> pathOpt();
+    Optional<Path> pathOpt();
 
     @Parameter(index = 3)
-    abstract Optional<Path> pathPos();
+    Optional<Path> pathPos();
 
     @Option(names = "--localDate")
-    abstract LocalDate localDate();
+    LocalDate localDate();
 
     @Option(names = "--localDateList")
-    abstract List<LocalDate> localDateList();
+    List<LocalDate> localDateList();
 
     @Option(names = "--localDateOpt")
-    abstract Optional<LocalDate> localDateOpt();
+    Optional<LocalDate> localDateOpt();
 
     @Parameter(index = 4)
-    abstract Optional<LocalDate> localDatePos();
+    Optional<LocalDate> localDatePos();
 
     @Option(names = "--uri")
-    abstract URI uri();
+    URI uri();
 
     @Option(names = "--uriList")
-    abstract List<URI> uriList();
+    List<URI> uriList();
 
     @Option(names = "--uriOpt")
-    abstract Optional<URI> uriOpt();
+    Optional<URI> uriOpt();
 
     @Parameter(index = 5)
-    abstract Optional<URI> uriPos();
+    Optional<URI> uriPos();
 
     @Option(names = "--pattern")
-    abstract Pattern pattern();
+    Pattern pattern();
 
     @Option(names = "--patternList")
-    abstract List<Pattern> patternList();
+    List<Pattern> patternList();
 
     @Option(names = "--patternOpt")
-    abstract Optional<Pattern> patternOpt();
+    Optional<Pattern> patternOpt();
 
     @Parameter(index = 6)
-    abstract Optional<Pattern> patternPos();
+    Optional<Pattern> patternPos();
 }
