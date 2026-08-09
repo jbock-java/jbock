@@ -1,6 +1,5 @@
 package net.jbock.writing;
 
-import com.palantir.javapoet.ClassName;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.annotated.VarargsParameter;
@@ -24,10 +23,6 @@ abstract class HasCommandRepresentation {
 
     final SourceElement sourceElement() {
         return commandRepresentation.sourceElement();
-    }
-
-    final ClassName optType() {
-        return commandRepresentation.optType();
     }
 
     final List<Mapping<Parameter>> positionalParameters() {

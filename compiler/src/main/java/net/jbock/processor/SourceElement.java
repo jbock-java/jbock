@@ -104,6 +104,12 @@ public final class SourceElement {
                     SuperCommand::enableAtFileExpansion);
         }
 
+        boolean skipHelp() {
+            return command.fold(
+                    Command::skipHelp,
+                    s -> true);
+        }
+
         String[] getDescription() {
             return command.fold(
                     Command::description,
@@ -161,6 +167,10 @@ public final class SourceElement {
 
     public boolean skipGeneratingParseOrExitMethod() {
         return command.isSkipGeneratingParseOrExitMethod();
+    }
+
+    public boolean skipHelp() {
+        return command.skipHelp();
     }
 
     public boolean parseOrExitMethodAcceptsList() {

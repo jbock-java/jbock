@@ -48,6 +48,13 @@ public @interface Command {
     boolean skipGeneratingParseOrExitMethod() default false;
 
     /**
+     * If {@code true}, the generated parser will not recognize the {@code --help} token.
+     *
+     * @return {@code true} to not generate code that recognizes {@code --help}
+     */
+    boolean skipHelp() default false;
+
+    /**
      * If {@code true}, the generated {@code parseOrExit} method
      * will accept {@code List<String>} instead of {@code String[]}.
      */

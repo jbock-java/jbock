@@ -1,6 +1,5 @@
 package net.jbock.writing;
 
-import com.palantir.javapoet.ClassName;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.annotated.VarargsParameter;
@@ -16,12 +15,8 @@ import static net.jbock.common.Suppliers.memoize;
 
 public final class CommandRepresentation {
 
-    private final Supplier<ClassName> optType = memoize(() -> namedOptions().isEmpty() ?
-            ClassName.get(Void.class) : // javapoet #739
-            sourceElement().optionEnumType());
-
     private final Supplier<List<Mapping<?>>> allMappings = memoize(() -> {
-        List<Mapping<?>> result = new ArrayList<>();
+        List<Mapping<?>> result = new ArrayList<>(namedOptions().size() + positionalParameters().size() + 1);
         result.addAll(namedOptions());
         result.addAll(positionalParameters());
         varargsParameter().ifPresent(result::add);
@@ -59,11 +54,6 @@ public final class CommandRepresentation {
 
     List<Mapping<Option>> namedOptions() {
         return namedOptions;
-    }
-
-    /** Returns the type of the option enum. */
-    ClassName optType() {
-        return optType.get();
     }
 
     List<Mapping<?>> allMappings() {

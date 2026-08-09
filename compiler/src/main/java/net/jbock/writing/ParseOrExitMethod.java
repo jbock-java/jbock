@@ -44,16 +44,17 @@ final class ParseOrExitMethod extends HasCommandRepresentation {
         ParameterSpec err = builder(AtFileError.class, "err").build();
 
         CodeBlock.Builder code = CodeBlock.builder();
-        if (parseOrExitMethodAcceptsList()) {
-            code.beginControlFlow("if (!$1N.isEmpty() && $2S.equals($1N.get(0)))", args, "--help");
-        } else {
-            code.beginControlFlow("if ($1N.length > 0 && $2S.equals($1N[0]))", args, "--help");
+        if (!sourceElement().skipHelp()) {
+            if (parseOrExitMethodAcceptsList()) {
+                code.beginControlFlow("if (!$1N.isEmpty() && $2S.equals($1N.get(0)))", args, "--help");
+            } else {
+                code.beginControlFlow("if ($1N.length > 0 && $2S.equals($1N[0]))", args, "--help");
+            }
+            code.add("$T.builder().build()\n", StandardErrorHandler.class).indent()
+                    .add(".printUsageDocumentation($N());\n", createModelMethod.get()).unindent()
+                    .addStatement("$T.exit(0)", System.class)
+                    .endControlFlow();
         }
-        code.add("$T.builder().build()\n", StandardErrorHandler.class).indent()
-                .add(".printUsageDocumentation($N());\n", createModelMethod.get()).unindent()
-                .addStatement("$T.exit(0)", System.class)
-                .endControlFlow();
-
         if (enableAtFileExpansion()) {
             code.add("return $T.from($N).expand()\n", ParseRequest.class, args).indent()
                     .add(".mapLeft($1N -> $1N.addModel($2N()))\n", err, createModelMethod.get())
