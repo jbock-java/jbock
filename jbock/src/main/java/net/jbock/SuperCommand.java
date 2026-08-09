@@ -7,13 +7,10 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for an abstract class or interface
- * that defines a command line API, similar to {@link Command},
- * with some differences as explained below.
+ * Marker annotation for a java interface
+ * that defines a command line API.
  *
- * <p>Each abstract method of the command class must have an empty
- * argument list, and either the {@link Option} or the {@link Parameter} annotation.
- * There must be at least one {@code Parameter}. The {@link VarargsParameter} annotation
+ * <p>There must be at least one {@code Parameter}. The {@link VarargsParameter} annotation
  * is not allowed on a super-command.
  *
  * <p>The generated parser will stop parsing after the

@@ -7,17 +7,8 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for an abstract class or interface
+ * Marker annotation for a java interface
  * that defines a command line API.
- *
- * <p>Each abstract method of the command class must have an empty
- * argument list, and carry one of the following annotations:
- *
- * <ul>
- *   <li>{@link Option}
- *   <li>{@link Parameter}
- *   <li>{@link VarargsParameter}
- * </ul>
  */
 @Target(TYPE)
 @Retention(SOURCE)

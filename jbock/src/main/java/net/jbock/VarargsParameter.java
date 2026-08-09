@@ -8,8 +8,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  * Marker annotation for a <em>repeatable</em> positional parameter.
- * This will capture the remaining non-option tokens,
- * <em>after</em> any non-repeatable non-option tokens have been captured.
+ * This will capture the remaining positional parameters,
+ * <em>after</em> any {@link Parameter}s have been captured.
+ *
+ * <p>If none of the annotation attributes are specified, this annotation can be omitted.
  *
  * <ul>
  *   <li>The annotated method must be {@code abstract} and have an empty argument list.
