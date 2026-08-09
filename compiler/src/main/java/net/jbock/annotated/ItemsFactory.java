@@ -35,8 +35,7 @@ public class ItemsFactory {
                 !items.positionalParameters().isEmpty()) {
             return Optional.empty();
         }
-        String message = "At least one @Parameter must be defined" +
-                " in a @SuperCommand";
+        String message = "In a super command, at least one parameter must be defined";
         return Optional.of(List.of(sourceElement.fail(message)));
     }
 }

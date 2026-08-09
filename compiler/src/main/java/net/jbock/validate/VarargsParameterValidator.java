@@ -64,8 +64,7 @@ final class VarargsParameterValidator {
             return Optional.of(List.of(sourceElement.fail("In a super command, a catch-all parameter must be defined")));
         }
         if (!tool.isListOfString(parameters.get(0).returnType())) {
-            return Optional.of(List.of(sourceElement.fail("In a super command, the catch-all" +
-                    "must return List<String>")));
+            return Optional.of(List.of(sourceElement.fail("The catch-all parameter in a super command must return List<String>")));
         }
         return Optional.empty();
     }

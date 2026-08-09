@@ -7,18 +7,16 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for a <em>repeatable</em> positional parameter.
- * This will capture the remaining positional parameters,
- * <em>after</em> any {@link Parameter}s have been captured.
- *
- * <p>If none of the annotation attributes are specified, this annotation can be omitted.
+ * Marker annotation for a repeatable or &quot;catch-all&quot; positional parameter.
+ * This will capture the remaining positional parameters
+ * after all other {@link Parameter}s have been captured.
  *
  * <ul>
  *   <li>The annotated method must be {@code abstract} and have an empty argument list.
  *   <li>The annotated method <em>must</em> return {@link java.util.List List&lt;E&gt;},
- *       where {@code E} is a converted type.
- *   <li>There can only be one varargs parameter per command.
- *   <li>Cannot be used in a {@link SuperCommand}.
+ *       where {@code E} is a known type.
+ *   <li>There can be at most one catch-all parameter.
+ *   <li>If no attributes are specified, this annotation can be omitted.
  * </ul>
  *
  * @see Parameter

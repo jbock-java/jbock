@@ -26,15 +26,14 @@ class PositionalTest {
     }
 
     @Test
-    void superSimpleOptional() {
+    void superSimple() {
         JavaFileObject javaFile = fromSource(
-                "@SuperCommand(description = \"y\", descriptionKey = \"y\")",
-                "abstract class Arguments {",
+                "@Command(superCommand = true, description = \"y\", descriptionKey = \"y\")",
+                "interface Arguments {",
                 "",
                 "  @Parameter(index = 0, description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
-                "  abstract Optional<String> a();",
+                "  abstract String a();",
                 "",
-                "  @VarargsParameter",
                 "  abstract List<String> rest();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
@@ -42,21 +41,37 @@ class PositionalTest {
                 .compilesWithoutError();
     }
 
+    @Test
+    void superSimpleOptional() {
+        JavaFileObject javaFile = fromSource(
+                "@Command(superCommand = true, description = \"y\", descriptionKey = \"y\")",
+                "interface Arguments {",
+                "",
+                "  @Parameter(index = 0, description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
+                "  abstract Optional<String> a();",
+                "",
+                "  abstract List<String> rest();",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("In a super command, parameters cannot be optional");
+    }
+
     // TODO move this to SuperCommandTest
     @Test
     void superComplexOptional() {
         JavaFileObject javaFile = fromSource(
-                "@SuperCommand",
-                "abstract class Arguments {",
+                "@Command(superCommand = true)",
+                "interface Arguments {",
                 "",
                 "  @Parameter(index = 0)",
-                "  abstract Optional<String> a();",
+                "  String a();",
                 "",
                 "  @Option(names = \"--b\")",
-                "  abstract Optional<String> b();",
+                "  String b();",
                 "",
-                "  @VarargsParameter",
-                "  abstract List<String> rest();",
+                "  List<String> rest();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
@@ -67,37 +82,34 @@ class PositionalTest {
     @Test
     void missingVarargsParameterInSuperCommand() {
         JavaFileObject javaFile = fromSource(
-                "@SuperCommand",
-                "abstract class Arguments {",
+                "@Command(superCommand = true)",
+                "interface Arguments {",
                 "",
                 "  @Parameter(index = 0)",
-                "  abstract String p();",
+                "  String p();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("At least one @VarargsParameter must be defined" +
-                        " in a @SuperCommand");
+                .withErrorContaining("In a super command, a catch-all parameter must be defined");
     }
 
     // TODO move this to SuperCommandTest
     @Test
     void missingParamSuperCommand() {
         JavaFileObject javaFile = fromSource(
-                "@SuperCommand",
-                "abstract class Arguments {",
+                "@Command(superCommand = true)",
+                "interface Arguments {",
                 "",
                 "  @Option(names = \"--a\")",
-                "  abstract String a();",
+                "  String a();",
                 "",
-                "  @VarargsParameter",
-                "  abstract List<String> rest();",
+                "  List<String> rest();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("At least one @Parameter must be defined" +
-                        " in a @SuperCommand");
+                .withErrorContaining("In a super command, at least one parameter must be defined");
     }
 
     @Test

@@ -6,7 +6,7 @@ import net.jbock.SuperCommand;
 
 import java.util.List;
 
-@SuperCommand
+@Command(superCommand = true)
 interface HelplessSuperArguments {
 
     @Option(names = {"--quiet", "-q"})

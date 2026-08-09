@@ -67,8 +67,8 @@ public @interface Command {
     boolean publicParser() default false;
 
     /**
-     * <p>If {@code true}, there must be at least one non-optional {@link Parameter}, and there must be
-     * a catch-all parameter.
+     * <p>If {@code true}, there must be at least one {@link Parameter}, parameters cannot be optional,
+     * and there must be a catch-all parameter.
      *
      * <p>The generated parser will not recognize the double-dash escape sequence.
      */

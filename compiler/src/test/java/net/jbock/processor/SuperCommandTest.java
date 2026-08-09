@@ -12,36 +12,19 @@ import static net.jbock.processor.Processor.fromSource;
 class SuperCommandTest {
 
     @Test
-    void cannotCombineCommandAndSuperCommand() {
+    void varargsParameterNotListOfStringInSuperCommand() {
         JavaFileObject javaFile = fromSource(
-                "@Command",
-                "@SuperCommand",
+                "@Command(superCommand = true)",
                 "interface Arguments {",
                 "",
                 "  @Parameter(index = 0)",
                 "  String a();",
+                "",
+                "  List<Integer> rest();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("not both");
-    }
-
-    @Test
-    void varargsParameterNotListOfStringInSuperCommand() {
-        JavaFileObject javaFile = fromSource(
-                "@SuperCommand",
-                "abstract class Arguments {",
-                "",
-                "  @Parameter(index = 0)",
-                "  abstract String a();",
-                "",
-                "  @VarargsParameter",
-                "  abstract List<Integer> rest();",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("The @VarargsParameter in a @SuperCommand must return List<String>");
+                .withErrorContaining("The catch-all parameter in a super command must return List<String>");
     }
 }

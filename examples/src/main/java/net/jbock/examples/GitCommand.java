@@ -2,11 +2,11 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Parameter;
-import net.jbock.SuperCommand;
 
 import java.util.List;
 
-@SuperCommand(
+@Command(
+        superCommand = true,
         name = "git",
         description = "Git is software for tracking changes in any set of files.")
 interface GitCommand {
@@ -24,6 +24,7 @@ interface GitCommand {
     @Parameter(index = 0)
     String command();
 
+    // catch-all
     List<String> rest();
 
     // more options...

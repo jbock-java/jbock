@@ -10,9 +10,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * Marker annotation for a java interface
  * that defines a command line API.
  *
- * <p>There must be at least one {@code Parameter}. The {@link VarargsParameter} annotation
- * is not allowed on a super-command.
- *
  * <p>The generated parser will stop parsing after the
  * last {@code Parameter} has been read.
  * The generated methods {@code parse} and {@code parseOrExit}
@@ -20,7 +17,11 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * after the last {@code Parameter}, as an array of strings.
  *
  * <p>The generated parser will not recognize the double-dash escape sequence.
+ *
+ * @deprecated use {@link Command} with {@code superCommand = true}
+ *
  */
+@Deprecated(forRemoval = true)
 @Target(TYPE)
 @Retention(SOURCE)
 public @interface SuperCommand {

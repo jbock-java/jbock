@@ -97,10 +97,6 @@ public static void main(String[] args) {
 
 Some types are converted automatically. See [StandardConverters.java](https://github.com/jbock-java/jbock/blob/master/jbock/src/main/java/net/jbock/contrib/StandardConverters.java).
 
-### Subcommands
-
-The `@SuperCommand` annotation can be used to define a git-like subcommand structure. See [javadoc](https://github.com/jbock-java/jbock/blob/master/jbock/src/main/java/net/jbock/SuperCommand.java).
-
 ### Sample projects
 
 * [jbock-maven-example](https://github.com/jbock-java/jbock-maven-example)

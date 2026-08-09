@@ -128,7 +128,7 @@ public final class SourceElement {
     }
 
     public boolean isSuperCommand() {
-        return command.command.isRight();
+        return command.command.fold(Command::superCommand, r -> true);
     }
 
     public List<Modifier> accessModifiers() {
