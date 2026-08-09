@@ -18,7 +18,7 @@ import static net.jbock.util.ErrTokenType.INVALID_OPTION;
  */
 abstract class SimpleParser implements ParseResult {
 
-    private static final Pattern SUSPICIOUS = Pattern.compile("^-[a-zA-Z0-9]+|^--[a-zA-Z0-9-]+");
+    private static final Pattern SUSPICIOUS = Pattern.compile("^-\\S.*");
 
     private final Map<String, Integer> optionNames;
     private final OptionState[] optionStates;

@@ -23,17 +23,10 @@ class SuperArgumentsTest {
 
     @Test
     void testDoubleEscape() {
-        String[] args = {"-q", "--", "--", "a"};
+        String[] args = {"-q", "word", "--", "a"};
         SuperArguments result = f.parse(args);
+        assertEquals("word", result.command());
         assertEquals(List.of("--", "a"), result.rest());
-    }
-
-    @Test
-    void testEscapeSequenceNotRecognized() {
-        String[] args = {"-q", "--"};
-        SuperArguments result = f.parse(args);
-        assertEquals("--", result.command());
-        assertTrue(result.rest().isEmpty());
     }
 
     @Test

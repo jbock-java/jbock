@@ -15,7 +15,7 @@ class MvArgumentsTest {
 
     @Test
     void invalidOption() {
-        f.assertThat("-aa", "b").fails("Invalid option: -aa");
+        f.assertThat("-a", "b").fails("Invalid option: -a");
     }
 
     @Test
