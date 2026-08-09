@@ -1,5 +1,6 @@
-[![jbock-compiler](https://maven-badges.sml.io/maven-central/io.github.jbock-java/jbock-compiler/badge.svg?color=grey&subject=jbock-compiler)](https://maven-badges.sml.io/maven-central/io.github.jbock-java/jbock-compiler)
-[![jbock](https://maven-badges.sml.io/maven-central/io.github.jbock-java/jbock/badge.svg?subject=jbock)](https://maven-badges.sml.io/maven-central/io.github.jbock-java/jbock)
+[![jbock-compiler](https://img.shields.io/maven-central/v/io.github.jbock-java/jbock-compiler?label=jbock-compiler)](https://central.sonatype.com/artifact/io.github.jbock-java/jbock-compiler)
+[![jbock](https://img.shields.io/maven-central/v/io.github.jbock-java/jbock?label=jbock)](https://central.sonatype.com/artifact/io.github.jbock-java/jbock)
+
 
 jbock is a command line parser, which uses well-known annotation names similar to [JCommander](https://jcommander.org/)
 and [picocli](https://github.com/remkop/picocli).
@@ -9,15 +10,23 @@ which does not use runtime reflection, but generates a custom parser at compile 
 
 ### Quick rundown
 
-Create a Java interface, and add the `@Command` annotation.
-In this so-called *command class*, each non-default method represents a command line option or argument.
-Let's call a non-default method an *option method*.
-Every option method must have "getter signature". It must also be annotated with either
-`@Option`, `@Parameter` or `@VarargsParameter`.
+Choose any name for the java interface which will describe your command line API.
+Add the `@Command` anntation to your command interface, to make the annotation processor aware of it.
 
-An option method must not return `void`.
+Let's call a non-default interface method an *abstract method*.
+Each abstract method in your command interface represents a command line option or argument.
+It must have "getter signature": return something other that `void`, and have an empty parameter list.
+It must also be annotated with either
+`@Option`, `@Parameter` or `@VarargsParameter` (with one exception, see below).
+
 The return types `boolean`, `List<?>` and `Optional<?>` (including `OptionalInt` and such) have special semantics.
 They are used to declare flags, repeable and optional options and parameters, respectively.
+
+> [!TIP]
+> If a method annotated with `@VarargsParameter` exists, it must return a list.
+> There cannot be more than one such method.
+> Any unannotated, list-returning abstract method is also used as a catch-all for extra positional parameters.
+> In other words, the `@VarargsParameter` annotation can be omitted.
 
 Here's an example:
 
