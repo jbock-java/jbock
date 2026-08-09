@@ -1,5 +1,6 @@
 package net.jbock.annotated;
 
+import net.jbock.common.Constants;
 import net.jbock.common.SnakeName;
 
 import javax.lang.model.element.ExecutableElement;
@@ -9,7 +10,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
 public final class VarargsParameter extends Item {
@@ -19,11 +19,11 @@ public final class VarargsParameter extends Item {
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
-    private final net.jbock.VarargsParameter parameter;
+    private final Optional<net.jbock.VarargsParameter> parameter;
 
     VarargsParameter(
             ExecutableElement method,
-            net.jbock.VarargsParameter parameter,
+            Optional<net.jbock.VarargsParameter> parameter,
             String enumName) {
         super(method, enumName);
         this.parameter = parameter;
@@ -31,16 +31,16 @@ public final class VarargsParameter extends Item {
 
     @Override
     public Optional<String> descriptionKey() {
-        return optionalString(parameter.descriptionKey());
+        return parameter.map(net.jbock.VarargsParameter::descriptionKey).flatMap(Constants::optionalString);
     }
 
     @Override
     public List<String> description() {
-        return List.of(parameter.description());
+        return parameter.map(net.jbock.VarargsParameter::description).map(List::of).orElse(List.of());
     }
 
     @Override
-    Annotation annotation() {
+    Optional<? extends Annotation> annotation() {
         return parameter;
     }
 
@@ -60,6 +60,6 @@ public final class VarargsParameter extends Item {
     }
 
     private Optional<String> parameterParamLabel() {
-        return optionalString(parameter.paramLabel());
+        return parameter.map(net.jbock.VarargsParameter::paramLabel).flatMap(Constants::optionalString);
     }
 }

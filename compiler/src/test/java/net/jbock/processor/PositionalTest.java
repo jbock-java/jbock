@@ -226,7 +226,7 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("duplicate @VarargsParameter annotation");
+                .withErrorContaining("more than one catch-all parameter");
     }
 
     @Test

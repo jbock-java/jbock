@@ -3,7 +3,6 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
-import net.jbock.VarargsParameter;
 
 import java.util.List;
 
@@ -16,6 +15,5 @@ interface EscapeSequenceCommand {
     @Option(names = "--bare")
     boolean bare();
 
-    @VarargsParameter
     List<String> remainingArgs();
 }

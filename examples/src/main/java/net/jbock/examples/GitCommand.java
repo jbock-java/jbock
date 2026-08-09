@@ -3,7 +3,6 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Parameter;
 import net.jbock.SuperCommand;
-import net.jbock.VarargsParameter;
 
 import java.util.List;
 
@@ -17,7 +16,6 @@ interface GitCommand {
             description = "Add file contents to the index",
             parseOrExitMethodAcceptsList = true)
     interface AddCommand {
-        @VarargsParameter
         List<String> pathspec();
 
         // more parameters and options...
@@ -26,7 +24,6 @@ interface GitCommand {
     @Parameter(index = 0)
     String command();
 
-    @VarargsParameter
     List<String> rest();
 
     // more options...

@@ -40,8 +40,8 @@ public final class Parameter extends Item {
     }
 
     @Override
-    Annotation annotation() {
-        return parameter;
+    Optional<? extends Annotation> annotation() {
+        return Optional.ofNullable(parameter);
     }
 
     @Override

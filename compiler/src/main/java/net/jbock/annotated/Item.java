@@ -31,7 +31,11 @@ public abstract class Item {
     private static final Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
     private final Supplier<Optional<TypeElement>> converter = memoize(() -> {
-        String canonicalName = annotation().annotationType().getCanonicalName();
+        Optional<? extends Annotation> annotation = annotation();
+        if (annotation.isEmpty()) {
+            return Optional.empty();
+        }
+        String canonicalName = annotation.orElseThrow().annotationType().getCanonicalName();
         AnnotationMirror annotationMirror = method().getAnnotationMirrors().stream()
                 .filter(mirror -> AS_TYPE_ELEMENT.visit(mirror.getAnnotationType().asElement())
                         .map(TypeElement::getQualifiedName)
@@ -54,8 +58,12 @@ public abstract class Item {
 
     static Item create(
             ExecutableElement method,
-            Annotation annotation,
+            Optional<Annotation> anno,
             String enumName) {
+        if (anno.isEmpty()) {
+            return new VarargsParameter(method, Optional.empty(), enumName);
+        }
+        Annotation annotation = anno.orElseThrow();
         if (annotation instanceof net.jbock.Option) {
             return new Option(method, (net.jbock.Option) annotation, enumName);
         }
@@ -63,7 +71,7 @@ public abstract class Item {
             return new Parameter(method, (net.jbock.Parameter) annotation, enumName);
         }
         if (annotation instanceof net.jbock.VarargsParameter) {
-            return new VarargsParameter(method, (net.jbock.VarargsParameter) annotation, enumName);
+            return new VarargsParameter(method, Optional.of((net.jbock.VarargsParameter) annotation), enumName);
         }
         throw new AssertionError();
     }
@@ -78,7 +86,7 @@ public abstract class Item {
 
     public abstract List<String> description();
 
-    abstract Annotation annotation();
+    abstract Optional<? extends Annotation> annotation();
 
     public final ExecutableElement method() {
         return method;

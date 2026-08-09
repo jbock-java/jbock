@@ -3,7 +3,6 @@ package net.jbock.examples;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.SuperCommand;
-import net.jbock.VarargsParameter;
 
 import java.util.List;
 
@@ -16,6 +15,5 @@ interface HelplessSuperArguments {
     @Parameter(index = 0)
     String command();
 
-    @VarargsParameter
     List<String> rest();
 }

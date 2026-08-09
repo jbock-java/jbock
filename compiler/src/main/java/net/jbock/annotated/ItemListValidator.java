@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.allFailures;
-import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.element.NestingKind.MEMBER;
@@ -55,7 +54,7 @@ final class ItemListValidator {
                 method.method().getParameters().stream()
                         .map(VariableElement::getSimpleName)
                         .map(Name::toString)
-                        .collect(toList())));
+                        .toList()));
     }
 
     private static Optional<ValidationFailure> checkAccessibleReturnType(Item item) {

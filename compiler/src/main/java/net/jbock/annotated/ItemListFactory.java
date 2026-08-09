@@ -10,6 +10,7 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 
 import static io.jbock.util.Either.left;
 import static io.jbock.util.Eithers.allFailures;
@@ -48,14 +49,15 @@ final class ItemListFactory {
         return uniqueNameSet.getUniqueName(enumName);
     }
 
-    private static Either<ValidationFailure, Annotation> getMethodAnnotation(
+    private static Either<ValidationFailure, Optional<Annotation>> getMethodAnnotation(
             ExecutableElement method) {
         return methodLevelAnnotations().stream()
                 .map(method::getAnnotation)
                 .filter(Objects::nonNull)
+                .map(Optional::<Annotation>of)
                 .findFirst()
-                .<Either<ValidationFailure, Annotation>>map(Either::right)
-                .orElseGet(() -> left(missingAnnotationError(method)));
+                .<Either<ValidationFailure, Optional<Annotation>>>map(Either::right)
+                .orElseGet(() -> Either.right(Optional.empty()));
     }
 
     private static ValidationFailure missingAnnotationError(

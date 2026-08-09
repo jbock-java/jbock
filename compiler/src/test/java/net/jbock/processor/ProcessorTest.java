@@ -560,18 +560,17 @@ class ProcessorTest {
     void parameterizedUnannotated() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
-                "abstract class Arguments {",
+                "interface Arguments {",
                 "",
                 "  @Option(names = \"--xoxo\")",
-                "  abstract int goodMethod();",
+                "  int goodMethod();",
                 "",
-                "  abstract void parameterized(String foobar);",
+                "  void parameterized(String foobar);",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("missing annotation: add one of these annotations:" +
-                        " [Option, Parameter, VarargsParameter] to method 'parameterized'");
+                .withErrorContaining("abstract method 'parameterized' may not have any parameters");
     }
 
     @Test
@@ -657,9 +656,7 @@ class ProcessorTest {
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("missing annotation: add one of these annotations:" +
-                        " [Option, Parameter, VarargsParameter] to method 'a'");
+                .compilesWithoutError();
     }
 
     @Test

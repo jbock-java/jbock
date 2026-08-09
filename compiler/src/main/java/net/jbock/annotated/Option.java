@@ -70,8 +70,8 @@ public final class Option extends Item {
     }
 
     @Override
-    Annotation annotation() {
-        return option;
+    Optional<? extends Annotation> annotation() {
+        return Optional.ofNullable(option);
     }
 
     @Override

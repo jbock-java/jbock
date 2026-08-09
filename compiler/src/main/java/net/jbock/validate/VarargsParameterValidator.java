@@ -47,7 +47,7 @@ final class VarargsParameterValidator {
             List<VarargsParameter> parameters) {
         return parameters.stream()
                 .skip(1)
-                .map(param -> param.fail("duplicate @" + net.jbock.VarargsParameter.class.getSimpleName() + " annotation"))
+                .map(param -> param.fail("more than one catch-all parameter"))
                 .collect(toOptionalList())
                 .<Either<List<ValidationFailure>, List<VarargsParameter>>>map(Either::left)
                 .orElseGet(() -> right(parameters));
