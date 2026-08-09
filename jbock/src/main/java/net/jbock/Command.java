@@ -65,4 +65,12 @@ public @interface Command {
      * @return {@code true} to generate a public parser class
      */
     boolean publicParser() default false;
+
+    /**
+     * <p>If {@code true}, there must be at least one non-optional {@link Parameter}, and there must be
+     * a catch-all parameter.
+     *
+     * <p>The generated parser will not recognize the double-dash escape sequence.
+     */
+    boolean superCommand() default false;
 }

@@ -3,8 +3,6 @@ package net.jbock.convert.map;
 import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.annotated.Item;
-import net.jbock.common.SafeElements;
-import net.jbock.common.SafeTypes;
 import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
@@ -23,16 +21,14 @@ import static net.jbock.common.TypeTool.AS_DECLARED;
 
 public final class ConverterValidator {
 
-    private final SafeTypes types;
-    private final SafeElements elements;
+    private final TypeTool tool;
     private final MappingFactory.Factory mappingFactoryFactory;
 
     @Inject
     public ConverterValidator(
             TypeTool tool,
             MappingFactory.Factory mappingFactoryFactory) {
-        this.types = tool.types();
-        this.elements = tool.elements();
+        this.tool = tool;
         this.mappingFactoryFactory = mappingFactoryFactory;
     }
 
@@ -63,7 +59,7 @@ public final class ConverterValidator {
     Optional<Either<ValidationFailure, MappingFactory<M>>> checkSuppliedConverter(
             TypeElement converter, Match<M> match) {
         return converter.getInterfaces().stream()
-                .filter(inter -> isSameErasure(inter, Supplier.class))
+                .filter(inter -> tool.isSameErasure(inter, Supplier.class))
                 .map(AS_DECLARED::visit)
                 .flatMap(Optional::stream)
                 .findFirst()
@@ -79,7 +75,7 @@ public final class ConverterValidator {
             return left(match.fail(converterRawType(supplierType)));
         }
         return AS_DECLARED.visit(supplierType.getTypeArguments().get(0))
-                .filter(typeArgument -> isSameErasure(typeArgument, StringConverter.class))
+                .filter(typeArgument -> tool.isSameErasure(typeArgument, StringConverter.class))
                 .<Either<ValidationFailure, DeclaredType>>map(Either::right)
                 .orElseGet(() -> left(match.fail(errorConverterType())))
                 .flatMap(suppliedType -> handleConverter(converter, match, suppliedType, true));
@@ -89,17 +85,10 @@ public final class ConverterValidator {
     Optional<Either<ValidationFailure, MappingFactory<M>>> checkDirectConverter(
             TypeElement converter, Match<M> match) {
         return Optional.of(converter.getSuperclass())
-                .filter(inter -> isSameErasure(inter, StringConverter.class))
+                .filter(inter -> tool.isSameErasure(inter, StringConverter.class))
                 .flatMap(AS_DECLARED::visit)
                 .map(converterType ->
                         handleConverter(converter, match, converterType, false));
-    }
-
-    private boolean isSameErasure(TypeMirror x, Class<?> y) {
-        return elements.getTypeElement(y.getCanonicalName())
-                .map(TypeElement::asType)
-                .map(type -> types.isSameType(types.erasure(x), types.erasure(type)))
-                .orElse(false);
     }
 
     private String errorConverterType() {

@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.element.NestingKind.MEMBER;
@@ -154,7 +153,7 @@ public final class Util {
             List<Class<? extends Annotation>> annotations) {
         List<Class<? extends Annotation>> present = annotations.stream()
                 .filter(ann -> element.getAnnotation(ann) != null)
-                .collect(toList());
+                .toList();
         if (present.size() >= 2) {
             return Optional.of(new ValidationFailure("annotate with either @" + present.get(0).getSimpleName() +
                     " or @" + present.get(1).getSimpleName() + ", but not both", element));

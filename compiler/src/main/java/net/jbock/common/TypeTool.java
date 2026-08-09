@@ -1,6 +1,7 @@
 package net.jbock.common;
 
 import io.jbock.simple.Inject;
+import net.jbock.convert.match.OptionalPrimitive;
 
 import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.Element;
@@ -79,6 +80,30 @@ public final class TypeTool {
      */
     public boolean isSameType(TypeMirror mirror, Class<?> cl) {
         return isSameType(mirror, cl.getCanonicalName());
+    }
+
+    public boolean isOptionalish(TypeMirror mirror) {
+        Optional<DeclaredType> visit = AS_DECLARED.visit(mirror);
+        if (visit.isEmpty()) {
+            return false;
+        }
+        DeclaredType declaredType = visit.orElseThrow();
+        for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
+            if (isSameType(declaredType, optionalPrimitive.type())) {
+                return true;
+            }
+        }
+        if (declaredType.getTypeArguments().isEmpty()) {
+            return false;
+        }
+        return isSameErasure(declaredType, Optional.class);
+    }
+
+    public boolean isSameErasure(TypeMirror x, Class<?> y) {
+        return elements.getTypeElement(y.getCanonicalName())
+                .map(TypeElement::asType)
+                .map(type -> types.isSameType(types.erasure(x), types.erasure(type)))
+                .orElse(false);
     }
 
     public boolean isListOfString(TypeMirror mirror) {

@@ -6,7 +6,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
-enum OptionalPrimitive {
+public enum OptionalPrimitive {
 
     INT(OptionalInt.class, Integer.class),
     LONG(OptionalLong.class, Long.class),
@@ -24,7 +24,7 @@ enum OptionalPrimitive {
         return CodeBlock.of(".map($1T::of).orElse($1T.empty())", type);
     }
 
-    String type() {
+    public String type() {
         return type.getCanonicalName();
     }
 
