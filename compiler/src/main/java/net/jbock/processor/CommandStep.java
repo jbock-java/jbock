@@ -5,7 +5,6 @@ import com.palantir.javapoet.TypeSpec;
 import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.Command;
-import net.jbock.SuperCommand;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.validate.ValidateComponent;
@@ -23,12 +22,11 @@ import java.util.stream.Collectors;
 
 import static io.jbock.auto.common.BasicAnnotationProcessor.Step;
 import static io.jbock.util.Either.right;
-import static java.util.stream.Collectors.toSet;
 import static net.jbock.common.Annotations.typeLevelAnnotations;
 import static net.jbock.common.Util.checkNoDuplicateAnnotations;
 
 /**
- * This step handles the {@link Command} and {@link SuperCommand} annotations.
+ * This step handles the {@link Command} annotation.
  * It performs validation and source generation.
  */
 final class CommandStep implements Step {
@@ -52,9 +50,7 @@ final class CommandStep implements Step {
 
     @Override
     public Set<String> annotations() {
-        return typeLevelAnnotations().stream()
-                .map(Class::getCanonicalName)
-                .collect(toSet());
+        return Set.of(Command.class.getCanonicalName());
     }
 
     @Override

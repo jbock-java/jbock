@@ -4,7 +4,6 @@ import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.annotated.Items;
 import net.jbock.annotated.Parameter;
-import net.jbock.annotated.VarargsParameter;
 import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;

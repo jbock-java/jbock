@@ -3,7 +3,6 @@ package net.jbock.processor;
 import io.jbock.auto.common.BasicAnnotationProcessor.Step;
 import io.jbock.simple.Inject;
 import net.jbock.Command;
-import net.jbock.SuperCommand;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 
@@ -69,15 +68,14 @@ final class MethodStep implements Step {
 
     private Optional<ValidationFailure> validateCommandAnnotationPresent(ExecutableElement method) {
         Element enclosingElement = method.getEnclosingElement();
-        if (enclosingElement.getAnnotation(Command.class) != null
-                || enclosingElement.getAnnotation(SuperCommand.class) != null) {
+        if (enclosingElement.getAnnotation(Command.class) != null) {
             return Optional.empty();
         }
         String enclosingElementKind = enclosingElement.getKind() == ElementKind.INTERFACE ?
                 "interface" : "abstract class";
         return Optional.of(new ValidationFailure("missing command annotation: " +
                 enclosingElementKind + " '" + enclosingElement.getSimpleName() +
-                "' must be annotated with " + Command.class.getCanonicalName() + " or " + SuperCommand.class.getCanonicalName(),
+                "' must be annotated with " + Command.class.getCanonicalName(),
                 enclosingElement));
     }
 

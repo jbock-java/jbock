@@ -3,7 +3,6 @@ package net.jbock.common;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
-import net.jbock.SuperCommand;
 import net.jbock.VarargsParameter;
 
 import java.lang.annotation.Annotation;
@@ -16,6 +15,6 @@ public class Annotations {
     }
 
     public static List<Class<? extends Annotation>> typeLevelAnnotations() {
-        return List.of(Command.class, SuperCommand.class);
+        return List.of(Command.class);
     }
 }

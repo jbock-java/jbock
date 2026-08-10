@@ -2,9 +2,7 @@ package net.jbock.processor;
 
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.TypeName;
-import io.jbock.util.Either;
 import net.jbock.Command;
-import net.jbock.SuperCommand;
 import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;
 
@@ -12,11 +10,10 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static io.jbock.util.Either.left;
-import static io.jbock.util.Either.right;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
@@ -30,9 +27,6 @@ public final class SourceElement {
 
     private final Supplier<String> programName = memoize(() -> optionalString(command().getName())
             .orElseGet(() -> SnakeName.create(command().typeElement.getSimpleName()).snake('-')));
-
-    private final Supplier<ClassName> optionEnumType = memoize(() ->
-            generatedClass().nestedClass("Opt"));
 
     private final Supplier<Optional<String>> descriptionKey = memoize(() ->
             optionalString(command().getDescriptionKey()));
@@ -57,63 +51,44 @@ public final class SourceElement {
     }
 
     private static class AnyCommand {
-        final Either<Command, SuperCommand> command;
+        final Command command;
         final TypeElement typeElement;
 
         AnyCommand(TypeElement typeElement) {
             this.typeElement = typeElement;
-            Command command = typeElement.getAnnotation(Command.class);
-            this.command = command != null ?
-                    left(command) :
-                    right(typeElement.getAnnotation(SuperCommand.class));
+            this.command = Objects.requireNonNull(typeElement.getAnnotation(Command.class));
         }
 
         String getDescriptionKey() {
-            return command.fold(
-                    Command::descriptionKey,
-                    SuperCommand::descriptionKey);
+            return command.descriptionKey();
         }
 
         String getName() {
-            return command.fold(
-                    Command::name,
-                    SuperCommand::name);
+            return command.name();
         }
 
         boolean isPublicParser() {
-            return command.fold(
-                    Command::publicParser,
-                    SuperCommand::publicParser);
+            return command.publicParser();
         }
 
         boolean isSkipGeneratingParseOrExitMethod() {
-            return command.fold(
-                    Command::skipGeneratingParseOrExitMethod,
-                    SuperCommand::skipGeneratingParseOrExitMethod);
+            return command.skipGeneratingParseOrExitMethod();
         }
 
         boolean isParseOrExitMethodAcceptsList() {
-            return command.fold(
-                    Command::parseOrExitMethodAcceptsList,
-                    SuperCommand::parseOrExitMethodAcceptsList);
+            return command.parseOrExitMethodAcceptsList();
         }
 
         boolean isEnableAtFileExpansion() {
-            return command.fold(
-                    Command::enableAtFileExpansion,
-                    SuperCommand::enableAtFileExpansion);
+            return command.enableAtFileExpansion();
         }
 
         boolean skipHelp() {
-            return command.fold(
-                    Command::skipHelp,
-                    s -> true);
+            return command.skipHelp();
         }
 
         String[] getDescription() {
-            return command.fold(
-                    Command::description,
-                    SuperCommand::description);
+            return command.description();
         }
     }
 
@@ -134,7 +109,7 @@ public final class SourceElement {
     }
 
     public boolean isSuperCommand() {
-        return command.command.fold(Command::superCommand, r -> true);
+        return command.command.superCommand();
     }
 
     public List<Modifier> accessModifiers() {
@@ -143,10 +118,6 @@ public final class SourceElement {
 
     public ClassName generatedClass() {
         return generatedClass.get();
-    }
-
-    public ClassName optionEnumType() {
-        return optionEnumType.get();
     }
 
     public boolean isInterface() {
