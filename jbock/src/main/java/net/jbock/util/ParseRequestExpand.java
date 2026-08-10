@@ -1,16 +1,14 @@
 package net.jbock.util;
 
-import io.jbock.util.Either;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static io.jbock.util.Either.left;
-import static io.jbock.util.Either.right;
-import static io.jbock.util.Eithers.firstFailure;
+import static net.jbock.util.Either.firstFailure;
+import static net.jbock.util.Either.left;
+import static net.jbock.util.Either.right;
 
 final class ParseRequestExpand extends ParseRequest {
 
@@ -23,16 +21,20 @@ final class ParseRequestExpand extends ParseRequest {
     }
 
     @Override
-    public Either<? extends AtFileError, List<String>> expand() {
+    public Either<AtFileError, List<String>> expand() {
         try {
             List<String> lines = Files.readAllLines(path);
             return readAtLines(lines)
-                    .mapLeft(r -> new AtFileSyntaxError(path, r.number, r.lineResult.message()))
-                    .map(atLines -> {
-                        List<String> atLinesWithRest = new ArrayList<>(atLines);
-                        atLinesWithRest.addAll(args);
-                        return atLinesWithRest;
-                    });
+                    .fold(
+                            numberedLineResult -> Either.left(
+                                    new AtFileSyntaxError(path, numberedLineResult.number,
+                                            numberedLineResult.lineResult.message())),
+                            atLines -> {
+                                List<String> atLinesWithRest = new ArrayList<>(atLines.size() + args.size());
+                                atLinesWithRest.addAll(atLines);
+                                atLinesWithRest.addAll(args);
+                                return Either.right(atLinesWithRest);
+                            });
         } catch (Exception e) {
             return left(new AtFileReadError(e, path));
         }
@@ -175,15 +177,11 @@ final class ParseRequestExpand extends ParseRequest {
     }
 
     private char escapeValue(char c) {
-        switch (c) {
-            case 'n':
-                return '\n';
-            case 'r':
-                return '\r';
-            case 't':
-                return '\t';
-            default:
-                return c;
-        }
+        return switch (c) {
+            case 'n' -> '\n';
+            case 'r' -> '\r';
+            case 't' -> '\t';
+            default -> c;
+        };
     }
 }

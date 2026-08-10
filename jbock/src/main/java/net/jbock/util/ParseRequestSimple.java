@@ -1,10 +1,8 @@
 package net.jbock.util;
 
-import io.jbock.util.Either;
-
 import java.util.List;
 
-import static io.jbock.util.Either.right;
+import static net.jbock.util.Either.right;
 
 final class ParseRequestSimple extends ParseRequest {
 

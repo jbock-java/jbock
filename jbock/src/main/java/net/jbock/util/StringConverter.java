@@ -1,11 +1,9 @@
 package net.jbock.util;
 
-import io.jbock.util.Either;
-
 import java.util.function.Function;
 
-import static io.jbock.util.Either.left;
-import static io.jbock.util.Either.right;
+import static net.jbock.util.Either.left;
+import static net.jbock.util.Either.right;
 
 /**
  * Base class for a converter that converts a command line token.

@@ -3,8 +3,7 @@ package net.jbock.common;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
-import io.jbock.util.Either;
-import io.jbock.util.Eithers;
+import net.jbock.util.Either;
 
 import java.util.List;
 import java.util.Map;
@@ -19,8 +18,6 @@ public final class Constants {
     public static final TypeName LIST_OF_STRING = ParameterizedTypeName.get(ClassName.get(List.class), STRING);
 
     public static final ClassName EITHER = ClassName.get(Either.class);
-
-    public static final ClassName EITHERS = ClassName.get(Eithers.class);
 
     public static TypeName mapOf(TypeName keyType, TypeName valueType) {
         return ParameterizedTypeName.get(ClassName.get(Map.class), keyType, valueType);

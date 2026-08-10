@@ -1,8 +1,8 @@
 package net.jbock.examples.fixture;
 
-import io.jbock.util.Either;
 import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.model.CommandModel;
+import net.jbock.util.Either;
 import net.jbock.util.ParsingFailed;
 import org.junit.jupiter.api.Assertions;
 
@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -125,10 +124,12 @@ public final class ParserTestFixture<E> {
 
         public <V> AssertionBuilder<E> has(Function<E, V> getter, V expectation) {
             Either<ParsingFailed, E> parsed = getParsed();
-            assertTrue(parsed.isRight(), "Parsing was not successful");
-            parsed.getRight().ifPresent(r -> {
+            parsed.fold(l -> {
+                throw new RuntimeException("Parsing failed");
+            }, r -> {
                 V result = getter.apply(r);
                 Assertions.assertEquals(expectation, result);
+                return r;
             });
             return this;
         }
@@ -139,14 +140,15 @@ public final class ParserTestFixture<E> {
 
         private void fails(Predicate<String> messageTest) {
             Either<ParsingFailed, E> result = getParsed();
-            assertTrue(result.isLeft());
-            result.getLeft()
-                    .ifPresent(hasMessage -> {
-                        boolean success = messageTest.test(hasMessage.message());
-                        if (!success) {
-                            Assertions.fail("Assertion failed, message: " + hasMessage.message());
-                        }
-                    });
+            result.fold(l -> {
+                boolean success = messageTest.test(l.message());
+                if (!success) {
+                    Assertions.fail("Assertion failed, message: " + l.message());
+                }
+                return l;
+            }, r -> {
+                throw new RuntimeException("expected failure but found " + r);
+            });
         }
     }
 

@@ -1,7 +1,5 @@
 package net.jbock.util;
 
-import io.jbock.util.Either;
-
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -33,7 +31,7 @@ public abstract class ParseRequest {
     }
 
     public static ParseRequest from(List<String> args) {
-        if (args.size() >= 1
+        if (!args.isEmpty()
                 && args.get(0).length() >= 2
                 && args.get(0).startsWith("@")) {
             String fileName = args.get(0).substring(1);

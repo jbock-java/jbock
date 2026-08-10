@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.common.Constants.EITHERS;
+import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.writing.CodeBlocks.joinByNewline;
 
@@ -116,7 +116,7 @@ final class CreateImplMethod extends HasCommandRepresentation {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.rest()", result()));
         code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
-        code.add(CodeBlock.of(".collect($T.firstFailure())", EITHERS));
+        code.add(CodeBlock.of(".collect($T.firstFailure())", EITHER));
         code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters().size()));
         return joinByNewline(code);
     }
@@ -134,7 +134,7 @@ final class CreateImplMethod extends HasCommandRepresentation {
                         orElseThrowConverterError(ItemType.OPTION, i));
             case OPTIONAL:
                 return List.of(
-                        CodeBlock.of(".collect($T.firstFailure())", EITHERS),
+                        CodeBlock.of(".collect($T.firstFailure())", EITHER),
                         orElseThrowConverterError(ItemType.OPTION, i),
                         CodeBlock.of(".stream().findAny()"));
             default: {
@@ -142,7 +142,7 @@ final class CreateImplMethod extends HasCommandRepresentation {
                     throw new AssertionError();
                 }
                 return List.of(
-                        CodeBlock.of(".collect($T.firstFailure())", EITHERS),
+                        CodeBlock.of(".collect($T.firstFailure())", EITHER),
                         orElseThrowConverterError(ItemType.OPTION, i));
             }
         }
@@ -159,7 +159,7 @@ final class CreateImplMethod extends HasCommandRepresentation {
         }
         return List.of(
                 CodeBlock.of(".stream()"),
-                CodeBlock.of(".collect($T.firstFailure())", EITHERS),
+                CodeBlock.of(".collect($T.firstFailure())", EITHER),
                 orElseThrowConverterError(ItemType.PARAMETER, i),
                 CodeBlock.of(".stream().findAny()"));
     }

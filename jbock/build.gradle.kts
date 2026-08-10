@@ -29,7 +29,6 @@ repositories {
 }
 
 dependencies {
-  api("io.github.jbock-java:either:1.5.2")
   testImplementation(platform("org.junit:junit-bom:6.1.2"))
   testImplementation("org.junit.jupiter:junit-jupiter")
   testImplementation("org.mockito:mockito-core:5.23.0")

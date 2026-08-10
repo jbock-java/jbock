@@ -7,7 +7,6 @@
 module net.jbock {
 
     requires transitive java.compiler;
-    requires transitive io.jbock.util;
 
     exports net.jbock;
     exports net.jbock.util;

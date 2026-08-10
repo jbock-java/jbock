@@ -1,8 +1,8 @@
 package net.jbock.examples;
 
-import io.jbock.util.Either;
 import net.jbock.examples.fixture.ParserTestFixture;
 import net.jbock.util.ConverterReturnedNull;
+import net.jbock.util.Either;
 import net.jbock.util.ErrConvert;
 import net.jbock.util.ParsingFailed;
 import org.junit.jupiter.api.Test;
@@ -10,8 +10,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class ComplicatedMapperArgumentsTest {
 
@@ -35,10 +36,14 @@ class ComplicatedMapperArgumentsTest {
         Either<ParsingFailed, ComplicatedMapperArguments> parsed = ComplicatedMapperArgumentsParser.parse(List.of(
                 "-N", "12",
                 "--date", "2020-01-10"));
-        assertTrue(parsed.getLeft().isPresent());
-        ParsingFailed parsingFailed = parsed.getLeft().get();
-        assertTrue(parsingFailed instanceof ErrConvert);
-        ErrConvert errConvert = (ErrConvert) parsingFailed;
-        assertTrue(errConvert.converterFailure() instanceof ConverterReturnedNull);
+        parsed.fold(l -> {
+            assertInstanceOf(ErrConvert.class, l);
+            ErrConvert errConvert = (ErrConvert) l;
+            assertInstanceOf(ConverterReturnedNull.class, errConvert.converterFailure());
+            return l;
+        }, r -> {
+            fail("left expected");
+            return r;
+        });
     }
 }

@@ -12,7 +12,7 @@ import net.jbock.model.CommandModel;
  * in client code. It may be removed without warning in future
  * releases.
  */
-public abstract class ExFailure extends Exception {
+public abstract class ExFailure extends RuntimeException {
 
     /**
      * Converts this exception to a non-exceptional failure object.

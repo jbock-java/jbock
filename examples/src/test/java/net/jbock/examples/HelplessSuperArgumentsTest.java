@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
-import io.jbock.util.Either;
 import net.jbock.examples.fixture.ParserTestFixture;
+import net.jbock.util.Either;
 import net.jbock.util.ParsingFailed;
 import org.junit.jupiter.api.Test;
 

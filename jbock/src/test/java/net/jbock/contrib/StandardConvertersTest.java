@@ -1,12 +1,13 @@
 package net.jbock.contrib;
 
-import io.jbock.util.Either;
 import net.jbock.util.ConverterFailure;
+import net.jbock.util.Either;
 import net.jbock.util.StringConverter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class StandardConvertersTest {
 
@@ -21,6 +22,12 @@ class StandardConvertersTest {
     void intConverterWorksAsExpected() {
         StringConverter<Integer> conv = StandardConverters.asInteger();
         Either<ConverterFailure, Integer> result = conv.apply("3");
-        assertEquals(Either.right(3), result);
+        result.fold(l -> {
+            fail("expecting right");
+            return l;
+        }, r -> {
+            assertEquals(3, r);
+            return r;
+        });
     }
 }

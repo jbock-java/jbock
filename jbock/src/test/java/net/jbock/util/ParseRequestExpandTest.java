@@ -1,6 +1,5 @@
 package net.jbock.util;
 
-import io.jbock.util.Either;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -29,8 +28,8 @@ class ParseRequestExpandTest {
                 "");
         List<String> tokens = read(lines);
         assertEquals(List.of(
-                "1",
-                "2\" \\3  4 "),
+                        "1",
+                        "2\" \\3  4 "),
                 tokens);
     }
 
@@ -147,7 +146,6 @@ class ParseRequestExpandTest {
         Path path = Mockito.mock(Path.class);
         Either<ParseRequestExpand.NumberedLineResult, List<String>> either = new ParseRequestExpand(path, List.of())
                 .readAtLines(lines);
-        assertTrue(either.isRight());
         return either.fold(l -> {
             throw new RuntimeException("expecting Right");
         }, Function.identity());
@@ -157,7 +155,6 @@ class ParseRequestExpandTest {
         Path path = Mockito.mock(Path.class);
         Either<ParseRequestExpand.NumberedLineResult, List<String>> either = new ParseRequestExpand(path, List.of())
                 .readAtLines(lines);
-        assertTrue(either.isLeft());
         return either.fold(Function.identity(), l -> {
             throw new RuntimeException("expecting Left");
         });
