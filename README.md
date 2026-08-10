@@ -23,10 +23,9 @@ The return types `boolean`, `List<?>` and `Optional<?>` (including `OptionalInt`
 They are used to declare flags, repeable and optional options and parameters, respectively.
 
 > [!TIP]
-> If a method annotated with `@VarargsParameter` exists, it must return a list.
+> If a method is annotated with `@VarargsParameter`, it must return a list.
 > There cannot be more than one such method.
-> Any unannotated, list-returning abstract method is also used as a catch-all for extra positional parameters.
-> In other words, the `@VarargsParameter` annotation can be omitted.
+> If no attributes are specified, the `@VarargsParameter` annotation can be omitted.
 
 Here's an example:
 

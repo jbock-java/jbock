@@ -28,6 +28,8 @@ if ! ./gradlew clean -Pversion=${VERSION} compiler:publishToMavenCentral; then
   die "build failed"
 fi
 
+echo "Now go to https://central.sonatype.com"
+
 read -r -p "Upload successful. Also tag? [y/N] "
 if [[ "$REPLY" == [Yy]* ]]; then
   git tag "${VERSION}"
