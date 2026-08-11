@@ -26,7 +26,7 @@ repositories {
 dependencies {
   var jbock = project(":jbock")
   var simple_component = "io.github.jbock-java:simple-component:1.024"
-  implementation("io.github.jbock-java:either:1.5.2")
+  implementation("io.github.jbock-java:either:1.5.3")
   implementation("com.palantir.javapoet:javapoet:0.18.0")
   implementation("io.github.jbock-java:auto-common:1.2.3")
   implementation(jbock)
