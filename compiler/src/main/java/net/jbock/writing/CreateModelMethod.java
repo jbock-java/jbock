@@ -67,8 +67,8 @@ final class CreateModelMethod extends HasCommandRepresentation {
             code.add(CodeBlock.of("$T.nullary()", net.jbock.model.Option.class));
         } else {
             code.add(CodeBlock.of("$T.unary($T.$L)", net.jbock.model.Option.class, Multiplicity.class, m.multiplicity().name()));
+            code.add(CodeBlock.of(".withParamLabel($S)", m.paramLabel()));
         }
-        code.add(CodeBlock.of(".withParamLabel($S)", m.paramLabel()));
         m.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
         code.add(CodeBlock.of(".withNames($T.of($L))", List.class, joinByComma(names)));
         for (String line : m.item().description()) {

@@ -32,7 +32,7 @@ public final class Option extends Item {
     }
 
     /**
-     * Creates a builder instance.
+     * Creates a builder for a mode flag.
      *
      * @return empty builder
      */
@@ -41,7 +41,7 @@ public final class Option extends Item {
     }
 
     /**
-     * Creates a builder instance.
+     * Creates a builder for a unary option.
      *
      * @param multiplicity multiplicity
      * @return empty builder
@@ -134,14 +134,10 @@ public final class Option extends Item {
     @Override
     public String namesOverview() {
         String sample = String.join(", ", names);
-        switch (arity) {
-            case NULLARY:
-                return sample;
-            case UNARY:
-                return sample + ' ' + paramLabel();
-            default:
-                throw new AssertionError("all cases exhausted");
-        }
+        return switch (arity) {
+            case NULLARY -> sample;
+            case UNARY -> sample + ' ' + paramLabel();
+        };
     }
 
     @Override

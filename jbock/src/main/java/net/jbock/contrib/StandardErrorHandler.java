@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.requireNonNullElse;
+
 /**
  * A convenience class that performs standard error handling,
  * like printing error messages and printing the usage documentation.
@@ -37,10 +39,11 @@ public final class StandardErrorHandler {
 
         private PrintStream out = System.err;
         private int terminalWidth = 80;
-        private boolean ansi = true;
+        private boolean ansi;
         private Map<String, String> messages = Collections.emptyMap();
 
         private Builder() {
+            ansi = requireNonNullElse(System.getenv("NO_COLOR"), "").isEmpty();
         }
 
         /**

@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-public interface Either<L, R> {
+public sealed interface Either<L, R> permits Either.Left, Either.Right {
 
     static <L, R> Either<L, R> left(L value) {
         return new Left<>(value);

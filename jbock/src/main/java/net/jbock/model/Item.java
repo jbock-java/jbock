@@ -28,9 +28,6 @@ public abstract class Item {
             String descriptionKey,
             List<String> description,
             Multiplicity multiplicity) {
-        if (paramLabel.isEmpty()) {
-            throw new IllegalArgumentException("paramLabel may not be empty");
-        }
         this.paramLabel = paramLabel;
         this.descriptionKey = descriptionKey;
         this.description = description;
