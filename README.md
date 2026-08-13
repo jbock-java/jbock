@@ -8,7 +8,7 @@ It is an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
 which does not use runtime reflection, but generates a custom parser at compile time instead.
 
-### Quick rundown
+### Quick start
 
 Choose any name for the java interface which will describe your command line API.
 Add the `@Command` anntation to your command interface, to make the annotation processor aware of it.
@@ -23,9 +23,9 @@ The return types `boolean`, `List<?>` and `Optional<?>` (including `OptionalInt`
 They are used to declare flags, repeable and optional options and parameters, respectively.
 
 > [!TIP]
-> If a method is annotated with `@VarargsParameter`, it must return a list.
-> There cannot be more than one such method.
-> If no attributes are specified, the `@VarargsParameter` annotation can be omitted.
+> If an abstract method is annotated with `@VarargsParameter`, it must return a list.
+> There must not be more than one such method.
+> The varargs annotation can also be omitted, unless you want to override attributes.
 
 Here's an example:
 
