@@ -24,14 +24,15 @@ repositories {
 }
 
 dependencies {
+  var sc_version = "1.026"
   var jbock = project(":jbock")
-  var simple_component = "io.github.jbock-java:simple-component:1.024"
+  var simple_component = "io.github.jbock-java:simple-component:$sc_version"
   implementation("io.github.jbock-java:either:1.5.3")
   implementation("com.palantir.javapoet:javapoet:0.18.0")
   implementation("io.github.jbock-java:auto-common:1.2.3")
   implementation(jbock)
   compileOnly(simple_component)
-  annotationProcessor("io.github.jbock-java:simple-component-compiler:1.024")
+  annotationProcessor("io.github.jbock-java:simple-component-compiler:$sc_version")
   testImplementation("io.github.jbock-java:compile-testing:0.19.12")
   testImplementation("org.mockito:mockito-core:5.23.0")
   testImplementation(platform("org.junit:junit-bom:6.1.2"))
