@@ -27,13 +27,13 @@ class RmArgumentsTest {
     void testPrint() {
         f.assertPrintsHelp(
                 RmArgumentsParser.createModel(),
-                "\u001B[1mUSAGE\u001B[m",
+                "USAGE",
                 "  rm-arguments [OPTIONS] OTHER_TOKENS...",
                 "",
-                "\u001B[1mPARAMETERS\u001B[m",
+                "PARAMETERS",
                 "  OTHER_TOKENS  This is a list that may be empty.",
                 "",
-                "\u001B[1mOPTIONS\u001B[m",
+                "OPTIONS",
                 "  -r, --recursive  ALLES TURISTEN UND NONTEKNISCHEN LOOKENSPEEPERS! DAS",
                 "                   KOMPUTERMASCHINE IST NICHT FUR DER GEFINGERPOKEN UND",
                 "                   MITTENGRABEN! ODERWISE IST EASY TO SCHNAPPEN DER SPRINGENWERK,",

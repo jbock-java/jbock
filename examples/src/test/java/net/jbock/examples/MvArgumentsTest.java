@@ -47,10 +47,10 @@ class MvArgumentsTest {
     void testPrint() {
         f.assertPrintsHelp(
                 MvArgumentsParser.createModel(),
-                "\u001B[1mUSAGE\u001B[m",
+                "USAGE",
                 "  mv-arguments SOURCE DEST",
                 "",
-                "\u001B[1mPARAMETERS\u001B[m",
+                "PARAMETERS",
                 "  SOURCE ",
                 "  DEST   ",
                 "");

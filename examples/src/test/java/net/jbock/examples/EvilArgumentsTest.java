@@ -27,11 +27,11 @@ class EvilArgumentsTest {
     void testPrint() {
         f.assertPrintsHelp(
                 EvilArgumentsParser.createModel(),
-                "\u001B[1mUSAGE\u001B[m",
+                "USAGE",
                 "  evil-arguments [OPTIONS] --fancy FANCY --fAncy FANCY --f_ancy F_ANCY",
                 "        --f__ancy F__ANCY --blub BLUB --Blub BLUB",
                 "",
-                "\u001B[1mOPTIONS\u001B[m",
+                "OPTIONS",
                 "  --Fancy FANCY     ",
                 "  --fancy FANCY     ",
                 "  --fAncy FANCY     ",

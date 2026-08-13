@@ -26,9 +26,6 @@ final class OptionalMatcher extends Matcher {
     @Override
     <M extends Item>
     Optional<Match<M>> tryMatch(M item) {
-        if (item.isVarargsParameter()) {
-            return Optional.empty(); // A VarargsParameter cannot match as an Optional.
-        }
         TypeMirror returnType = item.returnType();
         return getOptionalPrimitive(item, returnType)
                 .or(() -> matchOptional(item, returnType));

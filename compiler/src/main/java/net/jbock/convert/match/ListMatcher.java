@@ -23,9 +23,6 @@ final class ListMatcher extends Matcher {
     @Override
     <M extends Item>
     Optional<Match<M>> tryMatch(M item) {
-        if (item.isParameter()) {
-            return Optional.empty(); // Not a VarargsParameter, so definitely not repeatable.
-        }
         TypeMirror returnType = item.returnType();
         return elements.getTypeElement("java.util.List")
                 .flatMap(utilList -> tool.getSingleTypeArgument(returnType, utilList))

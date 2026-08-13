@@ -4,7 +4,10 @@ import net.jbock.examples.CpArguments.Control;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CpArgumentsTest {
 
@@ -18,13 +21,24 @@ class CpArgumentsTest {
 
     @Test
     void enumValuesInMessage() {
-        f.assertThat("a", "b", "--backup", "CLOUD").fails(
-                "while converting option BACKUP (--backup): No such constant: CLOUD\n" +
-                        "Possible values (ignoring case):\n" +
-                        "  NONE\n" +
-                        "  NUMBERED\n" +
-                        "  EXISTING\n" +
-                        "  SIMPLE\n");
+        String expectation = """
+                while converting option BACKUP (--backup): No such constant: CLOUD
+                Possible values (ignoring case):
+                  NONE
+                  NUMBERED
+                  EXISTING
+                  SIMPLE
+                """;
+        f.assertThat("a", "b", "--backup", "CLOUD").fails(expectation);
+    }
+
+    @Test
+    void testFold() {
+        int rc = CpArgumentsParser.parse(List.of("a")).fold(
+                failure -> 1,
+                command -> 0
+        );
+        assertEquals(1, rc);
     }
 
     @Test
@@ -99,19 +113,19 @@ class CpArgumentsTest {
 
     @Test
     void testPrint() {
-        f.assertPrintsHelp(
-                CpArgumentsParser.createModel(),
-                "\u001B[1mUSAGE\u001B[m",
-                "  cp-arguments [OPTIONS] SOURCE DEST",
-                "",
-                "\u001B[1mPARAMETERS\u001B[m",
-                "  SOURCE ",
-                "  DEST   ",
-                "",
-                "\u001B[1mOPTIONS\u001B[m",
-                "  -r, --r             ",
-                "  --backup BACKUP     ",
-                "  -s, --suffix SUFFIX  Override the usual backup suffix",
-                "");
+        String expectation = """
+                USAGE
+                  cp-arguments [OPTIONS] SOURCE DEST
+                
+                PARAMETERS
+                  SOURCE\s
+                  DEST  \s
+                
+                OPTIONS
+                  -r, --r            \s
+                  --backup BACKUP    \s
+                  -s, --suffix SUFFIX  Override the usual backup suffix
+                """;
+        f.assertPrintsHelpString(CpArgumentsParser.createModel(), expectation);
     }
 }

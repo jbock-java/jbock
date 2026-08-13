@@ -27,13 +27,13 @@ class RestArgumentsTest {
                 RestArgumentsParser.createModel(),
                 "ouch",
                 "",
-                "\u001B[1mUSAGE\u001B[m",
+                "USAGE",
                 "  rest-arguments [OPTIONS] REST...",
                 "",
-                "\u001B[1mPARAMETERS\u001B[m",
+                "PARAMETERS",
                 "  REST ",
                 "",
-                "\u001B[1mOPTIONS\u001B[m",
+                "OPTIONS",
                 "  --file FILE  This is the file.",
                 "");
     }
@@ -45,13 +45,13 @@ class RestArgumentsTest {
                 messages,
                 "A very good program.",
                 "",
-                "\u001B[1mUSAGE\u001B[m",
+                "USAGE",
                 "  rest-arguments [OPTIONS] REST...",
                 "",
-                "\u001B[1mPARAMETERS\u001B[m",
+                "PARAMETERS",
                 "  REST  Hello yes",
                 "",
-                "\u001B[1mOPTIONS\u001B[m",
+                "OPTIONS",
                 "  --file FILE  This is dog",
                 "");
     }

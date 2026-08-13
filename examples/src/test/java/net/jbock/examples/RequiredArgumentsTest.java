@@ -34,13 +34,13 @@ class RequiredArgumentsTest {
     void testPrint() {
         f.assertPrintsHelp(
                 RequiredArgumentsParser.createModel(),
-                "\u001B[1mUSAGE\u001B[m",
+                "USAGE",
                 "  required-arguments --dir DIR OTHER_TOKENS...",
                 "",
-                "\u001B[1mPARAMETERS\u001B[m",
+                "PARAMETERS",
                 "  OTHER_TOKENS ",
                 "",
-                "\u001B[1mOPTIONS\u001B[m",
+                "OPTIONS",
                 "  --dir DIR ",
                 "");
     }

@@ -91,10 +91,10 @@ class PositionalArgumentsTest {
     void testPrint() {
         f.assertPrintsHelp(
                 PositionalArgumentsParser.createModel(),
-                "\u001B[1mUSAGE\u001B[m",
+                "USAGE",
                 "  positional-arguments SOURCE DEST ANOTHER_INT [OPT_STRING] OTHER_TOKENS...",
                 "",
-                "\u001B[1mPARAMETERS\u001B[m",
+                "PARAMETERS",
                 "  SOURCE       ",
                 "  DEST          Desc of dest.",
                 "  ANOTHER_INT  ",

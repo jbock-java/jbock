@@ -12,10 +12,10 @@ class PsArgumentsTest {
     void testPrint() {
         f.assertPrintsHelp(
                 PsArgumentsParser.createModel(),
-                "\u001B[1mUSAGE\u001B[m",
+                "USAGE",
                 "  ps-arguments [OPTIONS]",
                 "",
-                "\u001B[1mOPTIONS\u001B[m",
+                "OPTIONS",
                 "  -a, --all         ",
                 "  -w, --width WIDTH  This is the description.",
                 "");

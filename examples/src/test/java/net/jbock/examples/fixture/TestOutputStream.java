@@ -23,7 +23,6 @@ public class TestOutputStream {
     }
 
     public String[] split() {
-        String stdout = baos.toString();
-        return stdout.split("\\R", -1);
+        return baos.toString().split("\\R", -1);
     }
 }

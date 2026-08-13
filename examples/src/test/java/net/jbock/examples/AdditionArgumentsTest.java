@@ -47,10 +47,10 @@ class AdditionArgumentsTest {
     void testPrint() {
         f.assertPrintsHelp(
                 AdditionArgumentsParser.createModel(),
-                "\u001B[1mUSAGE\u001B[m",
+                "USAGE",
                 "  addition-arguments A B [C]",
                 "",
-                "\u001B[1mPARAMETERS\u001B[m",
+                "PARAMETERS",
                 "  A  First argument",
                 "  B  Second argument",
                 "  C  Optional third argument",

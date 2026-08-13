@@ -64,6 +64,15 @@ public final class ParserTestFixture<E> {
         assertPrintsHelp(commandModel, Map.of(), expected);
     }
 
+    public void assertPrintsHelpString(
+            CommandModel commandModel,
+            String expected) {
+        String actual = getUsageDocumentationString(commandModel, Map.of()).toString();
+        String[] actualAr = actual.split("\\R", -1);
+        String[] expectedAr = expected.split("\\R", -1);
+        assertArraysEquals(expectedAr, actualAr);
+    }
+
     public E parse(String... args) {
         return parser.apply(List.of(args))
                 .orElseThrow(l -> new RuntimeException("expecting success but found " + l.getClass()));
@@ -155,13 +164,21 @@ public final class ParserTestFixture<E> {
     private String[] getUsageDocumentation(
             CommandModel commandModel,
             Map<String, String> messages) {
+        TestOutputStream testOutputStream = getUsageDocumentationString(commandModel, messages);
+        return testOutputStream.split();
+    }
+
+    private static TestOutputStream getUsageDocumentationString(
+            CommandModel commandModel,
+            Map<String, String> messages) {
         TestOutputStream testOutputStream = new TestOutputStream();
         StandardErrorHandler.builder()
                 .withOutputStream(testOutputStream.out)
                 .withTerminalWidth(MAX_LINE_WIDTH)
+                .withAnsi(false)
                 .withMessages(messages)
                 .build()
                 .printUsageDocumentation(commandModel);
-        return testOutputStream.split();
+        return testOutputStream;
     }
 }

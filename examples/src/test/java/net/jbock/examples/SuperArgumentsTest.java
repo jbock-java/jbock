@@ -33,14 +33,14 @@ class SuperArgumentsTest {
     void testHelp() {
         f.assertPrintsHelp(
                 SuperArgumentsParser.createModel(),
-                "\u001B[1mUSAGE\u001B[m",
+                "USAGE",
                 "  super-arguments [OPTIONS] COMMAND REST...",
                 "",
-                "\u001B[1mPARAMETERS\u001B[m",
+                "PARAMETERS",
                 "  COMMAND ",
                 "  REST    ",
                 "",
-                "\u001B[1mOPTIONS\u001B[m",
+                "OPTIONS",
                 "  -q, --quiet ",
                 "");
     }

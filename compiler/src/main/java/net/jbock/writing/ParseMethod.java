@@ -63,23 +63,23 @@ final class ParseMethod extends HasCommandRepresentation {
                 ArrayTypeName.of(ClassName.get(OptionState.class)),
                 "optionStates").build();
         if (namedOptions().isEmpty()) {
-          code.addStatement("$T $N = $T.of()", optionNames.type(), optionNames, Map.class);
+            code.addStatement("$T $N = $T.of()", optionNames.type(), optionNames, Map.class);
         } else {
-          long mapSize = namedOptions().stream()
-                  .map(Mapping::item)
-                  .map(Option::names)
-                  .map(List::size)
-                  .mapToLong(i -> i)
-                  .sum();
-          int capacity = (int) (1 + Math.max(mapSize * 1.35, 15));
-          code.addStatement("$T $N = new $T<>($L)", optionNames.type(), optionNames, HashMap.class, capacity);
-          for (Mapping<Option> namedOption : namedOptions()) {
-              for (String dashedName : namedOption.item().names()) {
-                  code.addStatement("$N.put($S, $L)",
-                          optionNames, dashedName,
-                          namedOption.item().index());
-              }
-          }
+            long mapSize = namedOptions().stream()
+                    .map(Mapping::item)
+                    .map(Option::names)
+                    .map(List::size)
+                    .mapToLong(i -> i)
+                    .sum();
+            int capacity = (int) (1 + Math.max(mapSize * 1.35, 15));
+            code.addStatement("$T $N = new $T<>($L)", optionNames.type(), optionNames, HashMap.class, capacity);
+            for (Mapping<Option> namedOption : namedOptions()) {
+                for (String dashedName : namedOption.item().names()) {
+                    code.addStatement("$N.put($S, $L)",
+                            optionNames, dashedName,
+                            namedOption.item().index());
+                }
+            }
         }
         code.addStatement("$T $N = new $T[$L]", optionStates.type(), optionStates, OptionState.class, namedOptions().size());
         for (Mapping<Option> namedOption : namedOptions()) {

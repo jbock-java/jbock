@@ -321,6 +321,6 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter class that extends StringConverter<List<Integer>> or implements Supplier<StringConverter<List<Integer>>>");
+                .withErrorContaining("a parameter may not be a list; drop the annotation or use @VarargsParameter");
     }
 }

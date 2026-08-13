@@ -39,6 +39,7 @@ final class ParameterValidator {
             Items items) {
         return validatePositions(items.positionalParameters())
                 .filter(this::validateParametersInSuperCommand)
+                .filter(this::validateParameterIsNotList)
                 .flatMap(parameters -> parameters.stream()
                         .map(mappingFinder::findMapping)
                         .collect(allFailures()))
@@ -79,6 +80,19 @@ final class ParameterValidator {
                                 firstOptional.method().getSimpleName() + "'"))
                         .collect(toOptionalList()));
     }
+
+    /* Left-Optional
+     */
+    private Optional<List<ValidationFailure>> validateParameterIsNotList(
+            List<Parameter> parameters) {
+        for (Parameter parameter : parameters) {
+            if (tool.isList(parameter.returnType())) {
+                return Optional.of(List.of(parameter.fail("a parameter may not be a list; drop the annotation or use @VarargsParameter")));
+            }
+        }
+        return Optional.empty();
+    }
+
     /* Left-Optional
      */
     private Optional<List<ValidationFailure>> validateParametersInSuperCommand(

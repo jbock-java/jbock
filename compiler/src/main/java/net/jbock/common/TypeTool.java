@@ -14,6 +14,7 @@ import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.SimpleAnnotationValueVisitor9;
 import javax.lang.model.util.SimpleElementVisitor9;
 import javax.lang.model.util.SimpleTypeVisitor9;
+import java.util.List;
 import java.util.Optional;
 
 public final class TypeTool {
@@ -80,6 +81,18 @@ public final class TypeTool {
      */
     public boolean isSameType(TypeMirror mirror, Class<?> cl) {
         return isSameType(mirror, cl.getCanonicalName());
+    }
+
+    public boolean isList(TypeMirror mirror) {
+        Optional<DeclaredType> visit = AS_DECLARED.visit(mirror);
+        if (visit.isEmpty()) {
+            return false;
+        }
+        DeclaredType declaredType = visit.orElseThrow();
+        if (declaredType.getTypeArguments().isEmpty()) {
+            return false;
+        }
+        return isSameErasure(declaredType, List.class);
     }
 
     public boolean isOptionalish(TypeMirror mirror) {

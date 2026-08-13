@@ -45,7 +45,7 @@ class BasicFullTest {
                         "  static Either<ParsingFailed, Arguments> parse(List<String> tokens) {",
                         "    Map<String, Integer> optionNames = Map.of();",
                         "    OptionState[] optionStates = new OptionState[0];",
-                        "    VarargsParameterParser parser = VarargsParameterParser.create(optionNames, optionStates, 0);", 
+                        "    VarargsParameterParser parser = VarargsParameterParser.create(optionNames, optionStates, 0);",
                         "    try {",
                         "      parser.parse(tokens);",
                         "      return Either.right(createImpl(parser));",

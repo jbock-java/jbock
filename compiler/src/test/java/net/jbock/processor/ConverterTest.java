@@ -303,7 +303,8 @@ class ConverterTest {
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
-                .compilesWithoutError();
+                .failsToCompile()
+                .withErrorContaining("a parameter may not be a list; drop the annotation or use @VarargsParameter");
     }
 
     @Test
@@ -341,7 +342,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid converter class: should extend StringConverter<List<Integer>> or implement Supplier<StringConverter<List<Integer>>>");
+                .withErrorContaining("a parameter may not be a list; drop the annotation or use @VarargsParameter");
     }
 
     @Test

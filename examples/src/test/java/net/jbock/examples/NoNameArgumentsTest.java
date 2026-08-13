@@ -73,10 +73,10 @@ class NoNameArgumentsTest {
     void testPrint() {
         f.assertPrintsHelp(
                 NoNameArgumentsParser.createModel(),
-                "\u001B[1mUSAGE\u001B[m",
+                "USAGE",
                 "  no-name-arguments [OPTIONS] -n NUMBER",
                 "",
-                "\u001B[1mOPTIONS\u001B[m",
+                "OPTIONS",
                 "  --message MESSAGE         ",
                 "  --file FILE               ",
                 "  -v, --verbosity VERBOSITY ",
