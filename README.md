@@ -24,10 +24,15 @@ They are used to declare flags, repeable and optional options and parameters, re
 
 > [!TIP]
 > If an abstract method is annotated with `@VarargsParameter`, it must return a list.
-> There must not be more than one such method.
-> The varargs annotation can also be omitted, unless you want to override attributes.
+> There must not be more than one such "catch-all" parameter.
+> The varargs annotation can also be omitted, unless you want to override its attributes.
 
-Here's an example:
+> [!TIP]
+> Only `java.util.List` has special semantics, but no other "list-like" types.
+> For instance, the return type `ArrayList<String>` does *not* declare a
+> catch-all parameter.
+
+An example:
 
 ````java
 @Command
