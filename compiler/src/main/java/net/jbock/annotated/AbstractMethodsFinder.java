@@ -67,13 +67,13 @@ public class AbstractMethodsFinder {
             return Optional.empty();
         }
         return Optional.of(sourceElement.fail(
-                "invalid command class: the command class or interface may not implement or extend any interfaces," +
+                "the command interface must not extend any interfaces," +
                         " but found: " + interfaces.stream()
                         .map(AS_DECLARED::visit)
                         .flatMap(Optional::stream)
                         .map(DeclaredType::asElement)
                         .map(Element::getSimpleName)
-                        .collect(toList())));
+                        .toList()));
     }
 
     private List<ExecutableElement> abstractMethods() {

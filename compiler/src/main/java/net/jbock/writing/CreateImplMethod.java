@@ -27,35 +27,10 @@ import static net.jbock.common.Constants.STRING;
 import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 /**
- * Implementation of the command class.
+ * Implementation of the command interface.
  */
 final class CreateImplMethod extends HasCommandRepresentation {
 
-    //   if the command class is an interface, we can generate a record instead:
-    //
-    //   static ComplicatedMapperArguments_Impl create_ComplicatedMapperArguments_Impl(ParseResult result) throws ExFailure {
-    //       Integer number = result.option(0)
-    //               .map(new ComplicatedMapperArguments.MyConverter().get())
-    //               .findAny()
-    //               .orElseThrow(() -> new ExMissingItem(ItemType.OPTION, 0))
-    //               .orElseThrow(left -> new ExConvert(left, ItemType.OPTION, 0));
-    //       List<ComplicatedMapperArguments.LazyNumber> numbers = result.option(1)
-    //               .map(new ComplicatedMapperArguments.LazyNumberConverter().get())
-    //               .collect(Eithers.firstFailure())
-    //               .orElseThrow(left -> new ExConvert(left, ItemType.OPTION, 1));
-    //       Optional<LocalDate> date = result.option(2)
-    //               .map(new ComplicatedMapperArguments.NullReturningConverter())
-    //               .collect(Eithers.firstFailure())
-    //               .orElseThrow(left -> new ExConvert(left, ItemType.OPTION, 2))
-    //               .stream().findAny();
-    //       return new ComplicatedMapperArguments_Impl(number, numbers, date);
-    //   }
-    //
-    //   record ComplicatedMapperArguments_Impl(
-    //           Integer number,
-    //           List<ComplicatedMapperArguments.LazyNumber> numbers,
-    //           Optional<LocalDate> date) implements ComplicatedMapperArguments {
-    //   }
     private final GeneratedTypes generatedTypes;
 
     @Inject
@@ -125,27 +100,25 @@ final class CreateImplMethod extends HasCommandRepresentation {
         if (m.isNullary()) {
             return List.of(CodeBlock.of(".findAny().isPresent()"));
         }
-        switch (m.multiplicity()) {
-            case REQUIRED:
-                return List.of(
-                        CodeBlock.of(".findAny()"),
-                        CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
-                                ExMissingItem.class, ItemType.class, ItemType.OPTION, i),
-                        orElseThrowConverterError(ItemType.OPTION, i));
-            case OPTIONAL:
-                return List.of(
-                        CodeBlock.of(".collect($T.firstFailure())", EITHER),
-                        orElseThrowConverterError(ItemType.OPTION, i),
-                        CodeBlock.of(".stream().findAny()"));
-            default: {
+        return switch (m.multiplicity()) {
+            case REQUIRED -> List.of(
+                    CodeBlock.of(".findAny()"),
+                    CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
+                            ExMissingItem.class, ItemType.class, ItemType.OPTION, i),
+                    orElseThrowConverterError(ItemType.OPTION, i));
+            case OPTIONAL -> List.of(
+                    CodeBlock.of(".collect($T.firstFailure())", EITHER),
+                    orElseThrowConverterError(ItemType.OPTION, i),
+                    CodeBlock.of(".stream().findAny()"));
+            default -> {
                 if (!m.isRepeatable()) {
                     throw new AssertionError();
                 }
-                return List.of(
+                yield List.of(
                         CodeBlock.of(".collect($T.firstFailure())", EITHER),
                         orElseThrowConverterError(ItemType.OPTION, i));
             }
-        }
+        };
     }
 
     private List<CodeBlock> tailExpressionParameter(Mapping<Parameter> m, int i) {

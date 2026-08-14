@@ -99,7 +99,7 @@ class ConverterTest {
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
                 .withErrorContaining("invalid converter class: converter of 'foo' must be an inner class of " +
-                        "the command class 'Arguments'");
+                        "the command interface 'Arguments'");
     }
 
     @Test

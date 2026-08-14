@@ -19,7 +19,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
 /**
- * Implementation of the command class.
+ * Implementation of the command interface.
  */
 final class ImplClass extends HasCommandRepresentation {
 

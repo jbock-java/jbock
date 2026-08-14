@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * This class is part of the command model.
- * It represents an abstract method in the command class.
+ * It represents a non-default method in the command interface.
  *
  * <p>There are a fixed number of subclasses:
  * <ul>

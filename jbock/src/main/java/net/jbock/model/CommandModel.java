@@ -1,7 +1,6 @@
 package net.jbock.model;
 
 import net.jbock.Command;
-import net.jbock.SuperCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,7 +114,6 @@ public final class CommandModel {
         /**
          * Sets the supercommand property.
          *
-         * @see SuperCommand
          * @param superCommand whether this is a supercommand
          * @return the builder instance
          */
@@ -182,7 +180,7 @@ public final class CommandModel {
     /**
      * Returns the command description,
      * either from the {@link Command#description()} attribute, or, if that is
-     * empty, from the class javadoc of the command class.
+     * empty, from the class javadoc of the command interface.
      *
      * @return a list of lines, possibly empty
      */
@@ -193,7 +191,7 @@ public final class CommandModel {
     /**
      * Get the program name from the {@link Command#name()} attribute,
      * or, if that is empty, a default program name that is derived
-     * from the class name of the annotated command class.
+     * from the class name of the command interface.
      *
      * @see Command#name()
      * @return the program name, a nonempty string
@@ -223,7 +221,7 @@ public final class CommandModel {
     }
 
     /**
-     * Returns {@code true} if this is a {@link SuperCommand}.
+     * Returns {@code true} if {@code superCommand} is {@code true}.
      *
      * @return {@code true} if the command is a "super command",
      *         {@code false} if it is a regular command

@@ -90,7 +90,7 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(parent, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid command class: the command class or interface may not implement or extend any interfaces, but found: [Parent]");
+                .withErrorContaining("the command interface must not extend any interfaces, but found: [Parent]");
     }
 
     @Test
@@ -110,7 +110,7 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(parent, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid command class: the command class or interface may not implement or extend any interfaces, but found: [Parent]");
+                .withErrorContaining("the command interface must not extend any interfaces, but found: [Parent]");
     }
 
     @Test
@@ -160,7 +160,7 @@ class InheritanceTest {
         assertAbout(javaSources()).that(List.of(a, b, c))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid command class: the command class or interface may not implement or extend any interfaces, but found: [Bbb, Aaa]");
+                .withErrorContaining("the command interface must not extend any interfaces, but found: [Bbb, Aaa]");
     }
 
     @Test

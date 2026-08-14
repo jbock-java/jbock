@@ -78,7 +78,7 @@ public final class MappingFinder {
         if (!nested) {
             return Optional.of(item.fail("converter of '" +
                     item.methodName() +
-                    "' must be an inner class of the command class '" +
+                    "' must be an inner class of the command interface '" +
                     sourceElement.element().getSimpleName() + "'"));
         }
         return Optional.empty();
