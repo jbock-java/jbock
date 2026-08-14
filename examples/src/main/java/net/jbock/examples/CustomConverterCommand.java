@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -54,7 +53,7 @@ abstract class CustomConverterCommand {
     abstract List<Boolean> booleanList();
 
     @Option(names = "--optionalInts", converter = OptionalIntMapper.class)
-    abstract List<OptionalInt> optionalInts();
+    abstract List<Integer> optionalInts();
 
     @Option(names = "--listWrapper", converter = ListWrapperConverter.class)
     abstract Optional<ArrayList<String>> listWrapper();
@@ -142,16 +141,11 @@ abstract class CustomConverterCommand {
         }
     }
 
-    static class OptionalIntMapper implements Supplier<StringConverter<OptionalInt>> {
+    static class OptionalIntMapper implements Supplier<StringConverter<Integer>> {
 
         @Override
-        public StringConverter<OptionalInt> get() {
-            return StringConverter.create(s -> {
-                if (s.isEmpty()) {
-                    return OptionalInt.empty();
-                }
-                return OptionalInt.of(Integer.parseInt(s));
-            });
+        public StringConverter<Integer> get() {
+            return StringConverter.create(Integer::parseInt);
         }
     }
 

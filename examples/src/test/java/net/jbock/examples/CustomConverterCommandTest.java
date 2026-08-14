@@ -9,7 +9,6 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -32,7 +31,6 @@ class CustomConverterCommandTest {
                 "--notFlag", "true",
                 "--integerList", "1,2,3,4",
                 "--optionalInts", "1",
-                "--optionalInts", "",
                 "--optionalInts", "3",
                 "--listWrapper", "foo",
                 "--optionalInts", "4",
@@ -48,8 +46,7 @@ class CustomConverterCommandTest {
         assertEquals(List.of(true, false, true), parsed.booleanList());
         assertEquals(51, parsed.aRequiredInt());
         assertEquals(List.of(1, 2, 3, 4), parsed.integerList().orElseThrow(AssertionFailedError::new));
-        assertEquals(List.of(OptionalInt.of(1), OptionalInt.empty(), OptionalInt.of(3), OptionalInt.of(4)),
-                parsed.optionalInts());
+        assertEquals(List.of(1, 3, 4), parsed.optionalInts());
         assertEquals(singleton(MyEnum.FOO), parsed.enumSet().orElseThrow(AssertionFailedError::new));
         assertEquals(Optional.of(singletonList("foo")), parsed.listWrapper());
         assertArrayEquals(new String[]{"A"}, parsed.stringArray().orElseThrow(AssertionFailedError::new));
