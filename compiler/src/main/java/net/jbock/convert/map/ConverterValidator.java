@@ -52,6 +52,16 @@ public final class ConverterValidator {
             return left(match.fail(converterRawType(converterType)));
         }
         TypeMirror typeArgument = converterType.getTypeArguments().get(0);
+        if (tool.isList(typeArgument)) {
+            return left(match.fail("invalid converter class: converter must not return list"));
+        }
+        if (tool.isOptionalish(typeArgument)) {
+            return left(match.fail("invalid converter class: converter must not return optional"));
+        }
+        if (tool.isSameType(typeArgument, Boolean.TYPE)) {
+            // impossible in current java, but who knows
+            return left(match.fail("invalid converter class: converter must not return boolean"));
+        }
         return right(mappingFactoryFactory.create(converter, typeArgument, match, isSupplier));
     }
 

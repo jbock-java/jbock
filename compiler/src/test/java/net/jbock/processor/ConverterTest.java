@@ -285,7 +285,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid converter class: should extend StringConverter<Integer> or implement Supplier<StringConverter<Integer>>");
+                .withErrorContaining("converter must not return optional");
     }
 
     @Test
@@ -323,7 +323,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid converter class: should extend StringConverter<Integer>");
+                .withErrorContaining("converter must not return list");
     }
 
     @Test
@@ -637,7 +637,8 @@ class ConverterTest {
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
-                .compilesWithoutError();
+                .failsToCompile()
+                .withErrorContaining("converter must not return optional");
     }
 
     @Test
@@ -710,7 +711,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid converter class: should extend StringConverter<Integer>");
+                .withErrorContaining("converter must not return optional");
     }
 
     @Test
@@ -729,7 +730,7 @@ class ConverterTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid converter class: should extend StringConverter<Integer>");
+                .withErrorContaining("converter must not return optional");
     }
 
     @Test
