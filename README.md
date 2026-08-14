@@ -24,8 +24,8 @@ They are used to declare flags, repeable and optional options and parameters, re
 
 > [!TIP]
 > If an abstract method is annotated with `@VarargsParameter`, it must return a list.
-> There must not be more than one such "catch-all" parameter.
-> The varargs annotation can also be omitted, unless you want to override its attributes.
+> Only one such "catch-all" parameter may exist.
+> The varargs annotation can be omitted, unless you want to override its attributes.
 
 > [!TIP]
 > Only `java.util.List` has special semantics, but no other "list-like" types.
