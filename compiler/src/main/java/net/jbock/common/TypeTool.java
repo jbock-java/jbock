@@ -11,15 +11,15 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
-import javax.lang.model.util.SimpleAnnotationValueVisitor9;
-import javax.lang.model.util.SimpleElementVisitor9;
-import javax.lang.model.util.SimpleTypeVisitor9;
+import javax.lang.model.util.SimpleAnnotationValueVisitor14;
+import javax.lang.model.util.SimpleElementVisitor14;
+import javax.lang.model.util.SimpleTypeVisitor14;
 import java.util.List;
 import java.util.Optional;
 
 public final class TypeTool {
 
-    private abstract static class OptionalTypeVisitor<E> extends SimpleTypeVisitor9<Optional<E>, Void> {
+    private abstract static class OptionalTypeVisitor<E> extends SimpleTypeVisitor14<Optional<E>, Void> {
 
         @Override
         protected final Optional<E> defaultAction(TypeMirror e, Void nothing) {
@@ -41,7 +41,7 @@ public final class TypeTool {
         }
     };
 
-    public static final ElementVisitor<Optional<TypeElement>, Void> AS_TYPE_ELEMENT = new SimpleElementVisitor9<>() {
+    public static final ElementVisitor<Optional<TypeElement>, Void> AS_TYPE_ELEMENT = new SimpleElementVisitor14<>() {
         @Override
         public Optional<TypeElement> visitType(TypeElement typeElement, Void nothing) {
             return Optional.of(typeElement);
@@ -53,7 +53,7 @@ public final class TypeTool {
         }
     };
 
-    public static final AnnotationValueVisitor<Optional<TypeMirror>, Void> ANNOTATION_VALUE_AS_TYPE = new SimpleAnnotationValueVisitor9<>() {
+    public static final AnnotationValueVisitor<Optional<TypeMirror>, Void> ANNOTATION_VALUE_AS_TYPE = new SimpleAnnotationValueVisitor14<>() {
 
         @Override
         public Optional<TypeMirror> visitType(TypeMirror mirror, Void nothing) {
