@@ -9,32 +9,15 @@ import javax.lang.model.element.Modifier;
 /**
  * Generates the *Parser class.
  */
-final class ParserClass extends HasCommandRepresentation {
-
-    private final ParseMethod parseMethod;
-    private final ParseOrExitMethod parseOrExitMethod;
-    private final CreateImplMethod createImplMethod;
-    private final CreateModelMethod createModelMethod;
-    private final GeneratedAnnotation generatedAnnotation;
-    private final ImplClass implClass;
-
-    @Inject
-    ParserClass(
-            ParseMethod parseMethod,
-            CommandRepresentation commandRepresentation,
-            ParseOrExitMethod parseOrExitMethod,
-            CreateImplMethod createImplMethod,
-            CreateModelMethod createModelMethod,
-            GeneratedAnnotation generatedAnnotation,
-            ImplClass implClass) {
-        super(commandRepresentation);
-        this.parseMethod = parseMethod;
-        this.parseOrExitMethod = parseOrExitMethod;
-        this.createImplMethod = createImplMethod;
-        this.createModelMethod = createModelMethod;
-        this.generatedAnnotation = generatedAnnotation;
-        this.implClass = implClass;
-    }
+@Inject
+record ParserClass(
+        ParseMethod parseMethod,
+        CommandRepresentation commandRepresentation,
+        ParseOrExitMethod parseOrExitMethod,
+        CreateImplMethod createImplMethod,
+        CreateModelMethod createModelMethod,
+        GeneratedAnnotation generatedAnnotation,
+        ImplClass implClass) implements HasCommandRepresentation {
 
     /**
      * Entry point for code generation.

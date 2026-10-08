@@ -16,26 +16,12 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.function.Supplier;
 
-public final class MappingFactory<M extends Item> {
-
-    private final TypeElement converter;
-    private final TypeMirror outputType; // the type-arg T in StringConverter<T>
-    private final boolean supplier; // true if converter implements Supplier<StringConverter<T>>
-    private final SafeTypes types;
-    private final Match<M> match;
-
-    private MappingFactory(
-            TypeElement converter,
-            TypeMirror outputType,
-            boolean supplier,
-            SafeTypes types,
-            Match<M> match) {
-        this.converter = converter;
-        this.outputType = outputType;
-        this.supplier = supplier;
-        this.types = types;
-        this.match = match;
-    }
+public record MappingFactory<M extends Item>(
+        TypeElement converter,
+        TypeMirror outputType, // the type-arg T in StringConverter<T>
+        boolean supplier, // true if converter implements Supplier<StringConverter<T>>
+        SafeTypes types,
+        Match<M> match) {
 
     Either<ValidationFailure, Mapping<M>> checkMatchingMatch() {
         if (!types.isSameType(outputType, match.baseType())) {
@@ -57,21 +43,15 @@ public final class MappingFactory<M extends Item> {
         return Mapping.create(createConverterExpression.build(), match);
     }
 
-    public static final class Factory {
-
-        private final SafeTypes types;
-
-        @Inject
-        public Factory(TypeTool tool) {
-            this.types = tool.types();
-        }
+    @Inject
+    public record Factory(TypeTool tool) {
 
         <M extends Item> MappingFactory<M> create(
                 TypeElement converter,
                 TypeMirror outputType,
                 Match<M> match,
                 boolean supplier) {
-            return new MappingFactory<>(converter, outputType, supplier, types, match);
+            return new MappingFactory<>(converter, outputType, supplier, tool.types(), match);
         }
     }
 }

@@ -17,23 +17,12 @@ import static com.palantir.javapoet.ParameterSpec.builder;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
 
-final class ParseOrExitMethod extends HasCommandRepresentation {
-
-    private final GeneratedTypes generatedTypes;
-    private final ParseMethod parseMethod;
-    private final CreateModelMethod createModelMethod;
-
-    @Inject
-    ParseOrExitMethod(
-            CommandRepresentation commandRepresentation,
-            GeneratedTypes generatedTypes,
-            ParseMethod parseMethod,
-            CreateModelMethod createModelMethod) {
-        super(commandRepresentation);
-        this.generatedTypes = generatedTypes;
-        this.parseMethod = parseMethod;
-        this.createModelMethod = createModelMethod;
-    }
+@Inject
+record ParseOrExitMethod(
+        CommandRepresentation commandRepresentation,
+        GeneratedTypes generatedTypes,
+        ParseMethod parseMethod,
+        CreateModelMethod createModelMethod) implements HasCommandRepresentation {
 
     MethodSpec define() {
 

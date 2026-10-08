@@ -6,7 +6,9 @@ import io.jbock.simple.Named;
 import io.jbock.simple.Provides;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
+import net.jbock.convert.match.ListMatcher;
 import net.jbock.convert.match.Matcher;
+import net.jbock.convert.match.OptionalMatcher;
 import net.jbock.processor.SourceElement;
 
 import java.util.Set;
@@ -25,6 +27,18 @@ public interface ValidateComponent {
         Builder sourceElement(SourceElement sourceElement);
 
         ValidateComponent build();
+    }
+
+    @Provides
+    @Named("list")
+    static Matcher listMatcher(TypeTool tool) {
+        return new ListMatcher(tool);
+    }
+
+    @Provides
+    @Named("optional")
+    static Matcher optionalMatcher(TypeTool tool) {
+        return new OptionalMatcher(tool);
     }
 
     static ValidateComponent.Builder getBuilder() {

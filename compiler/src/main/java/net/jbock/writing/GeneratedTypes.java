@@ -6,17 +6,16 @@ import com.palantir.javapoet.TypeName;
 import io.jbock.simple.Inject;
 import net.jbock.util.ParsingFailed;
 
+import javax.lang.model.element.Name;
+
 import static net.jbock.common.Constants.EITHER;
 
-final class GeneratedTypes extends HasCommandRepresentation {
-
-    @Inject
-    GeneratedTypes(CommandRepresentation commandRepresentation) {
-        super(commandRepresentation);
-    }
+@Inject
+record GeneratedTypes(CommandRepresentation commandRepresentation) implements HasCommandRepresentation {
 
     ClassName implType() {
-        return sourceElement().generatedClass().nestedClass(sourceElement().element().getSimpleName() + "_Impl");
+        Name simpleName = sourceElement().element().getSimpleName();
+        return sourceElement().generatedClass().nestedClass(simpleName + "_Impl");
     }
 
     TypeName parseResultType() {

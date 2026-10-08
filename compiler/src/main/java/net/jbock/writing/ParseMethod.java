@@ -30,8 +30,9 @@ import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.mapOf;
 import static net.jbock.common.Suppliers.memoize;
 
-final class ParseMethod extends HasCommandRepresentation {
+final class ParseMethod implements HasCommandRepresentation {
 
+    private final CommandRepresentation commandRepresentation;
     private final GeneratedTypes generatedTypes;
     private final CreateModelMethod createModelMethod;
     private final ParserTypeFactory parserTypeFactory;
@@ -42,7 +43,7 @@ final class ParseMethod extends HasCommandRepresentation {
             CommandRepresentation commandRepresentation,
             CreateModelMethod createModelMethod,
             ParserTypeFactory parserTypeFactory) {
-        super(commandRepresentation);
+        this.commandRepresentation = commandRepresentation;
         this.generatedTypes = generatedTypes;
         this.createModelMethod = createModelMethod;
         this.parserTypeFactory = parserTypeFactory;
@@ -54,9 +55,9 @@ final class ParseMethod extends HasCommandRepresentation {
 
         CodeBlock.Builder code = CodeBlock.builder();
 
-        ParserType parserType = parserTypeFactory().get();
+        ClassName parserType = parserTypeFactory().get();
 
-        ParameterSpec parser = ParameterSpec.builder(parserType.type(), "parser").build();
+        ParameterSpec parser = ParameterSpec.builder(parserType, "parser").build();
         ParameterSpec optionNames = ParameterSpec.builder(
                 mapOf(STRING, ClassName.get(Integer.class)), "optionNames").build();
         ParameterSpec optionStates = ParameterSpec.builder(
@@ -95,7 +96,7 @@ final class ParseMethod extends HasCommandRepresentation {
         } else {
             parserClass = ClassName.get(StandardParser.class);
         }
-        code.addStatement("$T $N = $T.create($N, $N, $L)", parserType.type(), parser, parserClass,
+        code.addStatement("$T $N = $T.create($N, $N, $L)", parserType, parser, parserClass,
                 optionNames, optionStates, positionalParameters().size());
         code.add("try {\n").indent()
                 .addStatement("$N.parse($N)", parser, tokens);
@@ -141,5 +142,10 @@ final class ParseMethod extends HasCommandRepresentation {
 
     private GeneratedTypes generatedTypes() {
         return generatedTypes;
+    }
+
+    @Override
+    public CommandRepresentation commandRepresentation() {
+        return commandRepresentation;
     }
 }

@@ -4,7 +4,6 @@ import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.VarargsParameter;
 import net.jbock.annotated.Item;
-import net.jbock.common.SafeTypes;
 import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
 import net.jbock.model.Multiplicity;
@@ -21,18 +20,10 @@ import static net.jbock.common.TypeTool.AS_PRIMITIVE;
 import static net.jbock.model.Multiplicity.OPTIONAL;
 import static net.jbock.model.Multiplicity.REQUIRED;
 
-public final class MatchFinder {
-
-    private final Set<Matcher> matchers;
-    private final SafeTypes types;
-
-    @Inject
-    public MatchFinder(
-            Set<Matcher> matchers,
-            TypeTool tool) {
-        this.matchers = matchers;
-        this.types = tool.types();
-    }
+@Inject
+public record MatchFinder(
+        Set<Matcher> matchers,
+        TypeTool tool) {
 
     public <M extends Item>
     Either<ValidationFailure, Match<M>> findMatch(M item) {
@@ -45,7 +36,7 @@ public final class MatchFinder {
     public <M extends Item>
     Either<ValidationFailure, Match<M>>
     createNullaryMatch(M item) {
-        PrimitiveType bool = types.getPrimitiveType(BOOLEAN);
+        PrimitiveType bool = tool.types().getPrimitiveType(BOOLEAN);
         Match<M> match = Match.create(bool, OPTIONAL, item);
         return validateVarargsIsList(match)
                 .<Either<ValidationFailure, Match<M>>>map(Either::left)
@@ -60,7 +51,7 @@ public final class MatchFinder {
                 .findFirst()
                 .orElseGet(() -> {
                     TypeMirror baseType = AS_PRIMITIVE.visit(item.returnType())
-                            .map(types::boxedClass)
+                            .map(t -> tool.types().boxedClass(t))
                             .map(TypeElement::asType)
                             .orElse(item.returnType());
                     return Match.create(baseType, REQUIRED, item);

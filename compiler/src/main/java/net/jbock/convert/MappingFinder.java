@@ -19,27 +19,13 @@ import java.util.Optional;
 import static io.jbock.util.Either.right;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
-public final class MappingFinder {
-
-    private final AutoOrEnumMapper autoOrEnumMapper;
-    private final ConverterValidator converterValidator;
-    private final SourceElement sourceElement;
-    private final Util util;
-    private final MatchFinder matchFinder;
-
-    @Inject
-    public MappingFinder(
-            AutoOrEnumMapper autoOrEnumMapper,
-            ConverterValidator converterValidator,
-            SourceElement sourceElement,
-            Util util,
-            MatchFinder matchFinder) {
-        this.autoOrEnumMapper = autoOrEnumMapper;
-        this.converterValidator = converterValidator;
-        this.sourceElement = sourceElement;
-        this.util = util;
-        this.matchFinder = matchFinder;
-    }
+@Inject
+public record MappingFinder(
+        AutoOrEnumMapper autoOrEnumMapper,
+        ConverterValidator converterValidator,
+        SourceElement sourceElement,
+        Util util,
+        MatchFinder matchFinder) {
 
     public <M extends Item>
     Either<ValidationFailure, Mapping<M>> findMapping(M item) {

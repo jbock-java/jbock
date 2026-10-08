@@ -29,15 +29,19 @@ import static net.jbock.writing.CodeBlocks.joinByNewline;
 /**
  * Implementation of the command interface.
  */
-final class CreateImplMethod extends HasCommandRepresentation {
+final class CreateImplMethod implements HasCommandRepresentation {
 
+    private final CommandRepresentation commandRepresentation;
     private final GeneratedTypes generatedTypes;
+
+    private final Supplier<ParameterSpec> resultSupplier = Suppliers.memoize(() ->
+            ParameterSpec.builder(ClassName.get(ParseResult.class), "result").build());
 
     @Inject
     CreateImplMethod(
             CommandRepresentation commandRepresentation,
             GeneratedTypes generatedTypes) {
-        super(commandRepresentation);
+        this.commandRepresentation = commandRepresentation;
         this.generatedTypes = generatedTypes;
     }
 
@@ -58,7 +62,7 @@ final class CreateImplMethod extends HasCommandRepresentation {
             spec.addStatement("$T $N = $L", m.item().returnType(), m.param(), convertExpressionVarargsParameter(m));
             constructorParams.add(CodeBlock.of("$N", m.param()));
         });
-        spec.addStatement("return new $T($L)", generatedTypes.implType(), CodeBlocks.joinByComma(constructorParams));
+        spec.addStatement("return new $T($L)", generatedTypes.implType(), CodeBlock.join(constructorParams, ", "));
         return spec.addParameter(result())
                 .returns(sourceElement().typeName())
                 .addException(ExFailure.class)
@@ -137,9 +141,6 @@ final class CreateImplMethod extends HasCommandRepresentation {
                 CodeBlock.of(".stream().findAny()"));
     }
 
-    private final Supplier<ParameterSpec> resultSupplier = Suppliers.memoize(() ->
-            ParameterSpec.builder(ClassName.get(ParseResult.class), "result").build());
-
     private ParameterSpec result() {
         return resultSupplier.get();
     }
@@ -148,5 +149,10 @@ final class CreateImplMethod extends HasCommandRepresentation {
         ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
         return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5L))",
                 left, ExConvert.class, ItemType.class, itemType, i);
+    }
+
+    @Override
+    public CommandRepresentation commandRepresentation() {
+        return commandRepresentation;
     }
 }

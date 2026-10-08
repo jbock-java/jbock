@@ -12,12 +12,12 @@ import java.util.Optional;
 import static net.jbock.convert.match.Match.createWithExtract;
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
-final class OptionalMatcher extends Matcher {
+public final class OptionalMatcher extends Matcher {
 
     private final TypeTool tool;
     private final SafeElements elements;
 
-    OptionalMatcher(
+    public OptionalMatcher(
             TypeTool tool) {
         this.tool = tool;
         this.elements = tool.elements();

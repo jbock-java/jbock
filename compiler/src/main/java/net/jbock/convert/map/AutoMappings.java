@@ -18,14 +18,8 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-public final class AutoMappings {
-
-    private final TypeTool tool;
-
-    @Inject
-    public AutoMappings(TypeTool tool) {
-        this.tool = tool;
-    }
+@Inject
+public record AutoMappings(TypeTool tool) {
 
     <M extends Item>
     Optional<Mapping<M>> findAutoMapping(

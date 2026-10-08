@@ -9,43 +9,39 @@ import net.jbock.processor.SourceElement;
 import java.util.List;
 import java.util.Optional;
 
-abstract class HasCommandRepresentation {
+interface HasCommandRepresentation {
 
-    private final CommandRepresentation commandRepresentation;
+    CommandRepresentation commandRepresentation();
 
-    HasCommandRepresentation(CommandRepresentation commandRepresentation) {
-        this.commandRepresentation = commandRepresentation;
+    default List<Mapping<Option>> namedOptions() {
+        return commandRepresentation().namedOptions();
     }
 
-    final List<Mapping<Option>> namedOptions() {
-        return commandRepresentation.namedOptions();
+    default SourceElement sourceElement() {
+        return commandRepresentation().sourceElement();
     }
 
-    final SourceElement sourceElement() {
-        return commandRepresentation.sourceElement();
+    default List<Mapping<Parameter>> positionalParameters() {
+        return commandRepresentation().positionalParameters();
     }
 
-    final List<Mapping<Parameter>> positionalParameters() {
-        return commandRepresentation.positionalParameters();
+    default Optional<Mapping<VarargsParameter>> varargsParameter() {
+        return commandRepresentation().varargsParameter();
     }
 
-    final Optional<Mapping<VarargsParameter>> varargsParameter() {
-        return commandRepresentation.varargsParameter();
+    default List<Mapping<?>> allMappings() {
+        return commandRepresentation().allMappings();
     }
 
-    final List<Mapping<?>> allMappings() {
-        return commandRepresentation.allMappings();
+    default boolean isSuperCommand() {
+        return commandRepresentation().sourceElement().isSuperCommand();
     }
 
-    final boolean isSuperCommand() {
-        return commandRepresentation.sourceElement().isSuperCommand();
+    default boolean parseOrExitMethodAcceptsList() {
+        return commandRepresentation().sourceElement().parseOrExitMethodAcceptsList();
     }
 
-    final boolean parseOrExitMethodAcceptsList() {
-        return commandRepresentation.sourceElement().parseOrExitMethodAcceptsList();
-    }
-
-    final boolean enableAtFileExpansion() {
-        return commandRepresentation.sourceElement().enableAtFileExpansion();
+    default boolean enableAtFileExpansion() {
+        return commandRepresentation().sourceElement().enableAtFileExpansion();
     }
 }

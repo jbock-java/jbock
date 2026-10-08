@@ -19,15 +19,8 @@ import java.util.function.Supplier;
 
 import static io.jbock.util.Either.left;
 
-public final class AutoOrEnumMapper {
-
-    private final AutoMappings autoMappings;
-
-    @Inject
-    public AutoOrEnumMapper(
-            AutoMappings autoMappings) {
-        this.autoMappings = autoMappings;
-    }
+@Inject
+public record AutoOrEnumMapper(AutoMappings autoMappings) {
 
     public <M extends Item>
     Either<ValidationFailure, Mapping<M>> findMapping(

@@ -17,14 +17,14 @@ import java.util.stream.Stream;
 
 import static com.palantir.javapoet.MethodSpec.methodBuilder;
 import static net.jbock.common.Suppliers.memoize;
-import static net.jbock.writing.CodeBlocks.joinByComma;
 import static net.jbock.writing.CodeBlocks.joinByNewline;
 
-final class CreateModelMethod extends HasCommandRepresentation {
+@Inject
+final class CreateModelMethod implements HasCommandRepresentation {
+    private final CommandRepresentation commandRepresentation;
 
-    @Inject
     CreateModelMethod(CommandRepresentation commandRepresentation) {
-        super(commandRepresentation);
+        this.commandRepresentation = commandRepresentation;
     }
 
     private final Supplier<MethodSpec> define = memoize(() -> {
@@ -70,7 +70,7 @@ final class CreateModelMethod extends HasCommandRepresentation {
             code.add(CodeBlock.of(".withParamLabel($S)", m.paramLabel()));
         }
         m.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
-        code.add(CodeBlock.of(".withNames($T.of($L))", List.class, joinByComma(names)));
+        code.add(CodeBlock.of(".withNames($T.of($L))", List.class, CodeBlock.join(names, ", ")));
         for (String line : m.item().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
@@ -88,5 +88,10 @@ final class CreateModelMethod extends HasCommandRepresentation {
         }
         code.add(CodeBlock.of(".build()"));
         return joinByNewline(code);
+    }
+
+    @Override
+    public CommandRepresentation commandRepresentation() {
+        return commandRepresentation;
     }
 }

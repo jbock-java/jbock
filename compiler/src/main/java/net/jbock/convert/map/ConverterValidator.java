@@ -19,18 +19,10 @@ import static io.jbock.util.Either.left;
 import static io.jbock.util.Either.right;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 
-public final class ConverterValidator {
-
-    private final TypeTool tool;
-    private final MappingFactory.Factory mappingFactoryFactory;
-
-    @Inject
-    public ConverterValidator(
-            TypeTool tool,
-            MappingFactory.Factory mappingFactoryFactory) {
-        this.tool = tool;
-        this.mappingFactoryFactory = mappingFactoryFactory;
-    }
+@Inject
+public record ConverterValidator(
+        TypeTool tool,
+        MappingFactory.Factory mappingFactoryFactory) {
 
     public <M extends Item>
     Either<ValidationFailure, Mapping<M>> findMapping(

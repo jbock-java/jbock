@@ -10,8 +10,8 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_17
-  targetCompatibility = JavaVersion.VERSION_17
+  sourceCompatibility = JavaVersion.VERSION_21
+  targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks.withType<Javadoc>().configureEach {
@@ -24,15 +24,14 @@ repositories {
 }
 
 dependencies {
-  var sc_version = "1.026"
   var jbock = project(":jbock")
-  var simple_component = "io.github.jbock-java:simple-component:$sc_version"
+  var simple_component = "io.github.jbock-java:simple-component:2.0"
   implementation("io.github.jbock-java:either:1.5.3")
   implementation("com.palantir.javapoet:javapoet:0.18.0")
   implementation("io.github.jbock-java:auto-common:1.2.3")
   implementation(jbock)
   compileOnly(simple_component)
-  annotationProcessor("io.github.jbock-java:simple-component-compiler:$sc_version")
+  annotationProcessor("io.github.jbock-java:simple-component-compiler:2.0.1")
   testImplementation("io.github.jbock-java:compile-testing:0.19.12")
   testImplementation("org.mockito:mockito-core:5.23.0")
   testImplementation(platform("org.junit:junit-bom:6.1.2"))

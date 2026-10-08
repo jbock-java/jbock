@@ -9,12 +9,12 @@ import java.util.Optional;
 
 import static net.jbock.model.Multiplicity.REPEATABLE;
 
-final class ListMatcher extends Matcher {
+public final class ListMatcher extends Matcher {
 
     private final SafeElements elements;
     private final TypeTool tool;
 
-    ListMatcher(
+    public ListMatcher(
             TypeTool tool) {
         this.elements = tool.elements();
         this.tool = tool;

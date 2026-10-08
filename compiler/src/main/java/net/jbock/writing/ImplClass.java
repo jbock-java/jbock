@@ -21,16 +21,10 @@ import static javax.lang.model.element.Modifier.STATIC;
 /**
  * Implementation of the command interface.
  */
-final class ImplClass extends HasCommandRepresentation {
-
-    private final GeneratedTypes generatedTypes;
-
-    @Inject
-    ImplClass(GeneratedTypes generatedTypes,
-              CommandRepresentation commandRepresentation) {
-        super(commandRepresentation);
-        this.generatedTypes = generatedTypes;
-    }
+@Inject
+record ImplClass(
+        GeneratedTypes generatedTypes,
+        CommandRepresentation commandRepresentation) implements HasCommandRepresentation {
 
     TypeSpec define() {
         if (sourceElement().isInterface()) {

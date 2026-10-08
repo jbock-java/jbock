@@ -8,11 +8,8 @@ import net.jbock.processor.JbockProcessor;
 import javax.annotation.processing.Generated;
 import java.util.Objects;
 
+@Inject
 final class GeneratedAnnotation {
-
-    @Inject
-    GeneratedAnnotation() {
-    }
 
     AnnotationSpec define() {
         return AnnotationSpec.builder(Generated.class)
