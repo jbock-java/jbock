@@ -3,7 +3,6 @@ package net.jbock.annotated;
 import net.jbock.common.SnakeName;
 
 import javax.lang.model.element.ExecutableElement;
-import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -37,11 +36,6 @@ public final class Parameter extends Item {
     @Override
     public List<String> description() {
         return List.of(parameter.description());
-    }
-
-    @Override
-    Optional<? extends Annotation> annotation() {
-        return Optional.ofNullable(parameter);
     }
 
     @Override

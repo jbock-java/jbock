@@ -48,11 +48,7 @@ final class OptionValidator {
                 .orElseGet(() -> mappingFinder.findMapping(option));
     }
 
-    private Optional<Option> checkNullary(
-            Option option) {
-        if (option.converter().isPresent()) {
-            return Optional.empty();
-        }
+    private Optional<Option> checkNullary(Option option) {
         if (option.returnType().getKind() != BOOLEAN) {
             return Optional.empty();
         }

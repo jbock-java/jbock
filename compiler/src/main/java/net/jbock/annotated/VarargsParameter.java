@@ -4,7 +4,6 @@ import net.jbock.common.Constants;
 import net.jbock.common.SnakeName;
 
 import javax.lang.model.element.ExecutableElement;
-import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -31,17 +30,15 @@ public final class VarargsParameter extends Item {
 
     @Override
     public Optional<String> descriptionKey() {
-        return parameter.map(net.jbock.VarargsParameter::descriptionKey).flatMap(Constants::optionalString);
+        return parameter.map(net.jbock.VarargsParameter::descriptionKey)
+                .flatMap(Constants::optionalString);
     }
 
     @Override
     public List<String> description() {
-        return parameter.map(net.jbock.VarargsParameter::description).map(List::of).orElse(List.of());
-    }
-
-    @Override
-    Optional<? extends Annotation> annotation() {
-        return parameter;
+        return parameter.map(net.jbock.VarargsParameter::description)
+                .map(List::of)
+                .orElse(List.of());
     }
 
     @Override
@@ -60,6 +57,7 @@ public final class VarargsParameter extends Item {
     }
 
     private Optional<String> parameterParamLabel() {
-        return parameter.map(net.jbock.VarargsParameter::paramLabel).flatMap(Constants::optionalString);
+        return parameter.map(net.jbock.VarargsParameter::paramLabel)
+                .flatMap(Constants::optionalString);
     }
 }

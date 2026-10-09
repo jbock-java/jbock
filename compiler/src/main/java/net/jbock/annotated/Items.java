@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.toList;
 import static net.jbock.common.Constants.instancesOf;
 
 public final class Items {
@@ -37,10 +36,10 @@ public final class Items {
                 itemList.stream()
                         .flatMap(instancesOf(Parameter.class))
                         .sorted(INDEX_COMPARATOR)
-                        .collect(toList()),
+                        .toList(),
                 itemList.stream()
                         .flatMap(instancesOf(VarargsParameter.class))
-                        .collect(toList()));
+                        .toList());
     }
 
     public List<Option> namedOptions() {

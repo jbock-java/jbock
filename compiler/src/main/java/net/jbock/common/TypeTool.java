@@ -133,7 +133,7 @@ public final class TypeTool {
                 .isEmpty()) {
             return false;
         }
-        return isSameType(declaredType.getTypeArguments().get(0), String.class);
+        return isSameType(declaredType.getTypeArguments().getFirst(), String.class);
     }
 
     /**
@@ -156,7 +156,7 @@ public final class TypeTool {
                 .filter(declaredType -> types.isSameType(
                         types.erasure(declaredType),
                         types.erasure(someClass.asType())))
-                .map(declaredType -> declaredType.getTypeArguments().get(0));
+                .map(declaredType -> declaredType.getTypeArguments().getFirst());
     }
 
     public SafeTypes types() {

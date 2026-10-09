@@ -7,77 +7,76 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
  * This class contains converters for all "auto types"
  * that can be used without a custom converter.
  */
+// non static
 public final class StandardConverters {
 
     private static final ConverterStore STORE = new ConverterStore();
 
     public static StringConverter<String> asString() {
-        return STORE.get(String.class, Function.identity());
+        return STORE.asString();
     }
 
     public static StringConverter<Integer> asInteger() {
-        return STORE.get(Integer.class, Integer::valueOf);
+        return STORE.asInteger();
     }
 
     public static StringConverter<Long> asLong() {
-        return STORE.get(Long.class, Long::valueOf);
+        return STORE.asLong();
     }
 
     public static StringConverter<Short> asShort() {
-        return STORE.get(Short.class, Short::valueOf);
+        return STORE.asShort();
     }
 
     public static StringConverter<Byte> asByte() {
-        return STORE.get(Byte.class, Byte::valueOf);
+        return STORE.asByte();
     }
 
     public static StringConverter<Float> asFloat() {
-        return STORE.get(Float.class, Float::valueOf);
+        return STORE.asFloat();
     }
 
     public static StringConverter<Double> asDouble() {
-        return STORE.get(Double.class, Double::valueOf);
+        return STORE.asDouble();
     }
 
     public static StringConverter<Character> asCharacter() {
-        return STORE.get(Character.class, MoreConverters::asCharacter);
+        return STORE.asCharacter();
     }
 
     public static StringConverter<Path> asPath() {
-        return STORE.get(Path.class, Paths::get);
+        return STORE.asPath();
     }
 
     public static StringConverter<URI> asURI() {
-        return STORE.get(URI.class, URI::create);
+        return STORE.asURI();
     }
 
     public static StringConverter<Pattern> asPattern() {
-        return STORE.get(Pattern.class, Pattern::compile);
+        return STORE.asPattern();
     }
 
     public static StringConverter<LocalDate> asLocalDate() {
-        return STORE.get(LocalDate.class, LocalDate::parse);
+        return STORE.asLocalDate();
     }
 
     public static StringConverter<BigInteger> asBigInteger() {
-        return STORE.get(BigInteger.class, BigInteger::new);
+        return STORE.asBigInteger();
     }
 
     public static StringConverter<BigDecimal> asBigDecimal() {
-        return STORE.get(BigDecimal.class, BigDecimal::new);
+        return STORE.asBigDecimal();
     }
 
     public static StringConverter<File> asExistingFile() {
-        return STORE.get(File.class, MoreConverters::existingFile);
+        return STORE.asExistingFile();
     }
 
     private StandardConverters() {

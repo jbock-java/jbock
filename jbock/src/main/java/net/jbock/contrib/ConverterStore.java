@@ -2,12 +2,20 @@ package net.jbock.contrib;
 
 import net.jbock.util.StringConverter;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
-final class ConverterStore {
+public final class ConverterStore {
 
     private final Map<String, WeakReference<StringConverter<?>>> convertersByClass = new HashMap<>();
 
@@ -26,5 +34,65 @@ final class ConverterStore {
         StringConverter<T> newInstance = StringConverter.create(function);
         convertersByClass.put(canonicalName, new WeakReference<>(newInstance));
         return newInstance;
+    }
+
+    public StringConverter<String> asString() {
+        return get(String.class, Function.identity());
+    }
+
+    public StringConverter<Integer> asInteger() {
+        return get(Integer.class, Integer::valueOf);
+    }
+
+    public StringConverter<Long> asLong() {
+        return get(Long.class, Long::valueOf);
+    }
+
+    public StringConverter<Short> asShort() {
+        return get(Short.class, Short::valueOf);
+    }
+
+    public StringConverter<Byte> asByte() {
+        return get(Byte.class, Byte::valueOf);
+    }
+
+    public StringConverter<Float> asFloat() {
+        return get(Float.class, Float::valueOf);
+    }
+
+    public StringConverter<Double> asDouble() {
+        return get(Double.class, Double::valueOf);
+    }
+
+    public StringConverter<Character> asCharacter() {
+        return get(Character.class, MoreConverters::asCharacter);
+    }
+
+    public StringConverter<Path> asPath() {
+        return get(Path.class, Paths::get);
+    }
+
+    public StringConverter<URI> asURI() {
+        return get(URI.class, URI::create);
+    }
+
+    public StringConverter<Pattern> asPattern() {
+        return get(Pattern.class, Pattern::compile);
+    }
+
+    public StringConverter<LocalDate> asLocalDate() {
+        return get(LocalDate.class, LocalDate::parse);
+    }
+
+    public StringConverter<BigInteger> asBigInteger() {
+        return get(BigInteger.class, BigInteger::new);
+    }
+
+    public StringConverter<BigDecimal> asBigDecimal() {
+        return get(BigDecimal.class, BigDecimal::new);
+    }
+
+    public StringConverter<File> asExistingFile() {
+        return get(File.class, MoreConverters::existingFile);
     }
 }

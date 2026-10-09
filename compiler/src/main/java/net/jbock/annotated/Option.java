@@ -3,7 +3,6 @@ package net.jbock.annotated;
 import net.jbock.common.SnakeName;
 
 import javax.lang.model.element.ExecutableElement;
-import java.lang.annotation.Annotation;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -67,11 +66,6 @@ public final class Option extends Item {
     @Override
     public List<String> description() {
         return List.of(option.description());
-    }
-
-    @Override
-    Optional<? extends Annotation> annotation() {
-        return Optional.ofNullable(option);
     }
 
     @Override

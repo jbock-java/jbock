@@ -26,19 +26,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public @interface VarargsParameter {
 
     /**
-     * Class of a custom converter for this repeatable parameter.
-     * This is either a class that extends
-     * {@link net.jbock.util.StringConverter StringConverter}
-     * or a {@link java.util.function.Supplier Supplier} of a {@code StringConverter}.
-     *
-     * <p>Note: The same converter instance will be used to convert
-     * each individual token.
-     *
-     * @return converter class or {@code Void.class}
-     */
-    Class<?> converter() default Void.class;
-
-    /**
      * The key that is used to find the description for these
      * parameters in the internationalization bundle.
      *

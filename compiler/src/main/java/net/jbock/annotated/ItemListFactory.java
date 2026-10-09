@@ -12,7 +12,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-import static io.jbock.util.Either.left;
 import static io.jbock.util.Eithers.allFailures;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 
@@ -58,13 +57,5 @@ final class ItemListFactory {
                 .findFirst()
                 .<Either<ValidationFailure, Optional<Annotation>>>map(Either::right)
                 .orElseGet(() -> Either.right(Optional.empty()));
-    }
-
-    private static ValidationFailure missingAnnotationError(
-            ExecutableElement method) {
-        String message = "missing annotation: add one of these annotations: " + methodLevelAnnotations().stream()
-                .map(Class::getSimpleName).toList();
-        message = message + " to method '" + method.getSimpleName() + "'";
-        return new ValidationFailure(message, method);
     }
 }
