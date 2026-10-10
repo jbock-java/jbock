@@ -6,17 +6,11 @@ import java.util.List;
 
 /**
  * This class is part of the command model.
- * It represents a non-default method in the command interface.
- *
- * <p>There are a fixed number of subclasses:
- * <ul>
- *     <li>{@link Option}
- *     <li>{@link Parameter}
- * </ul>
+ * It represents an abstract method in the command interface.
  *
  * @see net.jbock.Command
  */
-public abstract class Item {
+public abstract sealed class Item permits Option, Parameter {
 
     private final String paramLabel;
     private final String descriptionKey;

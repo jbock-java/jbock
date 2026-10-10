@@ -50,9 +50,10 @@ final class CreateImplMethod implements HasCommandRepresentation {
     MethodSpec define() {
         MethodSpec.Builder spec = MethodSpec.methodBuilder("createImpl").addModifiers(PRIVATE, STATIC);
         List<CodeBlock> constructorParams = new ArrayList<>(namedOptions().size() + positionalParameters().size() + varargsParameter().map(x -> 1).orElse(0));
-        // todo only create this variable when necessary
-        ParameterSpec converters = ParameterSpec.builder(StandardConverters.class, CONVERTERS).build();
-        spec.addStatement("$T $N = new $T()", StandardConverters.class, converters, StandardConverters.class);
+        if (allMappings().stream().anyMatch(mapping -> mapping.createConverterExpression().isPresent())) {
+            ParameterSpec converters = ParameterSpec.builder(StandardConverters.class, CONVERTERS).build();
+            spec.addStatement("$T $N = new $T()", StandardConverters.class, converters, StandardConverters.class);
+        }
         for (int i = 0; i < namedOptions().size(); i++) {
             Mapping<Option> m = namedOptions().get(i);
             spec.addStatement("$T $N = $L", m.item().returnType(), m.param(), convertExpressionOption(m, i));
@@ -76,15 +77,17 @@ final class CreateImplMethod implements HasCommandRepresentation {
 
     private CodeBlock convertExpressionOption(Mapping<Option> m, int i) {
         List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$N.option($L)", result(),
-                m.item().index()));
         if (m.isNullary()) {
-            code.add(CodeBlock.of(".findAny().isPresent()"));
+            code.add(CodeBlock.of("$N.option($L).findAny().isPresent()", result(),
+                    m.item().index()));
         } else if (m.createConverterExpression().isPresent()) {
+            code.add(CodeBlock.of("$N.option($L)", result(),
+                    m.item().index()));
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
             code.addAll(tailExpressionOption(m, i));
         } else {
-            code.addAll(tailExpressionStringOption(m, i));
+            code.add(CodeBlock.of("$N.option($L)$L", result(),
+                    m.item().index(), tailExpressionStringOption(m, i)));
         }
         m.extractExpr().ifPresent(code::add);
         return joinByNewline(code);
@@ -92,13 +95,14 @@ final class CreateImplMethod implements HasCommandRepresentation {
 
     private CodeBlock convertExpressionParameter(Mapping<Parameter> m, int i) {
         List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$N.param($L)", result(),
-                m.item().index()));
         if (m.createConverterExpression().isPresent()) {
+            code.add(CodeBlock.of("$N.param($L)", result(),
+                    m.item().index()));
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
             code.addAll(tailExpressionParameter(m, i));
         } else {
-            code.addAll(tailExpressionStringParameter(m, i));
+            code.add(CodeBlock.of("$N.param($L)$L", result(),
+                    m.item().index(), tailExpressionStringParameter(m, i)));
         }
         m.extractExpr().ifPresent(code::add);
         return joinByNewline(code);
@@ -106,30 +110,28 @@ final class CreateImplMethod implements HasCommandRepresentation {
 
     private CodeBlock convertExpressionVarargsParameter(Mapping<VarargsParameter> m) {
         List<CodeBlock> code = new ArrayList<>();
-        code.add(CodeBlock.of("$N.rest()", result()));
         if (m.createConverterExpression().isPresent()) {
+            code.add(CodeBlock.of("$N.rest()", result()));
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
             code.add(CodeBlock.of(".collect($T.firstFailure())", EITHER));
             code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters().size()));
         } else {
-            code.add(CodeBlock.of(".toList()"));
+            code.add(CodeBlock.of("$N.rest().toList()", result()));
         }
         return joinByNewline(code);
     }
 
-    private List<CodeBlock> tailExpressionStringOption(Mapping<Option> m, int i) {
+    private CodeBlock tailExpressionStringOption(Mapping<Option> m, int i) {
         return switch (m.multiplicity()) {
-            case REQUIRED -> List.of(
-                    CodeBlock.of(".findAny()"),
-                    CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
-                            ExMissingItem.class, ItemType.class, ItemType.OPTION, i));
-            case OPTIONAL -> List.of(CodeBlock.of(".findAny()"));
+            case REQUIRED ->
+                    CodeBlock.of(".findAny().orElseThrow(() -> new $T($T.$L, $L))",
+                            ExMissingItem.class, ItemType.class, ItemType.OPTION, i);
+            case OPTIONAL -> CodeBlock.of(".findAny()");
             default -> {
                 if (!m.isRepeatable()) {
                     throw new AssertionError();
                 }
-                yield List.of(
-                        CodeBlock.of(".toList()"));
+                yield CodeBlock.of(".toList()");
             }
         };
     }
@@ -172,15 +174,15 @@ final class CreateImplMethod implements HasCommandRepresentation {
                 CodeBlock.of(".stream().findAny()"));
     }
 
-    private List<CodeBlock> tailExpressionStringParameter(Mapping<Parameter> m, int i) {
+    private CodeBlock tailExpressionStringParameter(Mapping<Parameter> m, int i) {
         if (m.isRequired()) {
-            return List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
-                    ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i));
+            return CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
+                    ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i);
         }
         if (!m.isOptional()) {
             throw new AssertionError();
         }
-        return List.of();
+        return CodeBlock.builder().build();
     }
 
     private ParameterSpec result() {

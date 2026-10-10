@@ -41,7 +41,7 @@ public final class Parameter extends Item {
 
         private String paramLabel;
         private String descriptionKey = "";
-        private final List<String> description = new ArrayList<>();
+        private List<String> description;
         private final Multiplicity multiplicity;
 
         private Builder(Multiplicity multiplicity) {
@@ -83,6 +83,9 @@ public final class Parameter extends Item {
          * @return the builder instance
          */
         public Builder addDescriptionLine(String descriptionLine) {
+            if (this.description == null) {
+                this.description = new ArrayList<>();
+            }
             this.description.add(descriptionLine);
             return this;
         }
@@ -93,7 +96,11 @@ public final class Parameter extends Item {
          * @return parameter model
          */
         public Parameter build() {
-            return new Parameter(paramLabel, descriptionKey, description, multiplicity);
+            return new Parameter(
+                    paramLabel,
+                    descriptionKey,
+                    description == null ? List.of() : description,
+                    multiplicity);
         }
     }
 
