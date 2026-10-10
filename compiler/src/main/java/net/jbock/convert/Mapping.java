@@ -6,6 +6,7 @@ import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeName;
 import net.jbock.annotated.Item;
 import net.jbock.convert.match.Match;
+import net.jbock.model.Arity;
 import net.jbock.model.Multiplicity;
 
 import java.util.Optional;
@@ -23,35 +24,40 @@ import static net.jbock.model.Multiplicity.OPTIONAL;
  */
 public final class Mapping<M extends Item> {
 
-    private final CodeBlock createConverterExpression;
+    private final Optional<CodeBlock> createConverterExpression;
     private final Match<M> match;
-    private final boolean nullary;
+    private final Arity arity;
 
     private Mapping(
-            CodeBlock createConverterExpression,
+            Optional<CodeBlock> createConverterExpression,
             Match<M> match,
-            boolean nullary) {
+            Arity arity) {
         this.createConverterExpression = createConverterExpression;
         this.match = match;
-        this.nullary = nullary;
+        this.arity = arity;
+    }
+
+    public static <M extends Item>
+    Mapping<M> create(Match<M> match) {
+        return new Mapping<>(Optional.empty(), match, Arity.UNARY);
     }
 
     public static <M extends Item>
     Mapping<M> create(
             CodeBlock createConverterExpression,
             Match<M> match) {
-        return create(createConverterExpression, match, false);
+        return new Mapping<>(Optional.of(createConverterExpression), match, Arity.UNARY);
     }
 
     public static <M extends Item>
     Mapping<M> create(
             CodeBlock createConverterExpression,
             Match<M> match,
-            boolean nullary) {
-        return new Mapping<>(createConverterExpression, match, nullary);
+            Arity arity) {
+        return new Mapping<>(Optional.of(createConverterExpression), match, arity);
     }
 
-    public CodeBlock createConverterExpression() {
+    public Optional<CodeBlock> createConverterExpression() {
         return createConverterExpression;
     }
 
@@ -61,10 +67,6 @@ public final class Mapping<M extends Item> {
 
     public Multiplicity multiplicity() {
         return match.multiplicity();
-    }
-
-    public String enumName() {
-        return item().enumName();
     }
 
     public boolean isRequired() {
@@ -80,7 +82,7 @@ public final class Mapping<M extends Item> {
     }
 
     public boolean isNullary() {
-        return nullary;
+        return arity == Arity.NULLARY;
     }
 
     public M item() {

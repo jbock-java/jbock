@@ -181,7 +181,7 @@ final class UsageDocumentation {
         int i = 0;
         while (i < tokens.size()) {
             String token = tokens.get(i);
-            boolean fresh = line.length() == 0;
+            boolean fresh = line.isEmpty();
             if (!fresh && token.length() + line.length() + 1 > terminalWidth) {
                 result.add(line.toString());
                 line.setLength(0);
@@ -193,7 +193,7 @@ final class UsageDocumentation {
             line.append(token);
             i++;
         }
-        if (line.length() > 0) {
+        if (!line.isEmpty()) {
             result.add(line.toString());
         }
         return result;

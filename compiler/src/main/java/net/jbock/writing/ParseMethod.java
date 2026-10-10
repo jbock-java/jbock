@@ -100,7 +100,6 @@ final class ParseMethod implements HasCommandRepresentation {
                 optionNames, optionStates, positionalParameters().size());
         code.add("try {\n").indent()
                 .addStatement("$N.parse($N)", parser, tokens);
-        ParameterSpec impl = ParameterSpec.builder(generatedTypes().implType(), "impl").build();
         code.addStatement("return $T.right(createImpl($N))", EITHER,
                 parser);
         ParameterSpec ex = builder(Exception.class, "e").build();

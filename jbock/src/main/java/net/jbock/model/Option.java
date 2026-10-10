@@ -155,16 +155,16 @@ public final class Option extends Item {
      * Returns a list of the option names, sorted by length and then alphabetically.
      *
      * @see net.jbock.Option#names()
-     * @return a nonempty list of option names
+     * @return a non-empty list of option names
      */
     public List<String> names() {
         return names;
     }
 
     /**
-     * Returns the option arity.
+     * Returns the option's arity.
      *
-     * @return the option arity
+     * @return the arity
      */
     public Arity arity() {
         return arity;

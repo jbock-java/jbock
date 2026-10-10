@@ -7,78 +7,90 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
- * This class contains converters for all "auto types"
+ * This class contains converters for the "known types"
  * that can be used without a custom converter.
  */
-// todo non static
+// todo cache this
 public final class StandardConverters {
 
-    private static final ConverterStore STORE = new ConverterStore();
+    private final Map<String, StringConverter<?>> cache = new HashMap<>();
 
-    public static StringConverter<String> asString() {
-        return STORE.asString();
+    private <T> StringConverter<T> get(
+            Class<T> clazz,
+            Function<String, T> function) {
+        String canonicalName = clazz.getCanonicalName();
+        StringConverter<?> cached = cache.get(canonicalName);
+        if (cached != null) {
+            @SuppressWarnings("unchecked")
+            StringConverter<T> result = (StringConverter<T>) cached;
+            return result;
+        }
+        StringConverter<T> newInstance = StringConverter.create(function);
+        cache.put(canonicalName, newInstance);
+        return newInstance;
     }
 
-    public static StringConverter<Integer> asInteger() {
-        return STORE.asInteger();
+    public StringConverter<Integer> asInteger() {
+        return get(Integer.class, Integer::valueOf);
     }
 
-    public static StringConverter<Long> asLong() {
-        return STORE.asLong();
+    public StringConverter<Long> asLong() {
+        return get(Long.class, Long::valueOf);
     }
 
-    public static StringConverter<Short> asShort() {
-        return STORE.asShort();
+    public StringConverter<Short> asShort() {
+        return get(Short.class, Short::valueOf);
     }
 
-    public static StringConverter<Byte> asByte() {
-        return STORE.asByte();
+    public StringConverter<Byte> asByte() {
+        return get(Byte.class, Byte::valueOf);
     }
 
-    public static StringConverter<Float> asFloat() {
-        return STORE.asFloat();
+    public StringConverter<Float> asFloat() {
+        return get(Float.class, Float::valueOf);
     }
 
-    public static StringConverter<Double> asDouble() {
-        return STORE.asDouble();
+    public StringConverter<Double> asDouble() {
+        return get(Double.class, Double::valueOf);
     }
 
-    public static StringConverter<Character> asCharacter() {
-        return STORE.asCharacter();
+    public StringConverter<Character> asCharacter() {
+        return get(Character.class, MoreConverters::asCharacter);
     }
 
-    public static StringConverter<Path> asPath() {
-        return STORE.asPath();
+    public StringConverter<Path> asPath() {
+        return get(Path.class, Paths::get);
     }
 
-    public static StringConverter<URI> asURI() {
-        return STORE.asURI();
+    public StringConverter<URI> asURI() {
+        return get(URI.class, URI::create);
     }
 
-    public static StringConverter<Pattern> asPattern() {
-        return STORE.asPattern();
+    public StringConverter<Pattern> asPattern() {
+        return get(Pattern.class, Pattern::compile);
     }
 
-    public static StringConverter<LocalDate> asLocalDate() {
-        return STORE.asLocalDate();
+    public StringConverter<LocalDate> asLocalDate() {
+        return get(LocalDate.class, LocalDate::parse);
     }
 
-    public static StringConverter<BigInteger> asBigInteger() {
-        return STORE.asBigInteger();
+    public StringConverter<BigInteger> asBigInteger() {
+        return get(BigInteger.class, BigInteger::new);
     }
 
-    public static StringConverter<BigDecimal> asBigDecimal() {
-        return STORE.asBigDecimal();
+    public StringConverter<BigDecimal> asBigDecimal() {
+        return get(BigDecimal.class, BigDecimal::new);
     }
 
-    public static StringConverter<File> asExistingFile() {
-        return STORE.asExistingFile();
-    }
-
-    private StandardConverters() {
+    public StringConverter<File> asExistingFile() {
+        return get(File.class, MoreConverters::existingFile);
     }
 }

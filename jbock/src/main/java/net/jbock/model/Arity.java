@@ -14,7 +14,7 @@ public enum Arity {
 
     /**
      * This option does not take an argument.
-     * It is, in fact, a mode flag.
+     * It is indeed a mode flag.
      */
     NULLARY,
 

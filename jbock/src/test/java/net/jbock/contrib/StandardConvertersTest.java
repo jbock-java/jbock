@@ -13,14 +13,15 @@ class StandardConvertersTest {
 
     @Test
     void converterInstancesAreReused() {
-        StringConverter<Integer> conv1 = StandardConverters.asInteger();
-        StringConverter<Integer> conv2 = StandardConverters.asInteger();
+        StandardConverters converters = new StandardConverters();
+        StringConverter<Integer> conv1 = converters.asInteger();
+        StringConverter<Integer> conv2 = converters.asInteger();
         assertSame(conv1, conv2);
     }
 
     @Test
     void intConverterWorksAsExpected() {
-        StringConverter<Integer> conv = StandardConverters.asInteger();
+        StringConverter<Integer> conv = new StandardConverters().asInteger();
         Either<ConverterFailure, Integer> result = conv.apply("3");
         result.fold(l -> {
             fail("expecting right");

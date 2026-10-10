@@ -9,6 +9,7 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.convert.map.AutoOrEnumMapper;
 import net.jbock.convert.match.Match;
 import net.jbock.convert.match.MatchFinder;
+import net.jbock.model.Arity;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.StringConverter;
 
@@ -29,7 +30,7 @@ public record MappingFinder(
     Either<ValidationFailure, Mapping<M>> findNullaryMapping(M item) {
         return matchFinder.createNullaryMatch(item)
                 .map(match -> Mapping.create(
-                        CodeBlock.of("$T.identity())", StringConverter.class), match, true));
+                        CodeBlock.of("$T.identity())", StringConverter.class), match, Arity.NULLARY));
     }
 
     private <M extends Item>

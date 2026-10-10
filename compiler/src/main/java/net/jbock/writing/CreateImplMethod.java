@@ -73,10 +73,14 @@ final class CreateImplMethod implements HasCommandRepresentation {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.option($L)", result(),
                 m.item().index()));
-        if (!m.isNullary()) {
-            code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
+        if (m.isNullary()) {
+            code.add(CodeBlock.of(".findAny().isPresent()"));
+        } else if (m.createConverterExpression().isPresent()) {
+            code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
+            code.addAll(tailExpressionOption(m, i));
+        } else {
+            code.addAll(tailExpressionStringOption(m, i));
         }
-        code.addAll(tailExpressionOption(m, i));
         m.extractExpr().ifPresent(code::add);
         return joinByNewline(code);
     }
@@ -85,8 +89,12 @@ final class CreateImplMethod implements HasCommandRepresentation {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.param($L)", result(),
                 m.item().index()));
-        code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
-        code.addAll(tailExpressionParameter(m, i));
+        if (m.createConverterExpression().isPresent()) {
+            code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
+            code.addAll(tailExpressionParameter(m, i));
+        } else {
+            code.addAll(tailExpressionStringParameter(m, i));
+        }
         m.extractExpr().ifPresent(code::add);
         return joinByNewline(code);
     }
@@ -94,16 +102,34 @@ final class CreateImplMethod implements HasCommandRepresentation {
     private CodeBlock convertExpressionVarargsParameter(Mapping<VarargsParameter> m) {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("$N.rest()", result()));
-        code.add(CodeBlock.of(".map($L)", m.createConverterExpression()));
-        code.add(CodeBlock.of(".collect($T.firstFailure())", EITHER));
-        code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters().size()));
+        if (m.createConverterExpression().isPresent()) {
+            code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
+            code.add(CodeBlock.of(".collect($T.firstFailure())", EITHER));
+            code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters().size()));
+        } else {
+            code.add(CodeBlock.of(".toList()"));
+        }
         return joinByNewline(code);
     }
 
+    private List<CodeBlock> tailExpressionStringOption(Mapping<Option> m, int i) {
+        return switch (m.multiplicity()) {
+            case REQUIRED -> List.of(
+                    CodeBlock.of(".findAny()"),
+                    CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
+                            ExMissingItem.class, ItemType.class, ItemType.OPTION, i));
+            case OPTIONAL -> List.of(CodeBlock.of(".findAny()"));
+            default -> {
+                if (!m.isRepeatable()) {
+                    throw new AssertionError();
+                }
+                yield List.of(
+                        CodeBlock.of(".toList()"));
+            }
+        };
+    }
+
     private List<CodeBlock> tailExpressionOption(Mapping<Option> m, int i) {
-        if (m.isNullary()) {
-            return List.of(CodeBlock.of(".findAny().isPresent()"));
-        }
         return switch (m.multiplicity()) {
             case REQUIRED -> List.of(
                     CodeBlock.of(".findAny()"),
@@ -139,6 +165,17 @@ final class CreateImplMethod implements HasCommandRepresentation {
                 CodeBlock.of(".collect($T.firstFailure())", EITHER),
                 orElseThrowConverterError(ItemType.PARAMETER, i),
                 CodeBlock.of(".stream().findAny()"));
+    }
+
+    private List<CodeBlock> tailExpressionStringParameter(Mapping<Parameter> m, int i) {
+        if (m.isRequired()) {
+            return List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
+                            ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i));
+        }
+        if (!m.isOptional()) {
+            throw new AssertionError();
+        }
+        return List.of();
     }
 
     private ParameterSpec result() {

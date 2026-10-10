@@ -26,7 +26,7 @@ public record AutoMappings(TypeTool tool) {
             Match<M> match) {
         TypeMirror baseType = match.baseType();
         if (tool.isSameType(baseType, String.class)) {
-            return Optional.of(createMapping("asString", match));
+            return Optional.of(Mapping.create(match));
         }
         if (tool.isSameType(baseType, Integer.class)) {
             return Optional.of(createMapping("asInteger", match));
@@ -76,7 +76,7 @@ public record AutoMappings(TypeTool tool) {
     private static <M extends Item> Mapping<M> createMapping(
             String methodName,
             Match<M> match) {
-        CodeBlock createConverterExpression = CodeBlock.of("$T.$L()", StandardConverters.class, methodName);
+        CodeBlock createConverterExpression = CodeBlock.of("new $T().$L()", StandardConverters.class, methodName);
         return Mapping.create(createConverterExpression, match);
     }
 }
