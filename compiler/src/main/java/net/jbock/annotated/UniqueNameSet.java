@@ -7,6 +7,13 @@ import java.util.Set;
 public final class UniqueNameSet {
     private final Set<String> uniqueNames = new HashSet<>();
 
+    void reserve(String name) {
+        if (uniqueNames.contains(name)) {
+            throw new AssertionError("already taken: " + name);
+        }
+        uniqueNames.add(name);
+    }
+
     /**
      * Generates a unique name using {@code base}. If {@code base} has not yet been added, it will be
      * returned as-is. If your {@code base} is healthy, this will always return {@code base}.

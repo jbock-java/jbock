@@ -59,10 +59,6 @@ public abstract class Item {
 
     public abstract List<String> description();
 
-    Optional<? extends Annotation> annotation() {
-        return Optional.empty();
-    }
-
     public final ExecutableElement method() {
         return method;
     }

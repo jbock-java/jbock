@@ -19,6 +19,8 @@ public final class Constants {
 
     public static final ClassName EITHER = ClassName.get(Either.class);
 
+    public static final String CONVERTERS = "converters";
+
     public static TypeName mapOf(TypeName keyType, TypeName valueType) {
         return ParameterizedTypeName.get(ClassName.get(Map.class), keyType, valueType);
     }

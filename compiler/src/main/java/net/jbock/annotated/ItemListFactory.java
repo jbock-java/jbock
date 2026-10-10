@@ -1,25 +1,26 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
-import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
 import static io.jbock.util.Eithers.allFailures;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
+import static net.jbock.common.Constants.CONVERTERS;
 
 final class ItemListFactory {
 
     private final UniqueNameSet uniqueNameSet = new UniqueNameSet();
 
     private ItemListFactory() {
+        uniqueNameSet.reserve("_");
+        uniqueNameSet.reserve(CONVERTERS);
     }
 
     static Either<List<ValidationFailure>, List<Item>> createItemList(
@@ -42,9 +43,7 @@ final class ItemListFactory {
     }
 
     private String enumNameFor(Name sourceMethodName) {
-        String enumName = "_".contentEquals(sourceMethodName) ?
-                "_1" : // avoid potential keyword issue
-                SnakeName.create(sourceMethodName).snake('_').toUpperCase(Locale.ROOT);
+        String enumName = sourceMethodName.toString();
         return uniqueNameSet.getUniqueName(enumName);
     }
 

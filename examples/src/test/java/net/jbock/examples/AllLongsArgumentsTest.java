@@ -17,7 +17,7 @@ class AllLongsArgumentsTest {
                 .has(AllLongsArguments::positional, List.of())
                 .has(AllLongsArguments::listOfLongs, List.of(1L, 2L, 2L, 3L))
                 .has(AllLongsArguments::optionalLong, Optional.empty())
-                .has(AllLongsArguments::longObject, 1L)
+                .has(AllLongsArguments::converters, 1L)
                 .has(AllLongsArguments::primitiveLong, 1L);
     }
 
@@ -27,7 +27,7 @@ class AllLongsArgumentsTest {
                 .has(AllLongsArguments::positional, List.of())
                 .has(AllLongsArguments::listOfLongs, List.of())
                 .has(AllLongsArguments::optionalLong, Optional.of(1L))
-                .has(AllLongsArguments::longObject, 1L)
+                .has(AllLongsArguments::converters, 1L)
                 .has(AllLongsArguments::primitiveLong, 1L);
     }
 
@@ -37,7 +37,7 @@ class AllLongsArgumentsTest {
                 .has(AllLongsArguments::positional, List.of(5L, 3L))
                 .has(AllLongsArguments::listOfLongs, List.of())
                 .has(AllLongsArguments::optionalLong, Optional.empty())
-                .has(AllLongsArguments::longObject, 1L)
+                .has(AllLongsArguments::converters, 1L)
                 .has(AllLongsArguments::primitiveLong, 1L);
     }
 }

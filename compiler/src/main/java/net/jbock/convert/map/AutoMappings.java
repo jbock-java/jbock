@@ -4,7 +4,6 @@ import com.palantir.javapoet.CodeBlock;
 import io.jbock.simple.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;
-import net.jbock.contrib.StandardConverters;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
 
@@ -17,6 +16,8 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.regex.Pattern;
+
+import static net.jbock.common.Constants.CONVERTERS;
 
 @Inject
 public record AutoMappings(TypeTool tool) {
@@ -76,7 +77,7 @@ public record AutoMappings(TypeTool tool) {
     private static <M extends Item> Mapping<M> createMapping(
             String methodName,
             Match<M> match) {
-        CodeBlock createConverterExpression = CodeBlock.of("new $T().$L()", StandardConverters.class, methodName);
+        CodeBlock createConverterExpression = CodeBlock.of("$L.$L()", CONVERTERS, methodName);
         return Mapping.create(createConverterExpression, match);
     }
 }

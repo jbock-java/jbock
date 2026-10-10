@@ -10,6 +10,7 @@ import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.convert.Mapping;
 
+import java.util.List;
 import java.util.StringJoiner;
 
 import static java.util.stream.Collectors.toList;
@@ -80,13 +81,16 @@ record ImplClass(
 
     private MethodSpec recordConstructor() {
         MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-        for (int i = 0; i < namedOptions().size(); i++) {
-            spec.addParameter(namedOptions().get(i).param());
+        List<Mapping<Option>> mappings = namedOptions();
+        for (Mapping<Option> mapping : mappings) {
+            spec.addParameter(ParameterSpec.builder(mapping.field().type(), mapping.field().name()).build());
         }
-        for (int i = 0; i < positionalParameters().size(); i++) {
-            spec.addParameter(positionalParameters().get(i).param());
+        List<Mapping<Parameter>> positional = positionalParameters();
+        for (Mapping<Parameter> mapping : positional) {
+            spec.addParameter(ParameterSpec.builder(mapping.field().type(), mapping.field().name()).build());
         }
-        varargsParameter().ifPresent(m -> spec.addParameter(m.param()));
+        varargsParameter().ifPresent(mapping -> spec.addParameter(
+                ParameterSpec.builder(mapping.field().type(), mapping.field().name()).build()));
         return spec.build();
     }
 

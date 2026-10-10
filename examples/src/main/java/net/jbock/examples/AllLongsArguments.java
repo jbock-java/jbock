@@ -18,7 +18,7 @@ interface AllLongsArguments {
     Optional<Long> optionalLong();
 
     @Option(names = "--obj")
-    Long longObject();
+    Long converters();
 
     @Option(names = "--prim")
     long primitiveLong();

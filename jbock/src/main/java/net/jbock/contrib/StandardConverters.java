@@ -15,10 +15,8 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
- * This class contains converters for the "known types"
- * that can be used without a custom converter.
+ * This class converts from {@code String} to certain &quot;known types&quot;.
  */
-// todo cache this
 public final class StandardConverters {
 
     private final Map<String, StringConverter<?>> cache = new HashMap<>();
