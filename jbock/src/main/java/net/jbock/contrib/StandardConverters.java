@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  * This class contains converters for all "auto types"
  * that can be used without a custom converter.
  */
-// non static
+// todo non static
 public final class StandardConverters {
 
     private static final ConverterStore STORE = new ConverterStore();
