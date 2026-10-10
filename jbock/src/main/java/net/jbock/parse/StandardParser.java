@@ -3,8 +3,8 @@ package net.jbock.parse;
 import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * This parser accepts a fixed number of positional parameters and
@@ -30,7 +30,7 @@ public final class StandardParser extends SimpleParser {
      *
      * @return new parser instance
      */
-    public static  StandardParser create(
+    public static StandardParser create(
             Map<String, Integer> optionNames,
             OptionState[] optionStates,
             int numParams) {
@@ -54,7 +54,7 @@ public final class StandardParser extends SimpleParser {
     }
 
     @Override
-    public Stream<String> rest() {
-        return Stream.empty();
+    public List<String> rest() {
+        return List.of();
     }
 }

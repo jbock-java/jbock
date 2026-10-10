@@ -23,22 +23,24 @@ repositories {
   mavenCentral()
 }
 
+val mockitoAgent = configurations.create("mockitoAgent")
 dependencies {
   var jbock = project(":jbock")
-  var simple_component = "io.github.jbock-java:simple-component:2.0"
+  var sc = "io.github.jbock-java:simple-component:2.0"
+  var mockito = "org.mockito:mockito-core:5.24.0"
   implementation("io.github.jbock-java:either:1.5.3")
   implementation("com.palantir.javapoet:javapoet:0.18.0")
   implementation("io.github.jbock-java:auto-common:1.2.3")
   implementation(jbock)
-  compileOnly(simple_component)
+  compileOnly(sc)
   annotationProcessor("io.github.jbock-java:simple-component-compiler:2.0.1")
   testImplementation("io.github.jbock-java:compile-testing:0.19.12")
-  testImplementation("org.mockito:mockito-core:5.23.0")
+  testImplementation(mockito)
   testImplementation(platform("org.junit:junit-bom:6.1.2"))
   testImplementation("org.junit.jupiter:junit-jupiter")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
   testImplementation(jbock)
-  testImplementation(simple_component)
+  mockitoAgent(mockito) { isTransitive = false }
 }
 
 tasks.withType<Jar> {
@@ -49,6 +51,7 @@ tasks.withType<Jar> {
 
 tasks.named<Test>("test") {
   useJUnitPlatform()
+  jvmArgs("-javaagent:${mockitoAgent.asPath}", "-Xshare:off")
 }
 
 // https://vanniktech.github.io/gradle-maven-publish-plugin/central/

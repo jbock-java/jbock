@@ -50,7 +50,7 @@ final class CreateImplMethod implements HasCommandRepresentation {
     MethodSpec define() {
         MethodSpec.Builder spec = MethodSpec.methodBuilder("createImpl").addModifiers(PRIVATE, STATIC);
         List<CodeBlock> constructorParams = new ArrayList<>(namedOptions().size() + positionalParameters().size() + varargsParameter().map(x -> 1).orElse(0));
-        if (allMappings().stream().anyMatch(mapping -> mapping.createConverterExpression().isPresent())) {
+        if (allMappings().stream().anyMatch(m -> m.createConverterExpression().isPresent())) {
             ParameterSpec converters = ParameterSpec.builder(StandardConverters.class, CONVERTERS).build();
             spec.addStatement("$T $N = new $T()", StandardConverters.class, converters, StandardConverters.class);
         }
@@ -78,10 +78,10 @@ final class CreateImplMethod implements HasCommandRepresentation {
     private CodeBlock convertExpressionOption(Mapping<Option> m, int i) {
         List<CodeBlock> code = new ArrayList<>();
         if (m.isNullary()) {
-            code.add(CodeBlock.of("$N.option($L).findAny().isPresent()", result(),
+            code.add(CodeBlock.of("!$N.option($L).isEmpty()", result(),
                     m.item().index()));
         } else if (m.createConverterExpression().isPresent()) {
-            code.add(CodeBlock.of("$N.option($L)", result(),
+            code.add(CodeBlock.of("$N.option($L).stream()", result(),
                     m.item().index()));
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
             code.addAll(tailExpressionOption(m, i));
@@ -111,12 +111,12 @@ final class CreateImplMethod implements HasCommandRepresentation {
     private CodeBlock convertExpressionVarargsParameter(Mapping<VarargsParameter> m) {
         List<CodeBlock> code = new ArrayList<>();
         if (m.createConverterExpression().isPresent()) {
-            code.add(CodeBlock.of("$N.rest()", result()));
+            code.add(CodeBlock.of("$N.rest().stream()", result()));
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
             code.add(CodeBlock.of(".collect($T.firstFailure())", EITHER));
             code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters().size()));
         } else {
-            code.add(CodeBlock.of("$N.rest().toList()", result()));
+            code.add(CodeBlock.of("$N.rest()", result()));
         }
         return joinByNewline(code);
     }
@@ -124,14 +124,14 @@ final class CreateImplMethod implements HasCommandRepresentation {
     private CodeBlock tailExpressionStringOption(Mapping<Option> m, int i) {
         return switch (m.multiplicity()) {
             case REQUIRED ->
-                    CodeBlock.of(".findAny().orElseThrow(() -> new $T($T.$L, $L))",
+                    CodeBlock.of(".stream().findAny().orElseThrow(() -> new $T($T.$L, $L))",
                             ExMissingItem.class, ItemType.class, ItemType.OPTION, i);
-            case OPTIONAL -> CodeBlock.of(".findAny()");
+            case OPTIONAL -> CodeBlock.of(".stream().findAny()");
             default -> {
                 if (!m.isRepeatable()) {
                     throw new AssertionError();
                 }
-                yield CodeBlock.of(".toList()");
+                yield CodeBlock.builder().build();
             }
         };
     }

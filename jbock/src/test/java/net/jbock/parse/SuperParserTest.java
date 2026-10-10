@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,21 +21,21 @@ class SuperParserTest {
     void testZeroParamsExcess() throws ExToken {
         SuperParser parser = SuperParser.create(Map.of(), new OptionState[0], 0);
         parser.parse(List.of("1"));
-        assertEquals(List.of("1"), parser.rest().toList());
+        assertEquals(List.of("1"), parser.rest());
     }
 
     @Test
     void testZeroParamsNotSuspicious() throws ExToken {
         SuperParser parser = SuperParser.create(Map.of(), new OptionState[0], 0);
         parser.parse(List.of("-a"));
-        assertEquals(List.of("-a"), parser.rest().toList());
+        assertEquals(List.of("-a"), parser.rest());
     }
 
     @Test
     void testZeroParamsSuccessEmpty() throws ExToken {
         SuperParser parser = SuperParser.create(Map.of(), new OptionState[0], 0);
         parser.parse(List.of());
-        assertTrue(parser.option(0).findAny().isEmpty());
+        assertTrue(parser.option(0).isEmpty());
         assertTrue(parser.param(0).isEmpty());
     }
 
@@ -42,9 +43,9 @@ class SuperParserTest {
     void testZeroParamsSuccessEscape() throws ExToken {
         SuperParser parser = SuperParser.create(Map.of(), new OptionState[0], 0);
         parser.parse(List.of("--"));
-        assertTrue(parser.option(0).findAny().isEmpty());
+        assertTrue(parser.option(0).isEmpty());
         assertTrue(parser.param(0).isEmpty());
-        assertEquals(List.of("--"), parser.rest().toList());
+        assertEquals(List.of("--"), parser.rest());
     }
 
     @Test
@@ -58,14 +59,14 @@ class SuperParserTest {
         SuperParser parser = SuperParser.create(Map.of(), new OptionState[0], 1);
         parser.parse(List.of("1", "2"));
         assertEquals(Optional.of("1"), parser.param(0));
-        assertEquals(List.of("2"), parser.rest().toList());
+        assertEquals(List.of("2"), parser.rest());
     }
 
     @Test
     void testOneParamSuccess() throws ExToken {
         SuperParser parser = SuperParser.create(Map.of(), new OptionState[0], 1);
         parser.parse(List.of("1"));
-        assertTrue(parser.option(0).findAny().isEmpty());
+        assertTrue(parser.option(0).isEmpty());
         assertEquals(Optional.of("1"), parser.param(0));
     }
 
@@ -76,7 +77,7 @@ class SuperParserTest {
         optionStates[0] = new OptionStateNonRepeatable();
         SuperParser parser = SuperParser.create(optionNames, optionStates, 1);
         parser.parse(List.of("-a1"));
-        assertEquals(List.of("1"), parser.option(0).toList());
+        assertEquals(List.of("1"), parser.option(0));
     }
 
     @Test
@@ -86,7 +87,7 @@ class SuperParserTest {
         optionStates[0] = new OptionStateNonRepeatable();
         SuperParser parser = SuperParser.create(optionNames, optionStates, 1);
         parser.parse(List.of("-a", "1"));
-        assertEquals(List.of("1"), parser.option(0).toList());
+        assertEquals(List.of("1"), parser.option(0));
     }
 
     @Test
@@ -101,7 +102,7 @@ class SuperParserTest {
     @Test
     void testOneUnixOptionClusterBadOptionState() throws ExToken {
         Map<String, Integer> optionNames = Map.of("-a", 0);
-        OptionState optionState = mock(OptionState.class);
+        OptionState optionState = mock(OptionStateModeFlag.class);
         when(optionState.read(any(), any()))
                 .thenReturn("readOptionName_invalid_input");
         OptionState[] optionStates = new OptionState[1];
@@ -117,7 +118,7 @@ class SuperParserTest {
         optionStates[0] = new OptionStateNonRepeatable();
         SuperParser parser = SuperParser.create(optionNames, optionStates, 1);
         parser.parse(List.of("--alpha=1"));
-        assertEquals(List.of("1"), parser.option(0).toList());
+        assertEquals(List.of("1"), parser.option(0));
     }
 
     @Test
@@ -127,7 +128,7 @@ class SuperParserTest {
         optionStates[0] = new OptionStateNonRepeatable();
         SuperParser parser = SuperParser.create(optionNames, optionStates, 1);
         parser.parse(List.of("--alpha", "1"));
-        assertEquals(List.of("1"), parser.option(0).toList());
+        assertEquals(List.of("1"), parser.option(0));
     }
 
     @Test
@@ -138,8 +139,8 @@ class SuperParserTest {
         optionStates[1] = new OptionStateNonRepeatable();
         SuperParser parser = SuperParser.create(optionNames, optionStates, 1);
         parser.parse(List.of("-a", "-b1"));
-        assertTrue(parser.option(0).findAny().isPresent());
-        assertEquals(List.of("1"), parser.option(1).toList());
+        assertFalse(parser.option(0).isEmpty());
+        assertEquals(List.of("1"), parser.option(1));
     }
 
     @Test
@@ -150,8 +151,8 @@ class SuperParserTest {
         optionStates[1] = new OptionStateNonRepeatable();
         SuperParser parser = SuperParser.create(optionNames, optionStates, 1);
         parser.parse(List.of("-a", "-b", "1"));
-        assertTrue(parser.option(0).findAny().isPresent());
-        assertEquals(List.of("1"), parser.option(1).toList());
+        assertFalse(parser.option(0).isEmpty());
+        assertEquals(List.of("1"), parser.option(1));
     }
 
     @Test
@@ -162,8 +163,8 @@ class SuperParserTest {
         optionStates[1] = new OptionStateNonRepeatable();
         SuperParser parser = SuperParser.create(optionNames, optionStates, 1);
         parser.parse(List.of("-ab1"));
-        assertTrue(parser.option(0).findAny().isPresent());
-        assertEquals(List.of("1"), parser.option(1).toList());
+        assertFalse(parser.option(0).isEmpty());
+        assertEquals(List.of("1"), parser.option(1));
     }
 
     @Test
@@ -174,7 +175,7 @@ class SuperParserTest {
         optionStates[1] = new OptionStateNonRepeatable();
         SuperParser parser = SuperParser.create(optionNames, optionStates, 1);
         parser.parse(List.of("-ab", "1"));
-        assertTrue(parser.option(0).findAny().isPresent());
-        assertEquals(List.of("1"), parser.option(1).toList());
+        assertFalse(parser.option(0).isEmpty());
+        assertEquals(List.of("1"), parser.option(1));
     }
 }

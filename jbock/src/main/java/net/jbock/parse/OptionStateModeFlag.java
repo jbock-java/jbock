@@ -4,7 +4,7 @@ import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
 import java.util.Iterator;
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
  * Detects and stores the presence of a mode flag.
@@ -28,7 +28,7 @@ public final class OptionStateModeFlag implements OptionState {
     }
 
     @Override
-    public Stream<String> stream() {
-        return seen ? Stream.of("") : Stream.empty();
+    public List<String> stream() {
+        return seen ? List.of("") : List.of();
     }
 }

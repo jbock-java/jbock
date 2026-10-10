@@ -54,7 +54,7 @@ public final class SuperParser extends SimpleParser {
     }
 
     @Override
-    public Stream<String> rest() {
-        return rest.stream();
+    public List<String> rest() {
+        return rest;
     }
 }

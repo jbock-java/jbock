@@ -3,12 +3,12 @@ package net.jbock.parse;
 import net.jbock.util.ExToken;
 
 import java.util.Iterator;
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
  * Interface for a mutable class that reads and remembers option arguments.
  */
-public interface OptionState {
+public sealed interface OptionState permits OptionStateModeFlag, OptionStateNonRepeatable, OptionStateRepeatable {
 
     /**
      * Reads the argument of the {@code token}, or remembers the
@@ -31,5 +31,5 @@ public interface OptionState {
      *
      * @return a stream of strings
      */
-    Stream<String> stream();
+    List<String> stream();
 }

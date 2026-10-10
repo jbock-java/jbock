@@ -16,7 +16,7 @@ class VarargsParameterParserTest {
     void testZeroParamsExcess() throws ExToken {
         VarargsParameterParser parser = VarargsParameterParser.create(Map.of(), new OptionState[0], 0);
         parser.parse(List.of("1"));
-        assertEquals(List.of("1"), parser.rest().toList());
+        assertEquals(List.of("1"), parser.rest());
     }
 
     @Test
@@ -24,7 +24,7 @@ class VarargsParameterParserTest {
         VarargsParameterParser parser = VarargsParameterParser.create(Map.of(), new OptionState[0], 1);
         parser.parse(List.of("1", "2"));
         assertEquals(Optional.of("1"), parser.param(0));
-        assertEquals(List.of("2"), parser.rest().toList());
+        assertEquals(List.of("2"), parser.rest());
     }
 
     @Test
@@ -61,7 +61,7 @@ class VarargsParameterParserTest {
         optionStates[0] = new OptionStateRepeatable();
         StandardParser parser = StandardParser.create(optionNames, optionStates, 0);
         parser.parse(List.of("-a1", "-a2"));
-        assertEquals(List.of("1", "2"), parser.option(0).toList());
+        assertEquals(List.of("1", "2"), parser.option(0));
     }
 
     @Test

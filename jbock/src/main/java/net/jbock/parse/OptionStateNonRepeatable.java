@@ -4,7 +4,7 @@ import net.jbock.util.ErrTokenType;
 import net.jbock.util.ExToken;
 
 import java.util.Iterator;
-import java.util.stream.Stream;
+import java.util.List;
 
 import static net.jbock.parse.OptionStateUtil.readOptionArgument;
 
@@ -27,7 +27,7 @@ public final class OptionStateNonRepeatable implements OptionState {
     }
 
     @Override
-    public Stream<String> stream() {
-        return value == null ? Stream.empty() : Stream.of(value);
+    public List<String> stream() {
+        return value == null ? List.of() : List.of(value);
     }
 }

@@ -30,7 +30,7 @@ record ImplClass(
     TypeSpec define() {
         if (sourceElement().isInterface()) {
             TypeSpec.Builder spec = TypeSpec.recordBuilder(generatedTypes.implType());
-            spec.addModifiers(PRIVATE, STATIC);
+            spec.addModifiers(PRIVATE);
             spec.recordConstructor(recordConstructor());
             spec.addSuperinterface(sourceElement().typeName());
             return spec.build();

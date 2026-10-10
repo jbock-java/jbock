@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import static net.jbock.util.ErrTokenType.INVALID_OPTION;
 
@@ -67,7 +66,7 @@ abstract class SimpleParser implements ParseResult {
 
     /**
      * Parse the given input and store the result internally.
-     * 
+     *
      * <p>The parser is single-use: The parse method should not
      * be called more than once per parser instance.
      *
@@ -112,16 +111,14 @@ abstract class SimpleParser implements ParseResult {
         return token.substring(0, token.indexOf('='));
     }
 
-    @Override
-    public final Stream<String> option(int optionIndex) {
+    public final List<String> option(int optionIndex) {
         if (optionIndex < 0 || optionIndex >= optionStates.length) {
-            return Stream.empty();
+            return List.of();
         }
         OptionState optionState = optionStates[optionIndex];
         return optionState.stream();
     }
 
-    @Override
     public final Optional<String> param(int index) {
         if (index < 0 || index >= params.length) {
             return Optional.empty();

@@ -52,8 +52,7 @@ class BasicFullTest {
                         "  }",
                         "",
                         "  private static Arguments createImpl(ParseResult result) throws ExFailure {",
-                        "    List<String> hello = result.rest()",
-                        "        .toList();",
+                        "    List<String> hello = result.rest();",
                         "    return new Arguments_Impl(hello);",
                         "  }",
                         "",
@@ -89,10 +88,9 @@ class BasicFullTest {
     void testPublicParser() {
         JavaFileObject javaFile = fromSource(
                 "@Command(skipGeneratingParseOrExitMethod = true, publicParser = true)",
-                "abstract class Arguments {",
+                "interface Arguments {",
                 "",
-                "  @VarargsParameter",
-                "  abstract List<String> hello();",
+                "  List<String> hello();",
                 "}");
         List<String> expectedParser =
                 List.of(
@@ -125,6 +123,11 @@ class BasicFullTest {
                         "    }",
                         "  }",
                         "",
+                        "  private static Arguments createImpl(ParseResult result) throws ExFailure {",
+                        "    List<String> hello = result.rest();",
+                        "    return new Arguments_Impl(hello);",
+                        "  }",
+                        "",
                         "  public static CommandModel createModel() {",
                         "    return CommandModel.builder()",
                         "        .withProgramName(\"arguments\")",
@@ -134,17 +137,7 @@ class BasicFullTest {
                         "        .build();",
                         "  }",
                         "",
-                        "  private static final class Arguments_Impl extends Arguments {",
-                        "    final List<String> hello;",
-                        "",
-                        "    Arguments_Impl(List<String> hello) {",
-                        "      this.hello = hello;",
-                        "    }",
-                        "",
-                        "    @Override",
-                        "    List<String> hello() {",
-                        "      return hello;",
-                        "    }",
+                        "  private record Arguments_Impl(List<String> hello) implements Arguments {",
                         "  }",
                         "}");
         Compilation compilation = Processor.compiler().compile(javaFile);

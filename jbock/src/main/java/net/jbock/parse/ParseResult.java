@@ -1,7 +1,7 @@
 package net.jbock.parse;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * This class represents the result of a successful parsing operation.
@@ -15,7 +15,7 @@ public interface ParseResult {
      * @param optionIndex a number that identifies a named option
      * @return a stream of tokens
      */
-    Stream<String> option(int optionIndex);
+    List<String> option(int optionIndex);
 
     /**
      * Get the positional parameter at the given index.
@@ -33,5 +33,5 @@ public interface ParseResult {
      *
      * @return remaining tokens
      */
-    Stream<String> rest();
+    List<String> rest();
 }

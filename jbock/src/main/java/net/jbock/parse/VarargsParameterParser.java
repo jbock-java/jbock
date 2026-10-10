@@ -3,7 +3,6 @@ package net.jbock.parse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * This parser accepts a fixed number of positional parameters, and any
@@ -54,7 +53,7 @@ public final class VarargsParameterParser extends SimpleParser {
     }
 
     @Override
-    public Stream<String> rest() {
-        return rest.stream();
+    public List<String> rest() {
+        return rest;
     }
 }
