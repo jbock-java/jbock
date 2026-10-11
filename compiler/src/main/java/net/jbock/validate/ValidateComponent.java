@@ -52,16 +52,8 @@ public interface ValidateComponent {
         return Set.of(optionalMatcher, listMatcher);
     }
 
-    class Factory {
-        private final Util util;
-        private final TypeTool tool;
-
-        @Inject
-        public Factory(Util util, TypeTool tool) {
-            this.util = util;
-            this.tool = tool;
-        }
-
+    @Inject
+    record Factory(Util util, TypeTool tool) {
         public ValidateComponent create(SourceElement sourceElement) {
             return ValidateComponent_Impl.builder()
                     .util(util)

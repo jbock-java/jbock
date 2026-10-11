@@ -19,13 +19,13 @@ import static io.jbock.util.Eithers.allFailures;
 import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
 
+@Inject
 final class ParameterValidator {
 
     private final SourceElement sourceElement;
     private final MappingFinder mappingFinder;
     private final TypeTool tool;
 
-    @Inject
     ParameterValidator(
             SourceElement sourceElement,
             MappingFinder mappingFinder,
