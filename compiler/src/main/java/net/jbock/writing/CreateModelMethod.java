@@ -13,7 +13,6 @@ import javax.lang.model.element.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static com.palantir.javapoet.MethodSpec.methodBuilder;
 import static net.jbock.common.Suppliers.memoize;
@@ -40,10 +39,12 @@ final class CreateModelMethod implements HasCommandRepresentation {
             code.add(CodeBlock.of(".withSuperCommand($L)", true));
         }
         for (Mapping<Option> c : namedOptions()) {
-            code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
+            code.add(optionBlock(c));
         }
-        Stream.concat(positionalParameters().stream(), varargsParameter().stream())
-                .forEach(c -> code.add(CodeBlock.of(".addParameter($L)", parameterBlock(c))));
+        for (Mapping<net.jbock.annotated.Parameter> c : positionalParameters()) {
+            code.add(parameterBlock(c));
+        }
+        varargsParameter().ifPresent(c -> code.add(parameterBlock(c)));
         code.add(CodeBlock.of(".build()"));
         return methodBuilder("createModel")
                 .addStatement(joinByNewline(code))
@@ -62,6 +63,17 @@ final class CreateModelMethod implements HasCommandRepresentation {
         for (String name : m.item().names()) {
             names.add(CodeBlock.of("$S", name));
         }
+        if (m.item().descriptionKey().isEmpty() && m.item().description().isEmpty()) {
+            if (m.isNullary()) {
+                return CodeBlock.of(".addNullary($T.of($L))",
+                        List.class, CodeBlock.join(names, ", "));
+            } else {
+                return CodeBlock.of(".addUnary($T.$L, $T.of($L), $S)",
+                        Multiplicity.class, m.multiplicity().name(),
+                        List.class, CodeBlock.join(names, ", "),
+                        m.paramLabel());
+            }
+        }
         List<CodeBlock> code = new ArrayList<>();
         if (m.isNullary()) {
             code.add(CodeBlock.of("$T.nullary()", net.jbock.model.Option.class));
@@ -75,11 +87,16 @@ final class CreateModelMethod implements HasCommandRepresentation {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
-        return joinByNewline(code);
+        return CodeBlock.of(".addOption($L)", joinByNewline(code));
     }
 
     private CodeBlock parameterBlock(Mapping<?> m) {
         List<CodeBlock> code = new ArrayList<>();
+        if (m.item().descriptionKey().isEmpty() && m.item().description().isEmpty()) {
+            return CodeBlock.of(".addParameter($T.$L, $S)",
+                    Multiplicity.class, m.multiplicity().name(),
+                    m.paramLabel());
+        }
         code.add(CodeBlock.of("$T.builder($T.$L)", Parameter.class, Multiplicity.class, m.multiplicity().name()));
         code.add(CodeBlock.of(".withParamLabel($S)", m.paramLabel()));
         m.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
@@ -87,7 +104,7 @@ final class CreateModelMethod implements HasCommandRepresentation {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
-        return joinByNewline(code);
+        return CodeBlock.of(".addParameter($L)", joinByNewline(code));
     }
 
     @Override

@@ -133,6 +133,14 @@ public final class CommandModel {
             return this;
         }
 
+        public Builder addUnary(Multiplicity multiplicity, List<String> names, String label) {
+            return addOption(Option.unary(multiplicity).withParamLabel(label).withNames(names).build());
+        }
+
+        public Builder addNullary(List<String> names) {
+            return addOption(Option.nullary().withNames(names).build());
+        }
+
         /**
          * Adds a parameter.
          *
@@ -142,6 +150,10 @@ public final class CommandModel {
         public Builder addParameter(Parameter parameter) {
             this.parameters.add(parameter);
             return this;
+        }
+
+        public Builder addParameter(Multiplicity multiplicity, String label) {
+            return addParameter(Parameter.builder(multiplicity).withParamLabel(label).build());
         }
 
         /**
@@ -239,13 +251,9 @@ public final class CommandModel {
      * @throws IndexOutOfBoundsException if the index is out of range
      */
     public Item getItem(ItemType itemType, int index) {
-        switch (itemType) {
-            case PARAMETER:
-                return parameters.get(index);
-            case OPTION:
-                return options.get(index);
-            default:
-                throw new AssertionError("all cases exhausted");
-        }
+        return switch (itemType) {
+            case PARAMETER -> parameters.get(index);
+            case OPTION -> options.get(index);
+        };
     }
 }
