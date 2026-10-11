@@ -118,8 +118,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter class that extends StringConverter<StringBuilder>" +
-                        " or implements Supplier<StringConverter<StringBuilder>>");
+                .withErrorContaining("unknown type: StringBuilder");
     }
 
     @Test
@@ -163,8 +162,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter class that extends StringConverter<List>" +
-                        " or implements Supplier<StringConverter<List>>");
+                .withErrorContaining("unknown type: List");
     }
 
     @Test
@@ -179,8 +177,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter class that extends StringConverter<Optional>" +
-                        " or implements Supplier<StringConverter<Optional>>");
+                .withErrorContaining("unknown type: Optional");
     }
 
     @Test
@@ -195,8 +192,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter class that extends StringConverter<Set<String>>" +
-                        " or implements Supplier<StringConverter<Set<String>>>");
+                .withErrorContaining("unknown type: Set<String>");
     }
 
     @Test
@@ -289,8 +285,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter class that extends" +
-                        " StringConverter<int[]> or implements Supplier<StringConverter<int[]>>");
+                .withErrorContaining("unknown type: int[]");
     }
 
     @Test
@@ -305,8 +300,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter class that extends StringConverter<Date>" +
-                        " or implements Supplier<StringConverter<Date>>");
+                .withErrorContaining("unknown type: Date");
     }
 
     @Test
@@ -538,8 +532,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter class that extends StringConverter<Boolean>" +
-                        " or implements Supplier<StringConverter<Boolean>>");
+                .withErrorContaining("unknown type: Boolean");
     }
 
     @Test
@@ -659,8 +652,7 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("define a converter class that extends StringConverter<Boolean>" +
-                        " or implements Supplier<StringConverter<Boolean>>");
+                .withErrorContaining("unknown type: Boolean");
     }
 
     @Test

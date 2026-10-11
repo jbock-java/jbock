@@ -6,6 +6,7 @@ import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
+import net.jbock.model.Arity;
 
 import javax.lang.model.type.TypeMirror;
 import java.io.File;
@@ -27,7 +28,7 @@ public record AutoMappings(TypeTool tool) {
             Match<M> match) {
         TypeMirror baseType = match.baseType();
         if (tool.isSameType(baseType, String.class)) {
-            return Optional.of(Mapping.create(match));
+            return Optional.of(Mapping.create(match, Arity.UNARY));
         }
         if (tool.isSameType(baseType, Integer.class)) {
             return Optional.of(createMapping("asInteger", match));

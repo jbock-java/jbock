@@ -15,7 +15,6 @@ import net.jbock.util.StringConverter;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.DeclaredType;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import static io.jbock.util.Either.left;
 
@@ -46,11 +45,6 @@ public record AutoOrEnumMapper(AutoMappings autoMappings) {
     }
 
     private ValidationFailure noConverterError(Match<?> match) {
-        String expectedType = StringConverter.class.getSimpleName() +
-                "<" + Util.typeToString(match.baseType()) + ">";
-        return match.fail("define a converter class that extends " + expectedType +
-                " or implements " +
-                Supplier.class.getSimpleName() +
-                "<" + expectedType + ">");
+        return match.fail("unknown type: " + Util.typeToString(match.baseType()));
     }
 }

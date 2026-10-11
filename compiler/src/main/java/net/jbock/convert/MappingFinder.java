@@ -1,6 +1,5 @@
 package net.jbock.convert;
 
-import com.palantir.javapoet.CodeBlock;
 import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.annotated.Item;
@@ -11,7 +10,6 @@ import net.jbock.convert.match.Match;
 import net.jbock.convert.match.MatchFinder;
 import net.jbock.model.Arity;
 import net.jbock.processor.SourceElement;
-import net.jbock.util.StringConverter;
 
 @Inject
 public record MappingFinder(
@@ -29,8 +27,7 @@ public record MappingFinder(
     public <M extends Item>
     Mapping<M> findNullaryMapping(M item) {
         Match<M> match = matchFinder.createNullaryMatch(item);
-        return Mapping.create(
-                CodeBlock.of("$T.identity())", StringConverter.class), match, Arity.NULLARY);
+        return Mapping.create(match, Arity.NULLARY);
     }
 
     private <M extends Item>

@@ -38,8 +38,10 @@ public final class Mapping<M extends Item> {
     }
 
     public static <M extends Item>
-    Mapping<M> create(Match<M> match) {
-        return new Mapping<>(Optional.empty(), match, Arity.UNARY);
+    Mapping<M> create(
+            Match<M> match,
+            Arity arity) {
+        return new Mapping<>(Optional.empty(), match, arity);
     }
 
     public static <M extends Item>
