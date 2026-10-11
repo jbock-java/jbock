@@ -37,47 +37,57 @@ An example:
 @Command
 interface DeleteCommand {
 
-  @Option(names = {"-v", "--verbosity"},
-          description = {"The return type for this option is \"optionalish\".",
-                         "Using int or Integer instead would make it a required option."})
+  /**
+   * The return type of this method is &quot;optionalish&quot;,
+   * so this is an optional option.
+   * Using int or Integer instead would make it a required option.
+   */
+  @Option(names = {"-v", "--verbosity"})
   OptionalInt verbosity();
 
-  @Parameter(
-          index = 0,
-          description = {"A required positional parameter.",
-                         "Path is a \"known type\",",
-                         "so the parser knows how to create a Path from a string."})
+  /**
+   * A required positional parameter.
+   * Path is one of the &quot;known types&quot;.
+   */
+  @Parameter(index = 0)
   Path path();
 
-  @Parameter(
-          index = 1,
-          description = {"The return type for this positional parameter is \"optionalish\",",
-                         "which makes this an optional positional parameter"})
+  /**
+   * The return type of this method is &quot;optionalish&quot;,
+   * so this is an optional positional parameter.
+   */
+  @Parameter(index = 1)
   Optional<Path> anotherPath();
 
-  @VarargsParameter(
-          description = {"The varargs parameter. There can be at most one of these.",
-                         "It is a catch-all for additional positional parameters.",
-                         "Must return List<KnownType>.",
-                         "Note: For an actual rm-style interface, it might make more sense",
-                         "to have only the VarargsParameter, and no other Parameters."})
+  /**
+   * A varargs parameter. There can be at most one of these.
+   * It is a catch-all for additional positional parameters.
+   * Must return List<KnownType>.
+   */
+  @VarargsParameter
   List<Path> morePaths();
   
-  @Option(names = "--dry-run",
-          description = {"The return type for this option is boolean,",
-                         "which makes it a mode flag."})
+  /**
+   * The return type is boolean, so this is a mode flag.
+   */
+  @Option(names = "--dry-run")
   boolean dryRun();
   
-  @Option(names = "-h",
-          description = "This returns List<KnownType>, so it's a \"repeatable option\".")
+  /**
+   * The return type is List<KnownType>, so this is option is repeatable.
+   */
   List<String> headers(); 
   
-  @Option(names = "--charset",
-          description = {"Charset is not a \"known type\",",
-                         "but we can use a default method to convert. See below."})
+  /**
+   * Charset is not one of the &quot;known types&quot;,
+   * so we use a default method to convert from String.
+   */
+  @Option(names = "--charset")
   Optional<String> charsetString();
   
-  // A default method can be used to convert from string.
+  /**
+   * This default method converts from String to Charset.
+   */
   default Charset charset() {
       return Charset.forName(charsetString());
   }
@@ -98,7 +108,7 @@ public static void main(String[] args) {
 
 ### Known types
 
-Some types are converted automatically. See [StandardConverters.java](https://github.com/jbock-java/jbock/blob/master/jbock/src/main/java/net/jbock/contrib/StandardConverters.java).
+Some types are converted automatically. All of these are listed in [StandardConverters.java](https://github.com/jbock-java/jbock/blob/master/jbock/src/main/java/net/jbock/contrib/StandardConverters.java).
 
 ### Sample projects
 
