@@ -13,8 +13,7 @@ which does not use runtime reflection, but generates a custom parser at compile 
 Choose any name for the java interface which will describe your command line API.
 Add the `@Command` anntation to your command interface, to make the annotation processor aware of it.
 
-Let's call a non-default interface method an *abstract method*.
-Each abstract method in your command interface represents a command line option or argument.
+Each abstract (i.e. non-`default`) method in your command interface represents a command line option or argument.
 It must have "getter signature": return something other that `void`, and have an empty parameter list.
 It must also be annotated with either
 `@Option`, `@Parameter` or `@VarargsParameter` (with one exception, see below).
@@ -25,11 +24,11 @@ They are used to declare flags, repeable and optional options and parameters, re
 > [!TIP]
 > If an abstract method is annotated with `@VarargsParameter`, it must return a list.
 > Only one such "catch-all" parameter may exist.
-> The varargs annotation can be omitted, unless you want to override its attributes.
+> The `@VarargsParameter` annotation can also be omitted, unless you want to override its attributes.
 
 > [!TIP]
 > Only `java.util.List` has special semantics, but no other "list-like" types.
-> For instance, the return type `ArrayList<String>` does *not* declare a
+> Example: An abstract method returning `ArrayList<String>` does *not* represent a
 > catch-all parameter.
 
 An example:
@@ -59,7 +58,7 @@ interface DeleteCommand {
   @VarargsParameter(
           description = {"The varargs parameter. There can be at most one of these.",
                          "It is a catch-all for additional positional parameters.",
-                         "Must return List<Something>.",
+                         "Must return List<KnownType>.",
                          "Note: For an actual rm-style interface, it might make more sense",
                          "to have only the VarargsParameter, and no other Parameters."})
   List<Path> morePaths();
@@ -70,7 +69,7 @@ interface DeleteCommand {
   boolean dryRun();
   
   @Option(names = "-h",
-          description = "This returns List<Something>, so it's a \"repeatable option\".")
+          description = "This returns List<KnownType>, so it's a \"repeatable option\".")
   List<String> headers(); 
   
   @Option(names = "--charset",
