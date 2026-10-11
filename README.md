@@ -2,11 +2,13 @@
 [![jbock](https://img.shields.io/maven-central/v/io.github.jbock-java/jbock?label=jbock)](https://central.sonatype.com/artifact/io.github.jbock-java/jbock)
 
 
-jbock is a command line parser, which uses well-known annotation names similar to [JCommander](https://jcommander.org/)
+jbock is a command line parser, which uses well-known annotation names, similar to those used by
+[JCommander](https://jcommander.org/)
 and [picocli](https://github.com/remkop/picocli).
-It is an
-[annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
-which does not use runtime reflection, but generates a custom parser at compile time instead.
+
+jbock is an
+[annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html).
+It does not rely on runtime reflection, but generates java source code instead.
 
 ### Quick start
 
@@ -28,7 +30,7 @@ They are used to declare flags, repeable and optional options and parameters, re
 > [!TIP]
 > Only the exact type `java.util.List` has special semantics.
 > An abstract method returning `ArrayList<String>`, for example, does *not* represent a
-> catch-all parameter.
+> repeatable option or catch-all parameter.
 
 An example:
 
@@ -63,10 +65,10 @@ interface DeleteCommand {
   Optional<Path> anotherPath();
 
   /**
-   * The return type is java.util.List,
+   * The return type of this parameter is java.util.List,
    * so this is the catch-all parameter.
    * It captures all but the first two positional parameters.
-   * The attribute {@code index = 2} is omitted.
+   * The index attribute {@code index = 2} is omitted here.
    */
   @Parameter
   List<Path> morePaths();
@@ -76,11 +78,6 @@ interface DeleteCommand {
    */
   @Option(names = "--dry-run")
   boolean dryRun();
-  
-  /**
-   * The return type is List<KnownType>, so this is option is repeatable.
-   */
-  List<String> headers(); 
   
   /**
    * Charset is not one of the &quot;known types&quot;,
