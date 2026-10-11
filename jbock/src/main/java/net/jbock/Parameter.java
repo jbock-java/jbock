@@ -10,16 +10,15 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * Marker annotation for a positional parameter that is <em>not</em> repeatable.
  * Use {@link VarargsParameter} to declare a repeatable positional parameter.
  *
- * <p>The annotated method must be abstract
- * and have an empty argument list.
+ * <p>The annotated method must be nullary and abstract.
  */
 @Target(METHOD)
 @Retention(SOURCE)
 public @interface Parameter {
 
     /**
-     * The parameter's index among the command's positional parameters.
-     * The first parameter's index must be {@code 0}.
+     * The parameter's position, relative to the other positional parameters.
+     * The indexes must start with {@code 0}, and must not contain any gaps.
      *
      * @return zero-based index
      */
@@ -27,7 +26,7 @@ public @interface Parameter {
 
     /**
      * The key that is used to find the parameter
-     * description in the internationalization bundle.
+     * description in the i18n bundle.
      *
      * @return description key or empty string
      */

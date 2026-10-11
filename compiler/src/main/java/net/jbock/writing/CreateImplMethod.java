@@ -49,10 +49,10 @@ final class CreateImplMethod implements HasCommandRepresentation {
 
     MethodSpec define() {
         MethodSpec.Builder spec = MethodSpec.methodBuilder("createImpl").addModifiers(PRIVATE, STATIC);
-        List<CodeBlock> constructorParams = new ArrayList<>(namedOptions().size() + positionalParameters().size() + varargsParameter().map(x -> 1).orElse(0));
+        List<CodeBlock> constructorParams = new ArrayList<>(namedOptions().size() + positionalParameters().size() + 1);
         if (allMappings().stream().anyMatch(m -> m.createConverterExpression().isPresent())) {
             ParameterSpec converters = ParameterSpec.builder(StandardConverters.class, CONVERTERS).build();
-            spec.addStatement("$T $N = new $T()", StandardConverters.class, converters, StandardConverters.class);
+            spec.addStatement("$1T $2N = new $1T()", StandardConverters.class, converters);
         }
         for (int i = 0; i < namedOptions().size(); i++) {
             Mapping<Option> m = namedOptions().get(i);
@@ -123,16 +123,10 @@ final class CreateImplMethod implements HasCommandRepresentation {
 
     private CodeBlock tailExpressionStringOption(Mapping<Option> m, int i) {
         return switch (m.multiplicity()) {
-            case REQUIRED ->
-                    CodeBlock.of(".stream().findAny().orElseThrow(() -> new $T($T.$L, $L))",
-                            ExMissingItem.class, ItemType.class, ItemType.OPTION, i);
+            case REQUIRED -> CodeBlock.of(".stream().findAny().orElseThrow(() -> new $T($T.$L, $L))",
+                    ExMissingItem.class, ItemType.class, ItemType.OPTION, i);
             case OPTIONAL -> CodeBlock.of(".stream().findAny()");
-            default -> {
-                if (!m.isRepeatable()) {
-                    throw new AssertionError();
-                }
-                yield CodeBlock.builder().build();
-            }
+            case REPEATABLE -> CodeBlock.builder().build();
         };
     }
 
@@ -147,42 +141,32 @@ final class CreateImplMethod implements HasCommandRepresentation {
                     CodeBlock.of(".collect($T.firstFailure())", EITHER),
                     orElseThrowConverterError(ItemType.OPTION, i),
                     CodeBlock.of(".stream().findAny()"));
-            default -> {
-                if (!m.isRepeatable()) {
-                    throw new AssertionError();
-                }
-                yield List.of(
-                        CodeBlock.of(".collect($T.firstFailure())", EITHER),
-                        orElseThrowConverterError(ItemType.OPTION, i));
-            }
+            case REPEATABLE -> List.of(
+                    CodeBlock.of(".collect($T.firstFailure())", EITHER),
+                    orElseThrowConverterError(ItemType.OPTION, i));
         };
     }
 
     private List<CodeBlock> tailExpressionParameter(Mapping<Parameter> m, int i) {
-        if (m.isRequired()) {
-            return List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
+        return switch (m.multiplicity()) {
+            case REQUIRED -> List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
                             ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
                     orElseThrowConverterError(ItemType.PARAMETER, i));
-        }
-        if (!m.isOptional()) {
-            throw new AssertionError();
-        }
-        return List.of(
-                CodeBlock.of(".stream()"),
-                CodeBlock.of(".collect($T.firstFailure())", EITHER),
-                orElseThrowConverterError(ItemType.PARAMETER, i),
-                CodeBlock.of(".stream().findAny()"));
+            case OPTIONAL -> List.of(CodeBlock.of(".stream()"),
+                    CodeBlock.of(".collect($T.firstFailure())", EITHER),
+                    orElseThrowConverterError(ItemType.PARAMETER, i),
+                    CodeBlock.of(".stream().findAny()"));
+            default-> throw new AssertionError("repeatable handled elsewhere");
+        };
     }
 
     private CodeBlock tailExpressionStringParameter(Mapping<Parameter> m, int i) {
-        if (m.isRequired()) {
-            return CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
+        return switch (m.multiplicity()) {
+            case REQUIRED -> CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
                     ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i);
-        }
-        if (!m.isOptional()) {
-            throw new AssertionError();
-        }
-        return CodeBlock.builder().build();
+            case OPTIONAL -> CodeBlock.builder().build();
+            default-> throw new AssertionError("repeatable handled elsewhere");
+        };
     }
 
     private ParameterSpec result() {
@@ -190,9 +174,9 @@ final class CreateImplMethod implements HasCommandRepresentation {
     }
 
     private CodeBlock orElseThrowConverterError(ItemType itemType, int i) {
-        ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
+        ParameterSpec failure = ParameterSpec.builder(STRING, "failure").build();
         return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5L))",
-                left, ExConvert.class, ItemType.class, itemType, i);
+                failure, ExConvert.class, ItemType.class, itemType, i);
     }
 
     @Override

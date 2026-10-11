@@ -8,8 +8,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  * Marker annotation for a named option.
- * The annotated method must be abstract
- * and have an empty argument list.
+ * The annotated method must be nullary and abstract.
  */
 @Target(METHOD)
 @Retention(SOURCE)
