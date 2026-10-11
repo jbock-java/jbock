@@ -31,19 +31,19 @@ import static net.jbock.common.Constants.mapOf;
 import static net.jbock.common.Suppliers.memoize;
 
 @Inject
-final class ParseMethod implements HasCommandRepresentation {
+final class ParseMethod {
 
-    private final CommandRepresentation commandRepresentation;
+    private final CommandRepresentation cr;
     private final GeneratedTypes generatedTypes;
     private final CreateModelMethod createModelMethod;
     private final ParserTypeFactory parserTypeFactory;
 
     ParseMethod(
             GeneratedTypes generatedTypes,
-            CommandRepresentation commandRepresentation,
+            CommandRepresentation cr,
             CreateModelMethod createModelMethod,
             ParserTypeFactory parserTypeFactory) {
-        this.commandRepresentation = commandRepresentation;
+        this.cr = cr;
         this.generatedTypes = generatedTypes;
         this.createModelMethod = createModelMethod;
         this.parserTypeFactory = parserTypeFactory;
@@ -63,10 +63,10 @@ final class ParseMethod implements HasCommandRepresentation {
         ParameterSpec optionStates = ParameterSpec.builder(
                 ArrayTypeName.of(ClassName.get(OptionState.class)),
                 "optionStates").build();
-        if (namedOptions().isEmpty()) {
+        if (cr().namedOptions().isEmpty()) {
             code.addStatement("$T $N = $T.of()", optionNames.type(), optionNames, Map.class);
         } else {
-            long mapSize = namedOptions().stream()
+            long mapSize = cr().namedOptions().stream()
                     .map(Mapping::item)
                     .map(Option::names)
                     .map(List::size)
@@ -74,7 +74,7 @@ final class ParseMethod implements HasCommandRepresentation {
                     .sum();
             int capacity = (int) (1 + Math.max(mapSize * 1.35, 15));
             code.addStatement("$T $N = new $T<>($L)", optionNames.type(), optionNames, HashMap.class, capacity);
-            for (Mapping<Option> namedOption : namedOptions()) {
+            for (Mapping<Option> namedOption : cr().namedOptions()) {
                 for (String dashedName : namedOption.item().names()) {
                     code.addStatement("$N.put($S, $L)",
                             optionNames, dashedName,
@@ -82,22 +82,22 @@ final class ParseMethod implements HasCommandRepresentation {
                 }
             }
         }
-        code.addStatement("$T $N = new $T[$L]", optionStates.type(), optionStates, OptionState.class, namedOptions().size());
-        for (Mapping<Option> namedOption : namedOptions()) {
+        code.addStatement("$T $N = new $T[$L]", optionStates.type(), optionStates, OptionState.class, cr().namedOptions().size());
+        for (Mapping<Option> namedOption : cr().namedOptions()) {
             code.addStatement("$N[$L] = new $T()",
                     optionStates, namedOption.item().internalIndex(),
                     optionParserType(namedOption));
         }
         ClassName parserClass;
-        if (isSuperCommand()) {
+        if (cr().isSuperCommand()) {
             parserClass = ClassName.get(SuperParser.class);
-        } else if (positionalParameters().stream().anyMatch(Mapping::isRepeatable)) {
+        } else if (cr().positionalParameters().stream().anyMatch(Mapping::isRepeatable)) {
             parserClass = ClassName.get(VarargsParameterParser.class);
         } else {
             parserClass = ClassName.get(StandardParser.class);
         }
         code.addStatement("$T $N = $T.create($N, $N, $L)", parserType, parser, parserClass,
-                optionNames, optionStates, positionalParameters().stream().filter(m -> !m.isRepeatable()).count());
+                optionNames, optionStates, cr().positionalParameters().stream().filter(m -> !m.isRepeatable()).count());
         code.add("try {\n").indent()
                 .addStatement("$N.parse($N)", parser, tokens);
         code.addStatement("return $T.right(createImpl($N))", EITHER,
@@ -112,7 +112,7 @@ final class ParseMethod implements HasCommandRepresentation {
                 .addParameter(tokens)
                 .returns(generatedTypes().parseResultType())
                 .addCode(code.build())
-                .addModifiers(sourceElement().accessModifiers())
+                .addModifiers(cr().sourceElement().accessModifiers())
                 .addModifiers(Modifier.STATIC)
                 .build();
     });
@@ -143,8 +143,7 @@ final class ParseMethod implements HasCommandRepresentation {
         return generatedTypes;
     }
 
-    @Override
-    public CommandRepresentation commandRepresentation() {
-        return commandRepresentation;
+    private CommandRepresentation cr() {
+        return cr;
     }
 }

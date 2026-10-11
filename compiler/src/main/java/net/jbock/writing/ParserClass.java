@@ -12,32 +12,32 @@ import javax.lang.model.element.Modifier;
 @Inject
 public record ParserClass(
         ParseMethod parseMethod,
-        CommandRepresentation commandRepresentation,
+        CommandRepresentation cr,
         ParseOrExitMethod parseOrExitMethod,
         CreateImplMethod createImplMethod,
         CreateModelMethod createModelMethod,
         GeneratedAnnotation generatedAnnotation,
-        ImplClass implClass) implements HasCommandRepresentation {
+        ImplClass implClass) {
 
     /**
      * Entry point for code generation.
      *
      * @return type spec of the generated {@code *Parser}
      */
-    TypeSpec define() {
-        TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement().generatedClass());
+    public TypeSpec define() {
+        TypeSpec.Builder spec = TypeSpec.classBuilder(cr.sourceElement().generatedClass());
         spec.addMethod(parseMethod.get());
-        if (!sourceElement().skipGeneratingParseOrExitMethod()) {
+        if (!cr.sourceElement().skipGeneratingParseOrExitMethod()) {
             spec.addMethod(parseOrExitMethod.define());
         }
 
         spec.addMethod(createImplMethod.define());
         spec.addMethod(createModelMethod.get());
-        Modifier[] modifiers = sourceElement().accessModifiers().toArray(new Modifier[0]);
+        Modifier[] modifiers = cr.sourceElement().accessModifiers().toArray(new Modifier[0]);
         spec.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE)
                 .build());
 
-        return spec.addOriginatingElement(sourceElement().element())
+        return spec.addOriginatingElement(cr.sourceElement().element())
                 .addModifiers(modifiers)
                 .addModifiers(Modifier.FINAL)
                 .addType(implClass.define())

@@ -30,41 +30,41 @@ import static net.jbock.common.Constants.STRING;
  * Implementation of the command interface.
  */
 @Inject
-final class CreateImplMethod implements HasCommandRepresentation {
+final class CreateImplMethod {
 
-    private final CommandRepresentation commandRepresentation;
+    private final CommandRepresentation cr;
     private final GeneratedTypes generatedTypes;
 
     private final Supplier<ParameterSpec> resultSupplier = Suppliers.memoize(() ->
             ParameterSpec.builder(ClassName.get(ParseResult.class), "result").build());
 
     CreateImplMethod(
-            CommandRepresentation commandRepresentation,
+            CommandRepresentation cr,
             GeneratedTypes generatedTypes) {
-        this.commandRepresentation = commandRepresentation;
+        this.cr = cr;
         this.generatedTypes = generatedTypes;
     }
 
     MethodSpec define() {
         MethodSpec.Builder spec = MethodSpec.methodBuilder("createImpl").addModifiers(PRIVATE, STATIC);
-        List<CodeBlock> constructorParams = new ArrayList<>(namedOptions().size() + positionalParameters().size() + 1);
-        if (allMappings().stream().anyMatch(m -> m.createConverterExpression().isPresent())) {
+        List<CodeBlock> constructorParams = new ArrayList<>(cr.namedOptions().size() + cr.positionalParameters().size() + 1);
+        if (cr.allMappings().stream().anyMatch(m -> m.createConverterExpression().isPresent())) {
             ParameterSpec converters = ParameterSpec.builder(StandardConverters.class, CONVERTERS).build();
             spec.addStatement("$1T $2N = new $1T()", StandardConverters.class, converters);
         }
-        for (int i = 0; i < namedOptions().size(); i++) {
-            Mapping<Option> m = namedOptions().get(i);
+        for (int i = 0; i < cr.namedOptions().size(); i++) {
+            Mapping<Option> m = cr.namedOptions().get(i);
             spec.addStatement("$T $N = $L", m.item().returnType(), m.param(), convertExpressionOption(m, i));
             constructorParams.add(CodeBlock.of("$N", m.param()));
         }
-        for (int i = 0; i < positionalParameters().size(); i++) {
-            Mapping<Parameter> m = positionalParameters().get(i);
+        for (int i = 0; i < cr.positionalParameters().size(); i++) {
+            Mapping<Parameter> m = cr.positionalParameters().get(i);
             spec.addStatement("$T $N = $L", m.item().returnType(), m.param(), convertExpressionParameter(m, i));
             constructorParams.add(CodeBlock.of("$N", m.param()));
         }
         spec.addStatement("return new $T($L)", generatedTypes.implType(), CodeBlock.join(constructorParams, ", "));
         return spec.addParameter(result())
-                .returns(sourceElement().typeName())
+                .returns(cr.sourceElement().typeName())
                 .addException(ExFailure.class)
                 .build();
     }
@@ -111,7 +111,7 @@ final class CreateImplMethod implements HasCommandRepresentation {
             code.add(CodeBlock.of("$N.rest().stream()", result()));
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
             code.add(CodeBlock.of(".collect($T.firstFailure())", EITHER));
-            code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters().size()));
+            code.add(orElseThrowConverterError(ItemType.PARAMETER, cr.positionalParameters().size()));
         } else {
             code.add(CodeBlock.of("$N.rest()", result()));
         }
@@ -153,7 +153,7 @@ final class CreateImplMethod implements HasCommandRepresentation {
                     CodeBlock.of(".collect($T.firstFailure())", EITHER),
                     orElseThrowConverterError(ItemType.PARAMETER, i),
                     CodeBlock.of(".stream().findAny()"));
-            default-> throw new AssertionError("repeatable handled elsewhere");
+            default -> throw new AssertionError("repeatable handled elsewhere");
         };
     }
 
@@ -162,7 +162,7 @@ final class CreateImplMethod implements HasCommandRepresentation {
             case REQUIRED -> CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
                     ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i);
             case OPTIONAL -> CodeBlock.builder().build();
-            default-> throw new AssertionError("repeatable handled elsewhere");
+            default -> throw new AssertionError("repeatable handled elsewhere");
         };
     }
 
@@ -174,10 +174,5 @@ final class CreateImplMethod implements HasCommandRepresentation {
         ParameterSpec failure = ParameterSpec.builder(STRING, "failure").build();
         return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5L))",
                 failure, ExConvert.class, ItemType.class, itemType, i);
-    }
-
-    @Override
-    public CommandRepresentation commandRepresentation() {
-        return commandRepresentation;
     }
 }

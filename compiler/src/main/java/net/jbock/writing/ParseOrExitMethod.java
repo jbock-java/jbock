@@ -19,22 +19,22 @@ import static net.jbock.common.Constants.STRING;
 
 @Inject
 record ParseOrExitMethod(
-        CommandRepresentation commandRepresentation,
+        CommandRepresentation cr,
         GeneratedTypes generatedTypes,
         ParseMethod parseMethod,
-        CreateModelMethod createModelMethod) implements HasCommandRepresentation {
+        CreateModelMethod createModelMethod) {
 
     MethodSpec define() {
 
-        ParameterSpec args = parseOrExitMethodAcceptsList() ?
+        ParameterSpec args = cr.parseOrExitMethodAcceptsList() ?
                 builder(LIST_OF_STRING, "args").build() :
                 builder(ArrayTypeName.of(STRING), "args").build();
         ParameterSpec notSuccess = builder(generatedTypes.parseResultType(), "failure").build();
         ParameterSpec err = builder(AtFileError.class, "err").build();
 
         CodeBlock.Builder code = CodeBlock.builder();
-        if (!sourceElement().skipHelp()) {
-            if (parseOrExitMethodAcceptsList()) {
+        if (!cr.sourceElement().skipHelp()) {
+            if (cr.parseOrExitMethodAcceptsList()) {
                 code.beginControlFlow("if (!$1N.isEmpty() && $2S.equals($1N.get(0)))", args, "--help");
             } else {
                 code.beginControlFlow("if ($1N.length > 0 && $2S.equals($1N[0]))", args, "--help");
@@ -44,7 +44,7 @@ record ParseOrExitMethod(
                     .addStatement("$T.exit(0)", System.class)
                     .endControlFlow();
         }
-        if (enableAtFileExpansion()) {
+        if (cr.enableAtFileExpansion()) {
             code.add("return $T.from($N).expand()\n", ParseRequest.class, args).indent()
                     .add(".mapLeft($1N -> $1N.addModel($2N()))\n", err, createModelMethod.get())
                     .add(".flatMap(this::$N)\n", parseMethod.get())
@@ -55,7 +55,7 @@ record ParseOrExitMethod(
                     .addStatement("return new $T()", RuntimeException.class).unindent()
                     .addStatement("})").unindent();
         } else {
-            CodeBlock pArgs = parseOrExitMethodAcceptsList() ?
+            CodeBlock pArgs = cr.parseOrExitMethodAcceptsList() ?
                     CodeBlock.of("$N", args) :
                     CodeBlock.of("$T.of($N)", List.class, args);
             code.add("return parse($L).orElseThrow($N -> {\n", pArgs, notSuccess).indent()
@@ -66,8 +66,8 @@ record ParseOrExitMethod(
                     .addStatement("})");
         }
         return methodBuilder("parseOrExit").addParameter(args)
-                .addModifiers(sourceElement().accessModifiers())
-                .returns(generatedTypes.sourceElement().typeName())
+                .addModifiers(cr.sourceElement().accessModifiers())
+                .returns(cr.sourceElement().typeName())
                 .addModifiers(Modifier.STATIC)
                 .addCode(code.build())
                 .build();

@@ -13,10 +13,10 @@ public interface ProcessorComponent {
 
     @Component.Factory
     interface Factory {
-        ProcessorComponent create(ProcessingEnvironment processingEnvironment);
+        ProcessorComponent create(ProcessingEnvironment env);
     }
 
-    static ProcessorComponent create(ProcessingEnvironment processingEnvironment) {
-        return ProcessorComponent_Impl.factory().create(processingEnvironment);
+    static ProcessorComponent create(ProcessingEnvironment env) {
+        return ProcessorComponent_Impl.factory().create(env);
     }
 }

@@ -22,13 +22,7 @@ import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
 
 @Inject
-final class OptionValidator {
-
-    private final MappingFinder mappingFinder;
-
-    OptionValidator(MappingFinder mappingFinder) {
-        this.mappingFinder = mappingFinder;
-    }
+record OptionValidator(MappingFinder mappingFinder) {
 
     Either<List<ValidationFailure>, List<Mapping<Option>>> wrapOptions(
             Items items) {

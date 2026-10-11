@@ -18,36 +18,36 @@ import static com.palantir.javapoet.MethodSpec.methodBuilder;
 import static net.jbock.common.Suppliers.memoize;
 
 @Inject
-final class CreateModelMethod implements HasCommandRepresentation {
-    private final CommandRepresentation commandRepresentation;
+final class CreateModelMethod {
+    private final CommandRepresentation cr;
 
-    CreateModelMethod(CommandRepresentation commandRepresentation) {
-        this.commandRepresentation = commandRepresentation;
+    CreateModelMethod(CommandRepresentation cr) {
+        this.cr = cr;
     }
 
     private final Supplier<MethodSpec> define = memoize(() -> {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("return $T.builder()", CommandModel.class));
-        sourceElement().descriptionKey().ifPresent(key ->
+        cr().sourceElement().descriptionKey().ifPresent(key ->
                 code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
-        for (String descriptionLine : sourceElement().description()) {
+        for (String descriptionLine : cr().sourceElement().description()) {
             code.add(CodeBlock.of(".addDescriptionLine($S)", descriptionLine));
         }
-        code.add(CodeBlock.of(".withProgramName($S)", sourceElement().programName()));
-        if (isSuperCommand()) {
+        code.add(CodeBlock.of(".withProgramName($S)", cr().sourceElement().programName()));
+        if (cr().isSuperCommand()) {
             code.add(CodeBlock.of(".withSuperCommand($L)", true));
         }
-        for (Mapping<Option> c : namedOptions()) {
+        for (Mapping<Option> c : cr().namedOptions()) {
             code.add(optionBlock(c));
         }
-        for (Mapping<net.jbock.annotated.Parameter> c : positionalParameters()) {
+        for (Mapping<net.jbock.annotated.Parameter> c : cr().positionalParameters()) {
             code.add(parameterBlock(c));
         }
         code.add(CodeBlock.of(".build()"));
         return methodBuilder("createModel")
                 .addStatement(CodeBlock.join(code, System.lineSeparator()))
                 .returns(CommandModel.class)
-                .addModifiers(sourceElement().accessModifiers())
+                .addModifiers(cr().sourceElement().accessModifiers())
                 .addModifiers(Modifier.STATIC)
                 .build();
     });
@@ -105,8 +105,7 @@ final class CreateModelMethod implements HasCommandRepresentation {
         return CodeBlock.of(".addParameter($L)", CodeBlock.join(code, System.lineSeparator()));
     }
 
-    @Override
-    public CommandRepresentation commandRepresentation() {
-        return commandRepresentation;
+    private CommandRepresentation cr() {
+        return cr;
     }
 }

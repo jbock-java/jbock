@@ -6,7 +6,6 @@ import net.jbock.Command;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -25,7 +24,7 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 
 @Inject
-public class MethodStep implements Step {
+public record MethodStep(ProcessingEnvironment env, Util util) implements Step {
 
     private static final Set<TypeKind> FORBIDDEN_KINDS = EnumSet.of(
             TypeKind.VOID,
@@ -34,14 +33,6 @@ public class MethodStep implements Step {
             TypeKind.OTHER,
             TypeKind.UNION,
             TypeKind.NONE);
-
-    private final Messager messager;
-    private final Util util;
-
-    MethodStep(ProcessingEnvironment processingEnvironment, Util util) {
-        this.messager = processingEnvironment.getMessager();
-        this.util = util;
-    }
 
     @Override
     public Set<String> annotations() {
@@ -61,7 +52,7 @@ public class MethodStep implements Step {
                     .or(() -> validateTypeParameters(method))
                     .or(() -> validateReturnType(method))
                     .or(() -> util.checkExceptionsInDeclaration(method))
-                    .ifPresent(failure -> failure.writeTo(messager));
+                    .ifPresent(failure -> failure.writeTo(env.getMessager()));
         }
         return Set.of();
     }

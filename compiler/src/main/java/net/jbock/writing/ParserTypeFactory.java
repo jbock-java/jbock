@@ -8,13 +8,12 @@ import net.jbock.parse.SuperParser;
 import net.jbock.parse.VarargsParameterParser;
 
 @Inject
-record ParserTypeFactory(
-        CommandRepresentation commandRepresentation) implements HasCommandRepresentation {
+record ParserTypeFactory(CommandRepresentation cr) {
 
     ClassName get() {
-        if (isSuperCommand()) {
+        if (cr.isSuperCommand()) {
             return ClassName.get(SuperParser.class);
-        } else if (positionalParameters().stream().anyMatch(Mapping::isRepeatable)) {
+        } else if (cr.positionalParameters().stream().anyMatch(Mapping::isRepeatable)) {
             return ClassName.get(VarargsParameterParser.class);
         } else {
             return ClassName.get(StandardParser.class);

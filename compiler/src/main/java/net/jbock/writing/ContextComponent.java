@@ -1,6 +1,5 @@
 package net.jbock.writing;
 
-import com.palantir.javapoet.TypeSpec;
 import io.jbock.simple.Component;
 
 @Component
@@ -10,11 +9,10 @@ public interface ContextComponent {
 
     @Component.Factory
     interface Factory {
-        ContextComponent create(CommandRepresentation command);
+        ContextComponent create(CommandRepresentation cr);
     }
 
-    static TypeSpec parserClass(CommandRepresentation command) {
-        ContextComponent component = ContextComponent_Impl.factory().create(command);
-        return component.parser().define();
+    static ContextComponent create(CommandRepresentation cr) {
+        return ContextComponent_Impl.factory().create(cr);
     }
 }

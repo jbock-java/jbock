@@ -48,4 +48,16 @@ public final class CommandRepresentation {
     List<Mapping<?>> allMappings() {
         return allMappings.get();
     }
+
+    boolean isSuperCommand() {
+        return sourceElement().isSuperCommand();
+    }
+
+    boolean parseOrExitMethodAcceptsList() {
+        return sourceElement().parseOrExitMethodAcceptsList();
+    }
+
+    boolean enableAtFileExpansion() {
+        return sourceElement().enableAtFileExpansion();
+    }
 }

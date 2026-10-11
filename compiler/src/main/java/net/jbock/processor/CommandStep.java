@@ -10,7 +10,6 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.validate.ValidateComponent;
 import net.jbock.writing.ContextComponent;
 
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -30,23 +29,11 @@ import static net.jbock.common.Util.checkNoDuplicateAnnotations;
  * It performs validation and source generation.
  */
 @Inject
-public final class CommandStep implements Step {
-
-    private final Messager messager;
-    private final Util util;
-    private final SourceFileGenerator sourceFileGenerator;
-    private final ValidateComponent.Factory validateComponentFactory;
-
-    CommandStep(
-            ProcessingEnvironment processingEnvironment,
-            Util util,
-            SourceFileGenerator sourceFileGenerator,
-            ValidateComponent.Factory validateComponentFactory) {
-        this.messager = processingEnvironment.getMessager();
-        this.util = util;
-        this.sourceFileGenerator = sourceFileGenerator;
-        this.validateComponentFactory = validateComponentFactory;
-    }
+public record CommandStep(
+        ProcessingEnvironment processingEnvironment,
+        Util util,
+        SourceFileGenerator sourceFileGenerator,
+        ValidateComponent.Factory validateComponentFactory) implements Step {
 
     @Override
     public Set<String> annotations() {
@@ -70,7 +57,7 @@ public final class CommandStep implements Step {
         validateComponentFactory.create(sourceElement)
                 .commandProcessor()
                 .generate()
-                .map(ContextComponent::parserClass)
+                .map(cr -> ContextComponent.create(cr).parser().define())
                 .ifLeftOrElse(
                         this::printFailures,
                         typeSpec -> writeSpec(sourceElement, typeSpec));
@@ -99,7 +86,7 @@ public final class CommandStep implements Step {
 
     private void printFailures(List<ValidationFailure> failures) {
         for (ValidationFailure failure : failures) {
-            failure.writeTo(messager);
+            failure.writeTo(processingEnvironment.getMessager());
         }
     }
 }

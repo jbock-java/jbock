@@ -11,17 +11,17 @@ import javax.lang.model.element.Name;
 import static net.jbock.common.Constants.EITHER;
 
 @Inject
-record GeneratedTypes(CommandRepresentation commandRepresentation) implements HasCommandRepresentation {
+record GeneratedTypes(CommandRepresentation cr) {
 
     ClassName implType() {
-        Name simpleName = sourceElement().element().getSimpleName();
-        return sourceElement().generatedClass().nestedClass(simpleName + "_Impl");
+        Name simpleName = cr.sourceElement().element().getSimpleName();
+        return cr.sourceElement().generatedClass().nestedClass(simpleName + "_Impl");
     }
 
     TypeName parseResultType() {
         return ParameterizedTypeName.get(
                 EITHER,
                 ClassName.get(ParsingFailed.class),
-                sourceElement().typeName());
+                cr.sourceElement().typeName());
     }
 }

@@ -25,25 +25,25 @@ import static javax.lang.model.element.Modifier.STATIC;
 @Inject
 record ImplClass(
         GeneratedTypes generatedTypes,
-        CommandRepresentation commandRepresentation) implements HasCommandRepresentation {
+        CommandRepresentation cr) {
 
     TypeSpec define() {
-        if (sourceElement().isInterface()) {
+        if (cr.sourceElement().isInterface()) {
             TypeSpec.Builder spec = TypeSpec.recordBuilder(generatedTypes.implType());
             spec.addModifiers(PRIVATE);
             spec.recordConstructor(recordConstructor());
-            spec.addSuperinterface(sourceElement().typeName());
+            spec.addSuperinterface(cr.sourceElement().typeName());
             return spec.build();
         } else {
             TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType());
-            spec.superclass(sourceElement().typeName());
+            spec.superclass(cr.sourceElement().typeName());
             return spec.addModifiers(PRIVATE, STATIC, FINAL)
                     .addMethod(allArgsConstructor())
                     .addMethod(generateToString())
-                    .addFields(allMappings().stream()
+                    .addFields(cr.allMappings().stream()
                             .map(Mapping::field)
                             .toList())
-                    .addMethods(allMappings().stream()
+                    .addMethods(cr.allMappings().stream()
                             .map(this::parameterMethodOverride)
                             .collect(toList()))
                     .build();
@@ -62,11 +62,11 @@ record ImplClass(
 
     private MethodSpec allArgsConstructor() {
         MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-        for (Mapping<Option> m : namedOptions()) {
+        for (Mapping<Option> m : cr.namedOptions()) {
             spec.addStatement("this.$N = $N", m.field(), m.param());
             spec.addParameter(m.param());
         }
-        for (Mapping<Parameter> m : positionalParameters()) {
+        for (Mapping<Parameter> m : cr.positionalParameters()) {
             spec.addStatement("this.$N = $N", m.field(), m.param());
             spec.addParameter(m.param());
         }
@@ -75,11 +75,11 @@ record ImplClass(
 
     private MethodSpec recordConstructor() {
         MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-        List<Mapping<Option>> mappings = namedOptions();
+        List<Mapping<Option>> mappings = cr.namedOptions();
         for (Mapping<Option> mapping : mappings) {
             spec.addParameter(ParameterSpec.builder(mapping.field().type(), mapping.field().name()).build());
         }
-        List<Mapping<Parameter>> positional = positionalParameters();
+        List<Mapping<Parameter>> positional = cr.positionalParameters();
         for (Mapping<Parameter> mapping : positional) {
             spec.addParameter(ParameterSpec.builder(mapping.field().type(), mapping.field().name()).build());
         }
@@ -92,12 +92,12 @@ record ImplClass(
         ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
         spec.addStatement("$T $N = new $T($S, $S, $S)", StringJoiner.class, joiner, StringJoiner.class,
                 ", ", "{ ", " }");
-        for (int i = 0; i < namedOptions().size(); i++) {
-            Mapping<Option> m = namedOptions().get(i);
+        for (int i = 0; i < cr.namedOptions().size(); i++) {
+            Mapping<Option> m = cr.namedOptions().get(i);
             spec.addStatement("$N.add($S + $N)", joiner, m.field().name() + ": ", m.field());
         }
-        for (int i = 0; i < positionalParameters().size(); i++) {
-            Mapping<Parameter> m = positionalParameters().get(i);
+        for (int i = 0; i < cr.positionalParameters().size(); i++) {
+            Mapping<Parameter> m = cr.positionalParameters().get(i);
             spec.addStatement("$N.add($S + $N)", joiner, m.field().name() + ": ", m.field());
         }
         spec.addStatement("return $N.toString()", joiner);

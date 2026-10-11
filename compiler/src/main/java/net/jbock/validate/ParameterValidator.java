@@ -20,20 +20,10 @@ import static io.jbock.util.Eithers.optionalList;
 import static io.jbock.util.Eithers.toOptionalList;
 
 @Inject
-final class ParameterValidator {
-
-    private final SourceElement sourceElement;
-    private final MappingFinder mappingFinder;
-    private final TypeTool tool;
-
-    ParameterValidator(
-            SourceElement sourceElement,
-            MappingFinder mappingFinder,
-            TypeTool tool) {
-        this.sourceElement = sourceElement;
-        this.mappingFinder = mappingFinder;
-        this.tool = tool;
-    }
+record ParameterValidator(
+        SourceElement sourceElement,
+        MappingFinder mappingFinder,
+        TypeTool tool) {
 
     Either<List<ValidationFailure>, List<Mapping<Parameter>>> wrapPositionalParams(
             Items items) {

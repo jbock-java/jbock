@@ -10,7 +10,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -19,7 +18,6 @@ import static net.jbock.common.Suppliers.memoize;
 
 public final class SourceElement {
 
-    private final Command command;
     private final TypeElement typeElement;
 
     private final Supplier<List<Modifier>> accessModifiers = memoize(() -> command().publicParser() ?
@@ -42,14 +40,12 @@ public final class SourceElement {
                 .peerClass(String.join("_", commandClass.simpleNames()) + "Parser");
     });
 
-    private SourceElement(Command command, TypeElement typeElement) {
-        this.command = command;
+    private SourceElement(TypeElement typeElement) {
         this.typeElement = typeElement;
     }
 
     static SourceElement create(TypeElement typeElement) {
-        Command command = Objects.requireNonNull(typeElement.getAnnotation(Command.class));
-        return new SourceElement(command, typeElement);
+        return new SourceElement(typeElement);
     }
 
     public TypeElement element() {
@@ -65,7 +61,7 @@ public final class SourceElement {
     }
 
     public boolean isSuperCommand() {
-        return command.superCommand();
+        return command().superCommand();
     }
 
     public List<Modifier> accessModifiers() {
@@ -93,23 +89,23 @@ public final class SourceElement {
     }
 
     public boolean skipGeneratingParseOrExitMethod() {
-        return command.skipGeneratingParseOrExitMethod();
+        return command().skipGeneratingParseOrExitMethod();
     }
 
     public boolean skipHelp() {
-        return command.skipHelp();
+        return command().skipHelp();
     }
 
     public boolean parseOrExitMethodAcceptsList() {
-        return command.parseOrExitMethodAcceptsList();
+        return command().parseOrExitMethodAcceptsList();
     }
 
     public boolean enableAtFileExpansion() {
-        return command.enableAtFileExpansion();
+        return command().enableAtFileExpansion();
     }
 
     private Command command() {
-        return command;
+        return typeElement.getAnnotation(Command.class);
     }
 
     private TypeElement typeElement() {
