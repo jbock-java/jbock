@@ -33,7 +33,7 @@ dependencies {
   implementation("io.github.jbock-java:auto-common:1.2.3")
   implementation(jbock)
   compileOnly(sc)
-  annotationProcessor("io.github.jbock-java:simple-component-compiler:2.0.1")
+  annotationProcessor("io.github.jbock-java:simple-component-compiler:2.0.2")
   testImplementation("io.github.jbock-java:compile-testing:0.19.12")
   testImplementation(mockito)
   testImplementation(platform("org.junit:junit-bom:6.1.2"))
