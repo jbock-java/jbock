@@ -90,7 +90,7 @@ final class CreateImplMethod implements HasCommandRepresentation {
     private CodeBlock convertExpressionParameter(Mapping<Parameter> m, int i) {
         List<CodeBlock> code = new ArrayList<>();
         if (m.isRepeatable()) {
-            return convertExpressionVarargsParameter(m);
+            return convertExpressionRepeatableParameter(m);
         }
         if (m.createConverterExpression().isPresent()) {
             code.add(CodeBlock.of("$N.param($L)", result(),
@@ -105,7 +105,7 @@ final class CreateImplMethod implements HasCommandRepresentation {
         return CodeBlock.join(code, System.lineSeparator());
     }
 
-    private CodeBlock convertExpressionVarargsParameter(Mapping<Parameter> m) {
+    private CodeBlock convertExpressionRepeatableParameter(Mapping<Parameter> m) {
         List<CodeBlock> code = new ArrayList<>();
         if (m.createConverterExpression().isPresent()) {
             code.add(CodeBlock.of("$N.rest().stream()", result()));
