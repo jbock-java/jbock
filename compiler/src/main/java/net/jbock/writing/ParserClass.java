@@ -10,7 +10,7 @@ import javax.lang.model.element.Modifier;
  * Generates the *Parser class.
  */
 @Inject
-record ParserClass(
+public record ParserClass(
         ParseMethod parseMethod,
         CommandRepresentation commandRepresentation,
         ParseOrExitMethod parseOrExitMethod,

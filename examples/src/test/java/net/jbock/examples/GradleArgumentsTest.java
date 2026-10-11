@@ -105,6 +105,7 @@ class GradleArgumentsTest {
                 .has(GradleArguments::dir, Optional.empty())
                 .has(GradleArguments::cmos, false)
                 .has(GradleArguments::verbose, false)
+                .has(GradleArguments::mainToken, Optional.empty())
                 .has(GradleArguments::otherTokens, List.of());
         f.assertThat("-m", "hello")
                 .has(GradleArguments::message, Optional.of("hello"))
@@ -112,6 +113,7 @@ class GradleArgumentsTest {
                 .has(GradleArguments::dir, Optional.empty())
                 .has(GradleArguments::cmos, false)
                 .has(GradleArguments::verbose, false)
+                .has(GradleArguments::mainToken, Optional.empty())
                 .has(GradleArguments::otherTokens, List.of());
         f.assertThat("--message=hello")
                 .has(GradleArguments::message, Optional.of("hello"))
@@ -119,6 +121,7 @@ class GradleArgumentsTest {
                 .has(GradleArguments::dir, Optional.empty())
                 .has(GradleArguments::cmos, false)
                 .has(GradleArguments::verbose, false)
+                .has(GradleArguments::mainToken, Optional.empty())
                 .has(GradleArguments::otherTokens, List.of());
         f.assertThat("--message", "hello")
                 .has(GradleArguments::message, Optional.of("hello"))
@@ -126,6 +129,7 @@ class GradleArgumentsTest {
                 .has(GradleArguments::dir, Optional.empty())
                 .has(GradleArguments::cmos, false)
                 .has(GradleArguments::verbose, false)
+                .has(GradleArguments::mainToken, Optional.empty())
                 .has(GradleArguments::otherTokens, List.of());
     }
 

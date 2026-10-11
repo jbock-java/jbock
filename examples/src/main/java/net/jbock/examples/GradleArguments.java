@@ -4,7 +4,6 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
-import net.jbock.VarargsParameter;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +38,7 @@ interface GradleArguments {
             description = "some token")
     Optional<String> mainToken();
 
-    @VarargsParameter(paramLabel = "moreTokens",
+    @Parameter(paramLabel = "moreTokens",
             description = "some more tokens")
     List<String> otherTokens();
 

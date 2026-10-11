@@ -20,11 +20,12 @@ class SuperCommandTest {
                 "  @Parameter(index = 0)",
                 "  String a();",
                 "",
+                "  @Parameter",
                 "  List<Integer> rest();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("The catch-all parameter in a super command must return List<String>");
+                .withErrorContaining("Only List<String> allowed in a super command");
     }
 }

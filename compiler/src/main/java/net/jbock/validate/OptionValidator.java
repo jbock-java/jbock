@@ -45,6 +45,7 @@ final class OptionValidator {
             Option option) {
         return checkNullary(option)
                 .map(mappingFinder::findNullaryMapping)
+                .map(Either::<ValidationFailure, Mapping<Option>>right)
                 .orElseGet(() -> mappingFinder.findMapping(option));
     }
 

@@ -565,6 +565,7 @@ class ProcessorTest {
                 "  @Option(names = \"--xoxo\")",
                 "  int goodMethod();",
                 "",
+                "  @Parameter",
                 "  void parameterized(String foobar);",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
@@ -647,19 +648,6 @@ class ProcessorTest {
     }
 
     @Test
-    void missingAnnotation() {
-        JavaFileObject javaFile = fromSource(
-                "@Command",
-                "abstract class Arguments {",
-                "",
-                "  abstract List<String> a();",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .compilesWithoutError();
-    }
-
-    @Test
     void positionalFlag() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
@@ -700,7 +688,7 @@ class ProcessorTest {
                 "  @Option(names = \"--x\")",
                 "  abstract List<String> a();",
                 "",
-                "  @VarargsParameter",
+                "  @Parameter",
                 "  abstract List<String> b();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))

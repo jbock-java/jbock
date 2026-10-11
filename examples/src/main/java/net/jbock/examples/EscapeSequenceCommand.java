@@ -15,5 +15,6 @@ interface EscapeSequenceCommand {
     @Option(names = "--bare")
     boolean bare();
 
+    @Parameter
     List<String> remainingArgs();
 }

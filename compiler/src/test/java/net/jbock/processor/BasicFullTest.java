@@ -17,7 +17,7 @@ class BasicFullTest {
                 "@Command(skipGeneratingParseOrExitMethod = true)",
                 "abstract class Arguments {",
                 "",
-                "  @VarargsParameter",
+                "  @Parameter",
                 "  abstract List<String> hello();",
                 "}");
         List<String> expectedParser =
@@ -87,6 +87,7 @@ class BasicFullTest {
                 "@Command(skipGeneratingParseOrExitMethod = true, publicParser = true)",
                 "interface Arguments {",
                 "",
+                "  @Parameter",
                 "  List<String> hello();",
                 "}");
         List<String> expectedParser =

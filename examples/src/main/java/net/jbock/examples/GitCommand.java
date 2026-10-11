@@ -16,15 +16,17 @@ interface GitCommand {
             description = "Add file contents to the index",
             parseOrExitMethodAcceptsList = true)
     interface AddCommand {
+        @Parameter
         List<String> pathspec();
 
         // more parameters and options...
     }
 
-    @Parameter(index = 0)
+    @Parameter
     String command();
 
     // catch-all
+    @Parameter
     List<String> rest();
 
     // more options...

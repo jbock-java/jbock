@@ -19,13 +19,27 @@ public final class Parameter extends Item {
                     .toUpperCase(Locale.ROOT)));
 
     private final net.jbock.Parameter parameter;
+    private final int internalIndex;
 
     Parameter(
             ExecutableElement method,
             net.jbock.Parameter parameter,
             String enumName) {
+        this(method, parameter, enumName, -1);
+    }
+
+    Parameter(
+            ExecutableElement method,
+            net.jbock.Parameter parameter,
+            String enumName,
+            int internalIndex) {
         super(method, enumName);
         this.parameter = parameter;
+        this.internalIndex = internalIndex;
+    }
+
+    Parameter withInternalIndex(int index) {
+        return new Parameter(method(), parameter, enumName(), index);
     }
 
     @Override
@@ -48,13 +62,15 @@ public final class Parameter extends Item {
         return true;
     }
 
-    @Override
-    public boolean isVarargsParameter() {
-        return false;
+    public int rawIndex() {
+        return parameter.index();
     }
 
     public int index() {
-        return parameter.index();
+        if (internalIndex < 0) {
+            throw new AssertionError("non-negative index expected");
+        }
+        return internalIndex;
     }
 
     private Optional<String> parameterParamLabel() {

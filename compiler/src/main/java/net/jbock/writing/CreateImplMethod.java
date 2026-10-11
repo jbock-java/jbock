@@ -7,7 +7,6 @@ import com.palantir.javapoet.ParameterSpec;
 import io.jbock.simple.Inject;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
-import net.jbock.annotated.VarargsParameter;
 import net.jbock.common.Suppliers;
 import net.jbock.contrib.StandardConverters;
 import net.jbock.convert.Mapping;
@@ -26,7 +25,6 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.common.Constants.CONVERTERS;
 import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.STRING;
-import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 /**
  * Implementation of the command interface.
@@ -64,10 +62,6 @@ final class CreateImplMethod implements HasCommandRepresentation {
             spec.addStatement("$T $N = $L", m.item().returnType(), m.param(), convertExpressionParameter(m, i));
             constructorParams.add(CodeBlock.of("$N", m.param()));
         }
-        varargsParameter().ifPresent(m -> {
-            spec.addStatement("$T $N = $L", m.item().returnType(), m.param(), convertExpressionVarargsParameter(m));
-            constructorParams.add(CodeBlock.of("$N", m.param()));
-        });
         spec.addStatement("return new $T($L)", generatedTypes.implType(), CodeBlock.join(constructorParams, ", "));
         return spec.addParameter(result())
                 .returns(sourceElement().typeName())
@@ -79,22 +73,25 @@ final class CreateImplMethod implements HasCommandRepresentation {
         List<CodeBlock> code = new ArrayList<>();
         if (m.isNullary()) {
             code.add(CodeBlock.of("!$N.option($L).isEmpty()", result(),
-                    m.item().index()));
+                    m.item().internalIndex()));
         } else if (m.createConverterExpression().isPresent()) {
             code.add(CodeBlock.of("$N.option($L).stream()", result(),
-                    m.item().index()));
+                    m.item().internalIndex()));
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
             code.addAll(tailExpressionOption(m, i));
         } else {
             code.add(CodeBlock.of("$N.option($L)$L", result(),
-                    m.item().index(), tailExpressionStringOption(m, i)));
+                    m.item().internalIndex(), tailExpressionStringOption(m, i)));
         }
         m.extractExpr().ifPresent(code::add);
-        return joinByNewline(code);
+        return CodeBlock.join(code, System.lineSeparator());
     }
 
     private CodeBlock convertExpressionParameter(Mapping<Parameter> m, int i) {
         List<CodeBlock> code = new ArrayList<>();
+        if (m.isRepeatable()) {
+            return convertExpressionVarargsParameter(m);
+        }
         if (m.createConverterExpression().isPresent()) {
             code.add(CodeBlock.of("$N.param($L)", result(),
                     m.item().index()));
@@ -105,10 +102,10 @@ final class CreateImplMethod implements HasCommandRepresentation {
                     m.item().index(), tailExpressionStringParameter(m, i)));
         }
         m.extractExpr().ifPresent(code::add);
-        return joinByNewline(code);
+        return CodeBlock.join(code, System.lineSeparator());
     }
 
-    private CodeBlock convertExpressionVarargsParameter(Mapping<VarargsParameter> m) {
+    private CodeBlock convertExpressionVarargsParameter(Mapping<Parameter> m) {
         List<CodeBlock> code = new ArrayList<>();
         if (m.createConverterExpression().isPresent()) {
             code.add(CodeBlock.of("$N.rest().stream()", result()));
@@ -118,7 +115,7 @@ final class CreateImplMethod implements HasCommandRepresentation {
         } else {
             code.add(CodeBlock.of("$N.rest()", result()));
         }
-        return joinByNewline(code);
+        return CodeBlock.join(code, System.lineSeparator());
     }
 
     private CodeBlock tailExpressionStringOption(Mapping<Option> m, int i) {

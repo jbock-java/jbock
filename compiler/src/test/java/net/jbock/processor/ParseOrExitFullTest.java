@@ -17,7 +17,7 @@ class ParseOrExitFullTest {
                 "@Command",
                 "abstract class Arguments {",
                 "",
-                "  @VarargsParameter",
+                "  @Parameter",
                 "  abstract List<String> hello();",
                 "}");
         List<String> expectedParser =
@@ -101,6 +101,7 @@ class ParseOrExitFullTest {
                 "@Command(publicParser = true)",
                 "interface Arguments {",
                 "",
+                "  @Parameter",
                 "  List<String> hello();",
                 "}");
         List<String> expectedParser =

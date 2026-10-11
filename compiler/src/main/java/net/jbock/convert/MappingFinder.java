@@ -22,15 +22,15 @@ public record MappingFinder(
 
     public <M extends Item>
     Either<ValidationFailure, Mapping<M>> findMapping(M item) {
-        return matchFinder.findMatch(item)
-                .flatMap(this::findMappingWithMatch);
+        Match<M> match = matchFinder.findMatch(item);
+        return findMappingWithMatch(match);
     }
 
     public <M extends Item>
-    Either<ValidationFailure, Mapping<M>> findNullaryMapping(M item) {
-        return matchFinder.createNullaryMatch(item)
-                .map(match -> Mapping.create(
-                        CodeBlock.of("$T.identity())", StringConverter.class), match, Arity.NULLARY));
+    Mapping<M> findNullaryMapping(M item) {
+        Match<M> match = matchFinder.createNullaryMatch(item);
+        return Mapping.create(
+                CodeBlock.of("$T.identity())", StringConverter.class), match, Arity.NULLARY);
     }
 
     private <M extends Item>

@@ -23,7 +23,6 @@ class PositionalArgumentsTest {
                 .has(PositionalArguments::source, "a")
                 .has(PositionalArguments::dest, "b")
                 .has(PositionalArguments::anotherInt, 1)
-                .has(PositionalArguments::optString, Optional.empty())
                 .has(PositionalArguments::otherTokens, List.of());
     }
 

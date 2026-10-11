@@ -1,45 +1,39 @@
 package net.jbock.annotated;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-import static java.util.Comparator.comparingInt;
 import static net.jbock.common.Constants.instancesOf;
 
 public final class Items {
 
-    private static final Comparator<Parameter> INDEX_COMPARATOR = comparingInt(Parameter::index);
-
     private final List<Option> namedOptions;
     private final List<Parameter> positionalParameters;
-    private final List<VarargsParameter> varargsParameters;
 
     private Items(List<Option> namedOptions,
-                  List<Parameter> positionalParameters,
-                  List<VarargsParameter> varargsParameters) {
+                  List<Parameter> positionalParameters) {
         this.namedOptions = namedOptions;
         this.positionalParameters = positionalParameters;
-        this.varargsParameters = varargsParameters;
     }
 
     static Items createItems(List<? extends Item> itemList) {
         List<Option> options = itemList.stream()
                 .flatMap(instancesOf(Option.class))
                 .toList();
+        List<Parameter> parameters = itemList.stream()
+                .flatMap(instancesOf(Parameter.class))
+                .toList();
         List<Option> indexedOptions = new ArrayList<>(options.size());
+        List<Parameter> indexedParameters = new ArrayList<>(parameters.size());
         for (int i = 0; i < options.size(); i++) {
             Option option = options.get(i);
-            indexedOptions.add(option.withIndex(i));
+            indexedOptions.add(option.withInternalIndex(i));
         }
-        return new Items(indexedOptions,
-                itemList.stream()
-                        .flatMap(instancesOf(Parameter.class))
-                        .sorted(INDEX_COMPARATOR)
-                        .toList(),
-                itemList.stream()
-                        .flatMap(instancesOf(VarargsParameter.class))
-                        .toList());
+        for (int i = 0; i < parameters.size(); i++) {
+            Parameter option = parameters.get(i);
+            indexedParameters.add(option.withInternalIndex(i));
+        }
+        return new Items(indexedOptions, indexedParameters);
     }
 
     public List<Option> namedOptions() {
@@ -48,9 +42,5 @@ public final class Items {
 
     public List<Parameter> positionalParameters() {
         return positionalParameters;
-    }
-
-    public List<VarargsParameter> varargsParameters() {
-        return varargsParameters;
     }
 }

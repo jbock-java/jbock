@@ -1,7 +1,5 @@
 package net.jbock.model;
 
-import net.jbock.VarargsParameter;
-
 import java.util.List;
 
 /**
@@ -56,7 +54,6 @@ public abstract sealed class Item permits Option, Parameter {
      *
      * @see net.jbock.Option#paramLabel()
      * @see net.jbock.Parameter#paramLabel()
-     * @see VarargsParameter#paramLabel()
      * @return param label, a non-empty string
      */
     public final String paramLabel() {
@@ -69,7 +66,6 @@ public abstract sealed class Item permits Option, Parameter {
      *
      * @see net.jbock.Option#description()
      * @see net.jbock.Parameter#description()
-     * @see VarargsParameter#description()
      * @return a list of lines, possibly empty
      */
     public final List<String> description() {
@@ -81,7 +77,6 @@ public abstract sealed class Item permits Option, Parameter {
      *
      * @see net.jbock.Option#descriptionKey()
      * @see net.jbock.Parameter#descriptionKey()
-     * @see VarargsParameter#descriptionKey()
      * @return description key
      */
     public final String descriptionKey() {

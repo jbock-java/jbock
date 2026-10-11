@@ -62,20 +62,14 @@ record ImplClass(
 
     private MethodSpec allArgsConstructor() {
         MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-        for (int i = 0; i < namedOptions().size(); i++) {
-            Mapping<Option> m = namedOptions().get(i);
+        for (Mapping<Option> m : namedOptions()) {
             spec.addStatement("this.$N = $N", m.field(), m.param());
             spec.addParameter(m.param());
         }
-        for (int i = 0; i < positionalParameters().size(); i++) {
-            Mapping<Parameter> m = positionalParameters().get(i);
+        for (Mapping<Parameter> m : positionalParameters()) {
             spec.addStatement("this.$N = $N", m.field(), m.param());
             spec.addParameter(m.param());
         }
-        varargsParameter().ifPresent(m -> {
-            spec.addStatement("this.$N = $N", m.field(), m.param());
-            spec.addParameter(m.param());
-        });
         return spec.build();
     }
 
@@ -89,8 +83,6 @@ record ImplClass(
         for (Mapping<Parameter> mapping : positional) {
             spec.addParameter(ParameterSpec.builder(mapping.field().type(), mapping.field().name()).build());
         }
-        varargsParameter().ifPresent(mapping -> spec.addParameter(
-                ParameterSpec.builder(mapping.field().type(), mapping.field().name()).build()));
         return spec.build();
     }
 

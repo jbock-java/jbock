@@ -7,8 +7,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for a positional parameter that is <em>not</em> repeatable.
- * Use {@link VarargsParameter} to declare a repeatable positional parameter.
+ * Marker annotation for a positional parameter.
  *
  * <p>The annotated method must be nullary and abstract.
  */
@@ -20,9 +19,13 @@ public @interface Parameter {
      * The parameter's position, relative to the other positional parameters.
      * The indexes must start with {@code 0}, and must not contain any gaps.
      *
-     * @return zero-based index
+     * <p>If the index is {@code -1}, the actual index is auto-assigned
+     * based on the method's position relative to the other parameter methods
+     * in the source file.
+     *
+     * @return a zero-based index or {@code -1}
      */
-    int index();
+    int index() default -1;
 
     /**
      * The key that is used to find the parameter

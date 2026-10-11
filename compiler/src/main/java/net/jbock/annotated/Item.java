@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
-public abstract class Item {
+public sealed abstract class Item permits Parameter, Option {
 
     private static final Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
@@ -31,27 +31,16 @@ public abstract class Item {
 
     static Item create(
             ExecutableElement method,
-            Optional<Annotation> anno,
+            Annotation annotation,
             String enumName) {
-        if (anno.isEmpty()) {
-            return new VarargsParameter(method, Optional.empty(), enumName);
-        }
-        Annotation annotation = anno.orElseThrow();
-        if (annotation instanceof net.jbock.Option) {
-            return new Option(method, (net.jbock.Option) annotation, enumName);
-        }
-        if (annotation instanceof net.jbock.Parameter) {
-            return new Parameter(method, (net.jbock.Parameter) annotation, enumName);
-        }
-        if (annotation instanceof net.jbock.VarargsParameter) {
-            return new VarargsParameter(method, Optional.of((net.jbock.VarargsParameter) annotation), enumName);
-        }
-        throw new AssertionError();
+        return switch (annotation) {
+            case net.jbock.Option option -> new Option(method, option, enumName);
+            case net.jbock.Parameter parameter -> new Parameter(method, parameter, enumName);
+            default -> throw new AssertionError("unknown annotation " + annotation);
+        };
     }
 
     public abstract boolean isParameter();
-
-    public abstract boolean isVarargsParameter();
 
     public abstract String paramLabel();
 

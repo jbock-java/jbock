@@ -9,7 +9,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static java.util.stream.Collectors.toList;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
@@ -21,7 +20,7 @@ public final class Option extends Item {
 
     private final Supplier<List<String>> names = memoize(() -> optionNames().stream()
             .sorted(LENGTH_FIRST_COMPARATOR)
-            .collect(toList()));
+            .toList());
 
     private final Supplier<String> paramLabel = memoize(() -> optionParamLabel()
             .or(() -> optionNames().stream()
@@ -35,7 +34,7 @@ public final class Option extends Item {
 
     private final net.jbock.Option option;
 
-    private final int index;
+    private final int internalIndex;
 
     Option(
             ExecutableElement method,
@@ -48,13 +47,13 @@ public final class Option extends Item {
             ExecutableElement method,
             net.jbock.Option option,
             String enumName,
-            int index) {
+            int internalIndex) {
         super(method, enumName);
         this.option = option;
-        this.index = index;
+        this.internalIndex = internalIndex;
     }
 
-    Option withIndex(int index) {
+    Option withInternalIndex(int index) {
         return new Option(method(), option, enumName(), index);
     }
 
@@ -78,16 +77,11 @@ public final class Option extends Item {
         return false;
     }
 
-    @Override
-    public boolean isVarargsParameter() {
-        return false;
-    }
-
-    public int index() {
-        if (index < 0) {
-            throw new IllegalStateException("no index");
+    public int internalIndex() {
+        if (internalIndex < 0) {
+            throw new AssertionError("non-negative index expected");
         }
-        return index;
+        return internalIndex;
     }
 
     public List<String> names() {

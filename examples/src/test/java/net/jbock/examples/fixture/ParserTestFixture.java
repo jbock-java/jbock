@@ -134,7 +134,7 @@ public final class ParserTestFixture<E> {
         public <V> AssertionBuilder<E> has(Function<E, V> getter, V expectation) {
             Either<ParsingFailed, E> parsed = getParsed();
             parsed.fold(l -> {
-                throw new RuntimeException("Parsing failed");
+                throw new RuntimeException("Parsing failed: " + l.message());
             }, r -> {
                 V result = getter.apply(r);
                 Assertions.assertEquals(expectation, result);

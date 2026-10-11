@@ -21,5 +21,6 @@ interface PositionalArguments {
     @Parameter(index = 3)
     Optional<String> optString();
 
+    @Parameter
     List<String> otherTokens();
 }

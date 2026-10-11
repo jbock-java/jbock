@@ -78,26 +78,26 @@ final class ParseMethod implements HasCommandRepresentation {
                 for (String dashedName : namedOption.item().names()) {
                     code.addStatement("$N.put($S, $L)",
                             optionNames, dashedName,
-                            namedOption.item().index());
+                            namedOption.item().internalIndex());
                 }
             }
         }
         code.addStatement("$T $N = new $T[$L]", optionStates.type(), optionStates, OptionState.class, namedOptions().size());
         for (Mapping<Option> namedOption : namedOptions()) {
             code.addStatement("$N[$L] = new $T()",
-                    optionStates, namedOption.item().index(),
+                    optionStates, namedOption.item().internalIndex(),
                     optionParserType(namedOption));
         }
         ClassName parserClass;
         if (isSuperCommand()) {
             parserClass = ClassName.get(SuperParser.class);
-        } else if (varargsParameter().isPresent()) {
+        } else if (positionalParameters().stream().anyMatch(Mapping::isRepeatable)) {
             parserClass = ClassName.get(VarargsParameterParser.class);
         } else {
             parserClass = ClassName.get(StandardParser.class);
         }
         code.addStatement("$T $N = $T.create($N, $N, $L)", parserType, parser, parserClass,
-                optionNames, optionStates, positionalParameters().size());
+                optionNames, optionStates, positionalParameters().stream().filter(m -> !m.isRepeatable()).count());
         code.add("try {\n").indent()
                 .addStatement("$N.parse($N)", parser, tokens);
         code.addStatement("return $T.right(createImpl($N))", EITHER,

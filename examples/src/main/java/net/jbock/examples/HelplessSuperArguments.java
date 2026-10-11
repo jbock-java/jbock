@@ -15,5 +15,6 @@ interface HelplessSuperArguments {
     @Parameter(index = 0)
     String command();
 
+    @Parameter
     List<String> rest();
 }

@@ -34,6 +34,7 @@ class PositionalTest {
                 "  @Parameter(index = 0, description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
                 "  abstract String a();",
                 "",
+                "  @Parameter",
                 "  abstract List<String> rest();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
@@ -48,14 +49,14 @@ class PositionalTest {
                 "interface Arguments {",
                 "",
                 "  @Parameter(index = 0, description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
-                "  abstract Optional<String> a();",
+                "  Optional<String> a();",
                 "",
-                "  abstract List<String> rest();",
+                "  @Parameter",
+                "  List<String> rest();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("In a super command, parameters cannot be optional");
+                .compilesWithoutError();
     }
 
     // TODO move this to SuperCommandTest
@@ -71,6 +72,7 @@ class PositionalTest {
                 "  @Option(names = \"--b\")",
                 "  String b();",
                 "",
+                "  @Parameter",
                 "  List<String> rest();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
@@ -91,10 +93,9 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("In a super command, a catch-all parameter must be defined");
+                .withErrorContaining("In a super command, a repeatable parameter must be defined");
     }
 
-    // TODO move this to SuperCommandTest
     @Test
     void missingParamSuperCommand() {
         JavaFileObject javaFile = fromSource(
@@ -103,13 +104,11 @@ class PositionalTest {
                 "",
                 "  @Option(names = \"--a\")",
                 "  String a();",
-                "",
-                "  List<String> rest();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("In a super command, at least one parameter must be defined");
+                .withErrorContaining("In a super command, a repeatable parameter must be defined");
     }
 
     @Test
@@ -163,8 +162,8 @@ class PositionalTest {
     void indexMissingZero() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
-                "abstract class Arguments {",
-                "  @Parameter(index = 1) abstract Optional<Integer> b();",
+                "interface Arguments {",
+                "  @Parameter(index = 1) Optional<Integer> b();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
@@ -177,12 +176,11 @@ class PositionalTest {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "abstract class Arguments {",
-                "  @Parameter(index = -1) abstract Optional<String> a();",
+                "  @Parameter(index = -1) abstract List<String> a();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("invalid position: expecting 0 but found -1");
+                .compilesWithoutError();
     }
 
     @Test
@@ -217,10 +215,10 @@ class PositionalTest {
     void positionalAllRanks() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
-                "abstract class Arguments {",
-                "  @Parameter(index = 0) abstract String b();",
-                "  @Parameter(index = 1) abstract Optional<String> c();",
-                "  @VarargsParameter abstract List<String> a();",
+                "interface Arguments {",
+                "  @Parameter(index = 0) String b();",
+                "  @Parameter(index = 1) Optional<String> c();",
+                "  @Parameter List<String> a();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
@@ -228,25 +226,67 @@ class PositionalTest {
     }
 
     @Test
-    void twoPositionalLists() {
+    void optionalBeforeRequired() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
-                "abstract class Arguments {",
-                "  @VarargsParameter abstract List<String> a();",
-                "  @VarargsParameter abstract List<String> b();",
+                "interface Arguments {",
+                "  @Parameter Optional<String> c();",
+                "  @Parameter String b();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("more than one catch-all parameter");
+                .withErrorContaining("position of required");
+    }
+
+    @Test
+    void repeatableBeforeRequired() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "interface Arguments {",
+                "  @Parameter List<String> c();",
+                "  @Parameter String b();",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("position of parameter");
+    }
+
+    @Test
+    void repeatableBeforeOptional() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "interface Arguments {",
+                "  @Parameter List<String> c();",
+                "  @Parameter Optional<String> b();",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("position of parameter");
+    }
+
+    @Test
+    void moreThanOneCatchAll() {
+        JavaFileObject javaFile = fromSource(
+                "@Command",
+                "interface Arguments {",
+                "  @Parameter List<String> a();",
+                "  @Parameter List<String> b();",
+                "}");
+        assertAbout(javaSources()).that(singletonList(javaFile))
+                .processedWith(Processor.testInstance())
+                .failsToCompile()
+                .withErrorContaining("Only one parameter can be repeatable");
     }
 
     @Test
     void validList() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
-                "abstract class Arguments {",
-                "  @VarargsParameter abstract List<String> a();",
+                "interface Arguments {",
+                "  @Parameter List<String> a();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
@@ -254,73 +294,14 @@ class PositionalTest {
     }
 
     @Test
-    void positionalOptionalBeforeRequired() {
+    void mayDeclareAsOptional() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
-                "abstract class Arguments {",
-                "  @Parameter(index = 0) abstract Optional<String> a();",
-                "  @Parameter(index = 1) abstract String b();",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("position of required parameter 'b' is greater than position of optional parameter 'a'");
-    }
-
-    @Test
-    void mayNotDeclareAsOptional() {
-        JavaFileObject javaFile = fromSource(
-                "@Command",
-                "abstract class Arguments {",
-                "  @Parameter(index = 0) abstract Optional<Integer> a();",
+                "interface Arguments {",
+                "  @Parameter Optional<String> a();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .compilesWithoutError();
-    }
-
-    @Test
-    void parametersInvalidNotList() {
-        JavaFileObject javaFile = fromSource(
-                "@Command",
-                "abstract class Arguments {",
-                "",
-                "  @VarargsParameter",
-                "  abstract Integer something();",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("method 'something' is annotated with @VarargsParameter, so it must return java.util.List");
-    }
-
-    @Test
-    void parametersInvalidNotListOptional() {
-        JavaFileObject javaFile = fromSource(
-                "@Command",
-                "abstract class Arguments {",
-                "",
-                "  @VarargsParameter",
-                "  abstract Optional<Integer> something();",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("method 'something' is annotated with @VarargsParameter, so it must return java.util.List");
-    }
-
-    @Test
-    void parameterInvalidList() {
-        JavaFileObject javaFile = fromSource(
-                "@Command",
-                "abstract class Arguments {",
-                "",
-                "  @Parameter(index = 0)",
-                "  abstract List<Integer> something();",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("a parameter may not be a list; drop the annotation or use @VarargsParameter");
     }
 }

@@ -16,7 +16,6 @@ import java.util.function.Supplier;
 
 import static com.palantir.javapoet.MethodSpec.methodBuilder;
 import static net.jbock.common.Suppliers.memoize;
-import static net.jbock.writing.CodeBlocks.joinByNewline;
 
 @Inject
 final class CreateModelMethod implements HasCommandRepresentation {
@@ -44,10 +43,9 @@ final class CreateModelMethod implements HasCommandRepresentation {
         for (Mapping<net.jbock.annotated.Parameter> c : positionalParameters()) {
             code.add(parameterBlock(c));
         }
-        varargsParameter().ifPresent(c -> code.add(parameterBlock(c)));
         code.add(CodeBlock.of(".build()"));
         return methodBuilder("createModel")
-                .addStatement(joinByNewline(code))
+                .addStatement(CodeBlock.join(code, System.lineSeparator()))
                 .returns(CommandModel.class)
                 .addModifiers(sourceElement().accessModifiers())
                 .addModifiers(Modifier.STATIC)
@@ -87,7 +85,7 @@ final class CreateModelMethod implements HasCommandRepresentation {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
-        return CodeBlock.of(".addOption($L)", joinByNewline(code));
+        return CodeBlock.of(".addOption($L)", CodeBlock.join(code, System.lineSeparator()));
     }
 
     private CodeBlock parameterBlock(Mapping<?> m) {
@@ -104,7 +102,7 @@ final class CreateModelMethod implements HasCommandRepresentation {
             code.add(CodeBlock.of(".addDescriptionLine($S)", line));
         }
         code.add(CodeBlock.of(".build()"));
-        return CodeBlock.of(".addParameter($L)", joinByNewline(code));
+        return CodeBlock.of(".addParameter($L)", CodeBlock.join(code, System.lineSeparator()));
     }
 
     @Override
