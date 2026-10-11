@@ -57,7 +57,7 @@ final class ParameterValidator {
                 index = i;
             }
             if (index != i) {
-                failures.add(parameter.fail("invalid position: expecting " + i + " but found " + index));
+                failures.add(parameter.fail("invalid index: expecting " + i + " but found " + index));
             }
         }
         return optionalList(failures)

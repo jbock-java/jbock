@@ -155,7 +155,7 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid position: expecting 1");
+                .withErrorContaining("invalid index: expecting 1");
     }
 
     @Test
@@ -168,7 +168,7 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid position: expecting ");
+                .withErrorContaining("invalid index: expecting 0");
     }
 
     @Test
@@ -194,7 +194,7 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("invalid position: expecting 0");
+                .withErrorContaining("invalid index: expecting 0");
     }
 
     @Test
@@ -293,14 +293,16 @@ class PositionalTest {
     }
 
     @Test
-    void mayDeclareAsOptional() {
+    void explicitPositionDoesNotAgree() {
         JavaFileObject javaFile = fromSource(
                 "@Command",
                 "interface Arguments {",
-                "  @Parameter Optional<String> a();",
+                "  @Parameter(index = 1) String a();",
+                "  @Parameter(index = 0) String b();",
                 "}");
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
-                .compilesWithoutError();
+                .failsToCompile()
+                .withErrorContaining("invalid index");
     }
 }
