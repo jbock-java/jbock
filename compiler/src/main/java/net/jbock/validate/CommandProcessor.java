@@ -24,6 +24,7 @@ import static io.jbock.util.Eithers.optionalList;
  * This class is responsible for item validation.
  * If validation succeeds, a {@link CommandRepresentation} is created.
  */
+@Inject
 public final class CommandProcessor {
 
     private final ItemsFactory itemsFactory;
@@ -31,7 +32,6 @@ public final class CommandProcessor {
     private final OptionValidator optionValidator;
     private final ParameterValidator parameterValidator;
 
-    @Inject
     CommandProcessor(
             ItemsFactory itemsFactory,
             SourceElement sourceElement,

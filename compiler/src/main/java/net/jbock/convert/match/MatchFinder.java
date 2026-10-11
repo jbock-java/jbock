@@ -1,10 +1,8 @@
 package net.jbock.convert.match;
 
 import io.jbock.simple.Inject;
-import io.jbock.util.Either;
 import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;
-import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
@@ -12,7 +10,6 @@ import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.jbock.util.Either.right;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
 import static net.jbock.common.TypeTool.AS_PRIMITIVE;
 import static net.jbock.model.Multiplicity.OPTIONAL;

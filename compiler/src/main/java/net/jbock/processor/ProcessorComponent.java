@@ -5,7 +5,7 @@ import io.jbock.simple.Component;
 import javax.annotation.processing.ProcessingEnvironment;
 
 @Component
-interface ProcessorComponent {
+public interface ProcessorComponent {
 
     MethodStep methodStep();
 

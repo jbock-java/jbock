@@ -4,7 +4,6 @@ import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.Name;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.EnumSet;
@@ -21,12 +20,12 @@ public sealed abstract class Item permits Parameter, Option {
     private static final Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
     private final ExecutableElement method;
-    private final String enumName;
+    private final String safeName;
 
     Item(ExecutableElement method,
-         String enumName) {
+         String safeName) {
         this.method = method;
-        this.enumName = enumName;
+        this.safeName = safeName;
     }
 
     static Item create(
@@ -52,10 +51,6 @@ public sealed abstract class Item permits Parameter, Option {
         return method;
     }
 
-    final Name simpleName() {
-        return method.getSimpleName();
-    }
-
     public final List<Modifier> accessModifiers() {
         return method().getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
@@ -66,8 +61,8 @@ public sealed abstract class Item permits Parameter, Option {
         return new ValidationFailure(message, method);
     }
 
-    public final String enumName() {
-        return enumName;
+    public final String safeName() {
+        return safeName;
     }
 
     public final String methodName() {

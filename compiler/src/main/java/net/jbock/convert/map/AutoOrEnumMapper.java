@@ -10,7 +10,6 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.contrib.EnumConverter;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.match.Match;
-import net.jbock.util.StringConverter;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.DeclaredType;
@@ -27,7 +26,8 @@ public record AutoOrEnumMapper(AutoMappings autoMappings) {
         return autoMappings.findAutoMapping(match)
                 .or(() -> findEnumMapping(match))
                 .<Either<ValidationFailure, Mapping<M>>>map(Either::right)
-                .orElseGet(() -> left(noConverterError(match)));
+                .orElseGet(() -> left(match.fail("unknown type: " +
+                        Util.typeToString(match.baseType()))));
     }
 
     private <M extends Item>
@@ -42,9 +42,5 @@ public record AutoOrEnumMapper(AutoMappings autoMappings) {
                             EnumConverter.class, enumType.asType());
                     return Mapping.create(mapper, match);
                 });
-    }
-
-    private ValidationFailure noConverterError(Match<?> match) {
-        return match.fail("unknown type: " + Util.typeToString(match.baseType()));
     }
 }

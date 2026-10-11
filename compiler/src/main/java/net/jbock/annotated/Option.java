@@ -28,7 +28,7 @@ public final class Option extends Item {
                     .map(name -> name.substring(2))
                     .map(s -> s.toUpperCase(Locale.ROOT))
                     .findFirst())
-            .orElseGet(() -> SnakeName.create(simpleName())
+            .orElseGet(() -> SnakeName.create(methodName())
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
@@ -54,7 +54,7 @@ public final class Option extends Item {
     }
 
     Option withInternalIndex(int index) {
-        return new Option(method(), option, enumName(), index);
+        return new Option(method(), option, safeName(), index);
     }
 
     @Override

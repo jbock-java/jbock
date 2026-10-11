@@ -18,12 +18,12 @@ import static javax.lang.model.element.NestingKind.MEMBER;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
+@Inject
 public final class Util {
 
     private final SafeTypes types;
     private final TypeTool tool;
 
-    @Inject
     public Util(SafeTypes types, TypeTool tool) {
         this.types = types;
         this.tool = tool;

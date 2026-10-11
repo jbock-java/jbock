@@ -14,12 +14,12 @@ import static net.jbock.common.Suppliers.memoize;
 public final class Parameter extends Item {
 
     private final Supplier<String> paramLabel = memoize(() -> parameterParamLabel()
-            .orElseGet(() -> SnakeName.create(simpleName())
+            .orElseGet(() -> SnakeName.create(methodName())
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
     private final net.jbock.Parameter parameter;
-    private final int internalIndex;
+    private final int effectiveIndex;
 
     Parameter(
             ExecutableElement method,
@@ -32,14 +32,14 @@ public final class Parameter extends Item {
             ExecutableElement method,
             net.jbock.Parameter parameter,
             String enumName,
-            int internalIndex) {
+            int effectiveIndex) {
         super(method, enumName);
         this.parameter = parameter;
-        this.internalIndex = internalIndex;
+        this.effectiveIndex = effectiveIndex;
     }
 
-    Parameter withInternalIndex(int index) {
-        return new Parameter(method(), parameter, enumName(), index);
+    Parameter withEffectiveIndex(int effectiveIndex) {
+        return new Parameter(method(), parameter, safeName(), effectiveIndex);
     }
 
     @Override
@@ -62,15 +62,15 @@ public final class Parameter extends Item {
         return true;
     }
 
-    public int rawIndex() {
+    public int index() {
         return parameter.index();
     }
 
-    public int index() {
-        if (internalIndex < 0) {
+    public int effectiveIndex() {
+        if (effectiveIndex < 0) {
             throw new AssertionError("non-negative index expected");
         }
-        return internalIndex;
+        return effectiveIndex;
     }
 
     private Optional<String> parameterParamLabel() {

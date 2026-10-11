@@ -37,9 +37,9 @@ final class ParameterValidator {
 
     Either<List<ValidationFailure>, List<Mapping<Parameter>>> wrapPositionalParams(
             Items items) {
-        return validatePositions(items.positionalParameters())
-                .filter(this::validateCatchAllInSuperCommand)
-                .filter(this::validateOnlyOneCatchAll)
+        return validateIndex(items.positionalParameters())
+                .filter(this::validateSuperCommandHasRepeatable)
+                .filter(this::validateOnlyOneRepeatable)
                 .flatMap(parameters -> parameters.stream()
                         .map(mappingFinder::findMapping)
                         .collect(allFailures()))
@@ -47,16 +47,13 @@ final class ParameterValidator {
                 .filter(this::checkRequiredBeforeOptional);
     }
 
-    private Either<List<ValidationFailure>, List<Parameter>> validatePositions(
+    private Either<List<ValidationFailure>, List<Parameter>> validateIndex(
             List<Parameter> parameters) {
         List<ValidationFailure> failures = new ArrayList<>();
         for (int i = 0; i < parameters.size(); i++) {
             Parameter parameter = parameters.get(i);
-            int index = parameter.rawIndex();
-            if (index == -1) {
-                index = i;
-            }
-            if (index != i) {
+            int index = parameter.index();
+            if (index >= 0 && index != i) {
                 failures.add(parameter.fail("invalid index: expecting " + i + " but found " + index));
             }
         }
@@ -74,8 +71,8 @@ final class ParameterValidator {
                 .flatMap(firstOptional -> positionalParameters.stream()
                         .filter(Mapping::isRequired)
                         .map(Mapping::item)
-                        .filter(sourceMethod -> sourceMethod.index()
-                                > firstOptional.index())
+                        .filter(sourceMethod -> sourceMethod.effectiveIndex()
+                                > firstOptional.effectiveIndex())
                         .map(item -> item.fail("position of required parameter '" +
                                 item.method().getSimpleName() +
                                 "' is greater than position of optional parameter '" +
@@ -91,8 +88,8 @@ final class ParameterValidator {
                 .flatMap(firstRepeatable -> positionalParameters.stream()
                         .filter(m -> !m.isRepeatable())
                         .map(Mapping::item)
-                        .filter(sourceMethod -> sourceMethod.index()
-                                > firstRepeatable.item().index())
+                        .filter(sourceMethod -> sourceMethod.effectiveIndex()
+                                > firstRepeatable.item().effectiveIndex())
                         .map(item -> item.fail("position of parameter '" +
                                 item.method().getSimpleName() +
                                 "' is greater than position of repeatable parameter '" +
@@ -100,7 +97,7 @@ final class ParameterValidator {
                         .collect(toOptionalList()));
     }
 
-    private Optional<List<ValidationFailure>> validateOnlyOneCatchAll(
+    private Optional<List<ValidationFailure>> validateOnlyOneRepeatable(
             List<Parameter> parameters) {
         return parameters.stream()
                 .filter(param -> tool.isList(param.returnType()))
@@ -109,16 +106,16 @@ final class ParameterValidator {
                 .collect(toOptionalList());
     }
 
-    private Optional<List<ValidationFailure>> validateCatchAllInSuperCommand(
+    private Optional<List<ValidationFailure>> validateSuperCommandHasRepeatable(
             List<Parameter> parameters) {
         if (!sourceElement.isSuperCommand()) {
             return Optional.empty();
         }
-        List<Parameter> repeatable = parameters.stream().filter(param -> tool.isList(param.returnType())).toList();
+        Optional<Parameter> repeatable = parameters.stream().filter(param -> tool.isList(param.returnType())).findFirst();
         if (repeatable.isEmpty()) {
             return Optional.of(List.of(sourceElement.fail("In a super command, a repeatable parameter must be defined")));
         }
-        if (!tool.isListOfString(repeatable.getFirst().returnType())) {
+        if (!tool.isListOfString(repeatable.orElseThrow().returnType())) {
             return Optional.of(List.of(sourceElement.fail("Only List<String> allowed in a super command")));
         }
         return Optional.empty();

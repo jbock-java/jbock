@@ -21,11 +21,11 @@ import static io.jbock.util.Eithers.toOptionalList;
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
 
+@Inject
 final class OptionValidator {
 
     private final MappingFinder mappingFinder;
 
-    @Inject
     OptionValidator(MappingFinder mappingFinder) {
         this.mappingFinder = mappingFinder;
     }

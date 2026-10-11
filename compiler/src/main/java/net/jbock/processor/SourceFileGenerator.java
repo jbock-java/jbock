@@ -12,12 +12,12 @@ import java.io.StringWriter;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+@Inject
 final class SourceFileGenerator {
 
     private final Filer filer;
     private final Messager messager;
 
-    @Inject
     SourceFileGenerator(ProcessingEnvironment processingEnvironment) {
         this.filer = processingEnvironment.getFiler();
         this.messager = processingEnvironment.getMessager();

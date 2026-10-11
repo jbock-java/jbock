@@ -31,7 +31,7 @@ public final class Items {
         }
         for (int i = 0; i < parameters.size(); i++) {
             Parameter option = parameters.get(i);
-            indexedParameters.add(option.withInternalIndex(i));
+            indexedParameters.add(option.withEffectiveIndex(i));
         }
         return new Items(indexedOptions, indexedParameters);
     }

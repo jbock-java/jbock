@@ -6,11 +6,11 @@ import net.jbock.common.ValidationFailure;
 
 import java.util.List;
 
+@Inject
 public class ItemsFactory {
 
     private final AbstractMethodsFinder abstractMethodsFinder;
 
-    @Inject
     public ItemsFactory(
             AbstractMethodsFinder abstractMethodsFinder) {
         this.abstractMethodsFinder = abstractMethodsFinder;

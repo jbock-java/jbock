@@ -14,7 +14,7 @@ import static net.jbock.common.Suppliers.memoize;
 public final class CommandRepresentation {
 
     private final Supplier<List<Mapping<?>>> allMappings = memoize(() -> {
-        List<Mapping<?>> result = new ArrayList<>(namedOptions().size() + positionalParameters().size() + 1);
+        List<Mapping<?>> result = new ArrayList<>(namedOptions().size() + positionalParameters().size());
         result.addAll(namedOptions());
         result.addAll(positionalParameters());
         return result;
@@ -22,7 +22,6 @@ public final class CommandRepresentation {
 
     private final List<Mapping<Option>> namedOptions;
     private final List<Mapping<Parameter>> positionalParameters;
-
     private final SourceElement sourceElement;
 
     public CommandRepresentation(

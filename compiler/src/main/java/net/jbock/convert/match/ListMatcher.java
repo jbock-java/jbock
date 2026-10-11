@@ -14,8 +14,7 @@ public final class ListMatcher extends Matcher {
     private final SafeElements elements;
     private final TypeTool tool;
 
-    public ListMatcher(
-            TypeTool tool) {
+    public ListMatcher(TypeTool tool) {
         this.elements = tool.elements();
         this.tool = tool;
     }

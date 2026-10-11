@@ -19,85 +19,41 @@ import static net.jbock.common.Suppliers.memoize;
 
 public final class SourceElement {
 
-    private final AnyCommand command;
+    private final Command command;
+    private final TypeElement typeElement;
 
-    private final Supplier<List<Modifier>> accessModifiers = memoize(() -> command().isPublicParser() ?
+    private final Supplier<List<Modifier>> accessModifiers = memoize(() -> command().publicParser() ?
             List.of(Modifier.PUBLIC) :
             List.of());
 
-    private final Supplier<String> programName = memoize(() -> optionalString(command().getName())
-            .orElseGet(() -> SnakeName.create(command().typeElement.getSimpleName()).snake('-')));
+    private final Supplier<String> programName = memoize(() -> optionalString(command().name())
+            .orElseGet(() -> SnakeName.create(typeElement().getSimpleName()).snake('-')));
 
     private final Supplier<Optional<String>> descriptionKey = memoize(() ->
-            optionalString(command().getDescriptionKey()));
+            optionalString(command().descriptionKey()));
 
     private final Supplier<List<String>> description = memoize(() ->
-            List.of(command().getDescription()));
+            List.of(command().description()));
 
     private final Supplier<ClassName> generatedClass = memoize(() -> {
-        ClassName commandClass = ClassName.get(command().typeElement);
+        ClassName commandClass = ClassName.get(typeElement());
         return commandClass
                 .topLevelClassName()
                 .peerClass(String.join("_", commandClass.simpleNames()) + "Parser");
     });
 
-    private SourceElement(AnyCommand command) {
+    private SourceElement(Command command, TypeElement typeElement) {
         this.command = command;
+        this.typeElement = typeElement;
     }
 
-    static SourceElement create(TypeElement t) {
-        AnyCommand command = new AnyCommand(t);
-        return new SourceElement(command);
-    }
-
-    private static class AnyCommand {
-        final Command command;
-        final TypeElement typeElement;
-
-        AnyCommand(TypeElement typeElement) {
-            this.typeElement = typeElement;
-            this.command = Objects.requireNonNull(typeElement.getAnnotation(Command.class));
-        }
-
-        String getDescriptionKey() {
-            return command.descriptionKey();
-        }
-
-        String getName() {
-            return command.name();
-        }
-
-        boolean isPublicParser() {
-            return command.publicParser();
-        }
-
-        boolean isSkipGeneratingParseOrExitMethod() {
-            return command.skipGeneratingParseOrExitMethod();
-        }
-
-        boolean isParseOrExitMethodAcceptsList() {
-            return command.parseOrExitMethodAcceptsList();
-        }
-
-        boolean isEnableAtFileExpansion() {
-            return command.enableAtFileExpansion();
-        }
-
-        boolean skipHelp() {
-            return command.skipHelp();
-        }
-
-        String[] getDescription() {
-            return command.description();
-        }
+    static SourceElement create(TypeElement typeElement) {
+        Command command = Objects.requireNonNull(typeElement.getAnnotation(Command.class));
+        return new SourceElement(command, typeElement);
     }
 
     public TypeElement element() {
-        return command.typeElement;
-    }
-
-    private AnyCommand command() {
-        return command;
+        return typeElement;
     }
 
     public TypeName typeName() {
@@ -109,7 +65,7 @@ public final class SourceElement {
     }
 
     public boolean isSuperCommand() {
-        return command.command.superCommand();
+        return command.superCommand();
     }
 
     public List<Modifier> accessModifiers() {
@@ -137,7 +93,7 @@ public final class SourceElement {
     }
 
     public boolean skipGeneratingParseOrExitMethod() {
-        return command.isSkipGeneratingParseOrExitMethod();
+        return command.skipGeneratingParseOrExitMethod();
     }
 
     public boolean skipHelp() {
@@ -145,10 +101,18 @@ public final class SourceElement {
     }
 
     public boolean parseOrExitMethodAcceptsList() {
-        return command.isParseOrExitMethodAcceptsList();
+        return command.parseOrExitMethodAcceptsList();
     }
 
     public boolean enableAtFileExpansion() {
-        return command.isEnableAtFileExpansion();
+        return command.enableAtFileExpansion();
+    }
+
+    private Command command() {
+        return command;
+    }
+
+    private TypeElement typeElement() {
+        return typeElement;
     }
 }

@@ -1,7 +1,6 @@
 package net.jbock.common;
 
 import io.jbock.simple.Inject;
-import net.jbock.convert.match.OptionalPrimitive;
 
 import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.Element;
@@ -17,7 +16,8 @@ import javax.lang.model.util.SimpleTypeVisitor14;
 import java.util.List;
 import java.util.Optional;
 
-public final class TypeTool {
+@Inject
+public record TypeTool(SafeElements elements, SafeTypes types) {
 
     private abstract static class OptionalTypeVisitor<E> extends SimpleTypeVisitor14<Optional<E>, Void> {
 
@@ -66,16 +66,6 @@ public final class TypeTool {
         }
     };
 
-    private final SafeTypes types;
-
-    private final SafeElements elements;
-
-    @Inject
-    public TypeTool(SafeElements elements, SafeTypes types) {
-        this.types = types;
-        this.elements = elements;
-    }
-
     /**
      * Works for classes with no type parameters.
      */
@@ -93,23 +83,6 @@ public final class TypeTool {
             return false;
         }
         return isSameErasure(declaredType, List.class);
-    }
-
-    public boolean isOptionalish(TypeMirror mirror) {
-        Optional<DeclaredType> visit = AS_DECLARED.visit(mirror);
-        if (visit.isEmpty()) {
-            return false;
-        }
-        DeclaredType declaredType = visit.orElseThrow();
-        for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
-            if (isSameType(declaredType, optionalPrimitive.type())) {
-                return true;
-            }
-        }
-        if (declaredType.getTypeArguments().isEmpty()) {
-            return false;
-        }
-        return isSameErasure(declaredType, Optional.class);
     }
 
     public boolean isSameErasure(TypeMirror x, Class<?> y) {
@@ -157,13 +130,5 @@ public final class TypeTool {
                         types.erasure(declaredType),
                         types.erasure(someClass.asType())))
                 .map(declaredType -> declaredType.getTypeArguments().getFirst());
-    }
-
-    public SafeTypes types() {
-        return types;
-    }
-
-    public SafeElements elements() {
-        return elements;
     }
 }

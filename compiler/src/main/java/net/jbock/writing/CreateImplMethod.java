@@ -29,6 +29,7 @@ import static net.jbock.common.Constants.STRING;
 /**
  * Implementation of the command interface.
  */
+@Inject
 final class CreateImplMethod implements HasCommandRepresentation {
 
     private final CommandRepresentation commandRepresentation;
@@ -37,7 +38,6 @@ final class CreateImplMethod implements HasCommandRepresentation {
     private final Supplier<ParameterSpec> resultSupplier = Suppliers.memoize(() ->
             ParameterSpec.builder(ClassName.get(ParseResult.class), "result").build());
 
-    @Inject
     CreateImplMethod(
             CommandRepresentation commandRepresentation,
             GeneratedTypes generatedTypes) {
@@ -94,12 +94,12 @@ final class CreateImplMethod implements HasCommandRepresentation {
         }
         if (m.createConverterExpression().isPresent()) {
             code.add(CodeBlock.of("$N.param($L)", result(),
-                    m.item().index()));
+                    m.item().effectiveIndex()));
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
             code.addAll(tailExpressionParameter(m, i));
         } else {
             code.add(CodeBlock.of("$N.param($L)$L", result(),
-                    m.item().index(), tailExpressionStringParameter(m, i)));
+                    m.item().effectiveIndex(), tailExpressionStringParameter(m, i)));
         }
         m.extractExpr().ifPresent(code::add);
         return CodeBlock.join(code, System.lineSeparator());

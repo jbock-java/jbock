@@ -24,7 +24,8 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 
-final class MethodStep implements Step {
+@Inject
+public class MethodStep implements Step {
 
     private static final Set<TypeKind> FORBIDDEN_KINDS = EnumSet.of(
             TypeKind.VOID,
@@ -37,7 +38,6 @@ final class MethodStep implements Step {
     private final Messager messager;
     private final Util util;
 
-    @Inject
     MethodStep(ProcessingEnvironment processingEnvironment, Util util) {
         this.messager = processingEnvironment.getMessager();
         this.util = util;

@@ -14,16 +14,15 @@ import javax.lang.model.util.ElementFilter;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
+@Inject
 public class AbstractMethodsFinder {
 
     private final SourceElement sourceElement;
 
-    @Inject
     public AbstractMethodsFinder(
             SourceElement sourceElement) {
         this.sourceElement = sourceElement;
@@ -79,6 +78,6 @@ public class AbstractMethodsFinder {
     private List<ExecutableElement> abstractMethods() {
         return ElementFilter.methodsIn(sourceElement.element().getEnclosedElements()).stream()
                 .filter(m -> m.getModifiers().contains(ABSTRACT))
-                .collect(toList());
+                .toList();
     }
 }

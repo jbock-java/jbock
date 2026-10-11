@@ -29,14 +29,14 @@ import static net.jbock.common.Util.checkNoDuplicateAnnotations;
  * This step handles the {@link Command} annotation.
  * It performs validation and source generation.
  */
-final class CommandStep implements Step {
+@Inject
+public final class CommandStep implements Step {
 
     private final Messager messager;
     private final Util util;
     private final SourceFileGenerator sourceFileGenerator;
     private final ValidateComponent.Factory validateComponentFactory;
 
-    @Inject
     CommandStep(
             ProcessingEnvironment processingEnvironment,
             Util util,

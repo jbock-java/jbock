@@ -30,6 +30,7 @@ import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.mapOf;
 import static net.jbock.common.Suppliers.memoize;
 
+@Inject
 final class ParseMethod implements HasCommandRepresentation {
 
     private final CommandRepresentation commandRepresentation;
@@ -37,7 +38,6 @@ final class ParseMethod implements HasCommandRepresentation {
     private final CreateModelMethod createModelMethod;
     private final ParserTypeFactory parserTypeFactory;
 
-    @Inject
     ParseMethod(
             GeneratedTypes generatedTypes,
             CommandRepresentation commandRepresentation,

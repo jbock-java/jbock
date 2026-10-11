@@ -97,7 +97,7 @@ public final class Mapping<M extends Item> {
 
     private final Supplier<ParameterSpec> paramSupplier = memoize(() -> {
         TypeName fieldType = TypeName.get(item().returnType());
-        String enumName = item().enumName();
+        String enumName = item().safeName();
         return ParameterSpec.builder(fieldType, enumName).build();
     });
 

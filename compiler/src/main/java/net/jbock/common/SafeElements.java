@@ -10,11 +10,11 @@ import java.util.Optional;
 /**
  * A wrapper around {@link Elements} where none of the methods can return {@code null}.
  */
+@Inject
 public class SafeElements {
 
     private final Elements elements;
 
-    @Inject
     public SafeElements(ProcessingEnvironment processingEnvironment) {
         this.elements = processingEnvironment.getElementUtils();
     }
