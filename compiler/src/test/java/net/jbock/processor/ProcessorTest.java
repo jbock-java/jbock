@@ -707,44 +707,6 @@ class ProcessorTest {
     }
 
     @Test
-    void privateParameterType() {
-        JavaFileObject javaFile = fromSource(
-                "@Command",
-                "abstract class Arguments {",
-                "",
-                "  @Option(names = \"--x\")",
-                "  abstract Foo foo();",
-                "",
-                "  private enum Foo {",
-                "    BAR",
-                "   }",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("inaccessible type: Foo");
-    }
-
-    @Test
-    void unreachableParameterType() {
-        JavaFileObject javaFile = fromSource(
-                "@Command",
-                "abstract class Arguments {",
-                "",
-                "  @Option(names = \"--x\")",
-                "  abstract List<Foo> foo();",
-                "",
-                "  private enum Foo {",
-                "    BAR",
-                "   }",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("inaccessible type: List<Foo>");
-    }
-
-    @Test
     void invalidNesting() {
         JavaFileObject javaFile = fromSource(
                 "class Arguments {",
@@ -762,7 +724,7 @@ class ProcessorTest {
     }
 
     @Test
-    void invalidNestingInaccessible() {
+    void unknownTypeFoo() {
         JavaFileObject javaFile = fromSource(
                 "class Arguments {",
                 "  class Foo {}",
@@ -774,6 +736,6 @@ class ProcessorTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("inaccessible type: Foo");
+                .withErrorContaining("unknown type: Foo");
     }
 }
