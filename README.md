@@ -16,19 +16,18 @@ Add the `@Command` anntation to your command interface, to make the annotation p
 Each abstract (i.e. non-`default`) method in your command interface represents a command line option or argument.
 It must have "getter signature": return something other that `void`, and have an empty parameter list.
 It must also be annotated with either
-`@Option`, `@Parameter` or `@VarargsParameter` (with one exception, see below).
+`@Option` or `@Parameter`.
 
 The return types `boolean`, `List<?>` and `Optional<?>` (including `OptionalInt` and such) have special semantics.
 They are used to declare flags, repeable and optional options and parameters, respectively.
 
 > [!TIP]
-> If an abstract method is annotated with `@VarargsParameter`, it must return a list.
-> Only one such "catch-all" parameter may exist.
-> The `@VarargsParameter` annotation can also be omitted, unless you want to override its attributes.
+> If an abstract method returns `java.util.List`, it is a "catch-all" parameter.
+> Only one catch-all parameter may exist.
 
 > [!TIP]
-> Only `java.util.List` has special semantics, but no other "list-like" types.
-> Example: An abstract method returning `ArrayList<String>` does *not* represent a
+> Only the exact type `java.util.List` has special semantics.
+> An abstract method returning `ArrayList<String>`, for example, does *not* represent a
 > catch-all parameter.
 
 An example:
@@ -47,7 +46,9 @@ interface DeleteCommand {
 
   /**
    * A required positional parameter.
-   * Path is one of the &quot;known types&quot;.
+   * It captures the first positional parameter.
+   * The index attribute can be omitted, since it is
+   * clear from the method's position in the source file.
    */
   @Parameter(index = 0)
   Path path();
@@ -55,16 +56,19 @@ interface DeleteCommand {
   /**
    * The return type of this method is &quot;optionalish&quot;,
    * so this is an optional positional parameter.
+   * It captures the second positional parameter, if available.
+   * The index attribute can be omitted.
    */
   @Parameter(index = 1)
   Optional<Path> anotherPath();
 
   /**
-   * A varargs parameter. There can be at most one of these.
-   * It is a catch-all for additional positional parameters.
-   * Must return List<KnownType>.
+   * The return type is java.util.List,
+   * so this is the catch-all parameter.
+   * It captures all but the first two positional parameters.
+   * The attribute {@code index = 2} is omitted.
    */
-  @VarargsParameter
+  @Parameter
   List<Path> morePaths();
   
   /**
@@ -80,7 +84,8 @@ interface DeleteCommand {
   
   /**
    * Charset is not one of the &quot;known types&quot;,
-   * so we use a default method to convert from String.
+   * so we use a default method to convert manually.
+   * See below.
    */
   @Option(names = "--charset")
   Optional<String> charsetString();
