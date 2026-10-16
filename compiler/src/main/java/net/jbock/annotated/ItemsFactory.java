@@ -19,7 +19,7 @@ public class ItemsFactory {
     public Either<List<ValidationFailure>, Items> createItems() {
         return abstractMethodsFinder.findAbstractMethods()
                 .flatMap(ItemListFactory::createItemList)
-                .flatMap(ItemListValidator::validate)
+                .filter(ItemListValidator::validate)
                 .map(Items::createItems);
     }
 }

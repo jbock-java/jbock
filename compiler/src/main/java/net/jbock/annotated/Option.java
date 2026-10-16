@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
-public final class Option extends Item {
+public final class Option implements Item {
 
     private static final Comparator<String> LENGTH_FIRST_COMPARATOR = Comparator
             .comparing(String::length)
@@ -32,39 +32,38 @@ public final class Option extends Item {
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
-    private final net.jbock.Option option;
-
+    private final SimpleOption option;
     private final int internalIndex;
 
-    Option(
-            ExecutableElement method,
-            net.jbock.Option option,
-            String enumName) {
-        this(method, option, enumName, -1);
-    }
-
     private Option(
-            ExecutableElement method,
-            net.jbock.Option option,
-            String enumName,
+            SimpleOption option,
             int internalIndex) {
-        super(method, enumName);
         this.option = option;
         this.internalIndex = internalIndex;
     }
 
-    Option withInternalIndex(int index) {
-        return new Option(method(), option, safeName(), index);
+    static Option createOption(SimpleOption option, int index) {
+        return new Option(option, index);
     }
 
     @Override
     public Optional<String> descriptionKey() {
-        return optionalString(option.descriptionKey());
+        return optionalString(option.option().descriptionKey());
     }
 
     @Override
     public List<String> description() {
-        return List.of(option.description());
+        return List.of(option.option().description());
+    }
+
+    @Override
+    public ExecutableElement method() {
+        return option.method();
+    }
+
+    @Override
+    public String safeName() {
+        return option.safeName();
     }
 
     @Override
@@ -72,15 +71,7 @@ public final class Option extends Item {
         return paramLabel.get();
     }
 
-    @Override
-    public boolean isParameter() {
-        return false;
-    }
-
     public int internalIndex() {
-        if (internalIndex < 0) {
-            throw new AssertionError("non-negative index expected");
-        }
         return internalIndex;
     }
 
@@ -89,10 +80,10 @@ public final class Option extends Item {
     }
 
     private List<String> optionNames() {
-        return List.of(option.names());
+        return List.of(option.option().names());
     }
 
     private Optional<String> optionParamLabel() {
-        return optionalString(option.paramLabel());
+        return optionalString(option.option().paramLabel());
     }
 }

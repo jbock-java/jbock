@@ -4,7 +4,6 @@ import io.jbock.util.Either;
 import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Name;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Objects;
@@ -22,28 +21,23 @@ final class ItemListFactory {
         uniqueNameSet.reserve(CONVERTERS);
     }
 
-    static Either<List<ValidationFailure>, List<Item>> createItemList(
+    static Either<List<ValidationFailure>, List<SimpleItem>> createItemList(
             List<ExecutableElement> methods) {
         return new ItemListFactory().validParameterlessAbstract(methods);
     }
 
-    private Either<List<ValidationFailure>, List<Item>> validParameterlessAbstract(
+    private Either<List<ValidationFailure>, List<SimpleItem>> validParameterlessAbstract(
             List<ExecutableElement> methods) {
         return methods.stream()
                 .map(this::createItem)
                 .collect(allFailures());
     }
 
-    private Either<ValidationFailure, Item> createItem(
+    private Either<ValidationFailure, SimpleItem> createItem(
             ExecutableElement method) {
-        String enumName = enumNameFor(method.getSimpleName());
+        String safeName = uniqueNameSet.getUniqueName(method.getSimpleName().toString());
         return getMethodAnnotation(method)
-                .map(a -> Item.create(method, a, enumName));
-    }
-
-    private String enumNameFor(Name sourceMethodName) {
-        String enumName = sourceMethodName.toString();
-        return uniqueNameSet.getUniqueName(enumName);
+                .map(a -> SimpleItem.create(method, a, safeName));
     }
 
     private static Either<ValidationFailure, Annotation> getMethodAnnotation(

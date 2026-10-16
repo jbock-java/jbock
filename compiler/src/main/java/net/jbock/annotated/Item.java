@@ -5,71 +5,43 @@ import net.jbock.common.ValidationFailure;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
-import java.lang.annotation.Annotation;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
-public sealed abstract class Item permits Parameter, Option {
+public sealed interface Item permits Parameter, Option {
 
-    private static final Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
+    Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
-    private final ExecutableElement method;
-    private final String safeName;
+    String paramLabel();
 
-    Item(ExecutableElement method,
-         String safeName) {
-        this.method = method;
-        this.safeName = safeName;
-    }
+    Optional<String> descriptionKey();
 
-    static Item create(
-            ExecutableElement method,
-            Annotation annotation,
-            String enumName) {
-        return switch (annotation) {
-            case net.jbock.Option option -> new Option(method, option, enumName);
-            case net.jbock.Parameter parameter -> new Parameter(method, parameter, enumName);
-            default -> throw new AssertionError("unknown annotation " + annotation);
-        };
-    }
+    List<String> description();
 
-    public abstract boolean isParameter();
+    ExecutableElement method();
 
-    public abstract String paramLabel();
+    String safeName();
 
-    public abstract Optional<String> descriptionKey();
-
-    public abstract List<String> description();
-
-    public final ExecutableElement method() {
-        return method;
-    }
-
-    public final List<Modifier> accessModifiers() {
+    default List<Modifier> accessModifiers() {
         return method().getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
-                .collect(toList());
+                .toList();
     }
 
-    public final ValidationFailure fail(String message) {
-        return new ValidationFailure(message, method);
+    default ValidationFailure fail(String message) {
+        return new ValidationFailure(message, method());
     }
 
-    public final String safeName() {
-        return safeName;
+    default String methodName() {
+        return method().getSimpleName().toString();
     }
 
-    public final String methodName() {
-        return method.getSimpleName().toString();
-    }
-
-    public final TypeMirror returnType() {
-        return method.getReturnType();
+    default TypeMirror returnType() {
+        return method().getReturnType();
     }
 }

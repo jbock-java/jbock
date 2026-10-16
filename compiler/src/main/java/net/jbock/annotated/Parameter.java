@@ -11,45 +11,45 @@ import java.util.function.Supplier;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
-public final class Parameter extends Item {
+public final class Parameter implements Item {
 
     private final Supplier<String> paramLabel = memoize(() -> parameterParamLabel()
             .orElseGet(() -> SnakeName.create(methodName())
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
-    private final net.jbock.Parameter parameter;
+    private final SimpleParameter simpleParameter;
     private final int effectiveIndex;
 
     Parameter(
-            ExecutableElement method,
-            net.jbock.Parameter parameter,
-            String enumName) {
-        this(method, parameter, enumName, -1);
-    }
-
-    Parameter(
-            ExecutableElement method,
-            net.jbock.Parameter parameter,
-            String enumName,
+            SimpleParameter simpleParameter,
             int effectiveIndex) {
-        super(method, enumName);
-        this.parameter = parameter;
+        this.simpleParameter = simpleParameter;
         this.effectiveIndex = effectiveIndex;
     }
 
-    Parameter withEffectiveIndex(int effectiveIndex) {
-        return new Parameter(method(), parameter, safeName(), effectiveIndex);
+    static Parameter createParameter(SimpleParameter parameter, int effectiveIndex) {
+        return new Parameter(parameter, effectiveIndex);
     }
 
     @Override
     public Optional<String> descriptionKey() {
-        return optionalString(parameter.descriptionKey());
+        return optionalString(simpleParameter.parameter().descriptionKey());
     }
 
     @Override
     public List<String> description() {
-        return List.of(parameter.description());
+        return List.of(simpleParameter.parameter().description());
+    }
+
+    @Override
+    public ExecutableElement method() {
+        return simpleParameter.method();
+    }
+
+    @Override
+    public String safeName() {
+        return simpleParameter.safeName();
     }
 
     @Override
@@ -57,23 +57,15 @@ public final class Parameter extends Item {
         return paramLabel.get();
     }
 
-    @Override
-    public boolean isParameter() {
-        return true;
-    }
-
     public int index() {
-        return parameter.index();
+        return simpleParameter.parameter().index();
     }
 
     public int effectiveIndex() {
-        if (effectiveIndex < 0) {
-            throw new AssertionError("non-negative index expected");
-        }
         return effectiveIndex;
     }
 
     private Optional<String> parameterParamLabel() {
-        return optionalString(parameter.paramLabel());
+        return optionalString(simpleParameter.parameter().paramLabel());
     }
 }
