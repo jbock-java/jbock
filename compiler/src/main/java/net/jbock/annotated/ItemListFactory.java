@@ -5,39 +5,36 @@ import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.ExecutableElement;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.jbock.util.Eithers.allFailures;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
 import static net.jbock.common.Constants.CONVERTERS;
 
 final class ItemListFactory {
 
-    private final UniqueNameSet uniqueNameSet = new UniqueNameSet();
-
     private ItemListFactory() {
-        uniqueNameSet.reserve("_");
-        uniqueNameSet.reserve(CONVERTERS);
     }
 
     static Either<List<ValidationFailure>, List<SimpleItem>> createItemList(
             List<ExecutableElement> methods) {
-        return new ItemListFactory().validParameterlessAbstract(methods);
-    }
-
-    private Either<List<ValidationFailure>, List<SimpleItem>> validParameterlessAbstract(
-            List<ExecutableElement> methods) {
-        return methods.stream()
-                .map(this::createItem)
-                .collect(allFailures());
-    }
-
-    private Either<ValidationFailure, SimpleItem> createItem(
-            ExecutableElement method) {
-        String safeName = uniqueNameSet.getUniqueName(method.getSimpleName().toString());
-        return getMethodAnnotation(method)
-                .map(a -> SimpleItem.create(method, a, safeName));
+        UniqueNameSet uniqueNameSet = new UniqueNameSet();
+        uniqueNameSet.reserve("_");
+        uniqueNameSet.reserve(CONVERTERS);
+        List<ValidationFailure> failures = new ArrayList<>();
+        List<SimpleItem> result = new ArrayList<>();
+        for (ExecutableElement method : methods) {
+            String safeName = uniqueNameSet.getUniqueName(method.getSimpleName().toString());
+            getMethodAnnotation(method).ifLeftOrElse(
+                    failures::add,
+                    a -> result.add(SimpleItem.create(method, a, safeName)));
+        }
+        if (failures.isEmpty()) {
+            return Either.right(result);
+        } else {
+            return Either.left(failures);
+        }
     }
 
     private static Either<ValidationFailure, Annotation> getMethodAnnotation(
