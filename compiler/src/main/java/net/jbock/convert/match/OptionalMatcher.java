@@ -42,7 +42,7 @@ public final class OptionalMatcher extends Matcher {
             M item,
             TypeMirror type) {
         for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
-            if (tool.erasesTo(type, optionalPrimitive.type())) {
+            if (tool.isErasureOf(type, optionalPrimitive.type())) {
                 CodeBlock extractExpr = optionalPrimitive.extractExpr();
                 return elements.getTypeElement(optionalPrimitive.numberType())
                         .map(TypeElement::asType)

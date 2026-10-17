@@ -69,7 +69,7 @@ public record TypeTool(SafeElements elements, SafeTypes types) {
     /**
      * Compares {@code mirror} to the erasure of {@code cl}.
      */
-    public boolean erasesTo(TypeMirror mirror, Class<?> cl) {
+    public boolean isErasureOf(TypeMirror mirror, Class<?> cl) {
         return elements.getTypeElement(cl.getCanonicalName())
                 .map(TypeElement::asType)
                 .map(types::erasure)
@@ -86,7 +86,7 @@ public record TypeTool(SafeElements elements, SafeTypes types) {
         if (declaredType.getTypeArguments().isEmpty()) {
             return false;
         }
-        return erasesTo(types.erasure(declaredType), List.class);
+        return isErasureOf(types.erasure(declaredType), List.class);
     }
 
     public boolean isListOfString(TypeMirror mirror) {
@@ -98,8 +98,8 @@ public record TypeTool(SafeElements elements, SafeTypes types) {
         if (declaredType.getTypeArguments().isEmpty()) {
             return false;
         }
-        boolean isList = erasesTo(types.erasure(declaredType), List.class);
-        return isList && erasesTo(declaredType.getTypeArguments().getFirst(), String.class);
+        boolean isList = isErasureOf(types.erasure(declaredType), List.class);
+        return isList && isErasureOf(declaredType.getTypeArguments().getFirst(), String.class);
     }
 
     /**
@@ -111,7 +111,7 @@ public record TypeTool(SafeElements elements, SafeTypes types) {
                 .filter(declaredType -> declaredType.getTypeArguments().size() == 1)
                 .filter(declaredType -> {
                     TypeMirror x = types.erasure(declaredType);
-                    return erasesTo(types.erasure(x), clazz);
+                    return isErasureOf(types.erasure(x), clazz);
                 })
                 .map(declaredType -> declaredType.getTypeArguments().getFirst());
     }

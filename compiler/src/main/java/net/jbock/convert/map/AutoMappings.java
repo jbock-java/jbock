@@ -27,49 +27,49 @@ public record AutoMappings(TypeTool tool) {
     Optional<Mapping<M>> findAutoMapping(
             Match<M> match) {
         TypeMirror baseType = match.baseType();
-        if (tool.erasesTo(baseType, String.class)) {
+        if (tool.isErasureOf(baseType, String.class)) {
             return Optional.of(Mapping.create(match, Arity.UNARY));
         }
-        if (tool.erasesTo(baseType, Integer.class)) {
+        if (tool.isErasureOf(baseType, Integer.class)) {
             return Optional.of(createMapping("asInteger", match));
         }
-        if (tool.erasesTo(baseType, Path.class)) {
+        if (tool.isErasureOf(baseType, Path.class)) {
             return Optional.of(createMapping("asPath", match));
         }
-        if (tool.erasesTo(baseType, File.class)) {
+        if (tool.isErasureOf(baseType, File.class)) {
             return Optional.of(createMapping("asExistingFile", match));
         }
-        if (tool.erasesTo(baseType, URI.class)) {
+        if (tool.isErasureOf(baseType, URI.class)) {
             return Optional.of(createMapping("asURI", match));
         }
-        if (tool.erasesTo(baseType, Pattern.class)) {
+        if (tool.isErasureOf(baseType, Pattern.class)) {
             return Optional.of(createMapping("asPattern", match));
         }
-        if (tool.erasesTo(baseType, LocalDate.class)) {
+        if (tool.isErasureOf(baseType, LocalDate.class)) {
             return Optional.of(createMapping("asLocalDate", match));
         }
-        if (tool.erasesTo(baseType, Long.class)) {
+        if (tool.isErasureOf(baseType, Long.class)) {
             return Optional.of(createMapping("asLong", match));
         }
-        if (tool.erasesTo(baseType, Short.class)) {
+        if (tool.isErasureOf(baseType, Short.class)) {
             return Optional.of(createMapping("asShort", match));
         }
-        if (tool.erasesTo(baseType, Byte.class)) {
+        if (tool.isErasureOf(baseType, Byte.class)) {
             return Optional.of(createMapping("asByte", match));
         }
-        if (tool.erasesTo(baseType, Float.class)) {
+        if (tool.isErasureOf(baseType, Float.class)) {
             return Optional.of(createMapping("asFloat", match));
         }
-        if (tool.erasesTo(baseType, Double.class)) {
+        if (tool.isErasureOf(baseType, Double.class)) {
             return Optional.of(createMapping("asDouble", match));
         }
-        if (tool.erasesTo(baseType, Character.class)) {
+        if (tool.isErasureOf(baseType, Character.class)) {
             return Optional.of(createMapping("asCharacter", match));
         }
-        if (tool.erasesTo(baseType, BigInteger.class)) {
+        if (tool.isErasureOf(baseType, BigInteger.class)) {
             return Optional.of(createMapping("asBigInteger", match));
         }
-        if (tool.erasesTo(baseType, BigDecimal.class)) {
+        if (tool.isErasureOf(baseType, BigDecimal.class)) {
             return Optional.of(createMapping("asBigDecimal", match));
         }
         return Optional.empty();
