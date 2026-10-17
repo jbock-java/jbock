@@ -32,8 +32,8 @@ public final class Option implements Item {
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
-    private final SimpleOption option;
-    private final int internalIndex;
+    private final SimpleOption option; // todo inline
+    private final int internalIndex; // rename to sourceIndex
 
     private Option(
             SimpleOption option,

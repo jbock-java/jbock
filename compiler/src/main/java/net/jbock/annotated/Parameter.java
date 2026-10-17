@@ -18,8 +18,8 @@ public final class Parameter implements Item {
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
-    private final SimpleParameter simpleParameter;
-    private final int effectiveIndex;
+    private final SimpleParameter simpleParameter; // todo inline
+    private final int effectiveIndex; // rename to sourceIndex
 
     Parameter(
             SimpleParameter simpleParameter,
