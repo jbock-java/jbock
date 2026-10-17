@@ -14,9 +14,6 @@ import static net.jbock.common.Util.checkNoDuplicateAnnotations;
 
 final class ItemListValidator {
 
-    private ItemListValidator() {
-    }
-
     static Optional<List<ValidationFailure>> validate(
             List<SimpleItem> items) {
         return Eithers.optionalList(items.stream()
@@ -43,5 +40,8 @@ final class ItemListValidator {
                         .map(VariableElement::getSimpleName)
                         .map(Name::toString)
                         .toList(), item.method()));
+    }
+
+    private ItemListValidator() {
     }
 }
