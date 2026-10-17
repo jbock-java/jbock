@@ -18,7 +18,6 @@ final class ItemListFactory {
     static Either<List<ValidationFailure>, Items> createItemList(
             List<ExecutableElement> methods) {
         UniqueNameSet uniqueNameSet = new UniqueNameSet();
-        uniqueNameSet.reserve("_");
         uniqueNameSet.reserve(CONVERTERS);
         List<ValidationFailure> failures = new ArrayList<>();
         int io = 0, ip = 0;
@@ -33,14 +32,10 @@ final class ItemListFactory {
             }
             Annotation a = e.getRight().orElseThrow();
             switch (a) {
-                case net.jbock.Option option -> {
-                    SimpleOption so = new SimpleOption(method, option, safeName);
-                    options.add(Option.createOption(so, io++));
-                }
-                case net.jbock.Parameter parameter -> {
-                    SimpleParameter sp = new SimpleParameter(method, parameter, safeName);
-                    parameters.add(Parameter.createParameter(sp, ip++));
-                }
+                case net.jbock.Option option -> //
+                        options.add(Option.createOption(method, option, safeName, io++));
+                case net.jbock.Parameter parameter -> //
+                        parameters.add(Parameter.createParameter(method, parameter, safeName, ip++));
                 default -> throw new AssertionError("unknown annotation " + a);
             }
 

@@ -39,15 +39,22 @@ record ParameterValidator(
 
     private Either<List<ValidationFailure>, List<Parameter>> validateIndex(
             List<Parameter> parameters) {
-        List<ValidationFailure> failures = new ArrayList<>();
-        for (int i = 0; i < parameters.size(); i++) {
-            Parameter parameter = parameters.get(i);
-            int index = parameter.index();
-            if (index >= 0 && index != i) {
-                failures.add(parameter.fail("invalid index: expecting " + i + " but found " + index));
+        List<ValidationFailure> failures = null;
+        for (Parameter parameter : parameters) {
+            if (parameter.index() < 0) {
+                continue;
+            }
+            if (parameter.index() != parameter.sourceIndex()) {
+                if (failures == null) {
+                    failures = new ArrayList<>();
+                }
+                failures.add(parameter.fail("invalid index: expecting " +
+                        parameter.sourceIndex() +
+                        " but found " +
+                        parameter.index()));
             }
         }
-        return optionalList(failures)
+        return optionalList(failures == null ? List.of() : failures)
                 .<Either<List<ValidationFailure>, List<Parameter>>>map(Either::left)
                 .orElseGet(() -> right(parameters));
     }
@@ -61,8 +68,8 @@ record ParameterValidator(
                 .flatMap(firstOptional -> positionalParameters.stream()
                         .filter(Mapping::isRequired)
                         .map(Mapping::item)
-                        .filter(sourceMethod -> sourceMethod.effectiveIndex()
-                                > firstOptional.effectiveIndex())
+                        .filter(sourceMethod -> sourceMethod.sourceIndex()
+                                > firstOptional.sourceIndex())
                         .map(item -> item.fail("position of required parameter '" +
                                 item.method().getSimpleName() +
                                 "' is greater than position of optional parameter '" +
@@ -78,8 +85,8 @@ record ParameterValidator(
                 .flatMap(firstRepeatable -> positionalParameters.stream()
                         .filter(m -> !m.isRepeatable())
                         .map(Mapping::item)
-                        .filter(sourceMethod -> sourceMethod.effectiveIndex()
-                                > firstRepeatable.item().effectiveIndex())
+                        .filter(sourceMethod -> sourceMethod.sourceIndex()
+                                > firstRepeatable.item().sourceIndex())
                         .map(item -> item.fail("position of parameter '" +
                                 item.method().getSimpleName() +
                                 "' is greater than position of repeatable parameter '" +

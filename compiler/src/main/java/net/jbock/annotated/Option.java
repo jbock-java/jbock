@@ -32,38 +32,48 @@ public final class Option implements Item {
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
-    private final SimpleOption option; // todo inline
-    private final int internalIndex; // rename to sourceIndex
+    private final ExecutableElement method;
+    private final net.jbock.Option option;
+    private final String safeName;
+    private final int sourceIndex;
 
     private Option(
-            SimpleOption option,
-            int internalIndex) {
+            ExecutableElement method,
+            net.jbock.Option option,
+            String safeName,
+            int sourceIndex) {
+        this.method = method;
         this.option = option;
-        this.internalIndex = internalIndex;
+        this.safeName = safeName;
+        this.sourceIndex = sourceIndex;
     }
 
-    static Option createOption(SimpleOption option, int index) {
-        return new Option(option, index);
+    static Option createOption(
+            ExecutableElement method,
+            net.jbock.Option option,
+            String safeName,
+            int sourceIndex) {
+        return new Option(method, option, safeName, sourceIndex);
     }
 
     @Override
     public Optional<String> descriptionKey() {
-        return optionalString(option.option().descriptionKey());
+        return optionalString(option.descriptionKey());
     }
 
     @Override
     public List<String> description() {
-        return List.of(option.option().description());
+        return List.of(option.description());
     }
 
     @Override
     public ExecutableElement method() {
-        return option.method();
+        return method;
     }
 
     @Override
     public String safeName() {
-        return option.safeName();
+        return safeName;
     }
 
     @Override
@@ -71,8 +81,8 @@ public final class Option implements Item {
         return paramLabel.get();
     }
 
-    public int internalIndex() {
-        return internalIndex;
+    public int sourceIndex() {
+        return sourceIndex;
     }
 
     public List<String> names() {
@@ -80,10 +90,10 @@ public final class Option implements Item {
     }
 
     private List<String> optionNames() {
-        return List.of(option.option().names());
+        return List.of(option.names());
     }
 
     private Optional<String> optionParamLabel() {
-        return optionalString(option.option().paramLabel());
+        return optionalString(option.paramLabel());
     }
 }

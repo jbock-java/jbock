@@ -78,14 +78,14 @@ final class ParseMethod {
                 for (String dashedName : namedOption.item().names()) {
                     code.addStatement("$N.put($S, $L)",
                             optionNames, dashedName,
-                            namedOption.item().internalIndex());
+                            namedOption.item().sourceIndex());
                 }
             }
         }
         code.addStatement("$T $N = new $T[$L]", optionStates.type(), optionStates, OptionState.class, cr().namedOptions().size());
         for (Mapping<Option> namedOption : cr().namedOptions()) {
             code.addStatement("$N[$L] = new $T()",
-                    optionStates, namedOption.item().internalIndex(),
+                    optionStates, namedOption.item().sourceIndex(),
                     optionParserType(namedOption));
         }
         ClassName parserClass;

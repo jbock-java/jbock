@@ -73,15 +73,15 @@ final class CreateImplMethod {
         List<CodeBlock> code = new ArrayList<>();
         if (m.isNullary()) {
             code.add(CodeBlock.of("!$N.option($L).isEmpty()", result(),
-                    m.item().internalIndex()));
+                    m.item().sourceIndex()));
         } else if (m.createConverterExpression().isPresent()) {
             code.add(CodeBlock.of("$N.option($L).stream()", result(),
-                    m.item().internalIndex()));
+                    m.item().sourceIndex()));
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
             code.addAll(tailExpressionOption(m, i));
         } else {
             code.add(CodeBlock.of("$N.option($L)$L", result(),
-                    m.item().internalIndex(), tailExpressionStringOption(m, i)));
+                    m.item().sourceIndex(), tailExpressionStringOption(m, i)));
         }
         m.extractExpr().ifPresent(code::add);
         return CodeBlock.join(code, System.lineSeparator());
@@ -94,12 +94,12 @@ final class CreateImplMethod {
         }
         if (m.createConverterExpression().isPresent()) {
             code.add(CodeBlock.of("$N.param($L)", result(),
-                    m.item().effectiveIndex()));
+                    m.item().sourceIndex()));
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
             code.addAll(tailExpressionParameter(m, i));
         } else {
             code.add(CodeBlock.of("$N.param($L)$L", result(),
-                    m.item().effectiveIndex(), tailExpressionStringParameter(m, i)));
+                    m.item().sourceIndex(), tailExpressionStringParameter(m, i)));
         }
         m.extractExpr().ifPresent(code::add);
         return CodeBlock.join(code, System.lineSeparator());

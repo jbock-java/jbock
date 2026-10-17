@@ -18,38 +18,48 @@ public final class Parameter implements Item {
                     .snake('_')
                     .toUpperCase(Locale.ROOT)));
 
-    private final SimpleParameter simpleParameter; // todo inline
-    private final int effectiveIndex; // rename to sourceIndex
+    private final ExecutableElement method;
+    private final net.jbock.Parameter parameter;
+    private final String safeName;
+    private final int sourceIndex; // rename to sourceIndex
 
     Parameter(
-            SimpleParameter simpleParameter,
-            int effectiveIndex) {
-        this.simpleParameter = simpleParameter;
-        this.effectiveIndex = effectiveIndex;
+            ExecutableElement method,
+            net.jbock.Parameter parameter,
+            String safeName,
+            int sourceIndex) {
+        this.method = method;
+        this.parameter = parameter;
+        this.safeName = safeName;
+        this.sourceIndex = sourceIndex;
     }
 
-    static Parameter createParameter(SimpleParameter parameter, int effectiveIndex) {
-        return new Parameter(parameter, effectiveIndex);
+    static Parameter createParameter(
+            ExecutableElement method,
+            net.jbock.Parameter parameter,
+            String safeName,
+            int sourceIndex) {
+        return new Parameter(method, parameter, safeName, sourceIndex);
     }
 
     @Override
     public Optional<String> descriptionKey() {
-        return optionalString(simpleParameter.parameter().descriptionKey());
+        return optionalString(parameter.descriptionKey());
     }
 
     @Override
     public List<String> description() {
-        return List.of(simpleParameter.parameter().description());
+        return List.of(parameter.description());
     }
 
     @Override
     public ExecutableElement method() {
-        return simpleParameter.method();
+        return method;
     }
 
     @Override
     public String safeName() {
-        return simpleParameter.safeName();
+        return safeName;
     }
 
     @Override
@@ -58,14 +68,14 @@ public final class Parameter implements Item {
     }
 
     public int index() {
-        return simpleParameter.parameter().index();
+        return parameter.index();
     }
 
-    public int effectiveIndex() {
-        return effectiveIndex;
+    public int sourceIndex() {
+        return sourceIndex;
     }
 
     private Optional<String> parameterParamLabel() {
-        return optionalString(simpleParameter.parameter().paramLabel());
+        return optionalString(parameter.paramLabel());
     }
 }
