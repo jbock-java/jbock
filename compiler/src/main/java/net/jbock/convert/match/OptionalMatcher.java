@@ -33,8 +33,7 @@ public final class OptionalMatcher extends Matcher {
 
     private <M extends Item> Optional<Match<M>>
     matchOptional(M item, TypeMirror returnType) {
-        return elements.getTypeElement("java.util.Optional")
-                .flatMap(el -> tool.getSingleTypeArgument(returnType, el))
+        return tool.getSingleTypeArgument(returnType, java.util.Optional.class)
                 .map(typeArg -> Match.create(typeArg, OPTIONAL, item));
     }
 
@@ -43,7 +42,7 @@ public final class OptionalMatcher extends Matcher {
             M item,
             TypeMirror type) {
         for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
-            if (tool.isSameType(type, optionalPrimitive.type())) {
+            if (tool.erasesTo(type, optionalPrimitive.type())) {
                 CodeBlock extractExpr = optionalPrimitive.extractExpr();
                 return elements.getTypeElement(optionalPrimitive.numberType())
                         .map(TypeElement::asType)

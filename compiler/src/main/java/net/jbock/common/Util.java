@@ -99,11 +99,11 @@ public final class Util {
             ExecutableElement element,
             TypeMirror thrown,
             TypeMirror mirror) {
-        if (tool.isSameType(mirror, RuntimeException.class) ||
-                tool.isSameType(mirror, Error.class)) {
+        if (tool.erasesTo(mirror, RuntimeException.class) ||
+                tool.erasesTo(mirror, Error.class)) {
             return Optional.empty();
         }
-        if (tool.isSameType(mirror, Throwable.class)) {
+        if (tool.erasesTo(mirror, Throwable.class)) {
             return Optional.of(new ValidationFailure("invalid throws clause:" +
                     " found checked exception " +
                     typeToString(thrown), element));

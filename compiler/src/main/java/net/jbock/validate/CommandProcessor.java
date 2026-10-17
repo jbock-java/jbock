@@ -61,8 +61,8 @@ public final class CommandProcessor {
         List<ValidationFailure> failures = new ArrayList<>();
         Set<String> keys = new HashSet<>();
         sourceElement.descriptionKey().ifPresent(keys::add);
-        Stream.of(items.namedOptions(),
-                        items.positionalParameters())
+        Stream.of(items.options(),
+                        items.parameters())
                 .flatMap(List::stream)
                 .forEach(m -> m.descriptionKey().ifPresent(key -> {
                     if (!keys.add(key)) {

@@ -67,10 +67,14 @@ public record TypeTool(SafeElements elements, SafeTypes types) {
     };
 
     /**
-     * Works for classes with no type parameters.
+     * Compares {@code mirror} to the erasure of {@code cl}.
      */
-    public boolean isSameType(TypeMirror mirror, Class<?> cl) {
-        return isSameType(mirror, cl.getCanonicalName());
+    public boolean erasesTo(TypeMirror mirror, Class<?> cl) {
+        return elements.getTypeElement(cl.getCanonicalName())
+                .map(TypeElement::asType)
+                .map(types::erasure)
+                .map(type -> types.isSameType(mirror, type))
+                .orElse(false);
     }
 
     public boolean isList(TypeMirror mirror) {
@@ -82,14 +86,7 @@ public record TypeTool(SafeElements elements, SafeTypes types) {
         if (declaredType.getTypeArguments().isEmpty()) {
             return false;
         }
-        return isSameErasure(declaredType, List.class);
-    }
-
-    public boolean isSameErasure(TypeMirror x, Class<?> y) {
-        return elements.getTypeElement(y.getCanonicalName())
-                .map(TypeElement::asType)
-                .map(type -> types.isSameType(types.erasure(x), types.erasure(type)))
-                .orElse(false);
+        return erasesTo(types.erasure(declaredType), List.class);
     }
 
     public boolean isListOfString(TypeMirror mirror) {
@@ -101,34 +98,21 @@ public record TypeTool(SafeElements elements, SafeTypes types) {
         if (declaredType.getTypeArguments().isEmpty()) {
             return false;
         }
-        if (elements.getTypeElement("java.util.List")
-                .filter(list -> list.equals(declaredType.asElement()))
-                .isEmpty()) {
-            return false;
-        }
-        return isSameType(declaredType.getTypeArguments().getFirst(), String.class);
-    }
-
-    /**
-     * Works for classes with no type parameters.
-     */
-    public boolean isSameType(TypeMirror mirror, String canonicalName) {
-        return elements.getTypeElement(canonicalName)
-                .map(TypeElement::asType)
-                .map(type -> types.isSameType(mirror, type))
-                .orElse(false);
+        boolean isList = erasesTo(types.erasure(declaredType), List.class);
+        return isList && erasesTo(declaredType.getTypeArguments().getFirst(), String.class);
     }
 
     /**
      * {@code someClass} must be a class with exactly one type parameter.
      */
     public Optional<TypeMirror> getSingleTypeArgument(
-            TypeMirror mirror, TypeElement someClass) {
+            TypeMirror mirror, Class<?> clazz) {
         return AS_DECLARED.visit(mirror)
                 .filter(declaredType -> declaredType.getTypeArguments().size() == 1)
-                .filter(declaredType -> types.isSameType(
-                        types.erasure(declaredType),
-                        types.erasure(someClass.asType())))
+                .filter(declaredType -> {
+                    TypeMirror x = types.erasure(declaredType);
+                    return erasesTo(types.erasure(x), clazz);
+                })
                 .map(declaredType -> declaredType.getTypeArguments().getFirst());
     }
 }

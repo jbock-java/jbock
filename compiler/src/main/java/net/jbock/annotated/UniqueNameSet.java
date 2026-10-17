@@ -5,7 +5,11 @@ import java.util.Set;
 
 /** A collector for names to be used in the same namespace that should not conflict. */
 public final class UniqueNameSet {
-    private final Set<String> uniqueNames = new HashSet<>();
+    private final Set<String> uniqueNames;
+
+    UniqueNameSet(int numElements) {
+        this.uniqueNames = HashSet.newHashSet(numElements);
+    }
 
     void reserve(String name) {
         if (uniqueNames.contains(name)) {

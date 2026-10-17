@@ -23,8 +23,7 @@ public final class ListMatcher extends Matcher {
     <M extends Item>
     Optional<Match<M>> tryMatch(M item) {
         TypeMirror returnType = item.returnType();
-        return elements.getTypeElement("java.util.List")
-                .flatMap(utilList -> tool.getSingleTypeArgument(returnType, utilList))
+        return tool.getSingleTypeArgument(returnType, java.util.List.class)
                 .map(typeArg -> Match.create(typeArg, REPEATABLE, item));
     }
 }

@@ -26,7 +26,7 @@ record OptionValidator(MappingFinder mappingFinder) {
 
     Either<List<ValidationFailure>, List<Mapping<Option>>> wrapOptions(
             Items items) {
-        return items.namedOptions().stream()
+        return items.options().stream()
                 .map(this::checkOptionNames)
                 .collect(allFailures())
                 .filter(this::validateUniqueOptionNames)

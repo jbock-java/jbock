@@ -27,7 +27,7 @@ record ParameterValidator(
 
     Either<List<ValidationFailure>, List<Mapping<Parameter>>> wrapPositionalParams(
             Items items) {
-        return validateIndex(items.positionalParameters())
+        return validateIndex(items.parameters())
                 .filter(this::validateSuperCommandHasRepeatable)
                 .filter(this::validateOnlyOneRepeatable)
                 .flatMap(parameters -> parameters.stream()
@@ -55,7 +55,7 @@ record ParameterValidator(
             }
         }
         return optionalList(failures == null ? List.of() : failures)
-                .<Either<List<ValidationFailure>, List<Parameter>>>map(Either::left)
+                .map(Either::<List<ValidationFailure>, List<Parameter>>left)
                 .orElseGet(() -> right(parameters));
     }
 
