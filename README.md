@@ -24,10 +24,6 @@ The return types `boolean`, `List<?>` and `Optional<?>` (including `OptionalInt`
 They are used to declare flags, repeable and optional options and parameters, respectively.
 
 > [!TIP]
-> If an abstract method returns `java.util.List`, it is a "catch-all" parameter.
-> Only one catch-all parameter may exist.
-
-> [!TIP]
 > Only the exact type `java.util.List` has special semantics.
 > An abstract method returning `ArrayList<String>`, for example, does *not* represent a
 > repeatable option or catch-all parameter.
