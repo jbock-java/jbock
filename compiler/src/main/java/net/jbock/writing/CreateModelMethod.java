@@ -72,37 +72,41 @@ final class CreateModelMethod {
                         m.paramLabel());
             }
         }
-        List<CodeBlock> code = new ArrayList<>();
+        CodeBlock.Builder code = CodeBlock.builder();
+        code.add(".addOption(");
         if (m.isNullary()) {
-            code.add(CodeBlock.of("$T.nullary()", net.jbock.model.Option.class));
+            code.add("$T.nullary()", net.jbock.model.Option.class);
+            code.indent();
         } else {
-            code.add(CodeBlock.of("$T.unary($T.$L)", net.jbock.model.Option.class, Multiplicity.class, m.multiplicity().name()));
-            code.add(CodeBlock.of(".withParamLabel($S)", m.paramLabel()));
+            code.add("$T.unary($T.$L)", net.jbock.model.Option.class, Multiplicity.class, m.multiplicity().name());
+            code.indent();
+            code.add("\n.withParamLabel($S)", m.paramLabel());
         }
-        m.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
-        code.add(CodeBlock.of(".withNames($T.of($L))", List.class, CodeBlock.join(names, ", ")));
+        m.item().descriptionKey().ifPresent(key -> code.add("\n.withDescriptionKey($S)", key));
+        code.add("\n.withNames($T.of($L))", List.class, CodeBlock.join(names, ", "));
         for (String line : m.item().description()) {
-            code.add(CodeBlock.of(".addDescriptionLine($S)", line));
+            code.add(".addDescriptionLine($S)", line);
         }
-        code.add(CodeBlock.of(".build()"));
-        return CodeBlock.of(".addOption($L)", CodeBlock.join(code, System.lineSeparator()));
+        code.add("\n.build())");
+        return code.unindent().build();
     }
 
-    private CodeBlock parameterBlock(Mapping<?> m) {
-        List<CodeBlock> code = new ArrayList<>();
+    private CodeBlock parameterBlock(Mapping<net.jbock.annotated.Parameter> m) {
         if (m.item().descriptionKey().isEmpty() && m.item().description().isEmpty()) {
             return CodeBlock.of(".addParameter($T.$L, $S)",
                     Multiplicity.class, m.multiplicity().name(),
                     m.paramLabel());
         }
-        code.add(CodeBlock.of("$T.builder($T.$L)", Parameter.class, Multiplicity.class, m.multiplicity().name()));
-        code.add(CodeBlock.of(".withParamLabel($S)", m.paramLabel()));
-        m.item().descriptionKey().ifPresent(key -> code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
+        CodeBlock.Builder code = CodeBlock.builder();
+        code.add(".addParameter($T.builder($T.$L)", Parameter.class, Multiplicity.class, m.multiplicity().name());
+        code.indent();
+        code.add("\n.withParamLabel($S)", m.paramLabel());
+        m.item().descriptionKey().ifPresent(key -> code.add("\n.withDescriptionKey($S)", key));
         for (String line : m.item().description()) {
-            code.add(CodeBlock.of(".addDescriptionLine($S)", line));
+            code.add("\n.addDescriptionLine($S)", line);
         }
-        code.add(CodeBlock.of(".build()"));
-        return CodeBlock.of(".addParameter($L)", CodeBlock.join(code, System.lineSeparator()));
+        code.add("\n.build())");
+        return code.unindent().build();
     }
 
     private CommandRepresentation cr() {

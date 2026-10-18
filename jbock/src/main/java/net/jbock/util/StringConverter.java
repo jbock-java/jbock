@@ -49,13 +49,6 @@ public abstract class StringConverter<T> implements Function<String, Either<Conv
         };
     }
 
-    /**
-     * This method is internal API and should not be used
-     * in client code.
-     *
-     * @param token a non-null string
-     * @return conversion result
-     */
     @Override
     public final Either<ConverterFailure, T> apply(String token) {
         try {
