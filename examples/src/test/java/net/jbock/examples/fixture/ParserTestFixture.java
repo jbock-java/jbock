@@ -1,5 +1,6 @@
 package net.jbock.examples.fixture;
 
+import net.jbock.ColorMode;
 import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.model.CommandModel;
 import net.jbock.util.Either;
@@ -175,7 +176,7 @@ public final class ParserTestFixture<E> {
         StandardErrorHandler.builder()
                 .withOutputStream(testOutputStream.out)
                 .withTerminalWidth(MAX_LINE_WIDTH)
-                .withNoColor(true)
+                .withColorMode(ColorMode.NO_COLOR)
                 .withMessages(messages)
                 .build()
                 .printUsageDocumentation(commandModel);

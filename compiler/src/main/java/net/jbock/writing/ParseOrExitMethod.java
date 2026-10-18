@@ -40,7 +40,7 @@ record ParseOrExitMethod(
             } else {
                 code.beginControlFlow("if ($1N.length > 0 && $2S.equals($1N[0]))", args, "--help");
             }
-            code.add("$L\n", createStandardErrorHandler()).indent()
+            code.add("$L\n", createErrorHandler()).indent()
                     .add(".printUsageDocumentation($N());\n", createModelMethod.get()).unindent()
                     .addStatement("$T.exit(0)", System.class)
                     .endControlFlow();
@@ -50,8 +50,8 @@ record ParseOrExitMethod(
                     .add(".mapLeft($1N -> $1N.addModel($2N()))\n", err, createModelMethod.get())
                     .add(".flatMap(this::$N)\n", parseMethod.get())
                     .add(".orElseThrow($N -> {\n", notSuccess).indent()
-                    .addStatement("$L.printErrorMessage($N)",
-                            createStandardErrorHandler(), notSuccess)
+                    .add("$L\n", createErrorHandler()).indent()
+                    .add(".printErrorMessage($N);\n", notSuccess).unindent()
                     .addStatement("$T.exit(1)", System.class)
                     .addStatement("return new $T()", RuntimeException.class).unindent()
                     .addStatement("})").unindent();
@@ -60,8 +60,8 @@ record ParseOrExitMethod(
                     CodeBlock.of("$N", args) :
                     CodeBlock.of("$T.of($N)", List.class, args);
             code.add("return parse($L).orElseThrow($N -> {\n", pArgs, notSuccess).indent()
-                    .addStatement("$L.printErrorMessage($N)",
-                            createStandardErrorHandler(), notSuccess)
+                    .add("$L\n", createErrorHandler()).indent()
+                    .add(".printErrorMessage($N);\n", notSuccess).unindent()
                     .addStatement("$T.exit(1)", System.class)
                     .addStatement("return new $T()", RuntimeException.class).unindent()
                     .addStatement("})");
@@ -74,7 +74,7 @@ record ParseOrExitMethod(
                 .build();
     }
 
-    private CodeBlock createStandardErrorHandler() {
+    private CodeBlock createErrorHandler() {
         if (cr().sourceElement().colorMode() == ColorMode.AUTO) {
             return CodeBlock.of("$T.builder().build()", StandardErrorHandler.class);
         } else {

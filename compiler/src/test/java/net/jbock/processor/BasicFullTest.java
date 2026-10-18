@@ -14,7 +14,7 @@ class BasicFullTest {
     @Test
     void testBasicGenerated() {
         JavaFileObject javaFile = fromSource(
-                "@Command(skipGeneratingParseOrExitMethod = true)",
+                "@Command(skipGeneratingParseOrExitMethod = true, colorMode = ColorMode.NO_COLOR)",
                 "abstract class Arguments {",
                 "",
                 "  @Parameter",
@@ -57,6 +57,7 @@ class BasicFullTest {
                         "",
                         "  static CommandModel createModel() {",
                         "    return CommandModel.builder()",
+                        "        .withColorMode(ColorMode.NO_COLOR)",
                         "        .withProgramName(\"arguments\")",
                         "        .addParameter(Multiplicity.REPEATABLE, \"HELLO\")",
                         "        .build();",

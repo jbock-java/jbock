@@ -20,6 +20,7 @@ import static net.jbock.common.Suppliers.memoize;
 public final class SourceElement {
 
     private final TypeElement typeElement;
+    private final Command command;
 
     private final Supplier<List<Modifier>> accessModifiers = memoize(() -> command().publicParser() ?
             List.of(Modifier.PUBLIC) :
@@ -41,12 +42,13 @@ public final class SourceElement {
                 .peerClass(String.join("_", commandClass.simpleNames()) + "Parser");
     });
 
-    private SourceElement(TypeElement typeElement) {
+    private SourceElement(TypeElement typeElement, Command command) {
         this.typeElement = typeElement;
+        this.command = command;
     }
 
     static SourceElement create(TypeElement typeElement) {
-        return new SourceElement(typeElement);
+        return new SourceElement(typeElement, typeElement.getAnnotation(Command.class));
     }
 
     public TypeElement element() {
@@ -62,7 +64,7 @@ public final class SourceElement {
     }
 
     public boolean isSuperCommand() {
-        return command().superCommand();
+        return command.superCommand();
     }
 
     public List<Modifier> accessModifiers() {
@@ -90,27 +92,27 @@ public final class SourceElement {
     }
 
     public boolean skipGeneratingParseOrExitMethod() {
-        return command().skipGeneratingParseOrExitMethod();
+        return command.skipGeneratingParseOrExitMethod();
     }
 
     public boolean skipHelp() {
-        return command().skipHelp();
+        return command.skipHelp();
     }
 
     public boolean parseOrExitMethodAcceptsList() {
-        return command().parseOrExitMethodAcceptsList();
+        return command.parseOrExitMethodAcceptsList();
     }
 
     public boolean enableAtFileExpansion() {
-        return command().enableAtFileExpansion();
+        return command.enableAtFileExpansion();
     }
 
     public ColorMode colorMode() {
-        return command().colorMode();
+        return command.colorMode();
     }
 
     private Command command() {
-        return typeElement.getAnnotation(Command.class);
+        return command;
     }
 
     private TypeElement typeElement() {
