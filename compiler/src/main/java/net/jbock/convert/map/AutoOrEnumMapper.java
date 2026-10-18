@@ -26,7 +26,7 @@ public record AutoOrEnumMapper(AutoMappings autoMappings) {
         return autoMappings.findAutoMapping(match)
                 .or(() -> findEnumMapping(match))
                 .<Either<ValidationFailure, Mapping<M>>>map(Either::right)
-                .orElseGet(() -> left(match.fail("unknown type: " +
+                .orElseGet(() -> left(match.item().fail("unknown type: " +
                         Util.typeToString(match.baseType()))));
     }
 

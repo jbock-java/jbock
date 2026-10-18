@@ -17,10 +17,7 @@ import static net.jbock.common.Suppliers.memoize;
 import static net.jbock.model.Multiplicity.OPTIONAL;
 
 /**
- * An annotated method with additional information about string conversion.
- *
- * @param <M> one of three types of annotated methods:
- *           named option, positional parameter, or repeatable positional parameter
+ * An item with additional information about string conversion.
  */
 public final class Mapping<M extends Item> {
 
@@ -37,22 +34,19 @@ public final class Mapping<M extends Item> {
         this.arity = arity;
     }
 
-    public static <M extends Item>
-    Mapping<M> create(
+    public static <M extends Item> Mapping<M> create(
             Match<M> match,
             Arity arity) {
         return new Mapping<>(Optional.empty(), match, arity);
     }
 
-    public static <M extends Item>
-    Mapping<M> create(
+    public static <M extends Item> Mapping<M> create(
             CodeBlock createConverterExpression,
             Match<M> match) {
         return new Mapping<>(Optional.of(createConverterExpression), match, Arity.UNARY);
     }
 
-    public static <M extends Item>
-    Mapping<M> create(
+    public static <M extends Item> Mapping<M> create(
             CodeBlock createConverterExpression,
             Match<M> match,
             Arity arity) {
