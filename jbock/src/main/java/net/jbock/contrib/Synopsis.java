@@ -16,20 +16,10 @@ import static java.util.stream.Collectors.toList;
 import static net.jbock.model.Multiplicity.REPEATABLE;
 import static net.jbock.model.Multiplicity.REQUIRED;
 
-final class Synopsis {
-
-    private final List<Option> options;
-    private final List<Parameter> parameters;
-    private final String programName;
-
-    private Synopsis(
-            String programName,
-            List<Option> options,
-            List<Parameter> parameters) {
-        this.options = options;
-        this.parameters = parameters;
-        this.programName = programName;
-    }
+record Synopsis(
+        String programName,
+        List<Option> options,
+        List<Parameter> parameters) {
 
     static Synopsis create(CommandModel context) {
         return new Synopsis(

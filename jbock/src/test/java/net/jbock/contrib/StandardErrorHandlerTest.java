@@ -1,5 +1,6 @@
 package net.jbock.contrib;
 
+import net.jbock.ColorMode;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Option;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ class StandardErrorHandlerTest {
                 """;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         StandardErrorHandler.builder()
-                .withAnsi(false)
+                .withColorMode(ColorMode.NO_COLOR)
                 .withOutputStream(new PrintStream(out))
                 .build()
                 .printUsageDocumentation(createModel());

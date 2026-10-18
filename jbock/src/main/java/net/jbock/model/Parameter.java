@@ -7,9 +7,6 @@ import java.util.Locale;
 /**
  * This class is part of the command model.
  * It represents a positional parameter.
- *
- * @see net.jbock.Parameter
- * @see CommandModel
  */
 public final class Parameter extends Item {
 

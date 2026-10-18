@@ -6,10 +6,7 @@ import java.util.Locale;
 
 /**
  * This class is part of the command model.
- * It represents a named option or a mode flag.
- *
- * @see net.jbock.Option
- * @see CommandModel
+ * It represents a named option.
  */
 public final class Option extends Item {
 
@@ -25,7 +22,7 @@ public final class Option extends Item {
             Arity arity) {
         super(paramLabel, descriptionKey, description, multiplicity);
         if (names.isEmpty()) {
-            throw new IllegalArgumentException("paramLabel may not be empty");
+            throw new AssertionError("a named option needs at least one name");
         }
         this.names = names;
         this.arity = arity;

@@ -1,36 +1,39 @@
 package net.jbock.contrib;
 
-import java.util.Optional;
+import net.jbock.ColorMode;
 
-final class AnsiStyle {
+import java.util.Objects;
+
+record AnsiStyle(boolean noColor) {
 
     private static final char ESC = 0x1B;
     private static final String CSI = ESC + "[";
     private static final String RESET = CSI + "m";
 
-    private final boolean ansi;
-
-    private AnsiStyle(boolean ansi) {
-        this.ansi = ansi;
-    }
-
-    static AnsiStyle create(boolean ansi) {
-        return new AnsiStyle(ansi);
-    }
-
-    private Optional<String> paint(String text, Style style) {
-        if (!ansi) {
-            return Optional.empty();
+    static AnsiStyle create(ColorMode colorMode) {
+        boolean noco;
+        if (colorMode == ColorMode.AUTO) {
+            noco = !Objects.toString(System.getenv("NO_COLOR"), "").isEmpty();
+        } else {
+            noco = colorMode == ColorMode.NO_COLOR;
         }
-        return Optional.of(CSI + style.code + 'm' + text + RESET);
+        return new AnsiStyle(noco);
     }
 
-    Optional<String> bold(String text) {
+    private String paint(String text, Style style) {
+        if (noColor) {
+            return text;
+        } else {
+            return CSI + style.code + 'm' + text + RESET;
+        }
+    }
+
+    String bold(String text) {
         return paint(text, Style.BOLD);
     }
 
     String red(String text) {
-        return paint(text, Style.FG_RED).orElse(text);
+        return paint(text, Style.FG_RED);
     }
 
     private enum Style {

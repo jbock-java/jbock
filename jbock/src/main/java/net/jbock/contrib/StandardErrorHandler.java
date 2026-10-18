@@ -1,36 +1,22 @@
 package net.jbock.contrib;
 
+import net.jbock.ColorMode;
 import net.jbock.model.CommandModel;
 import net.jbock.util.ParsingFailed;
 
 import java.io.PrintStream;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import static java.util.Objects.requireNonNullElse;
 
 /**
  * A convenience class that performs standard error handling,
  * like printing error messages and printing the usage documentation.
  */
-public final class StandardErrorHandler {
-
-    private final PrintStream out;
-    private final int terminalWidth;
-    private final boolean ansi;
-    private final Map<String, String> messages;
-
-    private StandardErrorHandler(
-            PrintStream out,
-            int terminalWidth,
-            boolean ansi,
-            Map<String, String> messages) {
-        this.out = out;
-        this.terminalWidth = terminalWidth;
-        this.ansi = ansi;
-        this.messages = messages;
-    }
+public record StandardErrorHandler(
+        PrintStream out,
+        int terminalWidth,
+        ColorMode colorMode,
+        Map<String, String> messages) {
 
     /**
      * Builder for {@link StandardErrorHandler}.
@@ -39,12 +25,8 @@ public final class StandardErrorHandler {
 
         private PrintStream out = System.err;
         private int terminalWidth = 80;
-        private boolean ansi;
-        private Map<String, String> messages = Collections.emptyMap();
-
-        private Builder() {
-            ansi = requireNonNullElse(System.getenv("NO_COLOR"), "").isEmpty();
-        }
+        private ColorMode colorMode = ColorMode.AUTO;
+        private Map<String, String> messages = Map.of();
 
         /**
          * Sets the output stream for printing help messages
@@ -89,13 +71,10 @@ public final class StandardErrorHandler {
         }
 
         /**
-         * Sets the value of the ansi attribute.
-         *
-         * @param ansi if ansi codes should be used
-         * @return the builder instance
+         * Sets the value of the noColor attribute to {@code true}.
          */
-        public Builder withAnsi(boolean ansi) {
-            this.ansi = ansi;
+        public Builder withColorMode(ColorMode colorMode) {
+            this.colorMode = colorMode;
             return this;
         }
 
@@ -105,7 +84,7 @@ public final class StandardErrorHandler {
          * @return an error handler
          */
         public StandardErrorHandler build() {
-            return new StandardErrorHandler(out, terminalWidth, ansi, messages);
+            return new StandardErrorHandler(out, terminalWidth, colorMode, messages);
         }
     }
 
@@ -126,7 +105,7 @@ public final class StandardErrorHandler {
     public void printUsageDocumentation(CommandModel model) {
         UsageDocumentation.builder(model)
                 .withOutputStream(out)
-                .withAnsi(ansi)
+                .withColorMode(colorMode)
                 .withMessages(messages)
                 .withTerminalWidth(terminalWidth)
                 .build()
@@ -141,15 +120,23 @@ public final class StandardErrorHandler {
      */
     public void printErrorMessage(ParsingFailed failure) {
         CommandModel model = failure.commandModel();
-        AnsiStyle ansiStyle = AnsiStyle.create(ansi);
+        AnsiStyle ansiStyle = AnsiStyle.create(colorMode);
         out.println(ansiStyle.red("ERROR:") + ' ' + failure.message());
         List<String> synopsis = Synopsis.create(model)
                 .createSynopsis("Usage:");
         out.println(String.join(" ", synopsis));
-        String helpCommand = model.programName() + " --help";
         out.println("Type " +
-                ansiStyle.bold(helpCommand).orElseGet(() -> "'" + helpCommand + "'") +
+                boldHelpCommand(model, ansiStyle) +
                 " for more information.");
         out.flush();
+    }
+
+    private String boldHelpCommand(CommandModel model, AnsiStyle ansiStyle) {
+        String helpCommand = model.programName() + " --help";
+        if (ansiStyle.noColor()) {
+            return "'" + helpCommand + "'";
+        } else {
+            return ansiStyle.bold(helpCommand);
+        }
     }
 }

@@ -3,6 +3,7 @@ package net.jbock.writing;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.MethodSpec;
 import io.jbock.simple.Inject;
+import net.jbock.ColorMode;
 import net.jbock.annotated.Option;
 import net.jbock.convert.Mapping;
 import net.jbock.model.CommandModel;
@@ -28,6 +29,9 @@ final class CreateModelMethod {
     private final Supplier<MethodSpec> define = memoize(() -> {
         List<CodeBlock> code = new ArrayList<>();
         code.add(CodeBlock.of("return $T.builder()", CommandModel.class));
+        if (cr().sourceElement().colorMode() != ColorMode.AUTO) {
+            code.add(CodeBlock.of(".withColorMode($T.$L)", ColorMode.class, cr().sourceElement().colorMode().name()));
+        }
         cr().sourceElement().descriptionKey().ifPresent(key ->
                 code.add(CodeBlock.of(".withDescriptionKey($S)", key)));
         for (String descriptionLine : cr().sourceElement().description()) {
@@ -57,19 +61,21 @@ final class CreateModelMethod {
     }
 
     private CodeBlock optionBlock(Mapping<Option> m) {
-        List<CodeBlock> names = new ArrayList<>();
-        for (String name : m.item().names()) {
-            names.add(CodeBlock.of("$S", name));
+        CodeBlock names;
+        if (m.item().names().size() == 1) {
+            names = CodeBlock.of("$S", m.item().names().getFirst());
+        } else {
+            names = m.item().names().stream()
+                    .map(name -> CodeBlock.of("$S", name))
+                    .collect(CodeBlock.joining(", "));
         }
         if (m.item().descriptionKey().isEmpty() && m.item().description().isEmpty()) {
             if (m.isNullary()) {
-                return CodeBlock.of(".addNullary($T.of($L))",
-                        List.class, CodeBlock.join(names, ", "));
+                return CodeBlock.of(".addNullary($T.of($L))", List.class, names);
             } else {
                 return CodeBlock.of(".addUnary($T.$L, $T.of($L), $S)",
                         Multiplicity.class, m.multiplicity().name(),
-                        List.class, CodeBlock.join(names, ", "),
-                        m.paramLabel());
+                        List.class, names, m.paramLabel());
             }
         }
         CodeBlock.Builder code = CodeBlock.builder();
@@ -82,8 +88,8 @@ final class CreateModelMethod {
             code.indent();
             code.add("\n.withParamLabel($S)", m.paramLabel());
         }
+        code.add("\n.withNames($T.of($L))", List.class, names);
         m.item().descriptionKey().ifPresent(key -> code.add("\n.withDescriptionKey($S)", key));
-        code.add("\n.withNames($T.of($L))", List.class, CodeBlock.join(names, ", "));
         for (String line : m.item().description()) {
             code.add(".addDescriptionLine($S)", line);
         }

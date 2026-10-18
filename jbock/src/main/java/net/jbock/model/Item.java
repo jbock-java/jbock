@@ -4,9 +4,7 @@ import java.util.List;
 
 /**
  * This class is part of the command model.
- * It represents an abstract method in the command interface.
- *
- * @see net.jbock.Command
+ * It represents either a named option or a positional parameter.
  */
 public abstract sealed class Item permits Option, Parameter {
 

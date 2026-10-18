@@ -5,6 +5,7 @@ import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterSpec;
 import io.jbock.simple.Inject;
+import net.jbock.ColorMode;
 import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.util.AtFileError;
 import net.jbock.util.ParseRequest;
@@ -39,7 +40,7 @@ record ParseOrExitMethod(
             } else {
                 code.beginControlFlow("if ($1N.length > 0 && $2S.equals($1N[0]))", args, "--help");
             }
-            code.add("$T.builder().build()\n", StandardErrorHandler.class).indent()
+            code.add("$L\n", createStandardErrorHandler()).indent()
                     .add(".printUsageDocumentation($N());\n", createModelMethod.get()).unindent()
                     .addStatement("$T.exit(0)", System.class)
                     .endControlFlow();
@@ -49,8 +50,8 @@ record ParseOrExitMethod(
                     .add(".mapLeft($1N -> $1N.addModel($2N()))\n", err, createModelMethod.get())
                     .add(".flatMap(this::$N)\n", parseMethod.get())
                     .add(".orElseThrow($N -> {\n", notSuccess).indent()
-                    .addStatement("$T.builder().build().printErrorMessage($N)",
-                            StandardErrorHandler.class, notSuccess)
+                    .addStatement("$L.printErrorMessage($N)",
+                            createStandardErrorHandler(), notSuccess)
                     .addStatement("$T.exit(1)", System.class)
                     .addStatement("return new $T()", RuntimeException.class).unindent()
                     .addStatement("})").unindent();
@@ -59,8 +60,8 @@ record ParseOrExitMethod(
                     CodeBlock.of("$N", args) :
                     CodeBlock.of("$T.of($N)", List.class, args);
             code.add("return parse($L).orElseThrow($N -> {\n", pArgs, notSuccess).indent()
-                    .addStatement("$T.builder().build().printErrorMessage($N)",
-                            StandardErrorHandler.class, notSuccess)
+                    .addStatement("$L.printErrorMessage($N)",
+                            createStandardErrorHandler(), notSuccess)
                     .addStatement("$T.exit(1)", System.class)
                     .addStatement("return new $T()", RuntimeException.class).unindent()
                     .addStatement("})");
@@ -71,5 +72,14 @@ record ParseOrExitMethod(
                 .addModifiers(Modifier.STATIC)
                 .addCode(code.build())
                 .build();
+    }
+
+    private CodeBlock createStandardErrorHandler() {
+        if (cr().sourceElement().colorMode() == ColorMode.AUTO) {
+            return CodeBlock.of("$T.builder().build()", StandardErrorHandler.class);
+        } else {
+            return CodeBlock.of("$T.builder().withColorMode($T.$L).build()",
+                    StandardErrorHandler.class, ColorMode.class, cr().sourceElement().colorMode().name());
+        }
     }
 }

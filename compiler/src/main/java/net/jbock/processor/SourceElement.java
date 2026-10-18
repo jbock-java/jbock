@@ -2,6 +2,7 @@ package net.jbock.processor;
 
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.TypeName;
+import net.jbock.ColorMode;
 import net.jbock.Command;
 import net.jbock.common.SnakeName;
 import net.jbock.common.ValidationFailure;
@@ -102,6 +103,10 @@ public final class SourceElement {
 
     public boolean enableAtFileExpansion() {
         return command().enableAtFileExpansion();
+    }
+
+    public ColorMode colorMode() {
+        return command().colorMode();
     }
 
     private Command command() {

@@ -1,5 +1,6 @@
 package net.jbock.model;
 
+import net.jbock.ColorMode;
 import net.jbock.Command;
 
 import java.util.ArrayList;
@@ -9,29 +10,14 @@ import java.util.List;
  * The runtime model of a class that is annotated with
  * {@link Command}.
  */
-public final class CommandModel {
-
-    private final String descriptionKey;
-    private final List<String> descriptionLines;
-    private final String programName;
-    private final boolean superCommand;
-    private final List<Option> options;
-    private final List<Parameter> parameters;
-
-    private CommandModel(
-            String descriptionKey,
-            List<String> descriptionLines,
-            String programName,
-            boolean superCommand,
-            List<Option> options,
-            List<Parameter> parameters) {
-        this.descriptionKey = descriptionKey;
-        this.descriptionLines = descriptionLines;
-        this.programName = programName;
-        this.superCommand = superCommand;
-        this.options = options;
-        this.parameters = parameters;
-    }
+public record CommandModel(
+        String descriptionKey,
+        List<String> descriptionLines,
+        String programName,
+        boolean superCommand,
+        ColorMode colorMode,
+        List<Option> options,
+        List<Parameter> parameters) {
 
     /**
      * Creates a builder instance.
@@ -48,30 +34,28 @@ public final class CommandModel {
     public static final class Builder {
 
         private String descriptionKey = "";
-        private final List<String> descriptionLines = new ArrayList<>();
+        private List<String> descriptionLines;
         private String programName;
         private boolean superCommand;
-        private final List<Option> options = new ArrayList<>();
-        private final List<Parameter> parameters = new ArrayList<>();
+        private ColorMode colorMode;
+        private List<Option> options;
+        private List<Parameter> parameters;
 
         private Builder() {
         }
 
-        public Builder withOptions(List<Option> newOptions) {
-            options.clear();
-            options.addAll(newOptions);
+        public Builder withOptions(List<Option> options) {
+            this.options = options;
             return this;
         }
 
-        public Builder withParameters(List<Parameter> newParameters) {
-            parameters.clear();
-            parameters.addAll(newParameters);
+        public Builder withParameters(List<Parameter> parameters) {
+            this.parameters = parameters;
             return this;
         }
 
-        public Builder withDescriptionLines(List<String> newDescriptionLines) {
-            descriptionLines.clear();
-            descriptionLines.addAll(newDescriptionLines);
+        public Builder withDescriptionLines(List<String> descriptionLines) {
+            this.descriptionLines = descriptionLines;
             return this;
         }
 
@@ -95,6 +79,9 @@ public final class CommandModel {
          * @return the builder instance
          */
         public Builder addDescriptionLine(String descriptionLine) {
+            if (descriptionLines == null) {
+                descriptionLines = new ArrayList<>();
+            }
             this.descriptionLines.add(descriptionLine);
             return this;
         }
@@ -123,12 +110,23 @@ public final class CommandModel {
         }
 
         /**
+         * Sets the noColor property to {@code true}.
+         */
+        public Builder withColorMode(ColorMode colorMode) {
+            this.colorMode = colorMode;
+            return this;
+        }
+
+        /**
          * Adds an option.
          *
          * @param option a named option
          * @return the builder instance
          */
         public Builder addOption(Option option) {
+            if (options == null) {
+                options = new ArrayList<>();
+            }
             this.options.add(option);
             return this;
         }
@@ -148,6 +146,9 @@ public final class CommandModel {
          * @return the builder instance
          */
         public Builder addParameter(Parameter parameter) {
+            if (parameters == null) {
+                parameters = new ArrayList<>();
+            }
             this.parameters.add(parameter);
             return this;
         }
@@ -162,9 +163,14 @@ public final class CommandModel {
          * @return command model
          */
         public CommandModel build() {
-            return new CommandModel(descriptionKey, descriptionLines,
-                    programName, superCommand,
-                    options, parameters);
+            return new CommandModel(
+                    descriptionKey,
+                    descriptionLines == null ? List.of() : descriptionLines,
+                    programName,
+                    superCommand,
+                    colorMode,
+                    options == null ? List.of() : options,
+                    parameters == null ? List.of() : parameters);
         }
     }
 
@@ -174,6 +180,7 @@ public final class CommandModel {
                 .withDescriptionLines(descriptionLines)
                 .withProgramName(programName)
                 .withSuperCommand(superCommand)
+                .withColorMode(colorMode)
                 .withOptions(options)
                 .withParameters(parameters);
     }

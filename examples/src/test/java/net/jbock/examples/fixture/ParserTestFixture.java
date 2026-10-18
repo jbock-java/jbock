@@ -175,7 +175,7 @@ public final class ParserTestFixture<E> {
         StandardErrorHandler.builder()
                 .withOutputStream(testOutputStream.out)
                 .withTerminalWidth(MAX_LINE_WIDTH)
-                .withAnsi(false)
+                .withNoColor(true)
                 .withMessages(messages)
                 .build()
                 .printUsageDocumentation(commandModel);

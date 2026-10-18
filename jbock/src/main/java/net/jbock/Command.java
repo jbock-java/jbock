@@ -67,17 +67,25 @@ public @interface Command {
 
     /**
      * If {@code true}, the generated parser class will be
-     * {@code public}. Otherwise, it will be package-private.
+     * {@code public}. Otherwise, it will be default-visible.
      *
      * @return {@code true} to generate a public parser class
      */
     boolean publicParser() default false;
 
     /**
-     * <p>If {@code true}, there must be at least one {@link Parameter}, parameters cannot be optional,
+     * <p>If {@code true}, there must be at least one {@link Parameter},
      * and there must be a catch-all parameter.
      *
      * <p>The generated parser will not recognize the double-dash escape sequence.
      */
     boolean superCommand() default false;
+
+    /**
+     * Set the color mode of the error and help messages that may be printed to stdout
+     * or stderr. If this is set to {@code ColorMode.AUTO}, the color mode will be
+     * set to {@code true} if and only if the environment variable {@code NO_COLOR}
+     * is non-empty.
+     */
+    ColorMode colorMode() default ColorMode.AUTO;
 }
