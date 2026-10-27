@@ -106,7 +106,7 @@ public static void main(String[] args) {
 
 ### Known types
 
-Some types are converted automatically. All of these are listed in [StandardConverters.java](https://github.com/jbock-java/jbock/blob/master/jbock/src/main/java/net/jbock/contrib/StandardConverters.java).
+Some types are converted from `String` automatically. All of these are listed in [StandardConverters.java](https://github.com/jbock-java/jbock/blob/master/jbock/src/main/java/net/jbock/contrib/StandardConverters.java).
 
 ### Sample projects
 
