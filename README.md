@@ -12,13 +12,13 @@ It does not rely on runtime reflection, but generates java source code instead.
 
 ### Quick start
 
-Choose any name for the java interface which will describe your command line API.
-Add the `@Command` anntation to your command interface, to make the annotation processor aware of it.
+Create a Java interface type,
+and add the `@Command` annotation to make the annotation processor aware of it.
 
-Each abstract (i.e. non-`default`) method in your command interface represents a command line option or argument.
-It must have "getter signature": return something other that `void`, and have an empty parameter list.
-It must also be annotated with either
-`@Option` or `@Parameter`.
+In the command interface, each abstract (i.e. non-`default`) method represents a command line option or parameter.
+The method must have "getter signature". It must either be annotated with `@Option` or `@Parameter`.
+
+Besides `String`, some other return types are possible. See <a href="#user-content-known-types">known types</a>.
 
 The return types `boolean`, `List<?>` and `Optional<?>` (including `OptionalInt` and such) have special semantics.
 They are used to declare flags, repeable and optional options and parameters, respectively.
