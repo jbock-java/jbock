@@ -1,49 +1,89 @@
 package net.jbock.annotated;
 
+import io.jbock.util.Either;
 import net.jbock.common.ValidationFailure;
+import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static net.jbock.common.Suppliers.memoize;
 
-public sealed interface Item permits Parameter, Option {
+public sealed abstract class Item permits Parameter, Option {
 
     Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
-    String paramLabel();
+    private final Supplier<Either<Optional<ValidationFailure>, ExecutableElement>> converter = memoize(() -> {
+        String annotation = converterAttribute();
+        if (annotation.isEmpty()) {
+            return Either.left(Optional.empty());
+        }
+        List<ExecutableElement> methods = ElementFilter.methodsIn(sourceElement().element().getEnclosedElements());
+        for (ExecutableElement method : methods) {
+            if (method.getSimpleName().contentEquals(annotation)) {
+                if (method.getModifiers().contains(Modifier.PRIVATE)) {
+                    return Either.left(Optional.of(new ValidationFailure("The converter must not be private", method)));
+                }
+                if (!method.getModifiers().contains(Modifier.STATIC)) {
+                    return Either.left(Optional.of(new ValidationFailure("The converter must be static", method)));
+                }
+                // todo validate converter signature
+                return Either.right(method);
+            }
+        }
+        return Either.left(Optional.of(new ValidationFailure("Method not found: " + annotation, sourceElement().element())));
+    });
 
-    String converter();
+    private final SourceElement sourceElement;
 
-    Optional<String> descriptionKey();
+    Item(SourceElement sourceElement) {
+        this.sourceElement = sourceElement;
+    }
 
-    List<String> description();
+    public final Either<Optional<ValidationFailure>, ExecutableElement> converter() {
+        return converter.get();
+    }
 
-    ExecutableElement method();
+    final SourceElement sourceElement() {
+        return sourceElement;
+    }
 
-    String safeName();
+    public abstract String paramLabel();
 
-    default List<Modifier> accessModifiers() {
+    public abstract String converterAttribute();
+
+    public abstract Optional<String> descriptionKey();
+
+    public abstract List<String> description();
+
+    public abstract ExecutableElement method();
+
+    public abstract String safeName();
+
+    public final List<Modifier> accessModifiers() {
         return method().getModifiers().stream()
                 .filter(ACCESS_MODIFIERS::contains)
                 .toList();
     }
 
-    default ValidationFailure fail(String message) {
+    public final ValidationFailure fail(String message) {
         return new ValidationFailure(message, method());
     }
 
-    default String methodName() {
+    public final String methodName() {
         return method().getSimpleName().toString();
     }
 
-    default TypeMirror returnType() {
+    public final TypeMirror returnType() {
         return method().getReturnType();
     }
 }

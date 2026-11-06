@@ -1,6 +1,7 @@
 package net.jbock.annotated;
 
 import net.jbock.common.SnakeName;
+import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.function.Supplier;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
-public final class Parameter implements Item {
+public final class Parameter extends Item {
 
     private final Supplier<String> paramLabel = memoize(() -> parameterParamLabel()
             .orElseGet(() -> SnakeName.create(methodName())
@@ -24,10 +25,12 @@ public final class Parameter implements Item {
     private final int sourceIndex; // rename to sourceIndex
 
     Parameter(
+            SourceElement sourceElement,
             ExecutableElement method,
             net.jbock.Parameter parameter,
             String safeName,
             int sourceIndex) {
+        super(sourceElement);
         this.method = method;
         this.parameter = parameter;
         this.safeName = safeName;
@@ -35,11 +38,12 @@ public final class Parameter implements Item {
     }
 
     static Parameter createParameter(
+            SourceElement sourceElement,
             ExecutableElement method,
             net.jbock.Parameter parameter,
             String safeName,
             int sourceIndex) {
-        return new Parameter(method, parameter, safeName, sourceIndex);
+        return new Parameter(sourceElement, method, parameter, safeName, sourceIndex);
     }
 
     @Override
@@ -68,7 +72,7 @@ public final class Parameter implements Item {
     }
 
     @Override
-    public String converter() {
+    public String converterAttribute() {
         return ""; // todo
     }
 

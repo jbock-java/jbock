@@ -3,6 +3,7 @@ package net.jbock.annotated;
 import io.jbock.util.Either;
 import io.jbock.util.Eithers;
 import net.jbock.common.ValidationFailure;
+import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
@@ -19,10 +20,12 @@ import static net.jbock.common.Constants.CONVERTERS;
 import static net.jbock.common.Util.checkNoDuplicateAnnotations;
 
 public record Items(
+        SourceElement sourceElement,
         List<Option> options,
         List<Parameter> parameters) {
 
     static Either<List<ValidationFailure>, Items> createItems(
+            SourceElement sourceElement,
             List<ExecutableElement> methods) {
         UniqueNameSet uniqueNameSet = new UniqueNameSet(methods.size() + 1);
         uniqueNameSet.reserve(CONVERTERS);
@@ -40,16 +43,16 @@ public record Items(
             Annotation a = e.getRight().orElseThrow();
             switch (a) {
                 case net.jbock.Option option -> //
-                        options.add(Option.createOption(method, option, safeName, io++));
+                        options.add(Option.createOption(sourceElement, method, option, safeName, io++));
                 case net.jbock.Parameter parameter -> //
-                        parameters.add(Parameter.createParameter(method, parameter, safeName, ip++));
+                        parameters.add(Parameter.createParameter(sourceElement, method, parameter, safeName, ip++));
                 default -> throw new AssertionError("unknown annotation " + a);
             }
 
         }
         return optionalList(failures)
                 .map(Either::<List<ValidationFailure>, Items>left)
-                .orElseGet(() -> Either.right(new Items(options, parameters)));
+                .orElseGet(() -> Either.right(new Items(sourceElement, options, parameters)));
     }
 
     private static Either<ValidationFailure, Annotation> getMethodAnnotation(

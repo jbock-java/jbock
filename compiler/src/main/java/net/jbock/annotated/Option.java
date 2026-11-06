@@ -1,6 +1,7 @@
 package net.jbock.annotated;
 
 import net.jbock.common.SnakeName;
+import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.Comparator;
@@ -12,7 +13,7 @@ import java.util.function.Supplier;
 import static net.jbock.common.Constants.optionalString;
 import static net.jbock.common.Suppliers.memoize;
 
-public final class Option implements Item {
+public final class Option extends Item {
 
     private static final Comparator<String> LENGTH_FIRST_COMPARATOR = Comparator
             .comparing(String::length)
@@ -38,10 +39,12 @@ public final class Option implements Item {
     private final int sourceIndex;
 
     private Option(
+            SourceElement sourceElement,
             ExecutableElement method,
             net.jbock.Option option,
             String safeName,
             int sourceIndex) {
+        super(sourceElement);
         this.method = method;
         this.option = option;
         this.safeName = safeName;
@@ -49,11 +52,12 @@ public final class Option implements Item {
     }
 
     static Option createOption(
+            SourceElement sourceElement,
             ExecutableElement method,
             net.jbock.Option option,
             String safeName,
             int sourceIndex) {
-        return new Option(method, option, safeName, sourceIndex);
+        return new Option(sourceElement, method, option, safeName, sourceIndex);
     }
 
     @Override
@@ -82,7 +86,7 @@ public final class Option implements Item {
     }
 
     @Override
-    public String converter() {
+    public String converterAttribute() {
         return ""; // todo
     }
 
