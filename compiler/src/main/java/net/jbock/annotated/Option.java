@@ -82,7 +82,7 @@ public final class Option implements Item {
     }
 
     @Override
-    public String validator() {
+    public String converter() {
         return ""; // todo
     }
 

@@ -68,7 +68,7 @@ public final class Parameter implements Item {
     }
 
     @Override
-    public String validator() {
+    public String converter() {
         return ""; // todo
     }
 

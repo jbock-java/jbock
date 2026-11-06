@@ -53,14 +53,13 @@ public @interface Option {
     String paramLabel() default "";
 
     /**
-     * The validator must either be empty, or it must be the name of a non-private
-     * static method in the same class. Such a validator method must accept {@code String}
-     * and return {@code Optional<String>}, which is interpreted as an error message
+     * The converter must either be empty, or it must be the name of a non-private
+     * static method in the same class. Such a converter method must accept {@code String}
+     * and return {@code Either<String, E>}, where {@code E} is the option type.
+     * A left value is interpreted as an error message
      * to be shown to the command line user.
-     * An empty error message indicates valid user input.
      *
-     * @return name of a validator method, or empty string to use the option type's
-     *         default validator
+     * @return name of a converter method, or empty string to use the default converter
      */
-    String validator() default "";
+    String converter() default "";
 }
