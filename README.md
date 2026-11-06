@@ -1,5 +1,5 @@
 [![jbock-compiler](https://img.shields.io/maven-central/v/io.github.jbock-java/jbock-compiler?label=jbock-compiler)](https://central.sonatype.com/artifact/io.github.jbock-java/jbock-compiler)
-[![jbock](https://img.shields.io/maven-central/v/io.github.jbock-java/jbock?label=jbock)](https://central.sonatype.com/artifact/io.github.jbock-java/jbock)
+[![jbock](https://img.shields.io/maven-central/v/io.github.jbock-java/jbock/6.1?label=jbock)](https://central.sonatype.com/artifact/io.github.jbock-java/jbock)
 
 
 jbock is a command line parser, which uses well-known annotation names, similar to those used by

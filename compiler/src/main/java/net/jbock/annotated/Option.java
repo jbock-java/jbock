@@ -81,6 +81,11 @@ public final class Option implements Item {
         return paramLabel.get();
     }
 
+    @Override
+    public String validator() {
+        return ""; // todo
+    }
+
     public int sourceIndex() {
         return sourceIndex;
     }

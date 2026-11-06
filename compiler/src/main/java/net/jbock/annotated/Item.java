@@ -19,6 +19,8 @@ public sealed interface Item permits Parameter, Option {
 
     String paramLabel();
 
+    String validator();
+
     Optional<String> descriptionKey();
 
     List<String> description();

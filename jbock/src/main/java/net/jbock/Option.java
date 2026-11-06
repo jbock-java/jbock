@@ -51,4 +51,16 @@ public @interface Option {
      * @return description label for the option argument
      */
     String paramLabel() default "";
+
+    /**
+     * The validator must either be empty, or it must be the name of a non-private
+     * static method in the same class. Such a validator method must accept {@code String}
+     * and return {@code Optional<String>}, which is interpreted as an error message
+     * to be shown to the command line user.
+     * An empty error message indicates valid user input.
+     *
+     * @return name of a validator method, or empty string to use the option type's
+     *         default validator
+     */
+    String validator() default "";
 }

@@ -67,6 +67,11 @@ public final class Parameter implements Item {
         return paramLabel.get();
     }
 
+    @Override
+    public String validator() {
+        return ""; // todo
+    }
+
     public int index() {
         return parameter.index();
     }
