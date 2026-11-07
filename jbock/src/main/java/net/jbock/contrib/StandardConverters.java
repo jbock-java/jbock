@@ -42,7 +42,7 @@ public final class StandardConverters {
                 }
                 return right(result);
             } catch (Exception e) {
-                return left("converter threw " + e.getClass().getCanonicalName() + ", message: " + e.getMessage());
+                return left("caught " + e.getClass().getCanonicalName() + ", message: " + e.getMessage());
             }
         };
         cache.put(canonicalName, newInstance);

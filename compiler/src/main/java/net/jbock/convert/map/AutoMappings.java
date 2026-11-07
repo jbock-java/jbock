@@ -25,46 +25,46 @@ public final class AutoMappings {
     public static Optional<CodeBlock> findAutoMapping(
             TypeTool tool,
             TypeMirror baseType) {
-        if (tool.isErasureOf(baseType, Integer.class)) {
+        if (tool.isSameType(baseType, Integer.class)) {
             return createMapping("asInteger");
         }
-        if (tool.isErasureOf(baseType, Path.class)) {
+        if (tool.isSameType(baseType, Path.class)) {
             return createMapping("asPath");
         }
-        if (tool.isErasureOf(baseType, File.class)) {
+        if (tool.isSameType(baseType, File.class)) {
             return createMapping("asExistingFile");
         }
-        if (tool.isErasureOf(baseType, URI.class)) {
+        if (tool.isSameType(baseType, URI.class)) {
             return createMapping("asURI");
         }
-        if (tool.isErasureOf(baseType, Pattern.class)) {
+        if (tool.isSameType(baseType, Pattern.class)) {
             return createMapping("asPattern");
         }
-        if (tool.isErasureOf(baseType, LocalDate.class)) {
+        if (tool.isSameType(baseType, LocalDate.class)) {
             return createMapping("asLocalDate");
         }
-        if (tool.isErasureOf(baseType, Long.class)) {
+        if (tool.isSameType(baseType, Long.class)) {
             return createMapping("asLong");
         }
-        if (tool.isErasureOf(baseType, Short.class)) {
+        if (tool.isSameType(baseType, Short.class)) {
             return createMapping("asShort");
         }
-        if (tool.isErasureOf(baseType, Byte.class)) {
+        if (tool.isSameType(baseType, Byte.class)) {
             return createMapping("asByte");
         }
-        if (tool.isErasureOf(baseType, Float.class)) {
+        if (tool.isSameType(baseType, Float.class)) {
             return createMapping("asFloat");
         }
-        if (tool.isErasureOf(baseType, Double.class)) {
+        if (tool.isSameType(baseType, Double.class)) {
             return createMapping("asDouble");
         }
-        if (tool.isErasureOf(baseType, Character.class)) {
+        if (tool.isSameType(baseType, Character.class)) {
             return createMapping("asCharacter");
         }
-        if (tool.isErasureOf(baseType, BigInteger.class)) {
+        if (tool.isSameType(baseType, BigInteger.class)) {
             return createMapping("asBigInteger");
         }
-        if (tool.isErasureOf(baseType, BigDecimal.class)) {
+        if (tool.isSameType(baseType, BigDecimal.class)) {
             return createMapping("asBigDecimal");
         }
         return Optional.empty();

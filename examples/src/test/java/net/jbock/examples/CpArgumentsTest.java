@@ -21,7 +21,7 @@ class CpArgumentsTest {
 
     @Test
     void enumValuesInMessage() {
-        String expectation = "while converting option BACKUP (--backup): converter threw java.lang.IllegalArgumentException, message: No enum constant net.jbock.examples.CpArguments.Control.CLOUD";
+        String expectation = "while converting option BACKUP (--backup): caught java.lang.IllegalArgumentException, message: No enum constant net.jbock.examples.CpArguments.Control.CLOUD";
         f.assertThat("a", "b", "--backup", "CLOUD").fails(expectation);
     }
 

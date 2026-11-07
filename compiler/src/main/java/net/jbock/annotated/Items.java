@@ -29,6 +29,7 @@ public record Items(
             List<ExecutableElement> methods) {
         UniqueNameSet uniqueNameSet = new UniqueNameSet(methods.size() + 1);
         uniqueNameSet.reserve(CONVERTERS);
+        uniqueNameSet.reserve(sourceElement.generatedClass().simpleName());
         List<ValidationFailure> failures = new ArrayList<>();
         int io = 0, ip = 0;
         List<Option> options = new ArrayList<>(methods.size());

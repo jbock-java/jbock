@@ -84,27 +84,30 @@ public sealed abstract class Item permits Parameter, Option {
         return returnType();
     });
 
-    private final Supplier<Either<Optional<ValidationFailure>, Converter>> converter = memoize(() -> {
+    private final Supplier<Either<ValidationFailure, CodeBlock>> converter = memoize(() -> {
         String annotation = converterAttribute();
         if (annotation.isEmpty()) {
-            return Either.left(Optional.empty());
+            return Either.left(new ValidationFailure("Converter not found", method()));
         }
         List<ExecutableElement> methods = ElementFilter.methodsIn(sourceElement().element().getEnclosedElements());
         for (ExecutableElement method : methods) {
             if (method.getSimpleName().contentEquals(annotation)) {
                 if (method.getModifiers().contains(Modifier.PRIVATE)) {
-                    return Either.left(Optional.of(new ValidationFailure("The converter must not be private", method)));
+                    return Either.left(new ValidationFailure("The converter must not be private", method));
                 }
                 if (!method.getModifiers().contains(Modifier.STATIC)) {
-                    return Either.left(Optional.of(new ValidationFailure("The converter must be static", method)));
+                    return Either.left(new ValidationFailure("The converter must be static", method));
                 }
-                return validateConverter(method).mapLeft(Optional::of);
+                return validateConverterMethod(method);
             }
         }
-        return Either.left(Optional.of(new ValidationFailure("Method not found: " + annotation, sourceElement().element())));
+        return Either.left(new ValidationFailure("Method not found: " + annotation, sourceElement().element()));
     });
 
     private final Supplier<Either<ValidationFailure, Optional<CodeBlock>>> createConverterExpression = memoize(() -> {
+        if (!converterAttribute().isEmpty()) {
+            return converter().map(Optional::of);
+        }
         if (isEnum()) {
             return Either.right(Optional.of(AutoMappings.findEnumMapping(baseType())));
         }
@@ -122,7 +125,7 @@ public sealed abstract class Item permits Parameter, Option {
         }
     });
 
-    private Either<ValidationFailure, Converter> validateConverter(ExecutableElement method) {
+    private Either<ValidationFailure, CodeBlock> validateConverterMethod(ExecutableElement method) {
         // parameter validation
         if (method.getParameters().isEmpty()) {
             return Either.left(new ValidationFailure("parameter expected", method));
@@ -133,8 +136,25 @@ public sealed abstract class Item permits Parameter, Option {
         if (!tool().isString(method.getParameters().getFirst().asType())) {
             return Either.left(new ValidationFailure("The parameter type must be String", method));
         }
-        method.getReturnType();
-        return Either.right(new Converter());
+        String standardMsg = String.format("The return type must be Either<String, %s>", Util.typeToString(baseType()));
+        if (!tool().isErasureOf(method.getReturnType(), Either.class)) {
+            return Either.left(new ValidationFailure(standardMsg, method));
+        }
+        Optional<DeclaredType> visit = TypeTool.AS_DECLARED.visit(method.getReturnType());
+        if (visit.isEmpty()) {
+            return Either.left(new ValidationFailure("Unexpected: Either type not found", method));
+        }
+        DeclaredType declaredType = visit.orElseThrow();
+        if (declaredType.getTypeArguments().size() != 2) {
+            return Either.left(new ValidationFailure(standardMsg, method));
+        }
+        if (!tool().isString(declaredType.getTypeArguments().getFirst())) {
+            return Either.left(new ValidationFailure(standardMsg, method));
+        }
+        if (!tool().types().isSameType(declaredType.getTypeArguments().get(1), baseType())) {
+            return Either.left(new ValidationFailure(standardMsg, method));
+        }
+        return Either.right(CodeBlock.of("$T.$L()", sourceElement().generatedClass(), method.getSimpleName()));
     }
 
     private final Supplier<ParameterSpec> paramSupplier = memoize(() -> {
@@ -155,7 +175,7 @@ public sealed abstract class Item permits Parameter, Option {
         this.sourceElement = sourceElement;
     }
 
-    public final Either<Optional<ValidationFailure>, Converter> converter() {
+    public final Either<ValidationFailure, CodeBlock> converter() {
         return converter.get();
     }
 
@@ -232,7 +252,7 @@ public sealed abstract class Item permits Parameter, Option {
     }
 
     public final boolean isList() {
-        return tool().isErasureOf(tool().types().erasure(returnType()), List.class);
+        return tool().isErasureOf(returnType(), List.class);
     }
 
     public final boolean isString() {
@@ -274,7 +294,7 @@ public sealed abstract class Item permits Parameter, Option {
         if (tool().isSameType(returnType(), OptionalDouble.class)) {
             return OPTIONAL;
         }
-        if (tool().isErasureOf(tool().types().erasure(returnType()), Optional.class)) {
+        if (tool().isErasureOf(returnType(), Optional.class)) {
             return OPTIONAL;
         }
         if (isBool()) {
