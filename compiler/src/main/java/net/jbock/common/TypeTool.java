@@ -77,6 +77,13 @@ public record TypeTool(SafeElements elements, SafeTypes types) {
                 .orElse(false);
     }
 
+    public boolean isSameType(TypeMirror mirror, Class<?> cl) {
+        return elements.getTypeElement(cl.getCanonicalName())
+                .map(TypeElement::asType)
+                .map(type -> types.isSameType(mirror, type))
+                .orElse(false);
+    }
+
     public boolean isList(TypeMirror mirror) {
         Optional<DeclaredType> visit = AS_DECLARED.visit(mirror);
         if (visit.isEmpty()) {
@@ -87,6 +94,15 @@ public record TypeTool(SafeElements elements, SafeTypes types) {
             return false;
         }
         return isErasureOf(types.erasure(declaredType), List.class);
+    }
+
+    public boolean isString(TypeMirror mirror) {
+        Optional<DeclaredType> visit = AS_DECLARED.visit(mirror);
+        if (visit.isEmpty()) {
+            return false;
+        }
+        DeclaredType declaredType = visit.orElseThrow();
+        return isSameType(declaredType, String.class);
     }
 
     public boolean isListOfString(TypeMirror mirror) {

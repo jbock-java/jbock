@@ -1,11 +1,15 @@
 package net.jbock.annotated;
 
 import io.jbock.util.Either;
+import net.jbock.common.SafeElements;
+import net.jbock.common.SafeTypes;
+import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.EnumSet;
@@ -42,8 +46,18 @@ public sealed abstract class Item permits Parameter, Option {
         return Either.left(Optional.of(new ValidationFailure("Method not found: " + annotation, sourceElement().element())));
     });
 
-    private Either<ValidationFailure, Converter> validateConverter(ExecutableElement converter) {
-        // todo validate converter signature
+    private Either<ValidationFailure, Converter> validateConverter(ExecutableElement method) {
+        // parameter validation
+        if (method.getParameters().isEmpty()) {
+            return Either.left(new ValidationFailure("parameter expected", method));
+        }
+        if (method.getParameters().size() >= 2) {
+            return Either.left(new ValidationFailure("single parameter expected", method));
+        }
+        if (!tool().isString(method.getParameters().getFirst().asType())) {
+            return Either.left(new ValidationFailure("The parameter type must be String", method));
+        }
+        // todo validate return type
         return Either.right(new Converter());
     }
 
@@ -59,6 +73,18 @@ public sealed abstract class Item permits Parameter, Option {
 
     final SourceElement sourceElement() {
         return sourceElement;
+    }
+
+    final TypeTool tool() {
+        return sourceElement.tool();
+    }
+
+    final SafeTypes types() {
+        return tool().types();
+    }
+
+    final SafeElements elements() {
+        return tool().elements();
     }
 
     public abstract String paramLabel();
