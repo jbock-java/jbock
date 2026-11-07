@@ -1,30 +1,79 @@
 package net.jbock.annotated;
 
+import com.palantir.javapoet.CodeBlock;
 import io.jbock.util.Either;
 import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
+import net.jbock.convert.match.OptionalPrimitive;
+import net.jbock.model.Arity;
+import net.jbock.model.Multiplicity;
 import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.Supplier;
 
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static net.jbock.common.Suppliers.memoize;
+import static net.jbock.common.TypeTool.AS_PRIMITIVE;
 
 public sealed abstract class Item permits Parameter, Option {
 
     Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
+
+    private final Supplier<TypeMirror> baseType = memoize(() -> {
+        if (isList()) {
+            Optional<TypeMirror> t = tool().getSingleTypeArgument(returnType(), List.class);
+            if (t.isPresent()) {
+                return t.orElseThrow();
+            }
+        }
+        if (isOptional()) {
+            Optional<TypeMirror> t = tool().getSingleTypeArgument(returnType(), Optional.class);
+            if (t.isPresent()) {
+                return t.orElseThrow();
+            }
+        }
+        if (tool().isSameType(returnType(), OptionalInt.class)) {
+            Optional<TypeMirror> t = tool().asType(Integer.class);
+            if (t.isPresent()) {
+                return t.orElseThrow();
+            }
+        }
+        if (tool().isSameType(returnType(), OptionalLong.class)) {
+            Optional<TypeMirror> t = tool().asType(Long.class);
+            if (t.isPresent()) {
+                return t.orElseThrow();
+            }
+        }
+        if (tool().isSameType(returnType(), OptionalDouble.class)) {
+            Optional<TypeMirror> t = tool().asType(Double.class);
+            if (t.isPresent()) {
+                return t.orElseThrow();
+            }
+        }
+        if (returnType().getKind().isPrimitive()) {
+            Optional<PrimitiveType> t = AS_PRIMITIVE.visit(returnType());
+            if (t.isPresent()) {
+                return tool().types().boxedClass(t.orElseThrow()).asType();
+            }
+        }
+        return returnType();
+    });
 
     private final Supplier<Either<Optional<ValidationFailure>, Converter>> converter = memoize(() -> {
         String annotation = converterAttribute();
@@ -57,7 +106,7 @@ public sealed abstract class Item permits Parameter, Option {
         if (!tool().isString(method.getParameters().getFirst().asType())) {
             return Either.left(new ValidationFailure("The parameter type must be String", method));
         }
-        // todo validate return type
+        method.getReturnType();
         return Either.right(new Converter());
     }
 
@@ -100,9 +149,7 @@ public sealed abstract class Item permits Parameter, Option {
     public abstract String safeName();
 
     public final List<Modifier> accessModifiers() {
-        return method().getModifiers().stream()
-                .filter(ACCESS_MODIFIERS::contains)
-                .toList();
+        return method().getModifiers().stream().filter(ACCESS_MODIFIERS::contains).toList();
     }
 
     public final ValidationFailure fail(String message) {
@@ -115,5 +162,54 @@ public sealed abstract class Item permits Parameter, Option {
 
     public final TypeMirror returnType() {
         return method().getReturnType();
+    }
+
+    /* baseType (List<A>) == A
+    /* baseType (Optional<A>) == A
+     * baseType (OptionalInt) == Integer
+     * baseType (int) == Integer
+     */
+    public final TypeMirror baseType() {
+        return baseType.get();
+    }
+
+    public final boolean isList() {
+        return tool().isErasureOf(tool().types().erasure(returnType()), List.class);
+    }
+
+    public final boolean isOptional() {
+        if (tool().isSameType(returnType(), OptionalInt.class)) {
+            return true;
+        }
+        if (tool().isSameType(returnType(), OptionalLong.class)) {
+            return true;
+        }
+        if (tool().isSameType(returnType(), OptionalDouble.class)) {
+            return true;
+        }
+        return tool().isErasureOf(tool().types().erasure(returnType()), Optional.class);
+    }
+
+    public Optional<CodeBlock> extractExpr() {
+        if (tool().isSameType(returnType(), OptionalInt.class)) {
+            return Optional.of(OptionalPrimitive.INT.extractExpr());
+        }
+        if (tool().isSameType(returnType(), OptionalLong.class)) {
+            return Optional.of(OptionalPrimitive.LONG.extractExpr());
+        }
+        if (tool().isSameType(returnType(), OptionalDouble.class)) {
+            return Optional.of(OptionalPrimitive.DOUBLE.extractExpr());
+        }
+        return Optional.empty();
+    }
+
+    // todo implement
+    public abstract Multiplicity multiplicity();
+
+    // todo implement
+    public abstract Arity arity();
+
+    public final boolean isBool() {
+        return returnType().getKind() == TypeKind.BOOLEAN;
     }
 }

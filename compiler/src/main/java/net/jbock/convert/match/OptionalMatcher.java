@@ -1,12 +1,9 @@
 package net.jbock.convert.match;
 
-import com.palantir.javapoet.CodeBlock;
 import io.jbock.simple.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;
 
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 
 import static net.jbock.model.Multiplicity.OPTIONAL;
@@ -15,28 +12,8 @@ import static net.jbock.model.Multiplicity.OPTIONAL;
 public record OptionalMatcher(TypeTool tool) {
 
     <M extends Item> Optional<Match<M>> tryMatch(M item) {
-        TypeMirror returnType = item.returnType();
-        return getOptionalPrimitive(item, returnType)
-                .or(() -> matchOptional(item, returnType));
-    }
-
-    private <M extends Item> Optional<Match<M>> matchOptional(
-            M item,
-            TypeMirror returnType) {
-        return tool.getSingleTypeArgument(returnType, java.util.Optional.class)
-                .map(typeArg -> Match.create(typeArg, OPTIONAL, item));
-    }
-
-    private <M extends Item> Optional<Match<M>> getOptionalPrimitive(
-            M item,
-            TypeMirror type) {
-        for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
-            if (tool.isErasureOf(type, optionalPrimitive.type())) {
-                CodeBlock extractExpr = optionalPrimitive.extractExpr();
-                return tool.elements().getTypeElement(optionalPrimitive.numberType())
-                        .map(TypeElement::asType)
-                        .map(t -> new Match<>(t, OPTIONAL, item, Optional.of(extractExpr)));
-            }
+        if (item.isOptional()) {
+            return Optional.of(Match.create(OPTIONAL, item));
         }
         return Optional.empty();
     }

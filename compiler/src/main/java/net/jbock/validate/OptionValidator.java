@@ -4,9 +4,12 @@ import io.jbock.simple.Inject;
 import io.jbock.util.Either;
 import net.jbock.annotated.Items;
 import net.jbock.annotated.Option;
+import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
+import net.jbock.convert.match.Match;
+import net.jbock.model.Arity;
 
 import java.util.HashSet;
 import java.util.List;
@@ -19,10 +22,12 @@ import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.allFailures;
 import static io.jbock.util.Eithers.toOptionalList;
 import static java.lang.Character.isWhitespace;
-import static javax.lang.model.type.TypeKind.BOOLEAN;
+import static net.jbock.model.Multiplicity.OPTIONAL;
 
 @Inject
-record OptionValidator(MappingFinder mappingFinder) {
+record OptionValidator(
+        TypeTool tool,
+        MappingFinder mappingFinder) {
 
     Either<List<ValidationFailure>, List<Mapping<Option>>> wrapOptions(
             Items items) {
@@ -37,17 +42,11 @@ record OptionValidator(MappingFinder mappingFinder) {
 
     private Either<ValidationFailure, Mapping<Option>> wrapOption(
             Option option) {
-        return checkNullary(option)
-                .map(mappingFinder::findNullaryMapping)
-                .map(Either::<ValidationFailure, Mapping<Option>>right)
-                .orElseGet(() -> mappingFinder.findMapping(option));
-    }
-
-    private Optional<Option> checkNullary(Option option) {
-        if (option.returnType().getKind() != BOOLEAN) {
-            return Optional.empty();
+        if (option.isBool()) {
+            Match<Option> match = Match.create(OPTIONAL, option);
+            return right(Mapping.create(match, Arity.NULLARY));
         }
-        return Optional.of(option);
+        return mappingFinder.findMapping(option);
     }
 
     private Either<ValidationFailure, Option> checkOptionNames(

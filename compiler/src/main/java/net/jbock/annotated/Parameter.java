@@ -1,6 +1,8 @@
 package net.jbock.annotated;
 
 import net.jbock.common.SnakeName;
+import net.jbock.model.Arity;
+import net.jbock.model.Multiplicity;
 import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
@@ -64,6 +66,16 @@ public final class Parameter extends Item {
     @Override
     public String safeName() {
         return safeName;
+    }
+
+    @Override
+    public Multiplicity multiplicity() {
+        return null; // todo
+    }
+
+    @Override
+    public Arity arity() {
+        return null; // todo
     }
 
     @Override

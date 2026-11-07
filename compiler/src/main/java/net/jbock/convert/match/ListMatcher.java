@@ -15,6 +15,6 @@ public record ListMatcher(TypeTool tool) {
     <M extends Item> Optional<Match<M>> tryMatch(M item) {
         TypeMirror returnType = item.returnType();
         return tool.getSingleTypeArgument(returnType, java.util.List.class)
-                .map(typeArg -> Match.create(typeArg, REPEATABLE, item));
+                .map(typeArg -> Match.create(REPEATABLE, item));
     }
 }

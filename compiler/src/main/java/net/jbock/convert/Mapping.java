@@ -58,7 +58,7 @@ public final class Mapping<M extends Item> {
     }
 
     public Optional<CodeBlock> extractExpr() {
-        return match.extractExpr();
+        return match.item().extractExpr();
     }
 
     public Multiplicity multiplicity() {

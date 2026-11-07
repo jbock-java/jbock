@@ -66,20 +66,23 @@ public record TypeTool(SafeElements elements, SafeTypes types) {
         }
     };
 
+    public Optional<TypeMirror> asType(Class<?> cl) {
+        return elements.getTypeElement(cl.getCanonicalName())
+                .map(TypeElement::asType);
+    }
+
     /**
      * Compares {@code mirror} to the erasure of {@code cl}.
      */
     public boolean isErasureOf(TypeMirror mirror, Class<?> cl) {
-        return elements.getTypeElement(cl.getCanonicalName())
-                .map(TypeElement::asType)
+        return asType(cl)
                 .map(types::erasure)
                 .map(type -> types.isSameType(mirror, type))
                 .orElse(false);
     }
 
     public boolean isSameType(TypeMirror mirror, Class<?> cl) {
-        return elements.getTypeElement(cl.getCanonicalName())
-                .map(TypeElement::asType)
+        return asType(cl)
                 .map(type -> types.isSameType(mirror, type))
                 .orElse(false);
     }

@@ -20,7 +20,7 @@ public enum OptionalPrimitive {
         this.numberType = numberType.getCanonicalName();
     }
 
-    CodeBlock extractExpr() {
+    public CodeBlock extractExpr() {
         return CodeBlock.of(".map($1T::of).orElse($1T.empty())", type);
     }
 

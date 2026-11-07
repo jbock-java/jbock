@@ -7,7 +7,6 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.convert.map.AutoOrEnumMapper;
 import net.jbock.convert.match.Match;
 import net.jbock.convert.match.MatchFinder;
-import net.jbock.model.Arity;
 
 @Inject
 public record MappingFinder(
@@ -18,11 +17,5 @@ public record MappingFinder(
             M item) {
         Match<M> match = matchFinder.findMatch(item);
         return autoOrEnumMapper.findMapping(match);
-    }
-
-    public <M extends Item> Mapping<M> findNullaryMapping(
-            M item) {
-        Match<M> match = matchFinder.createNullaryMatch(item);
-        return Mapping.create(match, Arity.NULLARY);
     }
 }
