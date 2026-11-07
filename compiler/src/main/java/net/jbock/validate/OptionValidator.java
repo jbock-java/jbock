@@ -6,8 +6,6 @@ import net.jbock.annotated.Items;
 import net.jbock.annotated.Option;
 import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.Mapping;
-import net.jbock.convert.MappingFinder;
 
 import java.util.HashSet;
 import java.util.List;
@@ -22,33 +20,24 @@ import static io.jbock.util.Eithers.toOptionalList;
 import static java.lang.Character.isWhitespace;
 
 @Inject
-record OptionValidator(
-        TypeTool tool,
-        MappingFinder mappingFinder) {
+record OptionValidator(TypeTool tool) {
 
-    Either<List<ValidationFailure>, List<Mapping<Option>>> wrapOptions(
+    Either<List<ValidationFailure>, List<Option>> wrapOptions(
             Items items) {
         return items.options().stream()
-                .map(this::checkOptionNames)
+                .map(this::checkOption)
                 .collect(allFailures())
-                .filter(this::validateUniqueOptionNames)
-                .flatMap(sourceOptions -> sourceOptions.stream()
-                        .map(this::wrapOption)
-                        .collect(allFailures()));
+                .filter(this::validateUniqueOptionNames);
     }
 
-    private Either<ValidationFailure, Mapping<Option>> wrapOption(
-            Option option) {
-        if (option.isNullary()) {
-            return right(Mapping.create(option));
-        }
-        return mappingFinder.findMapping(option);
-    }
-
-    private Either<ValidationFailure, Option> checkOptionNames(
+    private Either<ValidationFailure, Option> checkOption(
             Option option) {
         if (option.names().isEmpty()) {
             return left(option.fail("define at least one option name"));
+        }
+        Optional<ValidationFailure> converterError = option.validateConverterExpression();
+        if (converterError.isPresent()) {
+            return Either.left(converterError.orElseThrow());
         }
         return option.names().stream()
                 .map(name -> checkName(option, name))

@@ -6,8 +6,8 @@ import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterSpec;
 import io.jbock.simple.Inject;
+import net.jbock.annotated.Item;
 import net.jbock.annotated.Option;
-import net.jbock.convert.Mapping;
 import net.jbock.parse.OptionState;
 import net.jbock.parse.OptionStateModeFlag;
 import net.jbock.parse.OptionStateNonRepeatable;
@@ -67,31 +67,30 @@ final class ParseMethod {
             code.addStatement("$T $N = $T.of()", optionNames.type(), optionNames, Map.class);
         } else {
             long mapSize = cr().namedOptions().stream()
-                    .map(Mapping::item)
                     .map(Option::names)
                     .map(List::size)
                     .mapToLong(i -> i)
                     .sum();
             int capacity = (int) (1 + Math.max(mapSize * 1.35, 15));
             code.addStatement("$T $N = new $T<>($L)", optionNames.type(), optionNames, HashMap.class, capacity);
-            for (Mapping<Option> namedOption : cr().namedOptions()) {
-                for (String dashedName : namedOption.item().names()) {
+            for (Option namedOption : cr().namedOptions()) {
+                for (String dashedName : namedOption.names()) {
                     code.addStatement("$N.put($S, $L)",
                             optionNames, dashedName,
-                            namedOption.item().sourceIndex());
+                            namedOption.sourceIndex());
                 }
             }
         }
         code.addStatement("$T $N = new $T[$L]", optionStates.type(), optionStates, OptionState.class, cr().namedOptions().size());
-        for (Mapping<Option> namedOption : cr().namedOptions()) {
+        for (Option namedOption : cr().namedOptions()) {
             code.addStatement("$N[$L] = new $T()",
-                    optionStates, namedOption.item().sourceIndex(),
+                    optionStates, namedOption.sourceIndex(),
                     optionParserType(namedOption));
         }
         ClassName parserClass;
         if (cr().isSuperCommand()) {
             parserClass = ClassName.get(SuperParser.class);
-        } else if (cr().positionalParameters().stream().anyMatch(Mapping::isRepeatable)) {
+        } else if (cr().positionalParameters().stream().anyMatch(Item::isRepeatable)) {
             parserClass = ClassName.get(VarargsParameterParser.class);
         } else {
             parserClass = ClassName.get(StandardParser.class);
@@ -117,11 +116,11 @@ final class ParseMethod {
                 .build();
     });
 
-    private ClassName optionParserType(Mapping<Option> param) {
+    private ClassName optionParserType(Option param) {
         if (param.isRepeatable()) {
             return ClassName.get(OptionStateRepeatable.class);
         }
-        if (param.item().isNullary()) {
+        if (param.isNullary()) {
             return ClassName.get(OptionStateModeFlag.class);
         }
         return ClassName.get(OptionStateNonRepeatable.class);

@@ -1,18 +1,25 @@
 package net.jbock.annotated;
 
 import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.FieldSpec;
+import com.palantir.javapoet.ParameterSpec;
+import com.palantir.javapoet.TypeName;
 import io.jbock.util.Either;
 import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.TypeTool;
+import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
+import net.jbock.convert.map.AutoMappings;
 import net.jbock.convert.match.OptionalPrimitive;
-import net.jbock.model.Arity;
 import net.jbock.model.Multiplicity;
 import net.jbock.processor.SourceElement;
 
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
@@ -25,10 +32,13 @@ import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static net.jbock.common.Suppliers.memoize;
 import static net.jbock.common.TypeTool.AS_PRIMITIVE;
+import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
+import static net.jbock.model.Multiplicity.OPTIONAL;
 
 public sealed abstract class Item permits Parameter, Option {
 
@@ -94,6 +104,24 @@ public sealed abstract class Item permits Parameter, Option {
         return Either.left(Optional.of(new ValidationFailure("Method not found: " + annotation, sourceElement().element())));
     });
 
+    private final Supplier<Either<ValidationFailure, Optional<CodeBlock>>> createConverterExpression = memoize(() -> {
+        if (isEnum()) {
+            return Either.right(Optional.of(AutoMappings.findEnumMapping(baseType())));
+        }
+        if (isString()) {
+            return Either.right(Optional.empty());
+        }
+        if (isBool()) {
+            return Either.right(Optional.empty());
+        }
+        Optional<CodeBlock> result = AutoMappings.findAutoMapping(tool(), baseType());
+        if (result.isEmpty()) {
+            return Either.left(fail("unknown type: " + Util.typeToString(baseType())));
+        } else {
+            return Either.right(result);
+        }
+    });
+
     private Either<ValidationFailure, Converter> validateConverter(ExecutableElement method) {
         // parameter validation
         if (method.getParameters().isEmpty()) {
@@ -109,6 +137,18 @@ public sealed abstract class Item permits Parameter, Option {
         return Either.right(new Converter());
     }
 
+    private final Supplier<ParameterSpec> paramSupplier = memoize(() -> {
+        TypeName fieldType = TypeName.get(returnType());
+        String enumName = safeName();
+        return ParameterSpec.builder(fieldType, enumName).build();
+    });
+
+    private final Supplier<FieldSpec> fieldSupplier = memoize(() -> {
+        TypeName fieldType = TypeName.get(returnType());
+        String fieldName = methodName();
+        return FieldSpec.builder(fieldType, fieldName, FINAL).build();
+    });
+
     private final SourceElement sourceElement;
 
     Item(SourceElement sourceElement) {
@@ -117,6 +157,25 @@ public sealed abstract class Item permits Parameter, Option {
 
     public final Either<Optional<ValidationFailure>, Converter> converter() {
         return converter.get();
+    }
+
+    public final Either<ValidationFailure, Optional<CodeBlock>> createConverterExpressionEither() {
+        return createConverterExpression.get();
+    }
+
+    public final Optional<ValidationFailure> validateConverterExpression() {
+        return createConverterExpression.get().getLeft();
+    }
+
+    public Optional<CodeBlock> createConverterExpression() {
+        if (createConverterExpressionEither().isLeft()) {
+            throw new IllegalStateException("boo");
+        }
+        Optional<Optional<CodeBlock>> result = createConverterExpressionEither().getRight();
+        if (result.isEmpty()) {
+            return Optional.empty();
+        }
+        return result.orElseThrow();
     }
 
     final SourceElement sourceElement() {
@@ -176,17 +235,20 @@ public sealed abstract class Item permits Parameter, Option {
         return tool().isErasureOf(tool().types().erasure(returnType()), List.class);
     }
 
-    public final boolean isOptional() {
-        if (tool().isSameType(returnType(), OptionalInt.class)) {
-            return true;
+    public final boolean isString() {
+        return tool().isSameType(baseType(), String.class);
+    }
+
+    public final boolean isEnum() {
+        Optional<DeclaredType> visit = TypeTool.AS_DECLARED.visit(baseType());
+        if (visit.isEmpty()) {
+            return false;
         }
-        if (tool().isSameType(returnType(), OptionalLong.class)) {
-            return true;
+        Optional<TypeElement> tel = AS_TYPE_ELEMENT.visit(visit.orElseThrow().asElement());
+        if (tel.isEmpty()) {
+            return false;
         }
-        if (tool().isSameType(returnType(), OptionalDouble.class)) {
-            return true;
-        }
-        return tool().isErasureOf(tool().types().erasure(returnType()), Optional.class);
+        return tel.orElseThrow().getKind() == ElementKind.ENUM;
     }
 
     public Optional<CodeBlock> extractExpr() {
@@ -203,7 +265,19 @@ public sealed abstract class Item permits Parameter, Option {
     }
 
     public final Multiplicity multiplicity() {
-        if (isBool() || isOptional()) {
+        if (tool().isSameType(returnType(), OptionalInt.class)) {
+            return OPTIONAL;
+        }
+        if (tool().isSameType(returnType(), OptionalLong.class)) {
+            return OPTIONAL;
+        }
+        if (tool().isSameType(returnType(), OptionalDouble.class)) {
+            return OPTIONAL;
+        }
+        if (tool().isErasureOf(tool().types().erasure(returnType()), Optional.class)) {
+            return OPTIONAL;
+        }
+        if (isBool()) {
             return Multiplicity.OPTIONAL;
         }
         if (isList()) {
@@ -213,4 +287,24 @@ public sealed abstract class Item permits Parameter, Option {
     }
 
     abstract boolean isBool();
+
+    public FieldSpec field() {
+        return fieldSupplier.get();
+    }
+
+    public ParameterSpec param() {
+        return paramSupplier.get();
+    }
+
+    public boolean isRequired() {
+        return multiplicity() == Multiplicity.REQUIRED;
+    }
+
+    public boolean isRepeatable() {
+        return multiplicity() == Multiplicity.REPEATABLE;
+    }
+
+    public boolean isOptional() {
+        return multiplicity() == OPTIONAL;
+    }
 }

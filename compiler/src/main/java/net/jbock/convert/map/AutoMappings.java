@@ -1,10 +1,8 @@
 package net.jbock.convert.map;
 
 import com.palantir.javapoet.CodeBlock;
-import io.jbock.simple.Inject;
-import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;
-import net.jbock.convert.Mapping;
+import net.jbock.contrib.EnumConverter;
 
 import javax.lang.model.type.TypeMirror;
 import java.io.File;
@@ -18,65 +16,62 @@ import java.util.regex.Pattern;
 
 import static net.jbock.common.Constants.CONVERTERS;
 
-@Inject
-public record AutoMappings(TypeTool tool) {
+public final class AutoMappings {
 
-    <M extends Item>
-    Optional<Mapping<M>> findAutoMapping(
-            M match) {
-        TypeMirror baseType = match.baseType();
-        if (tool.isErasureOf(baseType, String.class)) {
-            return Optional.of(Mapping.create(match));
-        }
+    private static Optional<CodeBlock> createMapping(String methodName) {
+        return Optional.of(CodeBlock.of("$L.$L()", CONVERTERS, methodName));
+    }
+
+    public static Optional<CodeBlock> findAutoMapping(
+            TypeTool tool,
+            TypeMirror baseType) {
         if (tool.isErasureOf(baseType, Integer.class)) {
-            return Optional.of(createMapping("asInteger", match));
+            return createMapping("asInteger");
         }
         if (tool.isErasureOf(baseType, Path.class)) {
-            return Optional.of(createMapping("asPath", match));
+            return createMapping("asPath");
         }
         if (tool.isErasureOf(baseType, File.class)) {
-            return Optional.of(createMapping("asExistingFile", match));
+            return createMapping("asExistingFile");
         }
         if (tool.isErasureOf(baseType, URI.class)) {
-            return Optional.of(createMapping("asURI", match));
+            return createMapping("asURI");
         }
         if (tool.isErasureOf(baseType, Pattern.class)) {
-            return Optional.of(createMapping("asPattern", match));
+            return createMapping("asPattern");
         }
         if (tool.isErasureOf(baseType, LocalDate.class)) {
-            return Optional.of(createMapping("asLocalDate", match));
+            return createMapping("asLocalDate");
         }
         if (tool.isErasureOf(baseType, Long.class)) {
-            return Optional.of(createMapping("asLong", match));
+            return createMapping("asLong");
         }
         if (tool.isErasureOf(baseType, Short.class)) {
-            return Optional.of(createMapping("asShort", match));
+            return createMapping("asShort");
         }
         if (tool.isErasureOf(baseType, Byte.class)) {
-            return Optional.of(createMapping("asByte", match));
+            return createMapping("asByte");
         }
         if (tool.isErasureOf(baseType, Float.class)) {
-            return Optional.of(createMapping("asFloat", match));
+            return createMapping("asFloat");
         }
         if (tool.isErasureOf(baseType, Double.class)) {
-            return Optional.of(createMapping("asDouble", match));
+            return createMapping("asDouble");
         }
         if (tool.isErasureOf(baseType, Character.class)) {
-            return Optional.of(createMapping("asCharacter", match));
+            return createMapping("asCharacter");
         }
         if (tool.isErasureOf(baseType, BigInteger.class)) {
-            return Optional.of(createMapping("asBigInteger", match));
+            return createMapping("asBigInteger");
         }
         if (tool.isErasureOf(baseType, BigDecimal.class)) {
-            return Optional.of(createMapping("asBigDecimal", match));
+            return createMapping("asBigDecimal");
         }
         return Optional.empty();
     }
 
-    private static <M extends Item> Mapping<M> createMapping(
-            String methodName,
-            M match) {
-        CodeBlock createConverterExpression = CodeBlock.of("$L.$L()", CONVERTERS, methodName);
-        return Mapping.create(createConverterExpression, match);
+    public static CodeBlock findEnumMapping(TypeMirror baseType) {
+        return CodeBlock.of("$1T.create($2T::valueOf, $2T::values)",
+                EnumConverter.class, baseType);
     }
 }

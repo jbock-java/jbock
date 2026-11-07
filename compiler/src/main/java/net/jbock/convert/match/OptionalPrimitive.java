@@ -8,16 +8,15 @@ import java.util.OptionalLong;
 
 public enum OptionalPrimitive {
 
-    INT(OptionalInt.class, Integer.class),
-    LONG(OptionalLong.class, Long.class),
-    DOUBLE(OptionalDouble.class, Double.class);
+    INT(OptionalInt.class),
+    LONG(OptionalLong.class),
+    DOUBLE(OptionalDouble.class),
+    ;
 
     private final Class<?> type;
-    private final String numberType;
 
-    OptionalPrimitive(Class<?> type, Class<? extends Number> numberType) {
+    OptionalPrimitive(Class<?> type) {
         this.type = type;
-        this.numberType = numberType.getCanonicalName();
     }
 
     public CodeBlock extractExpr() {
@@ -26,9 +25,5 @@ public enum OptionalPrimitive {
 
     public Class<?> type() {
         return type;
-    }
-
-    String numberType() {
-        return numberType;
     }
 }

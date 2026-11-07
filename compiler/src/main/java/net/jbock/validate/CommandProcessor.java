@@ -7,7 +7,6 @@ import net.jbock.annotated.ItemsFactory;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.Mapping;
 import net.jbock.processor.SourceElement;
 import net.jbock.writing.CommandRepresentation;
 
@@ -47,8 +46,8 @@ public final class CommandProcessor {
         return itemsFactory.createItems()
                 .filter(this::checkDuplicateDescriptionKeys)
                 .flatMap(items -> {
-                    Either<List<ValidationFailure>, List<Mapping<Parameter>>> p = parameterValidator.wrapPositionalParams(items);
-                    Either<List<ValidationFailure>, List<Mapping<Option>>> o = optionValidator.wrapOptions(items);
+                    Either<List<ValidationFailure>, List<Parameter>> p = parameterValidator.wrapPositionalParams(items);
+                    Either<List<ValidationFailure>, List<Option>> o = optionValidator.wrapOptions(items);
                     return p.flatMap(parameters ->
                             o.map(options -> new CommandRepresentation(sourceElement, options, parameters)));
                 });

@@ -5,7 +5,6 @@ import com.palantir.javapoet.MethodSpec;
 import io.jbock.simple.Inject;
 import net.jbock.ColorMode;
 import net.jbock.annotated.Option;
-import net.jbock.convert.Mapping;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Multiplicity;
 import net.jbock.model.Parameter;
@@ -41,10 +40,10 @@ final class CreateModelMethod {
         if (cr().isSuperCommand()) {
             code.add(CodeBlock.of(".withSuperCommand($L)", true));
         }
-        for (Mapping<Option> c : cr().namedOptions()) {
+        for (Option c : cr().namedOptions()) {
             code.add(optionBlock(c));
         }
-        for (Mapping<net.jbock.annotated.Parameter> c : cr().positionalParameters()) {
+        for (net.jbock.annotated.Parameter c : cr().positionalParameters()) {
             code.add(parameterBlock(c));
         }
         code.add(CodeBlock.of(".build()"));
@@ -60,17 +59,17 @@ final class CreateModelMethod {
         return define.get();
     }
 
-    private CodeBlock optionBlock(Mapping<Option> m) {
+    private CodeBlock optionBlock(Option m) {
         CodeBlock names;
-        if (m.item().names().size() == 1) {
-            names = CodeBlock.of("$S", m.item().names().getFirst());
+        if (m.names().size() == 1) {
+            names = CodeBlock.of("$S", m.names().getFirst());
         } else {
-            names = m.item().names().stream()
+            names = m.names().stream()
                     .map(name -> CodeBlock.of("$S", name))
                     .collect(CodeBlock.joining(", "));
         }
-        if (m.item().descriptionKey().isEmpty() && m.item().description().isEmpty()) {
-            if (m.item().isNullary()) {
+        if (m.descriptionKey().isEmpty() && m.description().isEmpty()) {
+            if (m.isNullary()) {
                 return CodeBlock.of(".addNullary($T.of($L))", List.class, names);
             } else {
                 return CodeBlock.of(".addUnary($T.$L, $T.of($L), $S)",
@@ -80,7 +79,7 @@ final class CreateModelMethod {
         }
         CodeBlock.Builder code = CodeBlock.builder();
         code.add(".addOption(");
-        if (m.item().isNullary()) {
+        if (m.isNullary()) {
             code.add("$T.nullary()", net.jbock.model.Option.class);
             code.indent();
         } else {
@@ -89,16 +88,16 @@ final class CreateModelMethod {
             code.add("\n.withParamLabel($S)", m.paramLabel());
         }
         code.add("\n.withNames($T.of($L))", List.class, names);
-        m.item().descriptionKey().ifPresent(key -> code.add("\n.withDescriptionKey($S)", key));
-        for (String line : m.item().description()) {
+        m.descriptionKey().ifPresent(key -> code.add("\n.withDescriptionKey($S)", key));
+        for (String line : m.description()) {
             code.add(".addDescriptionLine($S)", line);
         }
         code.add("\n.build())");
         return code.unindent().build();
     }
 
-    private CodeBlock parameterBlock(Mapping<net.jbock.annotated.Parameter> m) {
-        if (m.item().descriptionKey().isEmpty() && m.item().description().isEmpty()) {
+    private CodeBlock parameterBlock(net.jbock.annotated.Parameter m) {
+        if (m.descriptionKey().isEmpty() && m.description().isEmpty()) {
             return CodeBlock.of(".addParameter($T.$L, $S)",
                     Multiplicity.class, m.multiplicity().name(),
                     m.paramLabel());
@@ -107,8 +106,8 @@ final class CreateModelMethod {
         code.add(".addParameter($T.builder($T.$L)", Parameter.class, Multiplicity.class, m.multiplicity().name());
         code.indent();
         code.add("\n.withParamLabel($S)", m.paramLabel());
-        m.item().descriptionKey().ifPresent(key -> code.add("\n.withDescriptionKey($S)", key));
-        for (String line : m.item().description()) {
+        m.descriptionKey().ifPresent(key -> code.add("\n.withDescriptionKey($S)", key));
+        for (String line : m.description()) {
             code.add("\n.addDescriptionLine($S)", line);
         }
         code.add("\n.build())");

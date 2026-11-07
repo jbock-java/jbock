@@ -9,7 +9,6 @@ import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.common.Suppliers;
 import net.jbock.contrib.StandardConverters;
-import net.jbock.convert.Mapping;
 import net.jbock.model.ItemType;
 import net.jbock.parse.ParseResult;
 import net.jbock.util.ExConvert;
@@ -53,13 +52,13 @@ final class CreateImplMethod {
             spec.addStatement("$1T $2N = new $1T()", StandardConverters.class, converters);
         }
         for (int i = 0; i < cr.namedOptions().size(); i++) {
-            Mapping<Option> m = cr.namedOptions().get(i);
-            spec.addStatement("$T $N = $L", m.item().returnType(), m.param(), convertExpressionOption(m, i));
+            Option m = cr.namedOptions().get(i);
+            spec.addStatement("$T $N = $L", m.returnType(), m.param(), convertExpressionOption(m, i));
             constructorParams.add(CodeBlock.of("$N", m.param()));
         }
         for (int i = 0; i < cr.positionalParameters().size(); i++) {
-            Mapping<Parameter> m = cr.positionalParameters().get(i);
-            spec.addStatement("$T $N = $L", m.item().returnType(), m.param(), convertExpressionParameter(m, i));
+            Parameter m = cr.positionalParameters().get(i);
+            spec.addStatement("$T $N = $L", m.returnType(), m.param(), convertExpressionParameter(m, i));
             constructorParams.add(CodeBlock.of("$N", m.param()));
         }
         spec.addStatement("return new $T($L)", generatedTypes.implType(), CodeBlock.join(constructorParams, ", "));
@@ -69,43 +68,43 @@ final class CreateImplMethod {
                 .build();
     }
 
-    private CodeBlock convertExpressionOption(Mapping<Option> m, int i) {
+    private CodeBlock convertExpressionOption(Option m, int i) {
         List<CodeBlock> code = new ArrayList<>();
-        if (m.item().isNullary()) {
+        if (m.isNullary()) {
             code.add(CodeBlock.of("!$N.option($L).isEmpty()", result(),
-                    m.item().sourceIndex()));
+                    m.sourceIndex()));
         } else if (m.createConverterExpression().isPresent()) {
             code.add(CodeBlock.of("$N.option($L).stream()", result(),
-                    m.item().sourceIndex()));
+                    m.sourceIndex()));
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
             code.addAll(tailExpressionOption(m, i));
         } else {
             code.add(CodeBlock.of("$N.option($L)$L", result(),
-                    m.item().sourceIndex(), tailExpressionStringOption(m, i)));
+                    m.sourceIndex(), tailExpressionStringOption(m, i)));
         }
         m.extractExpr().ifPresent(code::add);
         return CodeBlock.join(code, System.lineSeparator());
     }
 
-    private CodeBlock convertExpressionParameter(Mapping<Parameter> m, int i) {
+    private CodeBlock convertExpressionParameter(Parameter m, int i) {
         List<CodeBlock> code = new ArrayList<>();
         if (m.isRepeatable()) {
             return convertExpressionRepeatableParameter(m);
         }
         if (m.createConverterExpression().isPresent()) {
             code.add(CodeBlock.of("$N.param($L)", result(),
-                    m.item().sourceIndex()));
+                    m.sourceIndex()));
             code.add(CodeBlock.of(".map($L)", m.createConverterExpression().orElseThrow()));
             code.addAll(tailExpressionParameter(m, i));
         } else {
             code.add(CodeBlock.of("$N.param($L)$L", result(),
-                    m.item().sourceIndex(), tailExpressionStringParameter(m, i)));
+                    m.sourceIndex(), tailExpressionStringParameter(m, i)));
         }
         m.extractExpr().ifPresent(code::add);
         return CodeBlock.join(code, System.lineSeparator());
     }
 
-    private CodeBlock convertExpressionRepeatableParameter(Mapping<Parameter> m) {
+    private CodeBlock convertExpressionRepeatableParameter(Parameter m) {
         List<CodeBlock> code = new ArrayList<>();
         if (m.createConverterExpression().isPresent()) {
             code.add(CodeBlock.of("$N.rest().stream()", result()));
@@ -118,7 +117,7 @@ final class CreateImplMethod {
         return CodeBlock.join(code, System.lineSeparator());
     }
 
-    private CodeBlock tailExpressionStringOption(Mapping<Option> m, int i) {
+    private CodeBlock tailExpressionStringOption(Option m, int i) {
         return switch (m.multiplicity()) {
             case REQUIRED -> CodeBlock.of(".stream().findAny().orElseThrow(() -> new $T($T.$L, $L))",
                     ExMissingItem.class, ItemType.class, ItemType.OPTION, i);
@@ -127,7 +126,7 @@ final class CreateImplMethod {
         };
     }
 
-    private List<CodeBlock> tailExpressionOption(Mapping<Option> m, int i) {
+    private List<CodeBlock> tailExpressionOption(Option m, int i) {
         return switch (m.multiplicity()) {
             case REQUIRED -> List.of(
                     CodeBlock.of(".findAny()"),
@@ -144,7 +143,7 @@ final class CreateImplMethod {
         };
     }
 
-    private List<CodeBlock> tailExpressionParameter(Mapping<Parameter> m, int i) {
+    private List<CodeBlock> tailExpressionParameter(Parameter m, int i) {
         return switch (m.multiplicity()) {
             case REQUIRED -> List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
                             ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
@@ -157,7 +156,7 @@ final class CreateImplMethod {
         };
     }
 
-    private CodeBlock tailExpressionStringParameter(Mapping<Parameter> m, int i) {
+    private CodeBlock tailExpressionStringParameter(Parameter m, int i) {
         return switch (m.multiplicity()) {
             case REQUIRED -> CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
                     ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i);
