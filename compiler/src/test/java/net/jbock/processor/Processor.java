@@ -37,6 +37,7 @@ class Processor {
                 "import net.jbock.ColorMode;",
                 "import net.jbock.Parameter;",
                 "import net.jbock.Option;",
+                "import net.jbock.util.Either;",
                 "");
         List<String> moreLines = new ArrayList<>(lines.length + header.size());
         moreLines.addAll(header);

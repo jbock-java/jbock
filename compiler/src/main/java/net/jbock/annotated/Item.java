@@ -4,7 +4,6 @@ import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeName;
-import io.jbock.util.Either;
 import net.jbock.common.SafeElements;
 import net.jbock.common.SafeTypes;
 import net.jbock.common.TypeTool;
@@ -14,6 +13,7 @@ import net.jbock.convert.map.AutoMappings;
 import net.jbock.convert.match.OptionalPrimitive;
 import net.jbock.model.Multiplicity;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.Either;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -105,7 +105,8 @@ public sealed abstract class Item permits Parameter, Option {
     });
 
     private final Supplier<Either<ValidationFailure, Optional<CodeBlock>>> createConverterExpression = memoize(() -> {
-        if (!converterAttribute().isEmpty()) {
+        String converterAttribute = converterAttribute();
+        if (!converterAttribute.isEmpty()) {
             return converter().map(Optional::of);
         }
         if (isEnum()) {
@@ -154,7 +155,7 @@ public sealed abstract class Item permits Parameter, Option {
         if (!tool().types().isSameType(declaredType.getTypeArguments().get(1), baseType())) {
             return Either.left(new ValidationFailure(standardMsg, method));
         }
-        return Either.right(CodeBlock.of("$T.$L()", sourceElement().generatedClass(), method.getSimpleName()));
+        return Either.right(CodeBlock.of("$T::$L", sourceElement().typeName(), method.getSimpleName()));
     }
 
     private final Supplier<ParameterSpec> paramSupplier = memoize(() -> {

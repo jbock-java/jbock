@@ -2,6 +2,7 @@ package net.jbock.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -38,6 +39,23 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
                 Function<? super R, ? extends U> rightMapper) {
             return leftMapper.apply(value);
         }
+
+        @Override
+        public Optional<L> getLeft() {
+            return Optional.of(value);
+        }
+
+        @Override
+        public Optional<R> getRight() {
+            return Optional.empty();
+        }
+
+        @Override
+        public <R2> Either<L, R2> map(Function<? super R, ? extends R2> mapper) {
+            @SuppressWarnings("unchecked")
+            Either<L, R2> result = (Either<L, R2>) this;
+            return result;
+        }
     }
 
     record Right<L, R>(R value) implements Either<L, R> {
@@ -47,6 +65,21 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
                 Function<? super L, ? extends U> leftMapper,
                 Function<? super R, ? extends U> rightMapper) {
             return rightMapper.apply(value);
+        }
+
+        @Override
+        public Optional<L> getLeft() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<R> getRight() {
+            return Optional.of(value);
+        }
+
+        @Override
+        public <R2> Either<L, R2> map(Function<? super R, ? extends R2> mapper) {
+            return new Right<>(mapper.apply(value));
         }
     }
 
@@ -131,4 +164,18 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
                     : right(right == null ? List.of() : right);
         }
     }
+
+    default boolean isLeft() {
+        return this instanceof Either.Left<L, R>;
+    }
+
+    default boolean isRight() {
+        return this instanceof Either.Right<L, R>;
+    }
+
+    Optional<L> getLeft();
+
+    Optional<R> getRight();
+
+    <R2> Either<L, R2> map(Function<? super R, ? extends R2> mapper);
 }

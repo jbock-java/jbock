@@ -77,7 +77,7 @@ public final class Parameter extends Item {
 
     @Override
     public String converterAttribute() {
-        return ""; // todo
+        return parameter.converter();
     }
 
     public int index() {

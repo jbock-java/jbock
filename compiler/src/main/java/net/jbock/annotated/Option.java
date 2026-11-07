@@ -96,7 +96,7 @@ public final class Option extends Item {
 
     @Override
     public String converterAttribute() {
-        return ""; // todo
+        return option.converter();
     }
 
     public int sourceIndex() {
