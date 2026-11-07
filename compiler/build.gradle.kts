@@ -25,8 +25,8 @@ repositories {
 
 val mockitoAgent = configurations.create("mockitoAgent")
 dependencies {
-  var jbock = project(":jbock")
-  //var jbock = "io.github.jbock-java:jbock:6.1"
+  //var jbock = project(":jbock")
+  var jbock = "io.github.jbock-java:jbock:6.2"
   var sc = "io.github.jbock-java:simple-component:2.0"
   var mockito = "org.mockito:mockito-core:5.24.0"
   implementation("io.github.jbock-java:either:1.5.3")
@@ -37,7 +37,7 @@ dependencies {
   annotationProcessor("io.github.jbock-java:simple-component-compiler:2.0.2")
   testImplementation("io.github.jbock-java:compile-testing:0.19.12")
   testImplementation(mockito)
-  testImplementation(platform("org.junit:junit-bom:6.1.2"))
+  testImplementation(platform("org.junit:junit-bom:6.1.3"))
   testImplementation("org.junit.jupiter:junit-jupiter")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
   testImplementation(jbock)
