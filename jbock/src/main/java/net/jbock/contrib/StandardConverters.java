@@ -9,99 +9,73 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.regex.Pattern;
-
-import static net.jbock.util.Either.left;
-import static net.jbock.util.Either.right;
 
 /**
  * This class converts from {@code String} to certain &quot;known types&quot;.
  */
 public final class StandardConverters {
 
-    private final Map<String, Function<String, ?>> cache = new HashMap<>();
-
-    private <T> Function<String, Either<String, T>> get(
-            Class<T> clazz,
-            Function<String, T> function) {
-        String canonicalName = clazz.getCanonicalName();
-        Function<String, ?> cached = cache.get(canonicalName);
-        if (cached != null) {
-            @SuppressWarnings("unchecked")
-            Function<String, Either<String, T>> result = (Function<String, Either<String, T>>) cached;
-            return result;
-        }
-        Function<String, Either<String, T>> newInstance = token -> {
-            try {
-                T result = function.apply(token);
-                if (result == null) {
-                    return left("converter returned null");
-                }
-                return right(result);
-            } catch (Exception e) {
-                return left("caught " + e.getClass().getCanonicalName() + ", message: " + e.getMessage());
-            }
-        };
-        cache.put(canonicalName, newInstance);
-        return newInstance;
+    private static String printX(Exception e) {
+        return "caught " + e.getClass().getCanonicalName() + ", message: " + e.getMessage();
     }
 
-    public Function<String, Either<String, Integer>> asInteger() {
-        return get(Integer.class, Integer::valueOf);
+    public static Either<String, Integer> asInteger(String token) {
+        return Either.catching(Integer::valueOf, token).mapLeft(StandardConverters::printX);
     }
 
-    public Function<String, Either<String, Long>> asLong() {
-        return get(Long.class, Long::valueOf);
+    public static Either<String, Long> asLong(String token) {
+        return Either.catching(Long::valueOf, token).mapLeft(StandardConverters::printX);
     }
 
-    public Function<String, Either<String, Short>> asShort() {
-        return get(Short.class, Short::valueOf);
+    public static Either<String, Short> asShort(String token) {
+        return Either.catching(Short::valueOf, token).mapLeft(StandardConverters::printX);
     }
 
-    public Function<String, Either<String, Byte>> asByte() {
-        return get(Byte.class, Byte::valueOf);
+    public static Either<String, Byte> asByte(String token) {
+        return Either.catching(Byte::valueOf, token).mapLeft(StandardConverters::printX);
     }
 
-    public Function<String, Either<String, Float>> asFloat() {
-        return get(Float.class, Float::valueOf);
+    public static Either<String, Float> asFloat(String token) {
+        return Either.catching(Float::valueOf, token).mapLeft(StandardConverters::printX);
     }
 
-    public Function<String, Either<String, Double>> asDouble() {
-        return get(Double.class, Double::valueOf);
+    public static Either<String, Double> asDouble(String token) {
+        return Either.catching(Double::valueOf, token).mapLeft(StandardConverters::printX);
     }
 
-    public Function<String, Either<String, Character>> asCharacter() {
-        return get(Character.class, MoreConverters::asCharacter);
+    public static Either<String, Character> asCharacter(String token) {
+        return MoreConverters.asCharacter(token);
     }
 
-    public Function<String, Either<String, Path>> asPath() {
-        return get(Path.class, Paths::get);
+    public static Either<String, Path> asPath(String token) {
+        return Either.catching(Paths::get, token).mapLeft(StandardConverters::printX);
     }
 
-    public Function<String, Either<String, URI>> asURI() {
-        return get(URI.class, URI::create);
+    public static Either<String, URI> asURI(String token) {
+        return Either.catching(URI::create, token).mapLeft(StandardConverters::printX);
     }
 
-    public Function<String, Either<String, Pattern>> asPattern() {
-        return get(Pattern.class, Pattern::compile);
+    public static Either<String, Pattern> asPattern(String token) {
+        return Either.catching(Pattern::compile, token).mapLeft(StandardConverters::printX);
     }
 
-    public Function<String, Either<String, LocalDate>> asLocalDate() {
-        return get(LocalDate.class, LocalDate::parse);
+    public static Either<String, LocalDate> asLocalDate(String token) {
+        return Either.catching(LocalDate::parse, token).mapLeft(StandardConverters::printX);
     }
 
-    public Function<String, Either<String, BigInteger>> asBigInteger() {
-        return get(BigInteger.class, BigInteger::new);
+    public static Either<String, BigInteger> asBigInteger(String token) {
+        return Either.catching(BigInteger::new, token).mapLeft(StandardConverters::printX);
     }
 
-    public Function<String, Either<String, BigDecimal>> asBigDecimal() {
-        return get(BigDecimal.class, BigDecimal::new);
+    public static Either<String, BigDecimal> asBigDecimal(String token) {
+        return Either.catching(BigDecimal::new, token).mapLeft(StandardConverters::printX);
     }
 
-    public Function<String, Either<String, File>> asExistingFile() {
-        return get(File.class, MoreConverters::existingFile);
+    public static Either<String, File> asExistingFile(String token) {
+        return MoreConverters.existingFile(token);
+    }
+
+    private StandardConverters() {
     }
 }

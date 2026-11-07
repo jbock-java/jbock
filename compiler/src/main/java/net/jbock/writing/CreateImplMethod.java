@@ -8,7 +8,6 @@ import io.jbock.simple.Inject;
 import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.common.Suppliers;
-import net.jbock.contrib.StandardConverters;
 import net.jbock.model.ItemType;
 import net.jbock.parse.ParseResult;
 import net.jbock.util.ExConvert;
@@ -21,7 +20,6 @@ import java.util.function.Supplier;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.common.Constants.CONVERTERS;
 import static net.jbock.common.Constants.EITHER;
 import static net.jbock.common.Constants.STRING;
 
@@ -47,10 +45,6 @@ final class CreateImplMethod {
     MethodSpec define() {
         MethodSpec.Builder spec = MethodSpec.methodBuilder("createImpl").addModifiers(PRIVATE, STATIC);
         List<CodeBlock> constructorParams = new ArrayList<>(cr.namedOptions().size() + cr.positionalParameters().size() + 1);
-        if (cr.allMappings().stream().anyMatch(m -> m.createConverterExpression().isPresent())) {
-            ParameterSpec converters = ParameterSpec.builder(StandardConverters.class, CONVERTERS).build();
-            spec.addStatement("$1T $2N = new $1T()", StandardConverters.class, converters);
-        }
         for (int i = 0; i < cr.namedOptions().size(); i++) {
             Option m = cr.namedOptions().get(i);
             spec.addStatement("$T $N = $L", m.returnType(), m.param(), convertExpressionOption(m, i));

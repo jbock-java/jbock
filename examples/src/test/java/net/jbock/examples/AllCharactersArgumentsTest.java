@@ -33,6 +33,6 @@ class AllCharactersArgumentsTest {
                 "--charOpt", "X",
                 "--charList", "b",
                 "--charList", "c").fails(
-                "while converting option SMALLCHAR (--smallChar): caught java.lang.RuntimeException, message: Expecting a single character, but found: <abc>");
+                "while converting option SMALLCHAR (--smallChar): Expecting a single character, but found: <abc>");
     }
 }

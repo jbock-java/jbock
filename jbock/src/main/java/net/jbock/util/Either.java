@@ -51,6 +51,11 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
         }
 
         @Override
+        public <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> mapper) {
+            return new Left<>(mapper.apply(value));
+        }
+
+        @Override
         public <R2> Either<L, R2> map(Function<? super R, ? extends R2> mapper) {
             @SuppressWarnings("unchecked")
             Either<L, R2> result = (Either<L, R2>) this;
@@ -75,6 +80,13 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
         @Override
         public Optional<R> getRight() {
             return Optional.of(value);
+        }
+
+        @Override
+        public <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> mapper) {
+            @SuppressWarnings("unchecked")
+            Either<L2, R> result = (Either<L2, R>) this;
+            return result;
         }
 
         @Override
@@ -177,5 +189,15 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
 
     Optional<R> getRight();
 
+    <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> mapper);
+
     <R2> Either<L, R2> map(Function<? super R, ? extends R2> mapper);
+
+    static <I, O> Either<RuntimeException, O> catching(Function<I, O> f, I input) {
+        try {
+            return right(f.apply(input));
+        } catch (RuntimeException e) {
+            return left(e);
+        }
+    }
 }

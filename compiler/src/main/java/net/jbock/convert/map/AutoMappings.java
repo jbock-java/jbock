@@ -3,6 +3,7 @@ package net.jbock.convert.map;
 import com.palantir.javapoet.CodeBlock;
 import net.jbock.common.TypeTool;
 import net.jbock.contrib.EnumConverter;
+import net.jbock.contrib.StandardConverters;
 
 import javax.lang.model.type.TypeMirror;
 import java.io.File;
@@ -14,12 +15,10 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import static net.jbock.common.Constants.CONVERTERS;
-
 public final class AutoMappings {
 
     private static Optional<CodeBlock> createMapping(String methodName) {
-        return Optional.of(CodeBlock.of("$L.$L()", CONVERTERS, methodName));
+        return Optional.of(CodeBlock.of("$T::$L", StandardConverters.class, methodName));
     }
 
     public static Optional<CodeBlock> findAutoMapping(

@@ -89,7 +89,7 @@ class BasicFullTest {
                 "interface Arguments {",
                 "",
                 "  @Parameter",
-                "  List<String> hello();",
+                "  List<Integer> hello();",
                 "}");
         List<String> expectedParser =
                 List.of(
@@ -122,7 +122,10 @@ class BasicFullTest {
                         "  }",
                         "",
                         "  private static Arguments createImpl(ParseResult result) throws ExFailure {",
-                        "    List<String> hello = result.rest();",
+                        "    List<Integer> hello = result.rest().stream()",
+                        "        .map(StandardConverters::asInteger)",
+                        "        .collect(Either.firstFailure())",
+                        "        .orElseThrow(failure -> new ExConvert(failure, ItemType.PARAMETER, 1));",
                         "    return new Arguments_Impl(hello);",
                         "  }",
                         "",
@@ -133,7 +136,7 @@ class BasicFullTest {
                         "        .build();",
                         "  }",
                         "",
-                        "  private record Arguments_Impl(List<String> hello) implements Arguments {",
+                        "  private record Arguments_Impl(List<Integer> hello) implements Arguments {",
                         "  }",
                         "}");
         Compilation compilation = Processor.compiler().compile(javaFile);

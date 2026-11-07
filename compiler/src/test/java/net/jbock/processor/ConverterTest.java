@@ -27,7 +27,6 @@ class ConverterTest {
         List<String> expectedParser =
                 List.of(
                         "  private static Arguments createImpl(ParseResult result) throws ExFailure {",
-                        "    StandardConverters converters = new StandardConverters();",
                         "    Boolean something = result.param(0)",
                         "        .map(Arguments::myConverter)",
                         "        .orElseThrow(() -> new ExMissingItem(ItemType.PARAMETER, 0))",

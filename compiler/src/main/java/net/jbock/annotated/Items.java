@@ -3,6 +3,7 @@ package net.jbock.annotated;
 import io.jbock.util.Either;
 import io.jbock.util.Eithers;
 import net.jbock.common.ValidationFailure;
+import net.jbock.contrib.StandardConverters;
 import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
@@ -16,7 +17,6 @@ import java.util.Optional;
 
 import static io.jbock.util.Eithers.optionalList;
 import static net.jbock.common.Annotations.methodLevelAnnotations;
-import static net.jbock.common.Constants.CONVERTERS;
 import static net.jbock.common.Util.checkNoDuplicateAnnotations;
 
 public record Items(
@@ -28,7 +28,7 @@ public record Items(
             SourceElement sourceElement,
             List<ExecutableElement> methods) {
         UniqueNameSet uniqueNameSet = new UniqueNameSet(methods.size() + 1);
-        uniqueNameSet.reserve(CONVERTERS);
+        uniqueNameSet.reserve(StandardConverters.class.getSimpleName());
         uniqueNameSet.reserve(sourceElement.element().getSimpleName().toString());
         List<ValidationFailure> failures = new ArrayList<>();
         int io = 0, ip = 0;
