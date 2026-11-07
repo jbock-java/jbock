@@ -21,8 +21,8 @@ public final class EnumConverter {
         return token -> {
             try {
                 return right(valueOf.apply(token));
-            } catch (IllegalArgumentException e) {
-                return left("Converter threw " + e.getClass() + ", message: " + e.getMessage());
+            } catch (Exception e) {
+                return left("converter threw " + e.getClass().getCanonicalName() + ", message: " + e.getMessage());
             }
         };
     }

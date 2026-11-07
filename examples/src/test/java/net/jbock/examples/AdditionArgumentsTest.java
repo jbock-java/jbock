@@ -28,7 +28,7 @@ class AdditionArgumentsTest {
 
     @Test
     void wrongNumber() {
-        f.assertThat("--", "-a", "2").fails("while converting parameter A: For input string: \"-a\"");
+        f.assertThat("--", "-a", "2").fails("while converting parameter A: converter threw java.lang.NumberFormatException, message: For input string: \"-a\"");
     }
 
     @Test

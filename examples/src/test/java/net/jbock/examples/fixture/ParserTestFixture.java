@@ -151,9 +151,10 @@ public final class ParserTestFixture<E> {
         private void fails(Predicate<String> messageTest) {
             Either<ParsingFailed, E> result = getParsed();
             result.fold(l -> {
-                boolean success = messageTest.test(l.message());
+                String message = l.message();
+                boolean success = messageTest.test(message);
                 if (!success) {
-                    Assertions.fail("Assertion failed, message: " + l.message());
+                    Assertions.fail("Assertion failed, message: " + message);
                 }
                 return l;
             }, r -> {

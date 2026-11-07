@@ -38,11 +38,11 @@ public final class StandardConverters {
             try {
                 T result = function.apply(token);
                 if (result == null) {
-                    return left("Converter returned null");
+                    return left("converter returned null");
                 }
                 return right(result);
             } catch (Exception e) {
-                return left("Converter threw " + e.getClass() + ", message: " + e.getMessage());
+                return left("converter threw " + e.getClass().getCanonicalName() + ", message: " + e.getMessage());
             }
         };
         cache.put(canonicalName, newInstance);
