@@ -1,6 +1,6 @@
 package net.jbock.contrib;
 
-import net.jbock.util.StringConverter;
+import net.jbock.util.Either;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -14,81 +14,94 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import static net.jbock.util.Either.left;
+import static net.jbock.util.Either.right;
+
 /**
  * This class converts from {@code String} to certain &quot;known types&quot;.
  */
 public final class StandardConverters {
 
-    private final Map<String, StringConverter<?>> cache = new HashMap<>();
+    private final Map<String, Function<String, ?>> cache = new HashMap<>();
 
-    private <T> StringConverter<T> get(
+    private <T> Function<String, Either<String, T>> get(
             Class<T> clazz,
             Function<String, T> function) {
         String canonicalName = clazz.getCanonicalName();
-        StringConverter<?> cached = cache.get(canonicalName);
+        Function<String, ?> cached = cache.get(canonicalName);
         if (cached != null) {
             @SuppressWarnings("unchecked")
-            StringConverter<T> result = (StringConverter<T>) cached;
+            Function<String, Either<String, T>> result = (Function<String, Either<String, T>>) cached;
             return result;
         }
-        StringConverter<T> newInstance = StringConverter.create(function);
+        Function<String, Either<String, T>> newInstance = token -> {
+            try {
+                T result = function.apply(token);
+                if (result == null) {
+                    return left("Converter returned null");
+                }
+                return right(result);
+            } catch (Exception e) {
+                return left("Converter threw " + e.getClass() + ", message: " + e.getMessage());
+            }
+        };
         cache.put(canonicalName, newInstance);
         return newInstance;
     }
 
-    public StringConverter<Integer> asInteger() {
+    public Function<String, Either<String, Integer>> asInteger() {
         return get(Integer.class, Integer::valueOf);
     }
 
-    public StringConverter<Long> asLong() {
+    public Function<String, Either<String, Long>> asLong() {
         return get(Long.class, Long::valueOf);
     }
 
-    public StringConverter<Short> asShort() {
+    public Function<String, Either<String, Short>> asShort() {
         return get(Short.class, Short::valueOf);
     }
 
-    public StringConverter<Byte> asByte() {
+    public Function<String, Either<String, Byte>> asByte() {
         return get(Byte.class, Byte::valueOf);
     }
 
-    public StringConverter<Float> asFloat() {
+    public Function<String, Either<String, Float>> asFloat() {
         return get(Float.class, Float::valueOf);
     }
 
-    public StringConverter<Double> asDouble() {
+    public Function<String, Either<String, Double>> asDouble() {
         return get(Double.class, Double::valueOf);
     }
 
-    public StringConverter<Character> asCharacter() {
+    public Function<String, Either<String, Character>> asCharacter() {
         return get(Character.class, MoreConverters::asCharacter);
     }
 
-    public StringConverter<Path> asPath() {
+    public Function<String, Either<String, Path>> asPath() {
         return get(Path.class, Paths::get);
     }
 
-    public StringConverter<URI> asURI() {
+    public Function<String, Either<String, URI>> asURI() {
         return get(URI.class, URI::create);
     }
 
-    public StringConverter<Pattern> asPattern() {
+    public Function<String, Either<String, Pattern>> asPattern() {
         return get(Pattern.class, Pattern::compile);
     }
 
-    public StringConverter<LocalDate> asLocalDate() {
+    public Function<String, Either<String, LocalDate>> asLocalDate() {
         return get(LocalDate.class, LocalDate::parse);
     }
 
-    public StringConverter<BigInteger> asBigInteger() {
+    public Function<String, Either<String, BigInteger>> asBigInteger() {
         return get(BigInteger.class, BigInteger::new);
     }
 
-    public StringConverter<BigDecimal> asBigDecimal() {
+    public Function<String, Either<String, BigDecimal>> asBigDecimal() {
         return get(BigDecimal.class, BigDecimal::new);
     }
 
-    public StringConverter<File> asExistingFile() {
+    public Function<String, Either<String, File>> asExistingFile() {
         return get(File.class, MoreConverters::existingFile);
     }
 }

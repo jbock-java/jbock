@@ -13,7 +13,7 @@ import net.jbock.model.ItemType;
  */
 public final class ExConvert extends ExFailure {
 
-    private final ConverterFailure failure;
+    private final String failure;
     private final ItemType itemType;
     private final int itemIndex;
 
@@ -26,7 +26,7 @@ public final class ExConvert extends ExFailure {
      *                  within {@link CommandModel#options()} or
      *                  {@link CommandModel#parameters()}
      */
-    public ExConvert(ConverterFailure failure, ItemType itemType, int itemIndex) {
+    public ExConvert(String failure, ItemType itemType, int itemIndex) {
         this.failure = failure;
         this.itemType = itemType;
         this.itemIndex = itemIndex;

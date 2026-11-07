@@ -1,9 +1,9 @@
 package net.jbock.contrib;
 
-import net.jbock.util.ConverterFailure;
 import net.jbock.util.Either;
-import net.jbock.util.StringConverter;
 import org.junit.jupiter.api.Test;
+
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -14,15 +14,15 @@ class StandardConvertersTest {
     @Test
     void converterInstancesAreReused() {
         StandardConverters converters = new StandardConverters();
-        StringConverter<Integer> conv1 = converters.asInteger();
-        StringConverter<Integer> conv2 = converters.asInteger();
+        Function<String, Either<String, Integer>> conv1 = converters.asInteger();
+        Function<String, Either<String, Integer>> conv2 = converters.asInteger();
         assertSame(conv1, conv2);
     }
 
     @Test
     void intConverterWorksAsExpected() {
-        StringConverter<Integer> conv = new StandardConverters().asInteger();
-        Either<ConverterFailure, Integer> result = conv.apply("3");
+        Function<String, Either<String, Integer>> conv = new StandardConverters().asInteger();
+        Either<String, Integer> result = conv.apply("3");
         result.fold(l -> {
             fail("expecting right");
             return l;

@@ -71,7 +71,7 @@ public final class AutoMappings {
     }
 
     public static CodeBlock findEnumMapping(TypeMirror baseType) {
-        return CodeBlock.of("$1T.create($2T::valueOf, $2T::values)",
+        return CodeBlock.of("$T.create($T::valueOf)",
                 EnumConverter.class, baseType);
     }
 }

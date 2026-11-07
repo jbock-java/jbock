@@ -8,7 +8,7 @@ import net.jbock.model.Item;
  */
 public final class ErrConvert extends ParsingFailed {
 
-    private final ConverterFailure converterFailure;
+    private final String converterFailure;
     private final Item item;
 
     /**
@@ -20,7 +20,7 @@ public final class ErrConvert extends ParsingFailed {
      */
     public ErrConvert(
             CommandModel commandModel,
-            ConverterFailure converterFailure,
+            String converterFailure,
             Item item) {
         super(commandModel);
         this.converterFailure = converterFailure;
@@ -37,17 +37,17 @@ public final class ErrConvert extends ParsingFailed {
     }
 
     /**
-     * Returns the specific converter failure.
+     * Returns the error message that the converter returned.
      *
-     * @return an instance of {@code ConverterFailure}
+     * @return error message
      */
-    public ConverterFailure converterFailure() {
+    public String converterFailure() {
         return converterFailure;
     }
 
     @Override
     public String message() {
         return "while converting " + item.namesOverviewError() + ": "
-                + converterFailure.converterMessage();
+                + converterFailure;
     }
 }

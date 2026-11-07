@@ -19,14 +19,7 @@ import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
 @Inject
-public class AbstractMethodsFinder {
-
-    private final SourceElement sourceElement;
-
-    public AbstractMethodsFinder(
-            SourceElement sourceElement) {
-        this.sourceElement = sourceElement;
-    }
+public record AbstractMethodsFinder(SourceElement sourceElement) {
 
     /**
      * Returns a Right-Either containing all annotated parameterless

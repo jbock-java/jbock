@@ -33,7 +33,6 @@ class Processor {
                 "import java.util.Optional;",
                 "import java.util.function.Supplier;",
                 "",
-                "import net.jbock.util.StringConverter;",
                 "import net.jbock.Command;",
                 "import net.jbock.ColorMode;",
                 "import net.jbock.Parameter;",
