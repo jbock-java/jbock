@@ -2,10 +2,10 @@ package net.jbock.annotated;
 
 import net.jbock.common.SnakeName;
 import net.jbock.model.Arity;
-import net.jbock.model.Multiplicity;
 import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeKind;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -82,14 +82,12 @@ public final class Option extends Item {
         return safeName;
     }
 
-    @Override
-    public Multiplicity multiplicity() {
-        return null; // todo
+    boolean isBool() {
+        return returnType().getKind() == TypeKind.BOOLEAN;
     }
 
-    @Override
-    public Arity arity() {
-        return null; // todo
+    public boolean isNullary() {
+        return isBool();
     }
 
     @Override

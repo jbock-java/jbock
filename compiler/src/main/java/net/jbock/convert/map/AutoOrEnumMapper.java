@@ -9,7 +9,6 @@ import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.contrib.EnumConverter;
 import net.jbock.convert.Mapping;
-import net.jbock.convert.match.Match;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.DeclaredType;
@@ -22,17 +21,17 @@ public record AutoOrEnumMapper(AutoMappings autoMappings) {
 
     public <M extends Item>
     Either<ValidationFailure, Mapping<M>> findMapping(
-            Match<M> match) {
+            M match) {
         return autoMappings.findAutoMapping(match)
                 .or(() -> findEnumMapping(match))
                 .<Either<ValidationFailure, Mapping<M>>>map(Either::right)
-                .orElseGet(() -> left(match.item().fail("unknown type: " +
+                .orElseGet(() -> left(match.fail("unknown type: " +
                         Util.typeToString(match.baseType()))));
     }
 
     private <M extends Item>
     Optional<Mapping<M>> findEnumMapping(
-            Match<M> match) {
+            M match) {
         return TypeTool.AS_DECLARED.visit(match.baseType())
                 .map(DeclaredType::asElement)
                 .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)

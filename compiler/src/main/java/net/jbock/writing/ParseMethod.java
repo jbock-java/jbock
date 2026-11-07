@@ -121,7 +121,7 @@ final class ParseMethod {
         if (param.isRepeatable()) {
             return ClassName.get(OptionStateRepeatable.class);
         }
-        if (param.isNullary()) {
+        if (param.item().isNullary()) {
             return ClassName.get(OptionStateModeFlag.class);
         }
         return ClassName.get(OptionStateNonRepeatable.class);

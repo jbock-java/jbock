@@ -14,7 +14,6 @@ import net.jbock.processor.SourceElement;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.EnumSet;
@@ -203,13 +202,15 @@ public sealed abstract class Item permits Parameter, Option {
         return Optional.empty();
     }
 
-    // todo implement
-    public abstract Multiplicity multiplicity();
-
-    // todo implement
-    public abstract Arity arity();
-
-    public final boolean isBool() {
-        return returnType().getKind() == TypeKind.BOOLEAN;
+    public final Multiplicity multiplicity() {
+        if (isBool() || isOptional()) {
+            return Multiplicity.OPTIONAL;
+        }
+        if (isList()) {
+            return Multiplicity.REPEATABLE;
+        }
+        return Multiplicity.REQUIRED;
     }
+
+    abstract boolean isBool();
 }

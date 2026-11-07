@@ -8,8 +8,6 @@ import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.Mapping;
 import net.jbock.convert.MappingFinder;
-import net.jbock.convert.match.Match;
-import net.jbock.model.Arity;
 
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +20,6 @@ import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.allFailures;
 import static io.jbock.util.Eithers.toOptionalList;
 import static java.lang.Character.isWhitespace;
-import static net.jbock.model.Multiplicity.OPTIONAL;
 
 @Inject
 record OptionValidator(
@@ -42,9 +39,8 @@ record OptionValidator(
 
     private Either<ValidationFailure, Mapping<Option>> wrapOption(
             Option option) {
-        if (option.isBool()) {
-            Match<Option> match = Match.create(OPTIONAL, option);
-            return right(Mapping.create(match, Arity.NULLARY));
+        if (option.isNullary()) {
+            return right(Mapping.create(option));
         }
         return mappingFinder.findMapping(option);
     }

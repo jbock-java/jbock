@@ -5,17 +5,13 @@ import io.jbock.util.Either;
 import net.jbock.annotated.Item;
 import net.jbock.common.ValidationFailure;
 import net.jbock.convert.map.AutoOrEnumMapper;
-import net.jbock.convert.match.Match;
-import net.jbock.convert.match.MatchFinder;
 
 @Inject
 public record MappingFinder(
-        AutoOrEnumMapper autoOrEnumMapper,
-        MatchFinder matchFinder) {
+        AutoOrEnumMapper autoOrEnumMapper) {
 
     public <M extends Item> Either<ValidationFailure, Mapping<M>> findMapping(
             M item) {
-        Match<M> match = matchFinder.findMatch(item);
-        return autoOrEnumMapper.findMapping(match);
+        return autoOrEnumMapper.findMapping(item);
     }
 }

@@ -6,6 +6,7 @@ import net.jbock.model.Multiplicity;
 import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeKind;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -68,14 +69,8 @@ public final class Parameter extends Item {
         return safeName;
     }
 
-    @Override
-    public Multiplicity multiplicity() {
-        return null; // todo
-    }
-
-    @Override
-    public Arity arity() {
-        return null; // todo
+    boolean isBool() {
+        return false;
     }
 
     @Override

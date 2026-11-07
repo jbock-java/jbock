@@ -71,7 +71,7 @@ final class CreateImplMethod {
 
     private CodeBlock convertExpressionOption(Mapping<Option> m, int i) {
         List<CodeBlock> code = new ArrayList<>();
-        if (m.isNullary()) {
+        if (m.item().isNullary()) {
             code.add(CodeBlock.of("!$N.option($L).isEmpty()", result(),
                     m.item().sourceIndex()));
         } else if (m.createConverterExpression().isPresent()) {

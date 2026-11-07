@@ -70,7 +70,7 @@ final class CreateModelMethod {
                     .collect(CodeBlock.joining(", "));
         }
         if (m.item().descriptionKey().isEmpty() && m.item().description().isEmpty()) {
-            if (m.isNullary()) {
+            if (m.item().isNullary()) {
                 return CodeBlock.of(".addNullary($T.of($L))", List.class, names);
             } else {
                 return CodeBlock.of(".addUnary($T.$L, $T.of($L), $S)",
@@ -80,7 +80,7 @@ final class CreateModelMethod {
         }
         CodeBlock.Builder code = CodeBlock.builder();
         code.add(".addOption(");
-        if (m.isNullary()) {
+        if (m.item().isNullary()) {
             code.add("$T.nullary()", net.jbock.model.Option.class);
             code.indent();
         } else {

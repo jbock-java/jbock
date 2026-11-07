@@ -5,8 +5,6 @@ import io.jbock.simple.Inject;
 import net.jbock.annotated.Item;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.Mapping;
-import net.jbock.convert.match.Match;
-import net.jbock.model.Arity;
 
 import javax.lang.model.type.TypeMirror;
 import java.io.File;
@@ -25,10 +23,10 @@ public record AutoMappings(TypeTool tool) {
 
     <M extends Item>
     Optional<Mapping<M>> findAutoMapping(
-            Match<M> match) {
+            M match) {
         TypeMirror baseType = match.baseType();
         if (tool.isErasureOf(baseType, String.class)) {
-            return Optional.of(Mapping.create(match, Arity.UNARY));
+            return Optional.of(Mapping.create(match));
         }
         if (tool.isErasureOf(baseType, Integer.class)) {
             return Optional.of(createMapping("asInteger", match));
@@ -77,7 +75,7 @@ public record AutoMappings(TypeTool tool) {
 
     private static <M extends Item> Mapping<M> createMapping(
             String methodName,
-            Match<M> match) {
+            M match) {
         CodeBlock createConverterExpression = CodeBlock.of("$L.$L()", CONVERTERS, methodName);
         return Mapping.create(createConverterExpression, match);
     }
