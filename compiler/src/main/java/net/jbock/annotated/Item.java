@@ -22,7 +22,7 @@ public sealed abstract class Item permits Parameter, Option {
 
     Set<Modifier> ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
-    private final Supplier<Either<Optional<ValidationFailure>, ExecutableElement>> converter = memoize(() -> {
+    private final Supplier<Either<Optional<ValidationFailure>, Converter>> converter = memoize(() -> {
         String annotation = converterAttribute();
         if (annotation.isEmpty()) {
             return Either.left(Optional.empty());
@@ -36,12 +36,16 @@ public sealed abstract class Item permits Parameter, Option {
                 if (!method.getModifiers().contains(Modifier.STATIC)) {
                     return Either.left(Optional.of(new ValidationFailure("The converter must be static", method)));
                 }
-                // todo validate converter signature
-                return Either.right(method);
+                return validateConverter(method).mapLeft(Optional::of);
             }
         }
         return Either.left(Optional.of(new ValidationFailure("Method not found: " + annotation, sourceElement().element())));
     });
+
+    private Either<ValidationFailure, Converter> validateConverter(ExecutableElement converter) {
+        // todo validate converter signature
+        return Either.right(new Converter());
+    }
 
     private final SourceElement sourceElement;
 
@@ -49,7 +53,7 @@ public sealed abstract class Item permits Parameter, Option {
         this.sourceElement = sourceElement;
     }
 
-    public final Either<Optional<ValidationFailure>, ExecutableElement> converter() {
+    public final Either<Optional<ValidationFailure>, Converter> converter() {
         return converter.get();
     }
 

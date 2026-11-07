@@ -79,7 +79,7 @@ public record CommandStep(
         return util.commonTypeChecks(element)
                 .map(List::of)
                 .<Either<List<ValidationFailure>, SourceElement>>map(Either::left)
-                .orElseGet(() -> right(SourceElement.create(element)))
+                .orElseGet(() -> right(SourceElement.create(element, util.tool())))
                 .filter(sourceElement -> checkNoDuplicateAnnotations(
                         sourceElement.element(), typeLevelAnnotations()).map(List::of));
     }

@@ -5,6 +5,7 @@ import com.palantir.javapoet.TypeName;
 import net.jbock.ColorMode;
 import net.jbock.Command;
 import net.jbock.common.SnakeName;
+import net.jbock.common.TypeTool;
 import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.ElementKind;
@@ -20,6 +21,7 @@ import static net.jbock.common.Suppliers.memoize;
 public final class SourceElement {
 
     private final TypeElement typeElement;
+    private final TypeTool tool;
     private final Command command;
 
     private final Supplier<List<Modifier>> accessModifiers = memoize(() -> command().publicParser() ?
@@ -42,13 +44,14 @@ public final class SourceElement {
                 .peerClass(String.join("_", commandClass.simpleNames()) + "Parser");
     });
 
-    private SourceElement(TypeElement typeElement, Command command) {
+    private SourceElement(TypeElement typeElement, TypeTool tool, Command command) {
         this.typeElement = typeElement;
+        this.tool = tool;
         this.command = command;
     }
 
-    static SourceElement create(TypeElement typeElement) {
-        return new SourceElement(typeElement, typeElement.getAnnotation(Command.class));
+    static SourceElement create(TypeElement typeElement, TypeTool tool) {
+        return new SourceElement(typeElement, tool, typeElement.getAnnotation(Command.class));
     }
 
     public TypeElement element() {
@@ -109,6 +112,10 @@ public final class SourceElement {
 
     public ColorMode colorMode() {
         return command.colorMode();
+    }
+
+    public TypeTool tool() {
+        return tool;
     }
 
     private Command command() {

@@ -21,11 +21,9 @@ import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 @Inject
 public final class Util {
 
-    private final SafeTypes types;
     private final TypeTool tool;
 
-    public Util(SafeTypes types, TypeTool tool) {
-        this.types = types;
+    public Util(TypeTool tool) {
         this.tool = tool;
     }
 
@@ -108,7 +106,7 @@ public final class Util {
                     " found checked exception " +
                     typeToString(thrown), element));
         }
-        return types.asElement(mirror)
+        return tool.types().asElement(mirror)
                 .flatMap(AS_TYPE_ELEMENT::visit)
                 .flatMap(t -> checkNesting(t)
                         .map(f -> f.prepend("invalid throws clause: declared exception " +
@@ -159,5 +157,9 @@ public final class Util {
                     " or @" + present.get(1).getSimpleName() + ", but not both", element));
         }
         return Optional.empty();
+    }
+
+    public TypeTool tool() {
+        return tool;
     }
 }
