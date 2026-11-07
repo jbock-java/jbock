@@ -6,7 +6,6 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.util.Optional;
@@ -25,10 +24,6 @@ public final class SafeTypes {
 
     public Optional<Element> asElement(TypeMirror t) {
         return Optional.ofNullable(types.asElement(t));
-    }
-
-    public PrimitiveType getPrimitiveType(TypeKind kind) {
-        return types.getPrimitiveType(kind);
     }
 
     public TypeElement boxedClass(PrimitiveType p) {

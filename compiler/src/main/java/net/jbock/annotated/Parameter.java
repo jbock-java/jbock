@@ -1,12 +1,9 @@
 package net.jbock.annotated;
 
 import net.jbock.common.SnakeName;
-import net.jbock.model.Arity;
-import net.jbock.model.Multiplicity;
 import net.jbock.processor.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.TypeKind;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
