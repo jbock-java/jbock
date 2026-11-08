@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * <p>The parser recognizes the end-of-option-parsing token &quot;--&quot;.
  */
-public final class StandardParser extends SimpleParser {
+public final class StandardParser extends AbstractParser {
 
     private StandardParser(
             Map<String, Integer> optionNames,

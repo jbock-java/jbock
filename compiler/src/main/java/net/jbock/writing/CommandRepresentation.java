@@ -56,8 +56,4 @@ public final class CommandRepresentation {
     boolean parseOrExitMethodAcceptsList() {
         return sourceElement().parseOrExitMethodAcceptsList();
     }
-
-    boolean enableAtFileExpansion() {
-        return sourceElement().enableAtFileExpansion();
-    }
 }

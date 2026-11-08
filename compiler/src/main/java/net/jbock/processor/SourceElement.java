@@ -106,10 +106,6 @@ public final class SourceElement {
         return command.parseOrExitMethodAcceptsList();
     }
 
-    public boolean enableAtFileExpansion() {
-        return command.enableAtFileExpansion();
-    }
-
     public ColorMode colorMode() {
         return command.colorMode();
     }

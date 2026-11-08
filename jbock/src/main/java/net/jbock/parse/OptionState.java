@@ -8,7 +8,8 @@ import java.util.List;
 /**
  * Interface for a mutable class that reads and remembers option arguments.
  */
-public sealed interface OptionState permits OptionStateModeFlag, OptionStateNonRepeatable, OptionStateRepeatable {
+public sealed interface OptionState
+        permits OptionStateModeFlag, OptionStateNonRepeatable, OptionStateRepeatable {
 
     /**
      * Reads the argument of the {@code token}, or remembers the

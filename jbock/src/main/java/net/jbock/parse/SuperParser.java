@@ -3,7 +3,6 @@ package net.jbock.parse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * This parser accepts a fixed number of positional parameters and
@@ -11,7 +10,7 @@ import java.util.stream.Stream;
  *
  * <p>The parser does not recognize the end-of-option-parsing token &quot;--&quot;.
  */
-public final class SuperParser extends SimpleParser {
+public final class SuperParser extends AbstractParser {
 
     private final List<String> rest = new ArrayList<>();
 

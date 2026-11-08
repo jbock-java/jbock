@@ -25,8 +25,8 @@ repositories {
 
 val mockitoAgent = configurations.create("mockitoAgent")
 dependencies {
-  //var jbock = project(":jbock")
-  var jbock = "io.github.jbock-java:jbock:6.2"
+  var jbock = project(":jbock")
+  //var jbock = "io.github.jbock-java:jbock:6.2"
   var sc = "io.github.jbock-java:simple-component:2.0"
   var mockito = "org.mockito:mockito-core:5.24.0"
   implementation("io.github.jbock-java:either:1.5.3")
@@ -59,9 +59,9 @@ tasks.named<Test>("test") {
 mavenPublishing {
   coordinates("io.github.jbock-java", "jbock-compiler", project.version?.toString())
   pom {
-    name = "jbock"
+    name = "jbock-compiler"
     packaging = "jar"
-    description = "jbock annotations and utils"
+    description = "jbock annotation processor"
     url = "https://github.com/jbock-java/jbock"
 
     licenses {

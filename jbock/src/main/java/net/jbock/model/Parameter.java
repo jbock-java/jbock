@@ -8,15 +8,11 @@ import java.util.Locale;
  * This class is part of the command model.
  * It represents a positional parameter.
  */
-public final class Parameter extends Item {
-
-    private Parameter(
-            String paramLabel,
-            String descriptionKey,
-            List<String> description,
-            Multiplicity multiplicity) {
-        super(paramLabel, descriptionKey, description, multiplicity);
-    }
+public record Parameter(
+        String paramLabel,
+        String descriptionKey,
+        List<String> description,
+        Multiplicity multiplicity) implements Item {
 
     /**
      * Creates a builder instance.

@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * <p>The parser recognizes the end-of-option-parsing token &quot;--&quot;.
  */
-public final class VarargsParameterParser extends SimpleParser {
+public final class VarargsParameterParser extends AbstractParser {
 
     private final List<String> rest = new ArrayList<>();
 

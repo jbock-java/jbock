@@ -3,40 +3,22 @@ package net.jbock.util;
 import net.jbock.model.CommandModel;
 
 /**
- * Superclass of non-exceptional failure objects that can occur
+ * Instances of this interface represent runtime errors that can happen
  * during command line parsing.
- *
- * <p>There are a fixed number of subclasses:
- *
- * <ul>
- *   <li>{@link ErrAtFile}
- *   <li>{@link ErrConvert}
- *   <li>{@link ErrMissingItem}
- *   <li>{@link ErrToken}
- * </ul>
  */
-public abstract class ParsingFailed {
-
-    private final CommandModel commandModel;
-
-    ParsingFailed(CommandModel commandModel) {
-        this.commandModel = commandModel;
-    }
+public sealed interface ParsingFailed permits ErrConvert, ErrMissingItem, ErrToken {
 
     /**
-     * Returns a complete model of the annotated class, to generate
-     * usage documentation or failure messages.
+     * Returns a static model of the annotated command class.
      *
      * @return command model
      */
-    public CommandModel commandModel() {
-        return commandModel;
-    }
+    CommandModel commandModel();
 
     /**
-     * Returns an error message that describes the error.
+     * Returns the error message that describes the runtime error.
      *
      * @return the error message
      */
-    public abstract String message();
+    String message();
 }

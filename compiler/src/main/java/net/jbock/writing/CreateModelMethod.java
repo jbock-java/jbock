@@ -70,27 +70,27 @@ final class CreateModelMethod {
         }
         if (m.descriptionKey().isEmpty() && m.description().isEmpty()) {
             if (m.isNullary()) {
-                return CodeBlock.of(".addNullary($T.of($L))", List.class, names);
+                return CodeBlock.of(".addNullary($L)", names);
             } else {
-                return CodeBlock.of(".addUnary($T.$L, $T.of($L), $S)",
+                return CodeBlock.of(".addUnary($T.$L, $S, $L)",
                         Multiplicity.class, m.multiplicity().name(),
-                        List.class, names, m.paramLabel());
+                        m.paramLabel(), names);
             }
         }
         CodeBlock.Builder code = CodeBlock.builder();
         code.add(".addOption(");
         if (m.isNullary()) {
-            code.add("$T.nullary()", net.jbock.model.Option.class);
+            code.add("$T.nullaryBuilder()", net.jbock.model.Option.class);
             code.indent();
         } else {
-            code.add("$T.unary($T.$L)", net.jbock.model.Option.class, Multiplicity.class, m.multiplicity().name());
+            code.add("$T.unaryBuilder($T.$L)", net.jbock.model.Option.class, Multiplicity.class, m.multiplicity().name());
             code.indent();
             code.add("\n.withParamLabel($S)", m.paramLabel());
         }
-        code.add("\n.withNames($T.of($L))", List.class, names);
+        code.add("\n.withNames($L)", names);
         m.descriptionKey().ifPresent(key -> code.add("\n.withDescriptionKey($S)", key));
         for (String line : m.description()) {
-            code.add(".addDescriptionLine($S)", line);
+            code.add("\n.addDescriptionLine($S)", line);
         }
         code.add("\n.build())");
         return code.unindent().build();

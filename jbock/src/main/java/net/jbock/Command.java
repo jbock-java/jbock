@@ -61,11 +61,6 @@ public @interface Command {
     boolean parseOrExitMethodAcceptsList() default false;
 
     /**
-     * Set to {@code true} to enable at-file expansion.
-     */
-    boolean enableAtFileExpansion() default false;
-
-    /**
      * If {@code true}, the generated parser class will be
      * {@code public}. Otherwise, it will be default-visible.
      *

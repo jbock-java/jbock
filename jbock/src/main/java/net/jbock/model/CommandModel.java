@@ -131,12 +131,12 @@ public record CommandModel(
             return this;
         }
 
-        public Builder addUnary(Multiplicity multiplicity, List<String> names, String label) {
-            return addOption(Option.unary(multiplicity).withParamLabel(label).withNames(names).build());
+        public Builder addUnary(Multiplicity multiplicity, String label, String... names) {
+            return addOption(Option.unaryBuilder(multiplicity).withParamLabel(label).withNames(names).build());
         }
 
-        public Builder addNullary(List<String> names) {
-            return addOption(Option.nullary().withNames(names).build());
+        public Builder addNullary(String... names) {
+            return addOption(Option.nullaryBuilder().withNames(names).build());
         }
 
         /**

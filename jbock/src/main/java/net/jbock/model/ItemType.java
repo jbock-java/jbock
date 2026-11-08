@@ -10,13 +10,13 @@ public enum ItemType {
 
     /**
      * Item type for a named option, or a mode flag.
-     * The item's method is annotated with {@link Option}.
+     * The item method is annotated with {@link Option}.
      */
     OPTION,
 
     /**
      * Item type for a positional parameter.
-     * The item's method is annotated with {@link Parameter}.
+     * The item method is annotated with {@link Parameter}.
      */
     PARAMETER,
 }

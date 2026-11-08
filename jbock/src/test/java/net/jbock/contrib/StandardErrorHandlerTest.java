@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -34,10 +33,9 @@ class StandardErrorHandlerTest {
     private CommandModel createModel() {
         return CommandModel.builder()
                 .withProgramName("hello-world")
-                .addOption(Option.nullary()
-                        .withNames(List.of("-v"))
+                .addOption(Option.nullaryBuilder()
+                        .withNames("-v")
                         .build())
                 .build();
     }
-
 }

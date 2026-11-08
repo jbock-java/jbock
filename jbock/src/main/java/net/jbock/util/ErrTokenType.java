@@ -32,8 +32,6 @@ public enum ErrTokenType {
 
     /**
      * Missing argument of a unary option.
-     *
-     * @see net.jbock.model.Arity
      */
     MISSING_ARGUMENT,
 }

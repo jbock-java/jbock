@@ -26,4 +26,7 @@ public final class EnumConverter {
             }
         };
     }
+
+    private EnumConverter() {
+    }
 }

@@ -7,8 +7,6 @@ import com.palantir.javapoet.ParameterSpec;
 import io.jbock.simple.Inject;
 import net.jbock.ColorMode;
 import net.jbock.contrib.StandardErrorHandler;
-import net.jbock.util.AtFileError;
-import net.jbock.util.ParseRequest;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -31,7 +29,6 @@ record ParseOrExitMethod(
                 builder(LIST_OF_STRING, "args").build() :
                 builder(ArrayTypeName.of(STRING), "args").build();
         ParameterSpec notSuccess = builder(generatedTypes.parseResultType(), "failure").build();
-        ParameterSpec err = builder(AtFileError.class, "err").build();
 
         CodeBlock.Builder code = CodeBlock.builder();
         if (!cr.sourceElement().skipHelp()) {
@@ -45,27 +42,15 @@ record ParseOrExitMethod(
                     .addStatement("$T.exit(0)", System.class)
                     .endControlFlow();
         }
-        if (cr.enableAtFileExpansion()) {
-            code.add("return $T.from($N).expand()\n", ParseRequest.class, args).indent()
-                    .add(".mapLeft($1N -> $1N.addModel($2N()))\n", err, createModelMethod.get())
-                    .add(".flatMap(this::$N)\n", parseMethod.get())
-                    .add(".orElseThrow($N -> {\n", notSuccess).indent()
-                    .add("$L\n", createErrorHandler()).indent()
-                    .add(".printErrorMessage($N);\n", notSuccess).unindent()
-                    .addStatement("$T.exit(1)", System.class)
-                    .addStatement("return new $T()", RuntimeException.class).unindent()
-                    .addStatement("})").unindent();
-        } else {
-            CodeBlock pArgs = cr.parseOrExitMethodAcceptsList() ?
-                    CodeBlock.of("$N", args) :
-                    CodeBlock.of("$T.of($N)", List.class, args);
-            code.add("return parse($L).orElseThrow($N -> {\n", pArgs, notSuccess).indent()
-                    .add("$L\n", createErrorHandler()).indent()
-                    .add(".printErrorMessage($N);\n", notSuccess).unindent()
-                    .addStatement("$T.exit(1)", System.class)
-                    .addStatement("return new $T()", RuntimeException.class).unindent()
-                    .addStatement("})");
-        }
+        CodeBlock pArgs = cr.parseOrExitMethodAcceptsList() ?
+                CodeBlock.of("$N", args) :
+                CodeBlock.of("$T.of($N)", List.class, args);
+        code.add("return parse($L).orElseThrow($N -> {\n", pArgs, notSuccess).indent()
+                .add("$L\n", createErrorHandler()).indent()
+                .add(".printErrorMessage($N);\n", notSuccess).unindent()
+                .addStatement("$T.exit(1)", System.class)
+                .addStatement("return new $T()", RuntimeException.class).unindent()
+                .addStatement("})");
         return methodBuilder("parseOrExit").addParameter(args)
                 .addModifiers(cr.sourceElement().accessModifiers())
                 .returns(cr.sourceElement().typeName())

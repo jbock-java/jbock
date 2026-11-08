@@ -7,9 +7,6 @@ import java.util.Iterator;
 
 final class OptionStateUtil {
 
-    private OptionStateUtil() {
-    }
-
     static String readOptionArgument(String token, Iterator<String> it) throws ExToken {
         boolean unix = !token.startsWith("--");
         if (unix && token.length() > 2) {
@@ -22,5 +19,8 @@ final class OptionStateUtil {
             return it.next();
         }
         throw new ExToken(ErrTokenType.MISSING_ARGUMENT, token);
+    }
+
+    private OptionStateUtil() {
     }
 }

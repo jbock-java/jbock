@@ -8,43 +8,31 @@ import java.util.Locale;
  * This class is part of the command model.
  * It represents a named option.
  */
-public final class Option extends Item {
-
-    private final List<String> names;
-    private final Arity arity;
-
-    private Option(
-            String paramLabel,
-            String descriptionKey,
-            List<String> description,
-            List<String> names,
-            Multiplicity multiplicity,
-            Arity arity) {
-        super(paramLabel, descriptionKey, description, multiplicity);
-        if (names.isEmpty()) {
-            throw new AssertionError("a named option needs at least one name");
-        }
-        this.names = names;
-        this.arity = arity;
-    }
+public record Option(
+        String paramLabel,
+        String descriptionKey,
+        List<String> description,
+        List<String> names,
+        Multiplicity multiplicity,
+        boolean nullary) implements Item {
 
     /**
      * Creates a builder for a mode flag.
      *
-     * @return empty builder
+     * @return builder instance
      */
-    public static Builder nullary() {
-        return new Builder(Multiplicity.OPTIONAL, Arity.NULLARY);
+    public static Builder nullaryBuilder() {
+        return new Builder(Multiplicity.OPTIONAL, true);
     }
 
     /**
      * Creates a builder for a unary option.
      *
      * @param multiplicity multiplicity
-     * @return empty builder
+     * @return builder instance
      */
-    public static Builder unary(Multiplicity multiplicity) {
-        return new Builder(multiplicity, Arity.UNARY);
+    public static Builder unaryBuilder(Multiplicity multiplicity) {
+        return new Builder(multiplicity, false);
     }
 
     /**
@@ -57,11 +45,11 @@ public final class Option extends Item {
         private final List<String> description = new ArrayList<>();
         private List<String> names;
         private final Multiplicity multiplicity;
-        private final Arity arity;
+        private final boolean nullary;
 
-        private Builder(Multiplicity multiplicity, Arity arity) {
+        private Builder(Multiplicity multiplicity, boolean nullary) {
             this.multiplicity = multiplicity;
-            this.arity = arity;
+            this.nullary = nullary;
         }
 
         /**
@@ -107,8 +95,11 @@ public final class Option extends Item {
          * @param names the option names
          * @return the builder instance
          */
-        public Builder withNames(List<String> names) {
-            this.names = names;
+        public Builder withNames(String... names) {
+            if (names.length == 0) {
+                throw new AssertionError("a named option needs at least one name");
+            }
+            this.names = List.of(names);
             return this;
         }
 
@@ -118,23 +109,27 @@ public final class Option extends Item {
          * @return option model
          */
         public Option build() {
+            if (names == null || names.isEmpty()) {
+                throw new AssertionError("a named option needs at least one name");
+            }
             return new Option(
                     paramLabel,
                     descriptionKey,
                     description,
                     names,
                     multiplicity,
-                    arity);
+                    nullary);
         }
     }
 
     @Override
     public String namesOverview() {
         String sample = String.join(", ", names);
-        return switch (arity) {
-            case NULLARY -> sample;
-            case UNARY -> sample + ' ' + paramLabel();
-        };
+        if (nullary) {
+            return sample;
+        } else {
+            return sample + ' ' + paramLabel();
+        }
     }
 
     @Override
@@ -149,21 +144,12 @@ public final class Option extends Item {
     }
 
     /**
-     * Returns a list of the option names, sorted by length and then alphabetically.
+     * Returns a non-empty list of the option names, sorted by length and then alphabetically.
      *
-     * @see net.jbock.Option#names()
-     * @return a non-empty list of option names
+     * @return a non-empty list
      */
+    @Override
     public List<String> names() {
         return names;
-    }
-
-    /**
-     * Returns the option's arity.
-     *
-     * @return the arity
-     */
-    public Arity arity() {
-        return arity;
     }
 }

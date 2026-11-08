@@ -10,8 +10,8 @@ class CommandModelTest {
 
     @Test
     void testToBuilder() {
-        Option option1 = Option.nullary().withParamLabel("v").withNames(List.of("-v")).build();
-        Option option2 = Option.nullary().withParamLabel("p").withNames(List.of("-p")).build();
+        Option option1 = Option.nullaryBuilder().withParamLabel("v").withNames("-v").build();
+        Option option2 = Option.nullaryBuilder().withParamLabel("p").withNames("-p").build();
         CommandModel model1 = CommandModel.builder()
                 .addOption(option1)
                 .addOption(option2)

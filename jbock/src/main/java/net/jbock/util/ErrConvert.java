@@ -6,38 +6,8 @@ import net.jbock.model.Item;
 /**
  * Represents a runtime error during a converter invocation.
  */
-public final class ErrConvert extends ParsingFailed {
-
-    private final String converterFailure;
-    private final Item item;
-
-    /**
-     * Public constructor.
-     *
-     * @param commandModel the command model
-     * @param converterFailure an object describing the specific converter failure
-     * @param item the item that the converter was bound to
-     */
-    public ErrConvert(
-            CommandModel commandModel,
-            String converterFailure,
-            Item item) {
-        super(commandModel);
-        this.converterFailure = converterFailure;
-        this.item = item;
-    }
-
-    /**
-     * Returns the item that the converter was bound to.
-     *
-     * @return the item name
-     */
-    public Item item() {
-        return item;
-    }
-
-    @Override
-    public String message() {
-        return converterFailure;
-    }
+public record ErrConvert(
+        CommandModel commandModel,
+        String message,
+        Item item) implements ParsingFailed {
 }

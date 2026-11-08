@@ -6,23 +6,7 @@ import java.util.List;
  * This class is part of the command model.
  * It represents either a named option or a positional parameter.
  */
-public abstract sealed class Item permits Option, Parameter {
-
-    private final String paramLabel;
-    private final String descriptionKey;
-    private final List<String> description;
-    private final Multiplicity multiplicity;
-
-    Item(
-            String paramLabel,
-            String descriptionKey,
-            List<String> description,
-            Multiplicity multiplicity) {
-        this.paramLabel = paramLabel;
-        this.descriptionKey = descriptionKey;
-        this.description = description;
-        this.multiplicity = multiplicity;
-    }
+public sealed interface Item permits Option, Parameter {
 
     /**
      * An overview of all names of this item, including a
@@ -32,7 +16,7 @@ public abstract sealed class Item permits Option, Parameter {
      * @see net.jbock.Option#names()
      * @return a non-empty string
      */
-    public abstract String namesOverview();
+    String namesOverview();
 
     /**
      * An alternative form of {@link #namesOverview()} that is
@@ -41,7 +25,7 @@ public abstract sealed class Item permits Option, Parameter {
      * @see net.jbock.Option#names()
      * @return a non-empty string
      */
-    public abstract String namesOverviewError();
+    String namesOverviewError();
 
     /**
      * The item as shown in the synopsis, if this is a
@@ -54,9 +38,7 @@ public abstract sealed class Item permits Option, Parameter {
      * @see net.jbock.Parameter#paramLabel()
      * @return param label, a non-empty string
      */
-    public final String paramLabel() {
-        return paramLabel;
-    }
+    String paramLabel();
 
     /**
      * Get the description that is present directly on the annotated method,
@@ -66,9 +48,7 @@ public abstract sealed class Item permits Option, Parameter {
      * @see net.jbock.Parameter#description()
      * @return a list of lines, possibly empty
      */
-    public final List<String> description() {
-        return description;
-    }
+    List<String> description();
 
     /**
      * A string, possibly empty.
@@ -77,23 +57,19 @@ public abstract sealed class Item permits Option, Parameter {
      * @see net.jbock.Parameter#descriptionKey()
      * @return description key
      */
-    public final String descriptionKey() {
-        return descriptionKey;
-    }
+    String descriptionKey();
 
     /**
      * The multiplicity of this item.
      *
      * @return item multiplicity
      */
-    public final Multiplicity multiplicity() {
-        return multiplicity;
-    }
+    Multiplicity multiplicity();
 
     /**
      * Returns the item type.
      *
      * @return this item's {@code ItemType}
      */
-    public abstract ItemType itemType();
+    ItemType itemType();
 }
