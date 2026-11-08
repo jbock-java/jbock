@@ -39,6 +39,7 @@ class EvilArgumentsTest {
                 "  --f__ancy F__ANCY ",
                 "  --blub BLUB       ",
                 "  --Blub BLUB       ",
+                "  --parser PARSER   ",
                 "  --evil EVIL       ",
                 "");
     }
