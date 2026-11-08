@@ -29,6 +29,9 @@ interface EvilArguments {
     @Option(names = "--Blub")
     String Blub();
 
+    @Option(names = "--parser")
+    Optional<String> parser();
+
     @Option(names = "--evil")
     Optional<String> __();
 }
