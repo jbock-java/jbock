@@ -9,7 +9,7 @@ import net.jbock.annotated.Option;
 import net.jbock.annotated.Parameter;
 import net.jbock.common.Suppliers;
 import net.jbock.model.ItemType;
-import net.jbock.parse.ParseResult;
+import net.jbock.parse.AbstractParser;
 import net.jbock.util.ExConvert;
 import net.jbock.util.ExFailure;
 import net.jbock.util.ExMissingItem;
@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.common.Constants.EITHER;
+import static net.jbock.common.Constants.PARSER;
 import static net.jbock.common.Constants.STRING;
 
 /**
@@ -33,7 +34,7 @@ final class CreateImplMethod {
     private final GeneratedTypes generatedTypes;
 
     private final Supplier<ParameterSpec> resultSupplier = Suppliers.memoize(() ->
-            ParameterSpec.builder(ClassName.get(ParseResult.class), "result").build());
+            ParameterSpec.builder(ClassName.get(AbstractParser.class), PARSER).build());
 
     CreateImplMethod(
             CommandRepresentation cr,

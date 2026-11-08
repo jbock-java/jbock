@@ -22,7 +22,7 @@ public final class StandardParser extends AbstractParser {
     }
 
     /**
-     * Creates a RegularParser.
+     * Creates a StandardParser.
      *
      * @param optionNames maps option names to indexes in the array of option states
      * @param optionStates array of option states
@@ -41,7 +41,6 @@ public final class StandardParser extends AbstractParser {
     void handleExcessParam(String token) throws ExToken {
         throw new ExToken(ErrTokenType.EXCESS_PARAM, token);
     }
-
 
     @Override
     boolean isEscapeSequence(String token) {

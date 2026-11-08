@@ -2,6 +2,7 @@ package net.jbock.annotated;
 
 import io.jbock.util.Either;
 import io.jbock.util.Eithers;
+import net.jbock.common.Constants;
 import net.jbock.common.ValidationFailure;
 import net.jbock.contrib.StandardConverters;
 import net.jbock.processor.SourceElement;
@@ -28,6 +29,7 @@ public record Items(
             SourceElement sourceElement,
             List<ExecutableElement> methods) {
         UniqueNameSet uniqueNameSet = new UniqueNameSet(methods.size() + 1);
+        uniqueNameSet.reserve(Constants.PARSER);
         uniqueNameSet.reserve(StandardConverters.class.getSimpleName());
         uniqueNameSet.reserve(sourceElement.element().getSimpleName().toString());
         List<ValidationFailure> failures = new ArrayList<>();

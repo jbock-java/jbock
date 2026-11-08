@@ -26,8 +26,8 @@ class ConverterTest {
                 "}");
         List<String> expectedParser =
                 List.of(
-                        "  private static Arguments createImpl(ParseResult result) throws ExFailure {",
-                        "    Boolean something = result.param(0)",
+                        "  private static Arguments createImpl(AbstractParser parser) throws ExFailure {",
+                        "    Boolean something = parser.param(0)",
                         "        .map(Arguments::myConverter)",
                         "        .orElseThrow(() -> new ExMissingItem(ItemType.PARAMETER, 0))",
                         "        .orElseThrow(failure -> new ExConvert(failure, ItemType.PARAMETER, 0));",

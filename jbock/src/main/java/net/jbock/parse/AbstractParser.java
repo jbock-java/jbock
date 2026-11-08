@@ -15,7 +15,7 @@ import static net.jbock.util.ErrTokenType.INVALID_OPTION;
  * Abstract superclass of several primitive command line parsers.
  * These parsers are mutable and not thread safe.
  */
-abstract sealed class AbstractParser implements ParseResult
+public abstract sealed class AbstractParser
         permits StandardParser, SuperParser, VarargsParameterParser {
 
     private static final Pattern SUSPICIOUS = Pattern.compile("^-\\S.*");
@@ -66,6 +66,13 @@ abstract sealed class AbstractParser implements ParseResult
     abstract void handleExcessParam(String token) throws ExToken;
 
     /**
+     * Returns the remaining tokens after the last positional parameter.
+     *
+     * @return remaining tokens
+     */
+    public abstract List<String> rest();
+
+    /**
      * Parse the given input and store the result internally.
      *
      * <p>The parser is single-use: The parse method should not
@@ -112,6 +119,15 @@ abstract sealed class AbstractParser implements ParseResult
         return token.substring(0, token.indexOf('='));
     }
 
+    /**
+     * Get all the option values that were passed on the command line
+     * for the given option index.
+     * The order in which they were passed on the command line is
+     * preserved.
+     *
+     * @param optionIndex a number that identifies a named option
+     * @return list of tokens
+     */
     public final List<String> option(int optionIndex) {
         if (optionIndex < 0 || optionIndex >= optionStates.length) {
             return List.of();
@@ -120,6 +136,19 @@ abstract sealed class AbstractParser implements ParseResult
         return optionState.stream();
     }
 
+    /**
+     * Get the positional parameter that was passed on the command line
+     * at the given parameter index.
+     *
+     * <p>Please note: If there are any options before the parameters,
+     * the parameter index will be less than the token index.
+     *
+     * <p>If the index is negative, or if there is no positional parameter at this index,
+     * an empty {@code Optional} is returned.
+     *
+     * @param index parameter index
+     * @return the positional parameter at the given index, if it was passed on the command line
+     */
     public final Optional<String> param(int index) {
         if (index < 0 || index >= params.length) {
             return Optional.empty();

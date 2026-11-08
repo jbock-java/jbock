@@ -16,6 +16,7 @@ public final class Constants {
     public static final TypeName LIST_OF_STRING = ParameterizedTypeName.get(ClassName.get(List.class), STRING);
 
     public static final ClassName EITHER = ClassName.get(Either.class);
+    public static final String PARSER = "parser";
 
     public static TypeName mapOf(TypeName keyType, TypeName valueType) {
         return ParameterizedTypeName.get(ClassName.get(Map.class), keyType, valueType);
