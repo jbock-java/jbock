@@ -12,7 +12,8 @@ import net.jbock.model.CommandModel;
  * in client code. It may be removed without warning in future
  * releases.
  */
-public abstract sealed class ExFailure extends RuntimeException permits ExConvert, ExMissingItem, ExToken {
+public abstract sealed class ExFailure extends RuntimeException
+        permits ExConvert, ExMissingItem, ExToken {
 
     /**
      * Converts this exception to a non-exceptional failure object.
