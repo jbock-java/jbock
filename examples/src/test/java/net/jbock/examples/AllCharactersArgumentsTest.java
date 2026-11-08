@@ -33,6 +33,6 @@ class AllCharactersArgumentsTest {
                 "--charOpt", "X",
                 "--charList", "b",
                 "--charList", "c").fails(
-                "while converting option SMALLCHAR (--smallChar): Expecting a single character, but found: <abc>");
+                "Expecting a single character, but found: <abc>");
     }
 }

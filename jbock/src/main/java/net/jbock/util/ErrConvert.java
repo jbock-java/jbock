@@ -36,18 +36,8 @@ public final class ErrConvert extends ParsingFailed {
         return item;
     }
 
-    /**
-     * Returns the error message that the converter returned.
-     *
-     * @return error message
-     */
-    public String converterFailure() {
-        return converterFailure;
-    }
-
     @Override
     public String message() {
-        return "while converting " + item.namesOverviewError() + ": "
-                + converterFailure;
+        return converterFailure;
     }
 }

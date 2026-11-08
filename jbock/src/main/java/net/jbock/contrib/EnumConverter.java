@@ -22,7 +22,7 @@ public final class EnumConverter {
             try {
                 return right(valueOf.apply(token));
             } catch (Exception e) {
-                return left("caught " + e.getClass().getCanonicalName() + ", message: " + e.getMessage());
+                return left(e.getMessage());
             }
         };
     }
