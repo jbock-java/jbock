@@ -29,7 +29,7 @@ dependencies {
   var jbock = "io.github.jbock-java:jbock:6.3"
   var sc = "io.github.jbock-java:simple-component:2.0"
   var mockito = "org.mockito:mockito-core:5.24.0"
-  implementation("io.github.jbock-java:either:1.5.3")
+  implementation("io.github.jbock-java:either:1.5.5")
   implementation("com.palantir.javapoet:javapoet:0.18.0")
   implementation("io.github.jbock-java:auto-common:1.2.3")
   implementation(jbock)
@@ -57,7 +57,7 @@ tasks.named<Test>("test") {
 
 // https://vanniktech.github.io/gradle-maven-publish-plugin/central/
 mavenPublishing {
-  coordinates("io.github.jbock-java", "jbock-compiler", project.version?.toString())
+  coordinates("io.github.jbock-java", "jbock-compiler", project.version.toString())
   pom {
     name = "jbock-compiler"
     packaging = "jar"

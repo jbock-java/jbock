@@ -58,6 +58,17 @@ public record Items(
                 .orElseGet(() -> Either.right(new Items(sourceElement, options, parameters)));
     }
 
+    public int size() {
+        return options.size() + parameters.size();
+    }
+
+    public List<Item> allItems() {
+        List<Item> result = new ArrayList<>(size());
+        result.addAll(options);
+        result.addAll(parameters);
+        return result;
+    }
+
     private static Either<ValidationFailure, Annotation> getMethodAnnotation(
             ExecutableElement method) {
         return methodLevelAnnotations().stream()

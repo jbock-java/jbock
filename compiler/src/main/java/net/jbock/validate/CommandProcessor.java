@@ -10,13 +10,13 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 import net.jbock.writing.CommandRepresentation;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static io.jbock.util.Either.right;
 import static io.jbock.util.Eithers.optionalList;
 
 /**
@@ -45,11 +45,18 @@ public final class CommandProcessor {
     public Either<List<ValidationFailure>, CommandRepresentation> generate() {
         return itemsFactory.createItems()
                 .filter(this::checkDuplicateDescriptionKeys)
-                .flatMap(items -> {
+                .filterMap(items -> {
                     Either<List<ValidationFailure>, List<Parameter>> p = parameterValidator.wrapPositionalParams(items);
+                    if (p.isLeft()) {
+                        return p.pinLeft();
+                    }
                     Either<List<ValidationFailure>, List<Option>> o = optionValidator.wrapOptions(items);
-                    return p.flatMap(parameters ->
-                            o.map(options -> new CommandRepresentation(sourceElement, options, parameters)));
+                    if (o.isLeft()) {
+                        return o.pinLeft();
+                    }
+                    List<Option> options = o.getRightOrElseThrow();
+                    List<Parameter> parameters = p.getRightOrElseThrow();
+                    return right(new CommandRepresentation(sourceElement, options, parameters));
                 });
     }
 
@@ -57,18 +64,16 @@ public final class CommandProcessor {
      */
     private Optional<List<ValidationFailure>> checkDuplicateDescriptionKeys(
             Items items) {
-        List<ValidationFailure> failures = new ArrayList<>();
-        Set<String> keys = new HashSet<>();
+        Set<String> keys = HashSet.newHashSet(items.size() + 1);
         sourceElement.descriptionKey().ifPresent(keys::add);
-        Stream.of(items.options(),
-                        items.parameters())
-                .flatMap(List::stream)
-                .forEach(m -> m.descriptionKey().ifPresent(key -> {
-                    if (!keys.add(key)) {
-                        String message = "duplicate description key: " + key;
-                        failures.add(m.fail(message));
+        List<ValidationFailure> failures = items.allItems().stream()
+                .flatMap(m -> m.descriptionKey().map(key -> {
+                    if (keys.add(key)) {
+                        return Stream.<ValidationFailure>empty();
+                    } else {
+                        return Stream.of(m.fail("duplicate description key"));
                     }
-                }));
+                }).orElseGet(Stream::empty)).toList();
         return optionalList(failures);
     }
 }

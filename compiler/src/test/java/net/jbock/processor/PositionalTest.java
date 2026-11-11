@@ -59,43 +59,6 @@ class PositionalTest {
                 .compilesWithoutError();
     }
 
-    // TODO move this to SuperCommandTest
-    @Test
-    void superComplexOptional() {
-        JavaFileObject javaFile = fromSource(
-                "@Command(superCommand = true)",
-                "interface Arguments {",
-                "",
-                "  @Parameter(index = 0)",
-                "  String a();",
-                "",
-                "  @Option(names = \"--b\")",
-                "  String b();",
-                "",
-                "  @Parameter",
-                "  List<String> rest();",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .compilesWithoutError();
-    }
-
-    // TODO move this to SuperCommandTest
-    @Test
-    void missingVarargsParameterInSuperCommand() {
-        JavaFileObject javaFile = fromSource(
-                "@Command(superCommand = true)",
-                "interface Arguments {",
-                "",
-                "  @Parameter(index = 0)",
-                "  String p();",
-                "}");
-        assertAbout(javaSources()).that(singletonList(javaFile))
-                .processedWith(Processor.testInstance())
-                .failsToCompile()
-                .withErrorContaining("In a super command, a repeatable parameter must be defined");
-    }
-
     @Test
     void missingParamSuperCommand() {
         JavaFileObject javaFile = fromSource(
@@ -126,7 +89,7 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("duplicate description key: myKey");
+                .withErrorContaining("duplicate description key");
     }
 
     @Test
@@ -141,7 +104,7 @@ class PositionalTest {
         assertAbout(javaSources()).that(singletonList(javaFile))
                 .processedWith(Processor.testInstance())
                 .failsToCompile()
-                .withErrorContaining("duplicate description key: myKey");
+                .withErrorContaining("duplicate description key");
     }
 
     @Test
